@@ -1,0 +1,47 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "inttraCompanyId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "name",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_RapidReservation",
+        "KeySchema": [
+            {
+                "AttributeName": "inttraCompanyId",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "name",
+                "KeyType": "RANGE"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2018-08-24T14:08:05.391000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 4024,
+        "ItemCount": 9,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_RapidReservation",
+        "TableId": "1305d313-678c-4274-84e9-0a8bb4b5af16",
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

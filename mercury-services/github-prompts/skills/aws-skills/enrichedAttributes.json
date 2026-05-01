@@ -1,0 +1,787 @@
+{
+    "M": {
+      "bookingWithMigratedParties": {
+        "N": "1"
+      },
+      "containerTypeList": {
+        "L": [
+          {
+            "M": {
+              "description": {
+                "S": "Unventilated general purpose container - Vents in upper part of cargo space"
+              },
+              "displayCategory": {
+                "S": "General Purpose"
+              },
+              "displayFlag": {
+                "N": "0"
+              },
+              "groupCode": {
+                "S": "45GP"
+              },
+              "height": {
+                "N": "9.5"
+              },
+              "id": {
+                "N": "1014"
+              },
+              "lastModifiedBy": {
+                "S": "Admin"
+              },
+              "lastModifiedDateUtc": {
+                "S": "2018-02-27T16:59:38.000Z"
+              },
+              "length": {
+                "N": "40"
+              },
+              "listHeight": {
+                "S": "9ft 6in"
+              },
+              "listLength": {
+                "S": "40ft"
+              },
+              "listWidth": {
+                "S": "8ft"
+              },
+              "nonStandardType": {
+                "S": "9"
+              },
+              "oogFlag": {
+                "N": "0"
+              },
+              "shortDescription": {
+                "S": "40 High Cube General Purpose (45G1)"
+              },
+              "spareIndicator": {
+                "N": "0"
+              },
+              "statusCode": {
+                "S": "Active"
+              },
+              "teu": {
+                "N": "2"
+              },
+              "typeCategory": {
+                "S": "Not Controlled"
+              },
+              "typeCode": {
+                "S": "45G1"
+              },
+              "width": {
+                "N": "8"
+              }
+            }
+          }
+        ]
+      },
+      "multiVersionAttributes": {
+        "M": {
+          "notificationMap": {
+            "M": {}
+          },
+          "partyMap": {
+            "M": {
+              "Booker": {
+                "L": [
+                  {
+                    "M": {
+                      "address": {
+                        "M": {
+                          "city": {
+                            "S": "GREEN BROOK"
+                          },
+                          "country": {
+                            "M": {
+                              "countryName": {
+                                "S": "UNITED STATES"
+                              }
+                            }
+                          },
+                          "postalCode": {
+                            "S": "08812"
+                          },
+                          "state": {
+                            "S": "NEW JERSEY"
+                          },
+                          "unstructuredAddress01": {
+                            "S": "239, US HWY 22 E,"
+                          },
+                          "unstructuredAddress02": {
+                            "S": "null"
+                          },
+                          "unstructuredAddress03": {
+                            "S": "null"
+                          }
+                        }
+                      },
+                      "charges": {
+                        "L": []
+                      },
+                      "contacts": {
+                        "L": []
+                      },
+                      "partyId": {
+                        "S": "947471"
+                      },
+                      "partyINTTRACompanyId": {
+                        "S": "947471"
+                      },
+                      "partyName1": {
+                        "S": "VIP Cargo Services LLC"
+                      },
+                      "partyRole": {
+                        "S": "Booker"
+                      },
+                      "requestedDocuments": {
+                        "L": []
+                      }
+                    }
+                  }
+                ]
+              },
+              "Carrier": {
+                "L": [
+                  {
+                    "M": {
+                      "address": {
+                        "M": {
+                          "city": {
+                            "S": "COPENHAGEN(KOBENHAVN)"
+                          },
+                          "country": {
+                            "M": {
+                              "countryName": {
+                                "S": "DENMARK"
+                              }
+                            }
+                          },
+                          "postalCode": {
+                            "S": "1098 K"
+                          },
+                          "unstructuredAddress01": {
+                            "S": "Esplanaden 50"
+                          }
+                        }
+                      },
+                      "charges": {
+                        "L": []
+                      },
+                      "contacts": {
+                        "L": []
+                      },
+                      "partyId": {
+                        "S": "800000"
+                      },
+                      "partyINTTRACompanyId": {
+                        "S": "800000"
+                      },
+                      "partyName1": {
+                        "S": "Maersk"
+                      },
+                      "partyRole": {
+                        "S": "Carrier"
+                      },
+                      "partyScac": {
+                        "S": "MAEU"
+                      },
+                      "requestedDocuments": {
+                        "L": []
+                      }
+                    }
+                  }
+                ]
+              },
+              "ContractParty": {
+                "L": [
+                  {
+                    "M": {
+                      "address": {
+                        "M": {
+                          "city": {
+                            "S": "GREEN BROOK"
+                          },
+                          "country": {
+                            "M": {
+                              "countryName": {
+                                "S": "UNITED STATES"
+                              }
+                            }
+                          },
+                          "postalCode": {
+                            "S": "08812"
+                          },
+                          "state": {
+                            "S": "NEW JERSEY"
+                          },
+                          "unstructuredAddress01": {
+                            "S": "239, US HWY 22 E,"
+                          },
+                          "unstructuredAddress02": {
+                            "S": "null"
+                          },
+                          "unstructuredAddress03": {
+                            "S": "null"
+                          }
+                        }
+                      },
+                      "charges": {
+                        "L": []
+                      },
+                      "contacts": {
+                        "L": []
+                      },
+                      "partyId": {
+                        "S": "947471"
+                      },
+                      "partyINTTRACompanyId": {
+                        "S": "947471"
+                      },
+                      "partyName1": {
+                        "S": "VIP Cargo Services LLC"
+                      },
+                      "partyRole": {
+                        "S": "ContractParty"
+                      },
+                      "requestedDocuments": {
+                        "L": []
+                      }
+                    }
+                  }
+                ]
+              },
+              "Shipper": {
+                "L": [
+                  {
+                    "M": {
+                      "address": {
+                        "M": {
+                          "city": {
+                            "S": "GREEN BROOK"
+                          },
+                          "country": {
+                            "M": {
+                              "countryName": {
+                                "S": "UNITED STATES"
+                              }
+                            }
+                          },
+                          "postalCode": {
+                            "S": "08812"
+                          },
+                          "state": {
+                            "S": "NEW JERSEY"
+                          },
+                          "unstructuredAddress01": {
+                            "S": "239, US HWY 22 E,"
+                          },
+                          "unstructuredAddress02": {
+                            "S": "null"
+                          },
+                          "unstructuredAddress03": {
+                            "S": "null"
+                          }
+                        }
+                      },
+                      "charges": {
+                        "L": []
+                      },
+                      "contacts": {
+                        "L": []
+                      },
+                      "partyId": {
+                        "S": "947471"
+                      },
+                      "partyINTTRACompanyId": {
+                        "S": "947471"
+                      },
+                      "partyName1": {
+                        "S": "VIP Cargo Services LLC"
+                      },
+                      "partyRole": {
+                        "S": "Shipper"
+                      },
+                      "requestedDocuments": {
+                        "L": []
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "packageTypeList": {
+        "L": []
+      },
+      "transactionLocationInfoList": {
+        "L": [
+          {
+            "M": {
+              "country": {
+                "M": {
+                  "id": {
+                    "N": "1845"
+                  },
+                  "identifiers": {
+                    "L": [
+                      {
+                        "M": {
+                          "id": {
+                            "N": "5497"
+                          },
+                          "type": {
+                            "S": "ISOAlpha2"
+                          },
+                          "value": {
+                            "S": "AE"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "5498"
+                          },
+                          "type": {
+                            "S": "ISOAlpha3"
+                          },
+                          "value": {
+                            "S": "ARE"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "5499"
+                          },
+                          "type": {
+                            "S": "ISONumericUNM49"
+                          },
+                          "value": {
+                            "S": "784"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "standardName": {
+                    "S": "UNITED ARAB EMIRATES"
+                  },
+                  "status": {
+                    "S": "active"
+                  }
+                }
+              },
+              "countryIdentifierValue": {
+                "S": "AE"
+              },
+              "geography": {
+                "M": {
+                  "countryCode": {
+                    "S": "AE"
+                  },
+                  "countryId": {
+                    "N": "1845"
+                  },
+                  "countryName": {
+                    "S": "UNITED ARAB EMIRATES"
+                  },
+                  "locationId": {
+                    "N": "206188"
+                  },
+                  "locationName": {
+                    "S": "Jebel Ali"
+                  },
+                  "unLocode": {
+                    "S": "AEJEA"
+                  }
+                }
+              },
+              "identifierValue": {
+                "S": "AEJEA"
+              },
+              "locationIdentifierType": {
+                "S": "UNLOC"
+              },
+              "locationType": {
+                "S": "PlaceOfDischarge"
+              }
+            }
+          },
+          {
+            "M": {
+              "country": {
+                "M": {
+                  "id": {
+                    "N": "2075"
+                  },
+                  "identifiers": {
+                    "L": [
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6187"
+                          },
+                          "type": {
+                            "S": "ISOAlpha2"
+                          },
+                          "value": {
+                            "S": "US"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6188"
+                          },
+                          "type": {
+                            "S": "ISOAlpha3"
+                          },
+                          "value": {
+                            "S": "USA"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6189"
+                          },
+                          "type": {
+                            "S": "ISONumericUNM49"
+                          },
+                          "value": {
+                            "S": "840"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "standardName": {
+                    "S": "UNITED STATES"
+                  },
+                  "status": {
+                    "S": "active"
+                  }
+                }
+              },
+              "countryIdentifierValue": {
+                "S": "US"
+              },
+              "geography": {
+                "M": {
+                  "countryCode": {
+                    "S": "US"
+                  },
+                  "countryId": {
+                    "N": "2075"
+                  },
+                  "countryName": {
+                    "S": "UNITED STATES"
+                  },
+                  "locationId": {
+                    "N": "294560"
+                  },
+                  "locationName": {
+                    "S": "Charleston"
+                  },
+                  "subdivisionName": {
+                    "S": "South Carolina"
+                  },
+                  "unLocode": {
+                    "S": "USCHS"
+                  }
+                }
+              },
+              "identifierValue": {
+                "S": "USCHS"
+              },
+              "locationIdentifierType": {
+                "S": "UNLOC"
+              },
+              "locationType": {
+                "S": "PlaceOfLoad"
+              }
+            }
+          },
+          {
+            "M": {
+              "country": {
+                "M": {
+                  "id": {
+                    "N": "2075"
+                  },
+                  "identifiers": {
+                    "L": [
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6187"
+                          },
+                          "type": {
+                            "S": "ISOAlpha2"
+                          },
+                          "value": {
+                            "S": "US"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6188"
+                          },
+                          "type": {
+                            "S": "ISOAlpha3"
+                          },
+                          "value": {
+                            "S": "USA"
+                          }
+                        }
+                      },
+                      {
+                        "M": {
+                          "id": {
+                            "N": "6189"
+                          },
+                          "type": {
+                            "S": "ISONumericUNM49"
+                          },
+                          "value": {
+                            "S": "840"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "standardName": {
+                    "S": "UNITED STATES"
+                  }
+                }
+              },
+              "countryIdentifierValue": {
+                "S": "US"
+              }
+            }
+          }
+        ]
+      },
+      "transactionPartyList": {
+        "L": [
+          {
+            "M": {
+              "address": {
+                "M": {
+                  "city": {
+                    "S": "GREEN BROOK"
+                  },
+                  "country": {
+                    "M": {
+                      "countryName": {
+                        "S": "UNITED STATES"
+                      }
+                    }
+                  },
+                  "postalCode": {
+                    "S": "08812"
+                  },
+                  "state": {
+                    "S": "NEW JERSEY"
+                  },
+                  "unstructuredAddress01": {
+                    "S": "239, US HWY 22 E,"
+                  },
+                  "unstructuredAddress02": {
+                    "S": "null"
+                  },
+                  "unstructuredAddress03": {
+                    "S": "null"
+                  }
+                }
+              },
+              "charges": {
+                "L": []
+              },
+              "contacts": {
+                "L": []
+              },
+              "partyId": {
+                "S": "947471"
+              },
+              "partyINTTRACompanyId": {
+                "S": "947471"
+              },
+              "partyName1": {
+                "S": "VIP Cargo Services LLC"
+              },
+              "partyRole": {
+                "S": "Booker"
+              },
+              "requestedDocuments": {
+                "L": []
+              }
+            }
+          },
+          {
+            "M": {
+              "address": {
+                "M": {
+                  "city": {
+                    "S": "GREEN BROOK"
+                  },
+                  "country": {
+                    "M": {
+                      "countryName": {
+                        "S": "UNITED STATES"
+                      }
+                    }
+                  },
+                  "postalCode": {
+                    "S": "08812"
+                  },
+                  "state": {
+                    "S": "NEW JERSEY"
+                  },
+                  "unstructuredAddress01": {
+                    "S": "239, US HWY 22 E,"
+                  },
+                  "unstructuredAddress02": {
+                    "S": "null"
+                  },
+                  "unstructuredAddress03": {
+                    "S": "null"
+                  }
+                }
+              },
+              "charges": {
+                "L": []
+              },
+              "contacts": {
+                "L": []
+              },
+              "partyId": {
+                "S": "947471"
+              },
+              "partyINTTRACompanyId": {
+                "S": "947471"
+              },
+              "partyName1": {
+                "S": "VIP Cargo Services LLC"
+              },
+              "partyRole": {
+                "S": "ContractParty"
+              },
+              "requestedDocuments": {
+                "L": []
+              }
+            }
+          },
+          {
+            "M": {
+              "address": {
+                "M": {
+                  "city": {
+                    "S": "COPENHAGEN(KOBENHAVN)"
+                  },
+                  "country": {
+                    "M": {
+                      "countryName": {
+                        "S": "DENMARK"
+                      }
+                    }
+                  },
+                  "postalCode": {
+                    "S": "1098 K"
+                  },
+                  "unstructuredAddress01": {
+                    "S": "Esplanaden 50"
+                  }
+                }
+              },
+              "charges": {
+                "L": []
+              },
+              "contacts": {
+                "L": []
+              },
+              "partyId": {
+                "S": "800000"
+              },
+              "partyINTTRACompanyId": {
+                "S": "800000"
+              },
+              "partyName1": {
+                "S": "Maersk"
+              },
+              "partyRole": {
+                "S": "Carrier"
+              },
+              "partyScac": {
+                "S": "MAEU"
+              },
+              "requestedDocuments": {
+                "L": []
+              }
+            }
+          },
+          {
+            "M": {
+              "address": {
+                "M": {
+                  "city": {
+                    "S": "GREEN BROOK"
+                  },
+                  "country": {
+                    "M": {
+                      "countryName": {
+                        "S": "UNITED STATES"
+                      }
+                    }
+                  },
+                  "postalCode": {
+                    "S": "08812"
+                  },
+                  "state": {
+                    "S": "NEW JERSEY"
+                  },
+                  "unstructuredAddress01": {
+                    "S": "239, US HWY 22 E,"
+                  },
+                  "unstructuredAddress02": {
+                    "S": "null"
+                  },
+                  "unstructuredAddress03": {
+                    "S": "null"
+                  }
+                }
+              },
+              "charges": {
+                "L": []
+              },
+              "contacts": {
+                "L": []
+              },
+              "partyId": {
+                "S": "947471"
+              },
+              "partyINTTRACompanyId": {
+                "S": "947471"
+              },
+              "partyName1": {
+                "S": "VIP Cargo Services LLC"
+              },
+              "partyRole": {
+                "S": "Shipper"
+              },
+              "requestedDocuments": {
+                "L": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  }

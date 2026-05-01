@@ -1,0 +1,39 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "keyId",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_SequenceId",
+        "KeySchema": [
+            {
+                "AttributeName": "keyId",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2019-02-21T22:52:05.429000-05:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 50,
+        "ItemCount": 1,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SequenceId",
+        "TableId": "7ab1b872-8582-4c0e-931f-3d62d5a3cc67",
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

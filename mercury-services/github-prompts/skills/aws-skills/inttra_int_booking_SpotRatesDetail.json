@@ -1,0 +1,73 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "spotRateId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "spotRateKey",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_SpotRatesDetail",
+        "KeySchema": [
+            {
+                "AttributeName": "spotRateKey",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2019-10-04T14:48:10.733000-04:00",
+        "ProvisionedThroughput": {
+            "LastIncreaseDateTime": "2019-10-15T16:32:41.509000-04:00",
+            "LastDecreaseDateTime": "2019-10-15T16:53:15.816000-04:00",
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 0,
+        "ItemCount": 0,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SpotRatesDetail",
+        "TableId": "43435417-8ede-47b9-84a9-83d15b24cd62",
+        "GlobalSecondaryIndexes": [
+            {
+                "IndexName": "SPOT_RATE_ID_INDEX",
+                "KeySchema": [
+                    {
+                        "AttributeName": "spotRateId",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                },
+                "IndexSizeBytes": 0,
+                "ItemCount": 0,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SpotRatesDetail/index/SPOT_RATE_ID_INDEX",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 5,
+                    "WriteUnitsPerSecond": 5,
+                    "Status": "ACTIVE"
+                }
+            }
+        ],
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

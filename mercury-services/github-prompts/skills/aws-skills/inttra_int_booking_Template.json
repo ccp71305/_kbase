@@ -1,0 +1,47 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "hashKey",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "sortKey",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_Template",
+        "KeySchema": [
+            {
+                "AttributeName": "hashKey",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "sortKey",
+                "KeyType": "RANGE"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2018-10-03T18:14:49.546000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 73788,
+        "ItemCount": 14,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_Template",
+        "TableId": "8912d9f0-c18f-4aca-8f5e-3f9401c98923",
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

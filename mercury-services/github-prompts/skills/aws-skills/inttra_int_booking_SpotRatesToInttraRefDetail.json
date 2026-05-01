@@ -1,0 +1,101 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "inttraReference",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "spotRateId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "spotRateLinkKey",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_SpotRatesToInttraRefDetail",
+        "KeySchema": [
+            {
+                "AttributeName": "spotRateLinkKey",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2019-10-15T15:27:51.970000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+        },
+        "TableSizeBytes": 3653,
+        "ItemCount": 11,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SpotRatesToInttraRefDetail",
+        "TableId": "b4f2e4fe-8a3b-4d67-88cf-802b5eb839cf",
+        "GlobalSecondaryIndexes": [
+            {
+                "IndexName": "SPOT_RATE_ID_INDEX",
+                "KeySchema": [
+                    {
+                        "AttributeName": "spotRateId",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                },
+                "IndexSizeBytes": 1023,
+                "ItemCount": 11,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SpotRatesToInttraRefDetail/index/SPOT_RATE_ID_INDEX",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 5,
+                    "WriteUnitsPerSecond": 5,
+                    "Status": "ACTIVE"
+                }
+            },
+            {
+                "IndexName": "INTTRA_REFERENCE_INDEX",
+                "KeySchema": [
+                    {
+                        "AttributeName": "inttraReference",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 5,
+                    "WriteCapacityUnits": 5
+                },
+                "IndexSizeBytes": 792,
+                "ItemCount": 11,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_SpotRatesToInttraRefDetail/index/INTTRA_REFERENCE_INDEX",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 5,
+                    "WriteUnitsPerSecond": 5,
+                    "Status": "ACTIVE"
+                }
+            }
+        ],
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 5,
+            "WriteUnitsPerSecond": 5,
+            "Status": "ACTIVE"
+        }
+    }
+}

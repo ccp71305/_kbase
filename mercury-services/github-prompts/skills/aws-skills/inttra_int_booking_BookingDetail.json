@@ -1,0 +1,195 @@
+{
+    "Table": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "bookerId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "bookingId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "carrierId",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "carrierReferenceNumber",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "carrierScac",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "inttraReferenceNumber",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "sequenceNumber",
+                "AttributeType": "S"
+            },
+            {
+                "AttributeName": "shipmentId",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "inttra_int_booking_BookingDetail",
+        "KeySchema": [
+            {
+                "AttributeName": "bookingId",
+                "KeyType": "HASH"
+            },
+            {
+                "AttributeName": "sequenceNumber",
+                "KeyType": "RANGE"
+            }
+        ],
+        "TableStatus": "ACTIVE",
+        "CreationDateTime": "2018-06-07T15:03:37.655000-04:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 25,
+            "WriteCapacityUnits": 25
+        },
+        "TableSizeBytes": 9347297,
+        "ItemCount": 549,
+        "TableArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail",
+        "TableId": "f2fd3b2e-490f-4ff6-84a4-7e7dda8ba4d3",
+        "GlobalSecondaryIndexes": [
+            {
+                "IndexName": "bookerId_shipmentId",
+                "KeySchema": [
+                    {
+                        "AttributeName": "bookerId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "shipmentId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 25,
+                    "WriteCapacityUnits": 25
+                },
+                "IndexSizeBytes": 10595,
+                "ItemCount": 81,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail/index/bookerId_shipmentId",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 25,
+                    "WriteUnitsPerSecond": 25,
+                    "Status": "ACTIVE"
+                }
+            },
+            {
+                "IndexName": "carrierId_carrierReferenceNumber",
+                "KeySchema": [
+                    {
+                        "AttributeName": "carrierId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "carrierReferenceNumber",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 25,
+                    "WriteCapacityUnits": 25
+                },
+                "IndexSizeBytes": 21368,
+                "ItemCount": 154,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail/index/carrierId_carrierReferenceNumber",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 25,
+                    "WriteUnitsPerSecond": 25,
+                    "Status": "ACTIVE"
+                }
+            },
+            {
+                "IndexName": "INTTRA_REFERENCE_NUMBER_INDEX",
+                "KeySchema": [
+                    {
+                        "AttributeName": "inttraReferenceNumber",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 25,
+                    "WriteCapacityUnits": 25
+                },
+                "IndexSizeBytes": 65856,
+                "ItemCount": 549,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail/index/INTTRA_REFERENCE_NUMBER_INDEX",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 25,
+                    "WriteUnitsPerSecond": 25,
+                    "Status": "ACTIVE"
+                }
+            },
+            {
+                "IndexName": "carrierScac_carrierReferenceNumber",
+                "KeySchema": [
+                    {
+                        "AttributeName": "carrierScac",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "carrierReferenceNumber",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "Projection": {
+                    "ProjectionType": "KEYS_ONLY"
+                },
+                "IndexStatus": "ACTIVE",
+                "ProvisionedThroughput": {
+                    "NumberOfDecreasesToday": 0,
+                    "ReadCapacityUnits": 25,
+                    "WriteCapacityUnits": 25
+                },
+                "IndexSizeBytes": 20387,
+                "ItemCount": 147,
+                "IndexArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail/index/carrierScac_carrierReferenceNumber",
+                "WarmThroughput": {
+                    "ReadUnitsPerSecond": 25,
+                    "WriteUnitsPerSecond": 25,
+                    "Status": "ACTIVE"
+                }
+            }
+        ],
+        "StreamSpecification": {
+            "StreamEnabled": true,
+            "StreamViewType": "KEYS_ONLY"
+        },
+        "LatestStreamLabel": "2018-09-25T21:07:26.906",
+        "LatestStreamArn": "arn:aws:dynamodb:us-east-1:081020446316:table/inttra_int_booking_BookingDetail/stream/2018-09-25T21:07:26.906",
+        "SSEDescription": {
+            "Status": "ENABLED",
+            "SSEType": "KMS",
+            "KMSMasterKeyArn": "arn:aws:kms:us-east-1:081020446316:key/mrk-0250b728bc7b474987473c952357967c"
+        },
+        "DeletionProtectionEnabled": true,
+        "WarmThroughput": {
+            "ReadUnitsPerSecond": 25,
+            "WriteUnitsPerSecond": 25,
+            "Status": "ACTIVE"
+        }
+    }
+}

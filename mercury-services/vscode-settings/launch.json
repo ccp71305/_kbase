@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Booking Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.booking.BookingApplication",
+            "projectName": "booking",
+            "args": "server ${workspaceFolder}/booking/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/booking",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Booking Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.booking.BookingApplication",
+            "projectName": "booking",
+            "args": "server ${workspaceFolder}/booking/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/booking",
+            "console": "integratedTerminal",
+            "vmArgs": "-Xmx2g -Xms512m"
+        }
+    ]
+}
