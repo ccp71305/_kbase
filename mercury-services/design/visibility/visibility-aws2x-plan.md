@@ -1,12 +1,12 @@
 # Visibility Module — AWS SDK 2.x Upgrade Plan
 
 > **Status**: Planning  
-> **Date**: 2026-03-30  
+> **Date**: 2026-03-30 (updated 2026-05-05)  
 > **Module**: `visibility/` (multi-module Maven project — 11 sub-modules)  
 > **Target**: Migrate from AWS SDK v1 (`dynamo-client`, `AmazonS3`, `AmazonSQS`, `AmazonSNS`, etc.) to `cloud-sdk-api` + `cloud-sdk-aws` (AWS SDK 2.x)  
-> **Commons Version**: `1.0.22-SNAPSHOT`  
+> **Commons Version**: `1.0.23-SNAPSHOT`  
 > **Agent Model**: Claude Opus 4.6  
-> **Session ID**: `6fd63aa02b1c4a75` (MCP Context Server — "Visibility Module - AWS 2.x Upgrade Plan")  
+> **Session ID**: `6fd63aa02b1c4a75` (initial plan), `65cf629114ec4ee4` (update after booking merge)  
 > **Prompt**: `.github/prompts/visibility-aws-upgrade-plan.prompt.md`
 
 ---
@@ -39,11 +39,12 @@
 ---
 
 > **Session Context for Agents**  
-> To resume this work, load session `6fd63aa02b1c4a75` via MCP Context Server:  
+> To resume this work, load session `65cf629114ec4ee4` via MCP Context Server:  
 > ```
-> session_get(session_id="6fd63aa02b1c4a75")
+> session_get(session_id="65cf629114ec4ee4")
 > ```  
-> This session contains 9 entries covering: initial analysis, architectural decisions, git analysis (booking commit scope, develop delta, zero-overlap confirmation), branch strategy, all document corrections, and a comprehensive final summary with implementation details.  
+> Previous session: `6fd63aa02b1c4a75` (initial plan, pre-booking merge).  
+> This session contains the update history reflecting booking merge to develop, data format backward compatibility lessons, and commons version upgrade to 1.0.23-SNAPSHOT.  
 > **Skills**: `java-refactoring`, `session-context`, `git-operations`  
 > **Prompt used to generate this plan**: `.github/prompts/visibility-aws-upgrade-plan.prompt.md`  
 > **Current state analysis**: `visibility/docs/DESIGN-curr-state.md`  
@@ -55,7 +56,7 @@
 
 The visibility module is the largest multi-module service in the mercury-services monorepo, consisting of **11 sub-modules** (6 Dropwizard services, 4 AWS Lambda functions, 1 shared library). All sub-modules currently use **AWS SDK v1** via the deprecated `dynamo-client` library (`DynamoDBCrudRepository`) and direct AWS SDK v1 client classes (`AmazonS3`, `AmazonSQS`, etc.).
 
-The upgrade will replace all legacy AWS SDK v1 dependencies with the `cloud-sdk-api` (vendor-neutral interfaces) and `cloud-sdk-aws` (AWS SDK v2 implementations) libraries from `mercury-services-commons:1.0.22-SNAPSHOT`, following the same patterns successfully applied in **webbl**, **booking-bridge**, **booking**, **network**, **auth**, **registration**, **tx-tracking**, **self-service-reports**, and **db-migration** modules.
+The upgrade will replace all legacy AWS SDK v1 dependencies with the `cloud-sdk-api` (vendor-neutral interfaces) and `cloud-sdk-aws` (AWS SDK v2 implementations) libraries from `mercury-services-commons:1.0.23-SNAPSHOT`, following the same patterns successfully applied in **webbl**, **booking-bridge**, **booking**, **network**, **auth**, **registration**, **tx-tracking**, **self-service-reports**, and **db-migration** modules.
 
 ### Key Metrics
 - **DynamoDB Entity Classes**: 6 (ContainerEvent, ContainerEventOutbound, ContainerEventPending, ContainerTrackingEvent, BookingDetailVisibility, **CargoVisibilitySubscription**) + nested model classes with `@DynamoDBDocument`
@@ -65,62 +66,35 @@ The upgrade will replace all legacy AWS SDK v1 dependencies with the `cloud-sdk-
 - **SNS Clients**: Used in 6+ sub-modules
 - **Existing Tests**: 134 test files
 - **Current commons version**: `1.R.01.021`
-- **Target commons version**: `1.0.22-SNAPSHOT` (for cloud-sdk-api and cloud-sdk-aws only; commons artifact remains at `1.R.01.021`)
+- **Target commons version**: `1.0.23-SNAPSHOT` (for cloud-sdk-api and cloud-sdk-aws only; commons artifact remains at `1.R.01.021`)
 
 ### Reference Modules
 The following upgraded modules serve as implementation references (in chronological order of merge to develop):
 1. **webbl** — Single Dropwizard service with DynamoDB, SQS, SNS, S3, SES
 2. **booking-bridge** — Single Dropwizard service with DynamoDB, SQS, SNS
-3. **booking** — Complex module with 7 DynamoDB tables, Lambdas, SQS/SNS/S3/SES (feature branch `feature/ION-14382-bk3-aws-upgrade-2`)
+3. **booking** — Complex module with 7 DynamoDB tables, Lambdas, SQS/SNS/S3/SES (**merged to develop** via PRs #939, #965, #979, #988, #990, #991; final cloud-sdk version `1.0.23-SNAPSHOT`)
 
 ---
 
 ## 2. Branch & Git Strategy
 
-The booking module AWS upgrade (branch `feature/ION-14382-bk3-aws-upgrade-2`, commit `74f36e7a71`) has not yet been merged to `develop`, but visibility-commons depends on booking models (`com.inttra.mercury:booking:2.1.8.M`). The upgraded booking models are needed during visibility development. Rather than waiting for the booking PR to merge, we use a **cherry-pick + rebase-drop** strategy.
+> **[UPDATED 2026-05-05]** The booking module AWS upgrade has been **fully merged to `develop`** through a series of PRs (#939, #965, #979, #988, #990, #991). The cherry-pick + rebase-drop strategy originally documented here is **no longer needed**. The visibility feature branch can be created directly from `develop` and will have full access to the upgraded booking models.
 
-### Verified Facts (as of 2026-03-30)
-- Booking feature branch has **exactly 1 commit** ahead of develop: `74f36e7a71 ION-14382 bk3 aws upgrade changes`
-- That commit changes **223 files exclusively in `booking/`** — zero visibility, zero db-migration, zero network files
-- `develop` is **11 commits ahead** of the booking branch base (`abee9cc33d`), including ION-15057 and ION-14875 changes
-- The new develop commits touch **5 visibility files** (ION-15057: `CargoVisibilityEventProcessor`, `CargoVisibilitySubscriptionProcessor` + tests, `visibility/pom.xml`) — these will already be in the visibility branch since it starts from latest develop
-- **Zero file overlap** between the booking commit and the new develop commits, so cherry-pick is conflict-free
-- One new develop commit (`43a5f917ff` ION-15057) touches `booking/` files, but different files than those in the booking AWS commit, so no conflict
+### Booking Merge History (for reference)
+| PR | Commit | Description |
+|----|--------|-------------|
+| #939 | `74f36e7a71` | ION-14382 bk3 aws upgrade changes (initial) |
+| #960 | `dc4a0dde15` | Revert (temporary) |
+| #965 | `59ebf93a2a` | Reapply ION-14382 bk3 aws upgrade changes |
+| #979 | `ee29760491` | ION-14382 data format fixes (MetaData timestamp, boolean deserialization, OffsetDateTime) |
+| #988 | `b2be757726` | ION-14382 integration issue fixes |
+| #990 | `0095e73695` | ION-14382 code coverage tests for MetaDataConverter |
+| #991 | `dcab0df042` | ION-14382 netty owasp cloud-sdk upgrade to `1.0.23-SNAPSHOT` |
 
-### Strategy: Cherry-Pick + Rebase-Drop
+### Strategy: Branch from Develop (Simplified)
 
-```
-Timeline:
+Since booking is fully merged, create the visibility feature branch directly from `develop`:
 
-  develop ──────────────────────────────────────────────[booking merges here]──────>
-      │                                                          │
-      │ (1) create branch                                        │
-      ▼                                                          │
-  feature/visibility-aws-sdk-2x-upgrade                          │
-      │                                                          │
-      │ (2) cherry-pick 74f36e7a71                               │
-      │     (booking commit — provides upgraded models)          │
-      ▼                                                          │
-  [booking commit]                                               │
-      │                                                          │
-      │ (3) visibility upgrade commits                           │
-      │     (all phases 1-5 work)                                │
-      ▼                                                          │
-  [commit A] [commit B] ... [commit N]                           │
-      │                                                          │
-      │ (4) when booking merges to develop:                      │
-      │     git rebase -i develop                                │
-      │     → DROP the cherry-picked booking commit              │
-      │     (it's now redundant — develop has it)                │
-      ▼                                                          │
-  [commit A'] [commit B'] ... [commit N']  ← only visibility changes
-      │
-      └─▶ PR: shows ONLY visibility changes
-```
-
-### Step-by-Step Commands
-
-#### (1) Create visibility branch and cherry-pick booking commit
 ```bash
 # Ensure develop is up to date
 git checkout develop
@@ -129,72 +103,56 @@ git pull origin develop
 # Create visibility feature branch
 git checkout -b feature/visibility-aws-sdk-2x-upgrade
 
-# Cherry-pick the single booking commit
-git cherry-pick 74f36e7a71
-
-# Verify: should show 1 commit (the cherry-picked booking commit)
-git log --oneline develop..HEAD
+# Verify booking upgrade is present
+ls booking/docs/DESIGN-AWS2x.md  # Should exist
+grep "cloud-sdk" booking/pom.xml  # Should show cloud-sdk dependencies
 ```
 
-#### (2) Do all visibility work
-All visibility upgrade work goes on top as separate commits (Phases 1-5 of this plan).
+All upgraded booking models (`BookingDetail` with `@DynamoDbBean`, `@DynamoDbPartitionKey`, etc.) are available immediately on the new branch. No cherry-picking required.
 
-#### (3) Pre-PR rebase (when booking merges to develop)
-```bash
-# Update develop
-git checkout develop
-git pull origin develop
+### Data Format Backward Compatibility — Lessons from Booking Upgrade
 
-# Rebase visibility branch onto updated develop (interactive)
-git checkout feature/visibility-aws-sdk-2x-upgrade
-git rebase -i develop
+> **[ADDED 2026-05-05]** The booking module upgrade (PRs #979, #988) revealed critical data format issues when reading legacy DynamoDB records written by SDK v1. These issues MUST be proactively addressed during the visibility upgrade.
 
-# In the interactive editor:
-#   - The cherry-picked booking commit will appear first
-#   - Change its action from 'pick' to 'drop'
-#   - All other (visibility) commits remain as 'pick'
-#   Example:
-#     drop 74f36e7 ION-14382 bk3 aws upgrade changes    ← DROP this
-#     pick abc1234 Phase 1: POM dependency changes        ← KEEP
-#     pick def5678 Phase 2: visibility-commons migration   ← KEEP
-#     ...
+#### Issue 1: MetaData.timestamp DateTimeParseException
+**Root cause**: Legacy records stored `timestamp` with `T` separator (ISO format like `2024-01-15T10:30:00`), but the new SDK v2 deserializer expected a space separator.
+**Fix applied in booking**: Added `@JsonDeserialize(using = FlexibleLocalDateTimeDeserializer.class)` that accepts both `T` and space separators.
+**Visibility action**: For ALL date/time fields in `ContainerEvent`, `ContainerEventOutbound`, `ContainerEventPending`, and nested models that may contain legacy data with varying date formats, implement flexible deserializers in the `AttributeConverter` implementations. Specifically:
+- Configure the Jackson `ObjectMapper` in each `AttributeConverter` with `new JavaTimeModule()` and `ADJUST_DATES_TO_CONTEXT_TIME_ZONE` disabled
+- For `MetaData` (used in visibility via commons), the same `FlexibleLocalDateTimeDeserializer` from booking applies
+- For `DateIso8601AttributeConverter` and `DateEpochMilliSecondAttributeConverter`, handle both old and new format variants
 
-# Force push (safe)
-git push --force-with-lease
-```
+#### Issue 2: Boolean Deserialization (displayFlag)
+**Root cause**: `LegacyMapConverter` returned `"1"` (String) instead of `1` (Number) for DynamoDB `N` type boolean fields.
+**Fix applied in booking**: Fixed converter to return actual Java numbers for `N` type attributes.
+**Visibility action**: Any `AttributeConverter` that reads DynamoDB `N` type attributes as Java numeric types must handle both string and numeric representations. Ensure `DateEpochMilliSecondAttributeConverter` and `DateEpochSecondAttributeConverter` properly handle edge cases.
 
-#### (4) If develop needs rebasing before booking merges
-If `develop` gets other changes (not booking) that you need, you can rebase anytime — just keep the booking cherry-pick commit as the first commit so it's easy to identify and drop later.
-```bash
-git rebase -i develop
-# Keep all commits including the booking cherry-pick
-# Only drop it when booking has actually merged to develop
-```
+#### Issue 3: OffsetDateTime Parse Errors (Audit fields)
+**Root cause**: `OffsetDateTime` fields with pattern `yyyy-MM-dd'T'HH:mm:ss.SSSZ` failed when zone offset was `+00:00` vs `Z`.
+**Fix applied in booking**: Changed pattern to `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` and added `@JsonDeserialize(using = OffsetDateTimeTypeConverter.class)`.
+**Visibility action**: If any visibility models use `OffsetDateTime` (check `ContainerEvent` and nested models), apply the same flexible deserializer pattern.
 
-### Why This Works
-- **During development**: The cherry-picked booking commit gives you the upgraded booking models (cloud-sdk annotations, `BookingDetail` with `@DynamoDbBean`, etc.) so visibility can compile and test against them
-- **Booking commit is self-contained**: All 223 files are exclusively in `booking/` — no visibility, db-migration, or network files are touched, so the cherry-pick has no side-effects outside booking
-- **At PR time**: After the rebase-drop, the PR diff only shows visibility-specific changes. The booking commit is gone because develop already has those identical changes
-- **No merge conflicts**: Zero file overlap between the booking commit and new develop commits; cherry-pick onto latest develop is guaranteed conflict-free. Dropping it during interactive rebase is equally clean since git replays only the visibility commits on top of the new develop
+#### General Rule for Visibility Upgrade
+**ALL `AttributeConverter` implementations must be tested against:**
+1. Data written by AWS SDK v1 `DynamoDBMapper` (legacy format)
+2. Data written by AWS SDK v2 Enhanced Client (new format)
+3. Null/empty values
+4. Edge cases (epoch 0, empty strings, missing fields)
 
-### Edge Case: Booking Not Yet Merged When PR Is Ready
-If the visibility work finishes before booking merges to develop:
-1. Keep the cherry-picked booking commit on the branch
-2. Open a **draft PR** — it will show booking files + visibility files in the diff, but the booking changes are clearly isolated in `booking/` only (223 files)
-3. When booking merges, rebase-drop and mark PR as ready for review
-4. Alternatively, set the PR **base branch** to `feature/ION-14382-bk3-aws-upgrade-2` temporarily — this will show only the visibility diff since the booking commit is the common ancestor. Switch base back to `develop` after booking merges
+**Test strategy**: Create integration tests that:
+1. Pre-populate DynamoDB Local with JSON fixtures representing legacy SDK v1 data
+2. Read via new SDK v2 converters and verify no exceptions
+3. Write new data via SDK v2, read back, and verify round-trip consistency
 
 ---
 
 ## 3. Pre-Requisites
 
-1. **mercury-services-commons `1.0.22-SNAPSHOT`** must be available in the Maven repository.
+1. **mercury-services-commons `1.0.23-SNAPSHOT`** must be available in the Maven repository.
 
 2. **DynamoDB Local** must be available for integration testing (provided by `dynamo-integration-test` from mercury-services-commons).
 
-3. **Feature branch**: Create feature branch `feature/visibility-aws-sdk-2x-upgrade` from `develop`, then cherry-pick booking commit `74f36e7a71` (see [Branch & Git Strategy](#2-branch--git-strategy)).
-
-4. **Booking commit available**: Fetch `origin/feature/ION-14382-bk3-aws-upgrade-2` so commit `74f36e7a71` is available locally for cherry-pick.
+3. **Feature branch**: Create feature branch `feature/visibility-aws-sdk-2x-upgrade` from `develop` (booking upgrade is already available on develop).
 
 ---
 
@@ -204,7 +162,6 @@ The upgrade will be executed in the following order, compiling and testing after
 
 | Phase | Scope | Dependencies | Verification |
 |-------|-------|-------------|--------------|
-| **Phase 0** | Branch Setup | Cherry-pick booking commit onto new branch | `mvn compile -pl booking -am` |
 | **Phase 1** | POM & Dependency Changes | Parent + all sub-modules | `mvn compile -pl visibility -am` |
 | **Phase 2** | visibility-commons | Core shared library | `mvn test -pl visibility/visibility-commons` |
 | **Phase 3** | Dropwizard Services (6) | visibility-commons | `mvn test` per sub-module |
@@ -234,7 +191,7 @@ visibility-commons          ← FIRST (all others depend on this)
 
 **Add properties:**
 ```xml
-<mercury.cloudsdk.version>1.0.22-SNAPSHOT</mercury.cloudsdk.version>
+<mercury.cloudsdk.version>1.0.23-SNAPSHOT</mercury.cloudsdk.version>
 ```
 
 **Keep existing:**
@@ -284,15 +241,24 @@ visibility-commons          ← FIRST (all others depend on this)
 </dependency>
 ```
 
-**Update booking dependency** (once booking AWS upgrade is merged):
+**Update booking dependency** (booking AWS upgrade is merged to develop):
 ```xml
-<!-- Update to cloud-sdk-compatible version -->
+<!-- Booking is a sibling module in the reactor build. Version 3.0.0 is
+     published via the booking-model Maven profile. Since booking is now
+     upgraded to cloud-sdk on develop, the published model JAR already
+     contains @DynamoDbBean-annotated classes. No version change needed
+     if using reactor build; for external consumers, re-publish the
+     booking-model artifact:
+       mvn package -pl booking -P booking-model
+     This produces booking-model-1.0.jar with artifactId=booking, version=3.0.0 -->
 <dependency>
     <groupId>com.inttra.mercury</groupId>
     <artifactId>booking</artifactId>
-    <version>${booking.cloudsdk.version}</version> <!-- TBD after booking merge -->
+    <version>3.0.0</version>
 </dependency>
 ```
+
+> **[UPDATED 2026-05-05]** The booking model JAR is generated via `mvn package -pl booking -P booking-model` which packages classes from `com.inttra.mercury.booking.model`, `booking.inbound`, `booking.dynamodb`, `booking.exceptions`, `booking.util`, `booking.outbound.model` etc. The published artifact ID is `booking` with version `${project.version}.M` (e.g., `1.0.M`). After the booking AWS upgrade merge, this model JAR now includes cloud-sdk annotations (`@DynamoDbBean`, `@DynamoDbConvertedBy`, etc.) and the `AttributeConverter` implementations. The visibility module consuming this JAR will need the cloud-sdk transitive dependencies to compile.
 
 ### 5.3 Each Dropwizard Sub-Module POM
 
@@ -760,25 +726,45 @@ Lambda functions differ from Dropwizard services because they create AWS clients
 
 ## 9. Phase 5 — Booking Dependency Alignment
 
-The `visibility-commons` module depends on `com.inttra.mercury:booking:2.1.8.M` for cross-module booking data access. Thanks to the cherry-pick strategy (see [Branch & Git Strategy](#2-branch--git-strategy)), the upgraded booking code is already available on the visibility branch from the very start.
+> **[UPDATED 2026-05-05]** The booking module AWS upgrade is now **fully merged to `develop`** (PRs #939 through #991). The cherry-pick strategy documented in the original plan is obsolete. The upgraded booking models are available directly on develop.
 
-This phase handles aligning the visibility code with the upgraded booking models that are present in the cherry-picked commit.
+The `visibility-commons` module depends on `com.inttra.mercury:booking:3.0.0` for cross-module booking data access. Since the booking upgrade is now on develop, the upgraded booking code (with cloud-sdk annotations) is available immediately when branching from develop.
 
-### What the cherry-picked booking commit provides:
+### What the merged booking upgrade provides:
 - Upgraded `BookingDetail` entity with `@DynamoDbBean` / `@DynamoDbPartitionKey` annotations (cloud-sdk)
 - Upgraded booking DAOs using `DatabaseRepository` pattern
 - Upgraded booking Guice modules (`BookingDynamoModule`, `BookingMessagingModule`, etc.)
 - Upgraded booking converters (`AttributeConverter` implementations for booking models)
-- **Note**: The booking commit only changes `booking/` files (223 files). It does NOT change any visibility files.
+- Data format fixes for backward compatibility (FlexibleLocalDateTimeDeserializer, OffsetDateTimeTypeConverter, LegacyMapConverter number fix)
+- Cloud-sdk version `1.0.23-SNAPSHOT`
 
-### Actions (with booking code already on branch):
+### Actions:
 1. **Align `BookingDetailVisibility`** — ensure its annotations are compatible with the booking module's migrated `BookingDetail` entity (both using `@DynamoDbBean`)
 2. **Migrate `BookingDao`** in visibility-commons — convert from `DynamoDBCrudRepository<BookingDetailVisibility, ...>` to `DatabaseRepository<BookingDetailVisibility, DefaultCompositeKey<String, String>>`
 3. **Verify `BookingServiceImpl`** works with the new DAO pattern
 4. **Run integration tests** to verify cross-table reads
+5. **Apply data format backward compatibility patterns** — use the same flexible deserializers from booking (FlexibleLocalDateTimeDeserializer, OffsetDateTimeTypeConverter) in visibility converters
+
+### Booking Model Generation
+To regenerate the booking model JAR with cloud-sdk annotations:
+```bash
+# From the mercury-services root with develop branch
+mvn package -pl booking -P booking-model -DskipTests
+
+# This produces: booking/target/booking-model-1.0.jar
+# Published as: com.inttra.mercury:booking:3.0.0
+
+# The model JAR includes:
+#   - com/inttra/mercury/booking/model/**   (BookingDetail, etc. with @DynamoDbBean)
+#   - com/inttra/mercury/booking/dynamodb/** (AttributeConverter implementations)
+#   - com/inttra/mercury/booking/inbound/**
+#   - com/inttra/mercury/booking/exceptions/**
+#   - com/inttra/mercury/booking/util/**
+#   - com/inttra/mercury/booking/outbound/model/**
+```
 
 ### Note on booking dependency version
-The booking module is a sibling module in the same monorepo (not a published Maven artifact in this context). The `<dependency>` in `visibility-commons/pom.xml` uses version `2.1.8.M` which resolves within the reactor build. Since both booking and visibility are built together, the cherry-picked booking code is compiled as part of `mvn compile -pl visibility -am`. No version change is needed until the booking upgrade is formally merged and versioned.
+The booking module is a sibling module in the same monorepo. The `<dependency>` in `visibility-commons/pom.xml` uses version `3.0.0` which resolves from the S3 Maven repository. Since the booking upgrade is now merged, a new booking-model artifact should be published with the cloud-sdk annotations. Alternatively, the visibility branch can use the reactor build (`mvn compile -pl visibility -am`) which resolves the booking dependency from the local reactor.
 
 ---
 
@@ -1178,8 +1164,9 @@ java -jar visibility/visibility-inbound/target/visibility-inbound-1.0.jar server
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Booking dependency not yet merged to develop | Cherry-pick may cause rebase conflicts | Use cherry-pick + rebase-drop strategy; booking commit is always the first commit so it's easy to identify and drop during interactive rebase |
-| Complex nested model serialization changes | DynamoDB read/write failures | Thorough AttributeConverter tests + integration tests with real DynamoDB Local |
+| ~~Booking dependency not yet merged to develop~~ | ~~Cherry-pick may cause rebase conflicts~~ | **RESOLVED** — Booking is fully merged to develop (PRs #939-#991). Branch directly from develop. |
+| Data format backward compatibility | DynamoDB read/write failures when reading legacy SDK v1 data | Apply lessons from booking upgrade: FlexibleLocalDateTimeDeserializer for timestamps, OffsetDateTimeTypeConverter for audit fields, proper numeric handling in converters. **Test with legacy data fixtures.** |
+| Complex nested model serialization changes | DynamoDB read/write failures | Thorough AttributeConverter tests + integration tests with real DynamoDB Local. **Pre-populate test data in SDK v1 format.** |
 | DynamoDB Document API in S3 Archiver Lambda | Different migration path from DynamoDBMapper | Use `DynamoRepositoryFactory` directly in Lambda (no Guice) |
 | SQS processor pattern heavily customized | Risk of breaking polling/DLQ logic | Keep `SqsMessageHandler` structure; only swap client internals |
 | 134 test files to update | Large surface area for test breakage | Migrate tests alongside production code per phase |

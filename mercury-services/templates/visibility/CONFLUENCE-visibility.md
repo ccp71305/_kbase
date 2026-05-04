@@ -47,7 +47,7 @@ This document covers the AWS SDK 1.x → 2.x migration via `cloud-sdk-api` and `
 ### Technology Stack
 - **Framework**: Dropwizard 4.0.x
 - **Dependency Injection**: Google Guice
-- **AWS SDK**: Version 2 (via cloud-sdk-aws 1.0.22-SNAPSHOT)
+- **AWS SDK**: Version 2 (via cloud-sdk-aws 1.0.23-SNAPSHOT)
 - **Messaging**: SQS, SNS (via cloud-sdk-api)
 - **Storage**: S3 (via cloud-sdk-api StorageClient)
 - **Email**: SES (via cloud-sdk-api EmailService)
@@ -70,30 +70,27 @@ Detailed design documents for "cloud-sdk-api" and "cloud-sdk-aws" implementation
 ## Assumptions and Open Issues
 
 ### Assumptions
-- The `cloud-sdk-api` and `cloud-sdk-aws` libraries (version `1.0.22-SNAPSHOT`) provide full coverage for all AWS service operations required by the visibility module
-- The booking module's AWS 2.x upgrade commit (`74f36e7a71` from branch `feature/ION-14382-bk3-aws-upgrade-2`) is cherry-picked onto the visibility feature branch to provide upgraded booking models during development. This commit only touches `booking/` files (223 files, zero overlap with other modules)
-- When the booking PR merges to `develop`, a `git rebase -i develop` with drop of the cherry-picked commit will produce a clean visibility-only PR
+- The `cloud-sdk-api` and `cloud-sdk-aws` libraries (version `1.0.23-SNAPSHOT`) provide full coverage for all AWS service operations required by the visibility module
+- The booking module's AWS 2.x upgrade is **fully merged to `develop`** (PRs #939 through #991, final version `1.0.23-SNAPSHOT`). The upgraded booking models with cloud-sdk annotations are available directly on develop. No cherry-picking is required.
 - DynamoDB Local (embedded, no Docker) via `dynamo-integration-test` is sufficient for integration testing of all 4 DynamoDB table operations
 - Nested model objects previously annotated with `@DynamoDBDocument` (SDK 1.x) can be fully serialized/deserialized via Jackson JSON through `@DynamoDbConvertedBy` `AttributeConverter` implementations
+- **Data format backward compatibility**: All `AttributeConverter` implementations must handle legacy data written by SDK v1 `DynamoDBMapper`. Specific issues addressed in booking upgrade (PRs #979, #988): MetaData timestamp T-separator vs space, boolean/numeric type coercion, OffsetDateTime zone offset formats.
 
 ### Open Issues
-- **Booking dependency version**: `com.inttra.mercury:booking:2.1.8.M` compiled against the cherry-picked booking commit. Final version number will be set once the booking PR merges to `develop` and a release version is published
+- **Booking dependency version**: `com.inttra.mercury:booking:3.0.0` — the booking model JAR needs to be re-published after the AWS upgrade merge. Generate via `mvn package -pl booking -P booking-model`. The published model now includes `@DynamoDbBean` annotations and `AttributeConverter` implementations.
 - **BookingDetailVisibility model**: Needs alignment with the booking module's migrated `BookingDetail` entity annotations
 
 ### Branch Strategy
 
-The visibility feature branch uses a **cherry-pick + rebase-drop** workflow to unblock development while the booking PR is pending:
+> **[UPDATED 2026-05-05]** The booking module AWS upgrade is **fully merged to `develop`**. The cherry-pick + rebase-drop workflow is no longer needed.
+
+The visibility feature branch is created directly from `develop`:
 
 1. **Create branch**: `git checkout -b feature/visibility-aws-sdk-2x-upgrade` from latest `develop`
-2. **Cherry-pick booking commit**: `git cherry-pick 74f36e7a71` — this single commit (from `feature/ION-14382-bk3-aws-upgrade-2`) provides the upgraded booking models with cloud-sdk annotations. It changes **223 files exclusively in `booking/`** with zero overlap to any other module, so the cherry-pick is conflict-free.
-3. **Do visibility work**: All upgrade phases (POM changes, commons, services, lambdas, booking alignment) on top as separate commits
-4. **When booking merges to develop**: `git rebase -i develop` and **drop** the cherry-picked booking commit (it's now in develop). Force push with `--force-with-lease`. The PR will show only visibility changes.
-5. **If visibility finishes before booking merges**: Open a **draft PR** (it will include the booking diff in `booking/` only), or temporarily set the PR base branch to `feature/ION-14382-bk3-aws-upgrade-2` to see only the visibility diff.
+2. **Do visibility work**: All upgrade phases (POM changes, commons, services, lambdas, booking alignment) as separate commits
+3. **PR**: Submit directly against `develop` — the diff will show only visibility changes
 
-**Key facts (verified 2026-03-30)**:
-- Booking commit `74f36e7a71` only touches `booking/` files — zero visibility, db-migration, or network files
-- `develop` is 11 commits ahead of the booking branch base with zero file overlap to the booking commit
-- Cherry-pick and subsequent rebase-drop are guaranteed conflict-free
+**Booking merge history** (for reference): PRs #939, #960 (revert), #965 (reapply), #979 (data format fixes), #988 (integration fixes), #990 (test coverage), #991 (cloud-sdk `1.0.23-SNAPSHOT`)
 
 ---
 
@@ -565,15 +562,15 @@ Affected Lambda handlers:
 
 | Change Type | Dependency | Old Version | New Version | Reason |
 |-------------|------------|-------------|-------------|--------|
-| **Added** | `cloud-sdk-api` (mercury-services-commons) | N/A | 1.0.22-SNAPSHOT | AWS service abstraction interfaces |
-| **Added** | `cloud-sdk-aws` (mercury-services-commons) | N/A | 1.0.22-SNAPSHOT | AWS SDK 2.x implementations |
-| **Added** | `dynamo-integration-test` (mercury-services-commons) | N/A | 1.0.22-SNAPSHOT (test) | DynamoDB Local for integration tests |
+| **Added** | `cloud-sdk-api` (mercury-services-commons) | N/A | 1.0.23-SNAPSHOT | AWS service abstraction interfaces |
+| **Added** | `cloud-sdk-aws` (mercury-services-commons) | N/A | 1.0.23-SNAPSHOT | AWS SDK 2.x implementations |
+| **Added** | `dynamo-integration-test` (mercury-services-commons) | N/A | 1.0.23-SNAPSHOT (test) | DynamoDB Local for integration tests |
 | **Removed** | `dynamo-client` (mercury-services-commons) | 1.R.01.021 | — | Replaced by cloud-sdk Enhanced Client |
 | **Scope Changed** | `aws-java-sdk-dynamodb` | compile | test | Required only for DynamoDB Local in integration tests |
 | **Version Updated** | `aws-lambda-java-events` | 3.14.0 | 3.16.1 | Unified version; embeds DynamoDB event models |
-| **Version Updated** | `commons` (mercury-services-commons) | 1.R.01.021 | 1.0.22-SNAPSHOT | cloud-sdk-api + cloud-sdk-aws transitive dependencies |
+| **Version Updated** | `commons` (mercury-services-commons) | 1.R.01.021 | 1.0.23-SNAPSHOT | cloud-sdk-api + cloud-sdk-aws transitive dependencies |
 
-> **Note:** The `commons` dependency version update to `1.0.22-SNAPSHOT` brings in the cloud-sdk libraries transitively. The `mercury.commons.version` property in the parent POM is updated from `1.R.01.021` to `1.0.22-SNAPSHOT`.
+> **Note:** The `commons` dependency version update to `1.0.23-SNAPSHOT` brings in the cloud-sdk libraries transitively. The `mercury.commons.version` property in the parent POM is updated from `1.R.01.021` to `1.0.23-SNAPSHOT`.
 
 #### Import Package Changes
 
@@ -777,9 +774,16 @@ NA
 
 ## Backwards Compatible
 
-This uses `cloud-sdk-api` and `cloud-sdk-aws` version **1.0.22-SNAPSHOT** which integrate AWS SDK 2.x through abstraction interfaces (`StorageClient`, `MessagingClient`, `NotificationService`, `DatabaseRepository`, `EmailService`).
+This uses `cloud-sdk-api` and `cloud-sdk-aws` version **1.0.23-SNAPSHOT** which integrate AWS SDK 2.x through abstraction interfaces (`StorageClient`, `MessagingClient`, `NotificationService`, `DatabaseRepository`, `EmailService`).
 
 The `commons` dependency remains at version **1.R.01.021** to maintain compatibility with `com.inttra.mercury.messaging` packages and the base `InttraServer` framework. Only cloud-sdk dependencies use the SNAPSHOT version.
+
+> **[ADDED 2026-05-05] Data Format Backward Compatibility:**  
+> The booking AWS upgrade (PRs #979, #988) revealed that `AttributeConverter` implementations must handle legacy data written by SDK v1 `DynamoDBMapper`. Key issues and fixes:
+> - **MetaData.timestamp**: Legacy records use ISO format with `T` separator → `FlexibleLocalDateTimeDeserializer` accepts both `T` and space separators
+> - **Boolean/numeric coercion**: `LegacyMapConverter` must return Java numbers for DynamoDB `N` type, not strings
+> - **OffsetDateTime**: Pattern must use `XXX` (not `Z`) to handle `+00:00` zone offsets → `OffsetDateTimeTypeConverter`
+> - All visibility `AttributeConverter` implementations must be tested with legacy SDK v1 data fixtures
 
 ---
 
@@ -787,9 +791,9 @@ The `commons` dependency remains at version **1.R.01.021** to maintain compatibi
 
 | Library | Old Version | New Version | Purpose |
 |---------|-------------|-------------|---------|
-| cloud-sdk-api | N/A (new) | 1.0.22-SNAPSHOT | AWS service abstractions |
-| cloud-sdk-aws | N/A (new) | 1.0.22-SNAPSHOT | AWS SDK 2.x implementations |
-| dynamo-integration-test | N/A (new) | 1.0.22-SNAPSHOT | DynamoDB integration test support (DynamoDB Local) |
+| cloud-sdk-api | N/A (new) | 1.0.23-SNAPSHOT | AWS service abstractions |
+| cloud-sdk-aws | N/A (new) | 1.0.23-SNAPSHOT | AWS SDK 2.x implementations |
+| dynamo-integration-test | N/A (new) | 1.0.23-SNAPSHOT | DynamoDB integration test support (DynamoDB Local) |
 | dynamo-client | 1.R.01.021 | Removed | Replaced by cloud-sdk DynamoDB |
 | AWS SDK | 1.x (transitive via commons) | 2.x (via cloud-sdk-aws) | AWS service integration |
 | aws-lambda-java-events | 3.14.0 / 3.16.1 | 3.16.1 (unified) | Lambda event models |

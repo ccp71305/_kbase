@@ -1,7 +1,13 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\\\\network\\\\\" -Directory | Select-Object Name)",
+      "Bash(grep -E \"\\(Resource|Service|Dao|Mapper\\)\\\\.java$\")",
+      "Bash(ls -la C:\\\\\\\\Users\\\\\\\\arijit.kundu\\\\\\\\projects\\\\\\\\mercury-services\\\\\\\\network\\\\\\\\)"
+    ],
     "additionalDirectories": [
-      "c:\\Users\\arijit.kundu\\projects\\mercury-services\\watermill-publisher"
+      "c:\\Users\\arijit.kundu\\projects\\mercury-services\\watermill-publisher",
+      "C:\\Users\\arijit.kundu\\projects\\mercury-services\\network"
     ]
   }
 }
