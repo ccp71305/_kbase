@@ -1,0 +1,75 @@
+{
+  "id": "ea7b7b0f4ead409c",
+  "name": "ION-14382 Booking DynamoDB AWS SDK v2 Upgrade Review",
+  "description": "",
+  "project": "mercury-services",
+  "created_at": "2026-03-19T17:15:37.256798+00:00",
+  "updated_at": "2026-03-19T18:13:57.569089+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "dynamodb",
+    "aws-upgrade",
+    "cloud-sdk",
+    "review"
+  ],
+  "entries": [
+    {
+      "id": "af78bc04fe48",
+      "timestamp": "2026-03-19T17:27:51.443970+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "CRITICAL: Backward compatibility issue with DynamoDB data format. Old code used @DynamoDBDocument (Map type) for Audit, EnrichedAttributes, MetaData, Condition, Range. New converters expect JSON String (S type). Existing DynamoDB records will lose data when read.",
+      "detail": "Affected converters: AuditAttributeConverter, EnrichedAttributesConverter, MetaDataConverter, ConditionListAttributeConverter, RangeAttributeConverter. Affected tables: BookingDetail (549 items), SpotRatesToInttraRefDetail (11 items), RapidReservation (9 items). Need to add dual-format support in all converters.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/ConditionListAttributeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/RangeAttributeConverter.java"
+      ]
+    },
+    {
+      "id": "88f3535c6aec",
+      "timestamp": "2026-03-19T17:28:00.647838+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "GSI Projection Type mismatch: Code uses ProjectionType.ALL but production uses KEYS_ONLY for all BookingDetail, SpotRatesDetail, SpotRatesToInttraRefDetail GSIs",
+      "detail": "BookingDetail model has all 4 GSIs annotated with @GsiConfig(projection = ProjectionType.ALL) but the actual DynamoDB table uses KEYS_ONLY projection for all GSIs. This is a minor discrepancy that only affects table creation (in tests/local setup). Does not affect runtime queries since DAOs re-fetch from main table.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java",
+        ".github/skills/aws-skills/inttra_int_booking_BookingDetail.json"
+      ]
+    },
+    {
+      "id": "952f4b52f8ae",
+      "timestamp": "2026-03-19T18:09:43.593917+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "All unit tests (1683) and integration tests (149) PASS after converter backward compatibility fixes and GSI projection type corrections",
+      "detail": "Unit tests: 1683 run, 0 failures (1 skipped - pre-existing). Integration tests: 149 run, 0 failures, 0 errors. All DynamoDB-related integration tests pass including BookingDetailDaoIT, SpotRatesDaoIT, SpotRatesToInttraRefDaoIT, RapidReservationDaoIT, TemplateDaoIT, TemplateSummaryDaoIT, SequenceIdDaoIT, UniqueIdDaoIT.",
+      "tags": [],
+      "references": [
+        "booking/src/test/java"
+      ]
+    },
+    {
+      "id": "cc9ffb328b62",
+      "timestamp": "2026-03-19T18:13:57.569018+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Documentation complete. All tasks finished: aws-dynamo-review.md created with table-by-table analysis, annotation migration tables, converter details, backward compatibility explanation, GSI fixes, DAO migration, test results, and risk assessment.",
+      "detail": "Created booking/docs/aws-dynamo-review.md with: (1) Executive summary with findings table, (2) 7-table overview, (3) Detailed model-by-model comparison with before/after annotation tables, (4) GSI definitions with ASCII diagrams, (5) Converter migration table with dual-format explanation, (6) DAO migration details with repository types, (7) Guice module structure, (8) Changes made during review, (9) Test results (1683 unit + 149 integration), (10) Risk assessment table. Model used: Claude Opus 4.6",
+      "tags": [
+        "documentation",
+        "aws-dynamo-review",
+        "final-summary"
+      ],
+      "references": [
+        "booking/docs/aws-dynamo-review.md"
+      ]
+    }
+  ]
+}

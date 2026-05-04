@@ -1,0 +1,52 @@
+{
+  "id": "53e25b337b104e12",
+  "name": "ION-15098 Network OV Date Deserialization Fix",
+  "description": "Fix 400 error when changing OV status from UI. OptionalValidation date fields (createdDateUtc, lastModifiedDateUtc) serialized with nanosecond precision by OffsetDateTimeTypeConverter but deserialization expects yyyy-MM-dd'T'HH:mm:ss.SSSZ format.",
+  "project": "mercury-services",
+  "created_at": "2026-03-31T23:29:20.969592+00:00",
+  "updated_at": "2026-04-01T00:02:53.486916+00:00",
+  "status": "completed",
+  "tags": [
+    "network",
+    "optional-validation",
+    "date-format",
+    "deserialization",
+    "ION-15098",
+    "defect"
+  ],
+  "entries": [
+    {
+      "id": "d987528cc2c8",
+      "timestamp": "2026-04-01T00:00:17.836567+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "code_change",
+      "summary": "Fixed Audit.java: removed @JsonFormat causing strict millisecond-only deserialization. Added 11 unit tests.",
+      "detail": "Root Cause:\n- Audit.java had @JsonFormat(pattern = \"yyyy-MM-dd'T'HH:mm:ss.SSSZ\") on both date getters\n- This pattern enforces exactly 3 fractional digits (milliseconds) during deserialization\n- But OffsetDateTimeSerializer (from cloud-sdk-aws) outputs ISO_DATE_TIME format with nanosecond precision (e.g., \"2025-12-11T13:46:27.348382207Z\")\n- When UI echoes the full payload back (PUT request), Jackson can't parse the 9-digit fractional seconds → 400 \"Unable to process JSON\"\n\nFix:\n- Removed @JsonFormat from both getCreatedDateUtc() and getLastModifiedDateUtc() (3 lines deleted)\n- Removed unused import com.fasterxml.jackson.annotation.JsonFormat\n- Serialization still uses @JsonSerialize(using = OffsetDateTimeSerializer.class) → ISO format\n- Deserialization now handled by JavaTimeModule (from jackson-datatype-jsr310) which accepts any ISO precision\n- This matches the pattern used in the auth module's Audit.java (already working in prod)\n\nTests: 11 new tests in AuditDateSerializationTest, all passing. 117 existing tests still passing.",
+      "tags": [
+        "fix",
+        "date-format",
+        "jackson"
+      ],
+      "references": [
+        "network/optionalvalidations/src/main/java/com/inttra/mercury/optionalvalidations/model/Audit.java",
+        "ION-15098"
+      ]
+    },
+    {
+      "id": "df91273a61b3",
+      "timestamp": "2026-04-01T00:02:53.486879+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Committed and pushed fix to remote. 128/128 tests pass.",
+      "detail": "Committed aba3a10975 on branch bugfix/ION-15098-ov-date-deserialization and pushed to origin. PR creation link: https://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests?create&sourceBranch=refs%2Fheads%2Fbugfix%2FION-15098-ov-date-deserialization",
+      "tags": [
+        "commit",
+        "push"
+      ],
+      "references": [
+        "ION-15098",
+        "bugfix/ION-15098-ov-date-deserialization"
+      ]
+    }
+  ]
+}

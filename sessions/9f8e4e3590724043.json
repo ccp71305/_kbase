@@ -1,0 +1,47 @@
+{
+  "id": "9f8e4e3590724043",
+  "name": "Booking AWS Upgrade - Revert of Revert Build Issues",
+  "description": "Tracking flaky integration test failures during revert-of-revert for booking AWS SDK upgrade. Two tests fail intermittently due to thread pool exhaustion.",
+  "project": "mercury-services",
+  "created_at": "2026-04-10T18:59:26.716883-04:00",
+  "updated_at": "2026-04-14T22:33:54.8369950Z",
+  "status": "active",
+  "tags": [
+    "booking",
+    "aws-upgrade",
+    "integration-tests",
+    "flaky-tests",
+    "thread-pool"
+  ],
+  "entries": [
+    {
+      "id": "eddafe3e083d",
+      "timestamp": "2026-04-10T18:59:54.760748-04:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Flaky test: OutboundServiceModule test-mode executor missing CallerRunsPolicy causes RejectedExecutionException",
+      "detail": "File: booking/src/main/java/com/inttra/mercury/booking/config/OutboundServiceModule.java\nLine 53: outboundExecutor = environment.lifecycle().executorService(NAME).maxThreads(20).workQueue(outboundWorkQueue).build();\nShould be: ...workQueue(outboundWorkQueue).rejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy()).build();\n\nError messages:\n- testUnauthorizedAmend: expected AuthorizationException with '.* is not authorized to amend this booking\\.' but got RejectedExecutionException\n- testUnauthorizedCancel: expected AuthorizationException with '.* is not authorized to cancel this booking\\.' but got RejectedExecutionException\n\nModel: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/config/OutboundServiceModule.java",
+        "booking/src/test/java/com/inttra/mercury/booking/service/BookingServiceIntegrationTest.java"
+      ]
+    },
+    {
+      "id": "4052a431c71b",
+      "timestamp": "2026-04-14T22:33:54.8314833Z",
+      "agent": "claude-sonnet-4.6",
+      "category": "progress",
+      "summary": "PR #965 merged to develop — AWS upgrade live. Revert runbook documented in booking/docs.",
+      "detail": "PR #965 (Reapply ION-14382 bk3 aws upgrade) merged to develop on 2026-04-14.\nMerge commit: 681e7eba1d (merges 59ebf93a2a into develop).\nLocal develop synced with origin/develop at HEAD 4741ad3f16 (ION-15211). Git history verified clean.\n\nFull ION-14382 commit lifecycle:\n- 74f36e7a71: Original upgrade commit on feature/ION-14382-bk3-aws-upgrade-2 (2026-02-20, 224 files, 12306 insertions)\n- 7de030248f: PR #939 merge — first landing on develop (2026-04-06)\n- dc4a0dde15: Revert commit on ION-14382-BK-AWS-SDK-Revert branch (2026-04-06)\n- 55887494eb: PR #960 merge — revert landed same day (2026-04-06)\n- 59ebf93a2a: Reapply commit, rebased on b0b50768a5 + OutboundServiceImplReferencesTest fix (2026-04-10)\n- 681e7eba1d: PR #965 merge — final stable landing (2026-04-14)\n\nbooking/docs/2026-04-13-rebase-conflict-analysis.md updated with two new sections:\n1. Key Commit History table (full ION-14382 lifecycle with all SHAs, dates, PRs)\n2. Rollback runbook with 3 options:\n   - Option A (preferred): git revert -m 1 681e7eba1d (safe, traceable)\n   - Option B: git revert 59ebf93a2a (inner commit revert)\n   - Option C (emergency/destructive): git reset --hard dbcc95ada8\n   Plus post-revert checklist: compile, test, pom.xml cloud-sdk deps, config classes, notify downstream teams.\n\nModel: Claude Sonnet 4.6",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-04-13-rebase-conflict-analysis.md",
+        "ION-14382",
+        "PR #965",
+        "681e7eba1d",
+        "59ebf93a2a"
+      ]
+    }
+  ]
+}

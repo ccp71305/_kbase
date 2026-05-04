@@ -1,0 +1,37 @@
+{
+  "id": "65cf629114ec4ee4",
+  "name": "Visibility + Oceanschedules AWS 2.x Doc Updates",
+  "description": "Update visibility-aws2x-plan.md and CONFLUENCE-visibility.md now that booking is merged to develop. Create oceanschedules AWS 2.x upgrade plan and confluence design doc.",
+  "project": "mercury-services",
+  "created_at": "2026-05-04T18:44:49.534423+00:00",
+  "updated_at": "2026-05-04T19:01:00.385844+00:00",
+  "status": "active",
+  "tags": [
+    "aws-upgrade",
+    "visibility",
+    "oceanschedules",
+    "documentation",
+    "cloud-sdk"
+  ],
+  "entries": [
+    {
+      "id": "9098a5d015bb",
+      "timestamp": "2026-05-04T19:01:00.385814+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "progress",
+      "summary": "Created oceanschedules AWS SDK 2.x upgrade plan and Confluence design document",
+      "detail": "Created two comprehensive documents for the oceanschedules AWS SDK 2.x migration:\n\n1. **os-aws2x-plan.md** (~650 lines) — Detailed upgrade plan covering:\n   - Executive summary with metrics (558 production files, 212 test files, 9 deployable units)\n   - 4-phase upgrade approach (POM → API module → process/common → 7 sub-modules)\n   - DynamoDB entity migration for RealTimeCache and SchedulesProStaging (flat entities, no nested docs)\n   - SQS migration including extended client library replacement\n   - S3, SNS, SSM migration details\n   - Spark job AWS client lifecycle considerations\n   - Unit test plan (212 files), integration test plan (DynamoDB Local)\n   - Data format backward compatibility analysis (simpler than booking — epoch seconds only)\n   - Risk matrix (SQS extended client, Spark serialization, generic type parameters)\n   - Full file change matrix per module\n\n2. **CONFLUENCE-os.md** (~550 lines) — Confluence-style design document matching visibility/docs/CONFLUENCE-visibility.md structure:\n   - Requirements, Assumptions, High Level Design with architecture diagrams\n   - Low Level Design (DynamoDB table structures, entity migration code, Guice module architecture)\n   - Configuration changes (YAML, Java config classes, POM dependencies)\n   - Resiliency, backward compatibility, security analysis\n   - Unit test plan, review checklist\n\nKey finding: Ocean schedules entities are flat (no @DynamoDBDocument nesting), making the DynamoDB migration simpler than booking/visibility. The main complexity is in the Spark batch pipeline (5 sub-modules) and the SQS extended client library replacement.",
+      "tags": [
+        "oceanschedules",
+        "aws-2x",
+        "documentation",
+        "plan"
+      ],
+      "references": [
+        "oceanschedules/docs/os-aws2x-plan.md",
+        "oceanschedules/docs/CONFLUENCE-os.md",
+        "oceanschedules/docs/DESIGN-PRE-AWS-upgrade.md"
+      ]
+    }
+  ]
+}

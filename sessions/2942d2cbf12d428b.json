@@ -1,0 +1,201 @@
+{
+  "id": "2942d2cbf12d428b",
+  "name": "ION-14382 BK3 AWS Upgrade Branch Migration",
+  "description": "Migrate AWS SDK v2 upgrade changes from feature/ION-14382-bk3-aws-upgrade to a new clean branch feature/ION-14382-bk3-aws-upgrade-2 based on latest develop. Jenkins CI failing due to textual auto-merge producing compilation errors in OutboundServiceImplTest.java.",
+  "project": "mercury-services",
+  "created_at": "2026-03-27T16:57:25.745690+00:00",
+  "updated_at": "2026-03-27T22:12:46.323615+00:00",
+  "status": "completed",
+  "tags": [
+    "ION-14382",
+    "booking",
+    "aws-upgrade",
+    "branch-migration",
+    "cherry-pick"
+  ],
+  "entries": [
+    {
+      "id": "534828f72d78",
+      "timestamp": "2026-03-27T16:58:02.023767+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Current branch state: single commit with 223 booking-only file changes",
+      "detail": "Branch: feature/ION-14382-bk3-aws-upgrade has 1 commit (6cdba47f53) on top of local develop. 223 files changed (all booking module): 179 modified, 37 added, 7 deleted. Total: +12302/-4210 lines. Merge base with develop: 6d447a41545a961a378fad0aa47389514df69343",
+      "tags": [
+        "analysis",
+        "branch-state"
+      ],
+      "references": [
+        "feature/ION-14382-bk3-aws-upgrade",
+        "6cdba47f53",
+        "6d447a41545a961a378fad0aa47389514df69343"
+      ]
+    },
+    {
+      "id": "3818fc85b3bb",
+      "timestamp": "2026-03-27T16:58:02.034068+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Remote develop diverged ~50 commits ahead with significant booking changes",
+      "detail": "origin/develop (abee9cc33d) is ~50 commits ahead of the feature branch merge base. PRs #926-#938 merged since branch was created. Non-booking changes in network/ (commercial-entity, audit-trail), oceanschedules-process/, visibility/ (wm-inbound-processor), watermill-publisher/. Booking changes include ION-14927 Supplementation CLR Logic, ION-14370 Premium Event Filtering, ION-8601 location match country fix, ION-15255 preference name correction.",
+      "tags": [
+        "analysis",
+        "develop-state"
+      ],
+      "references": [
+        "origin/develop",
+        "abee9cc33d",
+        "PR#926-938"
+      ]
+    },
+    {
+      "id": "f5c61fe7c95b",
+      "timestamp": "2026-03-27T16:58:02.043896+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Root cause: 5 conflicting files, Jenkins fails because new develop tests use removed EmailSenderConfig class",
+      "detail": "5 files changed in both branches:\\n1. OutboundServiceImplTest.java — CRITICAL: develop added 172 new lines (3 new test methods using EmailSenderConfig in mock constructors + new imports for ConfirmPendingMessage, Action, Subscription, SubscriptionPreferences, PreferenceBasedEnhancements, HashMap, never). Feature branch changed EmailSenderConfig→BookingEmailConfig. Auto-merge textually succeeds but produces compilation error.\\n2. OutboundServiceImpl.java — develop added 3 lines (supplementation logic)\\n3. EnrichedAttributes.java — develop changed 2 ins/2 del\\n4. ConfirmPendingEmailVariablesConverterTest.java — develop changed 4 ins/4 del\\n5. RequestAmendEmailVariablesConverterTest.java — develop changed 4 ins/4 del\\n\\ngit merge-tree shows no CONFLICT markers — all auto-mergeable but semantically broken.",
+      "tags": [
+        "root-cause",
+        "conflict-analysis"
+      ],
+      "references": [
+        "OutboundServiceImplTest.java",
+        "OutboundServiceImpl.java",
+        "EnrichedAttributes.java",
+        "ConfirmPendingEmailVariablesConverterTest.java",
+        "RequestAmendEmailVariablesConverterTest.java"
+      ]
+    },
+    {
+      "id": "c33ac495779a",
+      "timestamp": "2026-03-27T16:58:02.055159+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "decision",
+      "summary": "Strategy decided: cherry-pick single commit onto new branch from latest develop",
+      "detail": "Strategy: Cherry-pick single commit (6cdba47f53) onto new branch feature/ION-14382-bk3-aws-upgrade-2 created from latest origin/develop. Steps:\\n1. Update local develop to origin/develop\\n2. Create new branch\\n3. Cherry-pick 6cdba47f53\\n4. Resolve 5 conflicts (critical: update new OutboundServiceImplTest lines to use BookingEmailConfig)\\n5. Compile → unit tests → integration tests → startup test\\n6. Push new branch\\n7. Create summary doc\\n\\nPlan file: C:\\\\Users\\\\akundu\\\\.copilot\\\\session-state\\\\c145fe0c-c70d-4883-b9d8-fc96c5d0d9f2\\\\plan.md",
+      "tags": [
+        "strategy",
+        "cherry-pick"
+      ],
+      "references": [
+        "plan.md",
+        "feature/ION-14382-bk3-aws-upgrade-2"
+      ]
+    },
+    {
+      "id": "382306d0cbaa",
+      "timestamp": "2026-03-27T16:58:02.065889+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Complete file inventory: 179 modified, 37 added, 7 deleted, 14 untracked docs",
+      "detail": "Deleted files (7): CreateTables.java, DeleteTables.java, DynamoSupport.java, S3Archive.java, CreateTablesTest.java, DeleteTablesTest.java, S3ArchiveTest.java\\n\\nNew files (37): BookingDynamoModule, BookingEmailConfig, BookingEmailSenderModule, BookingMessagingModule, BookingDynamoDbAdminCommand, ContractAttributeConverter, 7 new converters under dynamodb/converter/, DBRecordNotFoundException, FlexibleDateDeserializer, 9 integration tests (*IT.java), 12 new unit tests\\n\\nModified files (179): All across booking module — pom.xml, build.sh, config, dao, dynamodb, model, messaging, outbound, lambda, elasticsearch, template, util, and ~60 test files\\n\\n14 untracked doc files present in working tree (booking/docs/, booking-bridge/docs/, webbl/docs/)",
+      "tags": [
+        "file-inventory"
+      ],
+      "references": [
+        "booking/"
+      ]
+    },
+    {
+      "id": "8a8eb55d29a3",
+      "timestamp": "2026-03-27T16:58:02.077151+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Planning phase complete — ready for execution in new session",
+      "detail": "Analysis complete. Plan created in session plan.md with 10 TODOs tracked in SQL. All findings logged to MCP session context. Ready for execution in new session. VPN required for push step. Model: Claude Opus 4.6 (claude-opus-4.6).",
+      "tags": [
+        "status"
+      ],
+      "references": [
+        "plan.md",
+        "session:c145fe0c-c70d-4883-b9d8-fc96c5d0d9f2"
+      ]
+    },
+    {
+      "id": "4bd10eaa6694",
+      "timestamp": "2026-03-27T17:44:02.008087+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Branch migration complete — all tests pass, app starts, commit ready",
+      "detail": "Steps completed:\\n1. Updated local develop to origin/develop (abee9cc33d)\\n2. Created feature/ION-14382-bk3-aws-upgrade-2 from develop\\n3. Cherry-picked 6cdba47f53 — auto-merged all 5 conflict files without CONFLICT markers\\n4. Fixed 2 stale EmailSenderConfig→BookingEmailConfig refs in OutboundServiceImplTest.java (lines 309, 393)\\n5. Compilation: zero errors\\n6. Unit tests (Surefire): 1837 run, 0 failures, 0 errors, 1 skipped\\n7. Integration tests (Failsafe non-IT): 931 run, 0 failures, 0 errors, 9 skipped\\n8. DynamoDB IT: 138 run, 0 failures\\n9. Full IT suite: 149 run, 0 failures\\n10. Application startup: all modules initialized, all endpoints registered\\n11. Commit amended: 74f36e7a71 with message 'ION-14382 bk3 aws upgrade changes'\\n12. Summary doc created at booking/docs/2026-03-27-aws-upgrade-branch-migration-summary.md (untracked)\\n\\nBranch NOT pushed to remote per user request. DESIGN-AWS2x.md confirmed in commit.",
+      "tags": [
+        "completed",
+        "verified"
+      ],
+      "references": [
+        "feature/ION-14382-bk3-aws-upgrade-2",
+        "74f36e7a71",
+        "abee9cc33d",
+        "booking/docs/2026-03-27-aws-upgrade-branch-migration-summary.md",
+        "booking/docs/DESIGN-AWS2x.md"
+      ]
+    },
+    {
+      "id": "776a25e8218a",
+      "timestamp": "2026-03-27T17:44:02.023509+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "All tests pass: 2768+ tests, 0 failures, app startup verified",
+      "detail": "mvn verify -pl booking: BUILD SUCCESS in 17:46 min\\nSurefire: 1837 run, 0 fail, 0 err, 1 skip\\nFailsafe (non-IT): 931 run, 0 fail, 0 err, 9 skip\\nFailsafe (DynamoDB IT): 138 run, 0 fail, 0 err\\nFailsafe (full IT): 149 run, 0 fail, 0 err\\nApp startup: OK — all Guice modules, DynamoDB tables, SQS/SNS/S3/SES clients, all REST endpoints registered",
+      "tags": [
+        "test-results",
+        "verified"
+      ],
+      "references": [
+        "mvn verify -pl booking"
+      ]
+    },
+    {
+      "id": "639c3646a207",
+      "timestamp": "2026-03-27T17:50:59.951445+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Complete file list appended to summary doc (223 files categorized)",
+      "detail": "Added complete file list (all 223 files: 37 added, 7 deleted, 179 modified) to booking/docs/2026-03-27-aws-upgrade-branch-migration-summary.md. Files are categorized by area: Build/Config, DynamoDB/Data, Messaging/S3, Outbound/Email, Lambda/Elasticsearch, Inbound, Model classes (Common, INTTRA, Request), Network Services, Service/Resource, and Tests.",
+      "tags": [
+        "documentation"
+      ],
+      "references": [
+        "booking/docs/2026-03-27-aws-upgrade-branch-migration-summary.md"
+      ]
+    },
+    {
+      "id": "515f84d7cdcc",
+      "timestamp": "2026-03-27T22:02:53.567850+00:00",
+      "agent": "copilot-gpt-5.4",
+      "category": "progress",
+      "summary": "Created Booking-dev ECS log review report",
+      "detail": "Created booking/docs/2026-03-27-booking-dev-log-review.md with startup assessment, all 37 initial log prompts, per-prompt summaries, raw matching lines grouped by workflowId, and MercuryRequestLoggingFilter URI entries excluding /booking/services/ping.",
+      "tags": [
+        "aws",
+        "ecs",
+        "logs",
+        "booking"
+      ],
+      "references": [
+        "booking/docs/2026-03-27-booking-dev-log-review.md",
+        "arn:aws:ecs:us-east-1:081020446316:task/ANEINWEBSVC-001/aac68eede1d644afa3e0052b729919bd"
+      ]
+    },
+    {
+      "id": "d65408d91553",
+      "timestamp": "2026-03-27T22:12:46.323593+00:00",
+      "agent": "copilot-gpt-5.4",
+      "category": "finding",
+      "summary": "Reviewed two booking detail lambdas and wrote combined log report",
+      "detail": "Created booking/docs/2026-03-27-booking-lambda-log-review.md summarizing last 2 hours of application logs for inttra-int-lambda-bookingdetail-ElasticsearchLambda and inttra-int-lambda-bookingdetail-S3ArchiveLambda. ElasticsearchLambda initialized Jest/OpenSearch client, fetched BookingDetail for bookingId 76c9b33cbf8d4499b2b88e66b8496224, parsed dates 20260331 and 20260430, and indexed booking 2011967001. S3ArchiveLambda created S3 client, resolved credentials, fetched same BookingDetail, uploaded archive object to bucket inttra-int-s3-bookingdetail-s3archive, logged successful upload and wrote content location, then logged HTTP 401 Unauthorized during track and trace call before 'Completed Archive and Track n Trace'.",
+      "tags": [
+        "aws",
+        "lambda",
+        "logs",
+        "booking"
+      ],
+      "references": [
+        "booking/docs/2026-03-27-booking-lambda-log-review.md",
+        "arn:aws:lambda:us-east-1:081020446316:function:inttra-int-lambda-bookingdetail-ElasticsearchLambda",
+        "arn:aws:lambda:us-east-1:081020446316:function:inttra-int-lambda-bookingdetail-S3ArchiveLambda"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "e937e0e741bc46fa",
+  "name": "ION-14382-booking-aws-review",
+  "description": "Full review of booking module AWS SDK v2 migration. Check for issues in AWS changes, review test coverage, add missing unit and integration tests.",
+  "project": "mercury-services",
+  "created_at": "2026-03-11T21:57:00.756392+00:00",
+  "updated_at": "2026-03-11T22:41:39.766988+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "AWS",
+    "review",
+    "ION-14382",
+    "testing"
+  ],
+  "entries": [
+    {
+      "id": "d6310d1c2cff",
+      "timestamp": "2026-03-11T22:09:27.762986+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Code review complete - AWS migration well-implemented, 7 converter tests and 2 module tests missing",
+      "detail": "Review of booking module AWS SDK 2.x migration completed. Key findings:\n\n1. **Source code quality**: Excellent. All Guice modules, DAOs, converters, messaging clients, and entity models are correctly implemented using cloud-sdk-api/cloud-sdk-aws patterns.\n2. **DynamoDB annotations**: All correct - @DynamoDbBean, @DynamoDbPartitionKey, @DynamoDbSortKey, @DynamoDbVersionAttribute, @DynamoDbConvertedBy, GSI annotations all properly placed on getters.\n3. **GSI query pattern**: Consistent across all DAOs - query GSI (eventually consistent) → re-fetch from main table (strongly consistent).\n4. **Thread safety**: All singletons, static ObjectMappers, volatile shutdown flags - all correct.\n5. **Lambda handler**: Correct import changes for lambda-events 3.14.0.\n\nUnit tests: 914 pass (0 failures, 10 skipped).\n\n**Missing test coverage (Classes with NO dedicated unit tests)**:\n- 7 AttributeConverters: ContractAttributeConverter, AuditAttributeConverter, EnrichedAttributesConverter, MetaDataConverter, ConditionListAttributeConverter, RangeAttributeConverter, SpotRatesAttributeConverter\n- 2 Guice modules: BookingDynamoModule, BookingEmailSenderModule\n- BookingEmailConfig\n- DBRecordNotFoundException (trivial)\n\n**Open Issues from design doc to verify**:\n- Dead converter audit (ContractTypeConverter, QuantityTypeConverter, SpotRatesConverter, DateToEpochSecond, LocalDateTimeTypeConverter)\n- BookingRequestContract unused import\n- BookingDynamoDbAdminCommand excludes Template.class",
+      "tags": [
+        "review",
+        "findings"
+      ],
+      "references": [
+        "booking/docs/CONFLUENCE_DESIGN_DOC.md",
+        "booking/docs/DESIGN-AWS2x.md"
+      ]
+    },
+    {
+      "id": "7d0b824b6d57",
+      "timestamp": "2026-03-11T22:41:39.766955+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Booking module AWS review completed - all tests pass, 7 new unit test files created, all 8 DynamoDB ITs verified",
+      "detail": "## Final Review Summary\n\n### AWS Changes Review: NO ISSUES FOUND\n- All 8 DAOs correctly use cloud-sdk DatabaseRepository<T, ID>\n- All 7 AttributeConverters correctly implement SDK 2.x AttributeConverter interface\n- Guice modules (BookingDynamoModule, BookingMessagingModule, BookingEmailSenderModule) properly wired\n- Entity models (BookingDetail, Audit, UniqueId, SequenceId) have correct SDK 2.x annotations\n- Lambda handler (S3ArchiveHandler) uses aws-lambda-java-events 3.14.0\n\n### Unit Tests: 914 existing pass + 7 new test files created\nNew test files (all in booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/):\n1. AuditAttributeConverterTest.java - 14 tests\n2. MetaDataConverterTest.java - 12 tests\n3. ConditionListAttributeConverterTest.java - 12 tests\n4. RangeAttributeConverterTest.java - 12 tests\n5. EnrichedAttributesConverterTest.java - 11 tests\n6. SpotRatesAttributeConverterTest.java - 14 tests\n7. ContractAttributeConverterTest.java (in dynamodb/ package) - 15 tests\nTotal new tests: ~90\n\n### Integration Tests: All 8 DAOs covered\n- BookingDetailDaoIT, UniqueIdDaoIT, SequenceIdDaoIT, RapidReservationDaoIT\n- TemplateDaoIT, TemplateSummaryDaoIT, SpotRatesDaoIT, SpotRatesToInttraRefDaoIT\n- BookingDynamoDbAdminCommandIT verifies all 7 tables + GSIs + TTL\n- No new ITs needed\n\n### Minor gaps (non-blocking):\n- No OptimisticLockException concurrent update tests\n- No standalone BookingDynamoModuleIT (covered by FlowStep.java Guice bootstrap)\n- Open issues from design doc remain: dead converter audit, BookingRequestContract unused import, Template.class excluded from admin command\n\n### Suggested improvements:\n1. Add JaCoCo to booking/pom.xml for automated coverage tracking\n2. Consider adding OptimisticLockException test for SequenceIdDao\n3. Audit dead converters from SDK 1.x (SpotRatesConverter, etc.) for removal",
+      "tags": [
+        "booking",
+        "aws-review",
+        "unit-tests",
+        "integration-tests"
+      ],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/",
+        "booking/docs/DESIGN-AWS2x.md",
+        "booking/docs/CONFLUENCE_DESIGN_DOC.md"
+      ]
+    }
+  ]
+}

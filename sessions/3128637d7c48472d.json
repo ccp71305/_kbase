@@ -1,0 +1,115 @@
+{
+  "id": "3128637d7c48472d",
+  "name": "ION-14382-fix-preppedUri-config-error",
+  "description": "Fix Jenkins CI build error: Unrecognized field 'preppedUri' in ServiceDefinition during booking config deserialization. Analyze, fix, verify tests, create skill.",
+  "project": "mercury-services",
+  "created_at": "2026-03-11T18:30:04.614941+00:00",
+  "updated_at": "2026-03-11T20:47:18.175102+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "jackson",
+    "config",
+    "CI-fix",
+    "ION-14382"
+  ],
+  "entries": [
+    {
+      "id": "f80e2e47811c",
+      "timestamp": "2026-03-11T19:28:44.133766+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Root cause: preppedUri computed getter in ServiceDefinition serialized by Jackson but rejected by Dropwizard on re-read",
+      "detail": "ServiceDefinition class is in commons: com.inttra.mercury.config.ServiceDefinition. The getPreppedUri() method constructs a URI from other fields. AbstractIntegrationTest already had a ServiceDefinitionMixIn inner class with @JsonIgnore on getPreppedUri() at lines 254-257, registered via om.addMixIn() at line 89. NetworkServiceIntegrationTest had its own ObjectMapper in getBookingServerConfigFile() but lacked this MixIn.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "3c8323cae2ce",
+      "timestamp": "2026-03-11T19:28:52.164276+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Added ServiceDefinitionMixIn to NetworkServiceIntegrationTest to fix preppedUri serialization",
+      "detail": "The MixIn pattern matches what AbstractIntegrationTest already uses. Added the inner class at the end of the test class. The addMixIn call was placed right before the writeValueAsString call in the getBookingServerConfigFile() method.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "cb379f8847c7",
+      "timestamp": "2026-03-11T19:29:01.446376+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "All tests pass except testFindBooking (timestamp precision issue, unrelated to preppedUri fix)",
+      "detail": "The full integration test run uses the default bookingConfig=conf/pullRequest/config.yaml which enables server-based integration tests. 148 of 149 pass. The single failure is a timestamp precision mismatch unrelated to the preppedUri fix.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "e351d6d60682",
+      "timestamp": "2026-03-11T19:29:12.710541+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "testFindBooking fails due to OffsetDateTime nanosecond vs millisecond precision after DynamoDB round-trip",
+      "detail": "The test already has a similar normalization pattern for 'version' field at lines 228-230 (SDK v2 returns version as Long vs Integer). The fix should follow the same pattern: normalize in-memory audit timestamps to millisecond precision before the assertEquals at line 232. The Audit class is at booking/src/main/java/com/inttra/mercury/booking/dynamodb/Audit.java with @JsonFormat on createdDateUtc and lastModifiedDateUtc fields. AuditAttributeConverter serializes Audit to JSON string for DynamoDB storage.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "f5a437bf1bde",
+      "timestamp": "2026-03-11T19:29:26.178587+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Plan: normalize audit timestamps to milliseconds in testFindBooking before assertEquals, following existing version normalization pattern",
+      "detail": "Implementation: Add import java.time.temporal.ChronoUnit. After the version normalization (line 230), add code to iterate booking.getDetails() and truncate audit timestamps. Something like: booking.getDetails().forEach(d -> { if (d.getAudit() != null) { Audit a = d.getAudit(); if (a.getCreatedDateUtc() != null) a.setCreatedDateUtc(a.getCreatedDateUtc().truncatedTo(ChronoUnit.MILLIS)); if (a.getLastModifiedDateUtc() != null) a.setLastModifiedDateUtc(a.getLastModifiedDateUtc().truncatedTo(ChronoUnit.MILLIS)); } });",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "b21b0786e880",
+      "timestamp": "2026-03-11T19:29:37.785094+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Remaining: fix testFindBooking timestamp, re-run verify, create build-errors skill, finalize session",
+      "detail": "Key files for remaining work: booking/src/test/java/com/inttra/mercury/booking/service/BookingServiceIntegrationTest.java (line 228-232 area), booking/src/main/java/com/inttra/mercury/booking/dynamodb/Audit.java (has createdDateUtc, lastModifiedDateUtc fields). Branch: feature/ION-14382-bk3-aws-upgrade. All unit tests (913) and DynamoDB ITs (120) already pass. Only the single testFindBooking integration test needs fixing.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "ebc34771c8c4",
+      "timestamp": "2026-03-11T19:29:48.145678+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Session summary: preppedUri fix complete and verified, timestamp precision fix planned for next conversation",
+      "detail": "The preppedUri fix is complete and verified. The timestamp precision issue is a pre-existing behavioral difference caused by the AWS SDK v2 migration (DynamoDB Enhanced Client uses JSON serialization via AuditAttributeConverter, which applies @JsonFormat millisecond truncation). This is not a regression from the preppedUri fix.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "7cb3efd5bc1d",
+      "timestamp": "2026-03-11T20:45:52.940689+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "Fixed FlowTest.doTest flaky EDI timestamp and testFindBooking timestamp precision — all 149 integration tests pass",
+      "detail": "Two test fixes applied:\n\n1. testFindBooking: Added audit timestamp normalization (truncatedTo(ChronoUnit.MILLIS)) before assertEquals, following the existing version normalization pattern. DynamoDB stores via AuditAttributeConverter with @JsonFormat millisecond precision.\n\n2. FlowTest.doTest: TransformationProcessor uses system clock for EDI timestamps while the test template used a fixed clock captured earlier. Added overrideEdiTimestampsFromActual() method that extracts actual UNB/DTM timestamps from generated EDI and uses them when rendering expected template. This eliminates minute-boundary flakiness.\n\nBuild result: Tests run: 149, Failures: 0, Errors: 0, Skipped: 0. BUILD SUCCESS.",
+      "tags": [],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/service/BookingServiceIntegrationTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/flow/FlowStep.java"
+      ]
+    },
+    {
+      "id": "54fc306ecfe2",
+      "timestamp": "2026-03-11T20:47:18.175084+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "All remaining todos complete: both test fixes verified (149/149 pass), build-errors skill created",
+      "detail": "All remaining work complete:\\n1. testFindBooking timestamp fix — audit timestamps normalized to millis before assertion\\n2. FlowTest.doTest EDI timestamp fix — extract actual timestamps from TransformationProcessor output for template rendering\\n3. Full verify: 149/149 tests pass, BUILD SUCCESS\\n4. build-errors skill created at .github/skills/build-errors/SKILL.md with patterns for Jackson deserialization, DynamoDB precision, EDI timestamp flakiness, and SDK v2 behavioral differences",
+      "tags": [],
+      "references": [
+        ".github/skills/build-errors/SKILL.md",
+        "booking/src/test/java/com/inttra/mercury/booking/service/BookingServiceIntegrationTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/flow/FlowStep.java"
+      ]
+    }
+  ]
+}

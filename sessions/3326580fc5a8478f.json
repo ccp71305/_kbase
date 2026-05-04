@@ -1,0 +1,111 @@
+{
+  "id": "3326580fc5a8478f",
+  "name": "ION-14382 Booking DynamoDB Review Follow-up - Map vs String, Tests, UUID, Streaming",
+  "description": "",
+  "project": "mercury-services",
+  "created_at": "2026-03-19T19:20:08.951347+00:00",
+  "updated_at": "2026-03-20T02:32:56.336671+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "dynamodb",
+    "aws-upgrade",
+    "cloud-sdk",
+    "review",
+    "enrichedAttributes",
+    "multiVersionAttributes"
+  ],
+  "entries": [
+    {
+      "id": "211d4a269345",
+      "timestamp": "2026-03-19T20:05:27.002089+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Comprehensive analysis of 4 user concerns: (1) Map vs String serialization - NO constraint in SDK v2 prevents Map storage, registration module already does it; (2) Test counts: 913 unit tests (TestNG: 911+ JUnit5), 149 integration tests (9 DynamoDB IT classes); (3) UUID generation handled in services for all models; (4) @DynamoDBStream(KEYS_ONLY) was removed from BookingDetail but annotation exists in cloud-sdk-aws",
+      "detail": "Key findings:\\n1. Map vs String: EnrichedAttributes converter currently serializes to String(S) but can use Map(M). LegacyMapConverter already handles read from Map. Need reverse converter for write. Registration module's AuditConverter proves Map(M) works.\\n2. Tests: 199 JUnit-only files, 79 TestNG-only files, 23 both. Unit total ~913 (incl 9 skipped). Integration: 149 tests in 9 IT classes - all DynamoDB DAO ITs.\\n3. UUIDs: BookingDetail uses calcBookingId() UUID, SpotRates uses calcRandomUUID(), others use business keys. No auto-generation lost.\\n4. Streaming: @DynamoDBStream(StreamViewType.KEYS_ONLY) from com.inttra.mercury.cloudsdk.database.annotation.DynamoDBStream must be re-added to BookingDetail.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverter.java",
+        "registration/src/main/java/com/inttra/mercury/registration/config/AuditConverter.java"
+      ]
+    },
+    {
+      "id": "7e12f5137924",
+      "timestamp": "2026-03-19T20:34:53.205484+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "All 1683 unit tests + 149 integration tests PASS after converting converters from String(S) to native Map(M)/List(L) type and restoring @DynamoDBStream(KEYS_ONLY) on BookingDetail",
+      "detail": "After converting all 5 converters from String(S) to Map(M) type and adding @DynamoDBStream(KEYS_ONLY) back to BookingDetail:\\n- Unit tests: 1683 run, 0 failures (1 skipped)\\n- Integration tests: 149 run, 0 failures\\n- All DynamoDB DAO integration tests pass with Map format\\n\\nConverters changed: AuditAttributeConverter, EnrichedAttributesConverter, MetaDataConverter, ConditionListAttributeConverter (to L type), RangeAttributeConverter\\nAll converters now write native DynamoDB Map/List types matching production format.\\nBackward compat maintained: converters still read JSON String(S) format as fallback.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/ConditionListAttributeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/RangeAttributeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java"
+      ]
+    },
+    {
+      "id": "b6f4a543075d",
+      "timestamp": "2026-03-19T22:25:25.309798+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Session 3 continuation: Fixed IT test failure, added streaming IT test, added production-realistic EnrichedAttributes IT test. All 287 IT tests pass (0 failures). Model: Claude Opus 4.6",
+      "detail": "Changes made in this session continuation:\\n\\n1. FIXED: BookingDetailDaoIT production-realistic test failure - TransactionParty.partyScac is @JsonIgnore so not persisted in enrichedAttributes Map. Removed assertion for partyScac.\\n\\n2. ADDED: Streaming annotation IT test in BookingDynamoDbAdminCommandIT - verifies table has streamEnabled=true with KEYS_ONLY view type after admin command creates tables.\\n\\n3. ADDED: Production-realistic EnrichedAttributes round-trip IT test - uses complex nested data matching production enrichedAttributes.json: 4 LocationAdditionalInfo with Country (with identifiers) + Geography, 3 TransactionParty with Address, ContainerType, MultiVersionAttributes with partyMap.\\n\\nKey finding: TransactionParty.partyScac has @JsonIgnore — it's an enrichment-time field set by business logic, not persisted in DynamoDB enrichedAttributes Map. This is correct behavior.\\n\\nTest results after fixes:\\n- Failsafe: 287 completed, 0 failures, 0 errors\\n- Surefire (unit): 914 run, 0 failures, 10 skipped\\n- All 9 DynamoDB IT classes pass\\n\\nFiles changed:\\n- BookingDetailDaoIT.java: Added production-realistic EA test, fixed partyScac assertion\\n- BookingDynamoDbAdminCommandIT.java: Added streaming annotation verification test",
+      "tags": [],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/dao/BookingDetailDaoIT.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/BookingDynamoDbAdminCommandIT.java",
+        "booking/src/main/java/com/inttra/mercury/booking/model/Common/Artifacts/TransactionParty.java"
+      ]
+    },
+    {
+      "id": "a36befe03094",
+      "timestamp": "2026-03-19T22:34:14.096973+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Completed full update of aws-dynamo-review.md — all sections now reflect Map(M) native format",
+      "detail": "Document update completed across all sections:\n- Executive summary: Updated test counts (914 unit/287 IT), added streaming annotation row, renamed converter row\n- Section 3.1 BookingDetail: audit/enrichedAttributes/metaData → Map(M), streaming → restored\n- Section 3.2 SpotRatesDetail: audit → Map(M) \n- Section 3.3 SpotRatesToInttraRef: audit → Map(M)\n- Section 3.4 RapidReservation: audit/conditionList/range → Map(M)/List(L)\n- Section 4.1: Converter table already updated (prev session) to show Map(M) native format\n- Section 4.2: Already rewritten (prev session) as \"Native Map Storage\" with design rationale\n- Section 7: Rewritten — 7.1 Converter Storage Format, 7.2 GSI Projection, 7.3 Streaming Annotation Restored, 7.4 New Tests (including IT tests)\n- Section 8: Updated counts — unit 914/10skipped, IT 287 (149 TestNG + 138 JUnit5), added test framework breakdown table and mvn commands\n- Section 9: Risk table updated — Map format is now \"None\" severity, added Streams row\n- Section 10 (NEW): UUID/Primary Key Generation Verification — all 7 models verified, none lost auto-generation",
+      "tags": [
+        "documentation",
+        "review-doc",
+        "complete"
+      ],
+      "references": [
+        "booking/docs/aws-dynamo-review.md"
+      ]
+    },
+    {
+      "id": "4b208ccbda02",
+      "timestamp": "2026-03-19T22:34:19.254030+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.6",
+      "detail": "Agent: GitHub Copilot using Claude Opus 4.6 model",
+      "tags": [
+        "model"
+      ],
+      "references": []
+    },
+    {
+      "id": "860871b2391d",
+      "timestamp": "2026-03-20T02:32:56.336623+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Created PR review response document addressing all 17 review comments",
+      "detail": "Created PR review response document at .github/skills/pr-reviews/pr-review-responses.md. Addressed all 17 review comments:\n- 15 were queries about why annotations were removed — explained SDK v1 → v2 migration pattern (DynamoDBDocument removal, DynamoDBIgnore removal, converter pattern, entity annotation changes)\n- 1 was a real catch (DynamoDBStream annotation missing) — already fixed and tested\n- 1 was a concern about CreateTables.java deletion — explained replacement with DynamoDbAdminCommand and cross-module precedent\nKey architectural points documented:\n1. @DynamoDBDocument (80 removals) not needed because converters use Jackson ObjectMapper\n2. @DynamoDBIgnore (139 removals) not needed because nested classes aren't scanned by Enhanced Client\n3. DTOs (ConfirmPendingMessage, BookingRequestContract, CancelMessage) are NOT DynamoDB entities — stored via ContractAttributeConverter\n4. CreateTables replaced by BookingDynamoDbAdminCommand with annotation-driven table creation\n5. All converters replaced with SDK v2 AttributeConverter implementations",
+      "tags": [
+        "pr-review",
+        "documentation",
+        "complete"
+      ],
+      "references": [
+        ".github/skills/pr-reviews/pr-review-responses.md",
+        ".github/skills/pr-reviews/pr-review-comments.md",
+        "booking/docs/aws-dynamo-review.md"
+      ]
+    }
+  ]
+}

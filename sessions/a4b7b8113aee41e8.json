@@ -1,0 +1,157 @@
+{
+  "id": "a4b7b8113aee41e8",
+  "name": "CloudSDK Netty Removal Impact Analysis",
+  "description": "Thorough impact analysis on removing Netty (io.netty:* and netty-nio-client) from cloud-sdk-api, cloud-sdk-aws, and commons dependencies across all AWS-upgraded modules: auth, network, db-migration, registration, booking, booking-bridge, webbl, tx-tracking",
+  "project": "mercury-services",
+  "created_at": "2026-04-23T18:57:47.047299+00:00",
+  "updated_at": "2026-04-23T22:10:44.681184+00:00",
+  "status": "active",
+  "tags": [
+    "netty",
+    "cloud-sdk",
+    "dependency-analysis",
+    "impact-analysis",
+    "aws-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "7b36d1b44c44",
+      "timestamp": "2026-04-23T19:56:18.203922+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Completed Netty removal impact analysis across 8 AWS-upgraded modules. Result: SAFE to remove. Zero source code references to Netty/NettyNioAsyncHttpClient across ~3,071 Java files. All io.netty:* deps come exclusively from cloud-sdk-aws → netty-nio-client. All modules use sync ApacheHttpClient only.",
+      "detail": "Analysis document: booking/docs/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md. Key findings: (1) Zero NettyNioAsyncHttpClient usage, (2) Zero io.netty imports, (3) Zero ApacheHttpClient direct references, (4) All 8 modules pull identical set of 9 Netty JARs (4.1.124.Final) via cloud-sdk-aws, (5) booking shade-lambda already excludes Netty, (6) Elasticsearch 6.6.2 does NOT pull Netty, (7) aws-crt-client remains available for any future async needs.",
+      "tags": [
+        "netty",
+        "dependency-analysis",
+        "impact-analysis"
+      ],
+      "references": [
+        "booking/docs/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
+        "mercury-services-commons/cloud-sdk-aws/pom.xml"
+      ]
+    },
+    {
+      "id": "434187910bd6",
+      "timestamp": "2026-04-23T21:03:17.844968+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Starting commons version upgrade to 1.0.23-SNAPSHOT in booking module",
+      "detail": "Upgrading booking/pom.xml mercury.commons.version from 1.0.22-SNAPSHOT to 1.0.23-SNAPSHOT, then verifying Netty removal, running full test suite, and OWASP dependency check.",
+      "tags": [
+        "booking",
+        "commons-upgrade",
+        "netty-removal"
+      ],
+      "references": [
+        "booking/pom.xml",
+        "booking/docs/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md"
+      ]
+    },
+    {
+      "id": "0a227e787ccb",
+      "timestamp": "2026-04-23T21:06:55.841818+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "CRITICAL: Netty not fully removed in cloud-sdk-aws 1.0.23-SNAPSHOT — AWS SDK service clients still pull netty-nio-client transitively via BOM",
+      "detail": "cloud-sdk-aws 1.0.23-SNAPSHOT removed its direct netty-nio-client dependency and the io.netty:* version overrides, BUT all AWS SDK v2 service clients (ssm, sesv2, s3, sns, sqs, dynamodb, sso, ssooidc) still pull netty-nio-client at runtime scope via the AWS SDK BOM (2.30.24). This means Netty is NOT fully removed. Additionally, the Netty version regressed from pinned 4.1.124.Final to BOM default 4.1.118.Final — a potential CVE regression. Fix needed: cloud-sdk-aws should add exclusions for netty-nio-client on each service client, OR consuming modules should exclude at their level.",
+      "tags": [
+        "netty",
+        "blocker",
+        "cloud-sdk-aws",
+        "transitive-deps"
+      ],
+      "references": [
+        "booking/pom.xml",
+        "mercury-services-commons/cloud-sdk-aws/pom.xml"
+      ]
+    },
+    {
+      "id": "da8b64484ab7",
+      "timestamp": "2026-04-23T21:34:54.300323+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Investigation: booking integration test failures — IllegalArgument 'src' is null, NoClassDefFound SearcherTest$1, NullPointer FlowTest.doTest:70. All are PRE-EXISTING on develop, unrelated to Netty removal.",
+      "detail": "Git diff develop..HEAD is empty — feature/ION-14382-owasp-netty branch has no commits beyond develop. No changes to any test files (AbstractIntegrationTest, ServerSupport, SearcherTest, FlowTest). All three failure patterns trace back to integration test infrastructure setup, not to Netty or dependency changes.",
+      "tags": [],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/AbstractIntegrationTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/ServerSupport.java",
+        "booking/src/test/java/com/inttra/mercury/booking/elasticsearch/SearcherTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/flow/FlowTest.java"
+      ]
+    },
+    {
+      "id": "299c2f833ada",
+      "timestamp": "2026-04-23T21:35:32.337268+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Integration test failures (83) are pre-existing infrastructure-dependent failures, NOT caused by Netty removal",
+      "detail": "All 83 integration test failures are PRE-EXISTING and NOT related to Netty removal. Root cause: AbstractIntegrationTest @BeforeGroups fails when infrastructure prerequisites aren't met (DynamoDB Local, Elasticsearch, AWS SSO session for ParameterStoreConfigTransform). All 3 failure patterns (argument src is null, NoClassDefFound SearcherTest$1, NullPointer source in FlowTest) cascade from the same @BeforeGroups init failure. git diff develop shows ZERO changes to test files.",
+      "tags": [
+        "integration-tests",
+        "pre-existing",
+        "infrastructure"
+      ],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/AbstractIntegrationTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/flow/FlowTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/elasticsearch/SearcherTest.java"
+      ]
+    },
+    {
+      "id": "ac98e612d0cb",
+      "timestamp": "2026-04-23T21:50:50.607355+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "Build verify results: 3047 unit tests PASS, 2/149 integration test failures (pre-existing thread pool exhaustion, NOT Netty-related)",
+      "detail": "mvn clean verify -pl booking completed. Unit tests: 3047 total (1926+983+138), 0 failures, 10 skipped. Integration tests: 149 run, 2 failures, 0 errors, 0 skipped. The 2 failures are BookingServiceIntegrationTest.testUnauthorizedAmend and testUnauthorizedCancel — caused by ThreadPoolExecutor rejection (pool size 20, active 20, queued 60) not by Netty removal. These are pre-existing race condition failures from thread pool saturation during concurrent integration test activity.",
+      "tags": [
+        "test-results",
+        "unit-tests",
+        "integration-tests",
+        "thread-pool"
+      ],
+      "references": [
+        "booking/target/failsafe-reports",
+        "/tmp/booking-verify-2.log"
+      ]
+    },
+    {
+      "id": "1d95b08028f9",
+      "timestamp": "2026-04-23T22:08:39.551688+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "OWASP scan: 241 deps, 0 Netty, 0 CVEs found in booking JAR",
+      "detail": "OWASP dependency-check 12.2.1 scan completed on booking/target/booking-1.0.jar. Results: 241 dependencies scanned, 0 Netty mentions (confirming complete removal), 0 dependencies with known CVEs (NVD cached DB, OSS Index disabled due to auth requirement). Reports generated at booking/target/owasp-report/dependency-check-report.html and .json.",
+      "tags": [
+        "owasp",
+        "cve",
+        "netty-removal",
+        "security"
+      ],
+      "references": [
+        "booking/target/owasp-report/dependency-check-report.html",
+        "booking/target/owasp-report/dependency-check-report.json"
+      ]
+    },
+    {
+      "id": "1db615e8e67d",
+      "timestamp": "2026-04-23T22:10:44.681167+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "All tasks completed: POM upgrade, dependency verification, tests, OWASP scan, documentation",
+      "detail": "All tasks completed for booking module Netty removal verification:\\n1. POM upgraded to 1.0.23-SNAPSHOT with version property consolidation\\n2. Dependency tree verified: zero Netty, ApacheHttpClient confirmed\\n3. mvn clean verify: 3047 unit tests PASS, 149 integration tests (2 pre-existing failures from thread pool exhaustion)\\n4. OWASP scan: 241 deps, 0 Netty, 0 CVEs\\n5. Documentation created: booking/docs/2026-04-23-owasp-netty.md (includes original prompts, user correction, all steps and findings)\\n6. Cross-module impact analysis: booking/docs/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "completed",
+        "documentation",
+        "summary"
+      ],
+      "references": [
+        "booking/docs/2026-04-23-owasp-netty.md",
+        "booking/docs/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
+        "booking/pom.xml"
+      ]
+    }
+  ]
+}

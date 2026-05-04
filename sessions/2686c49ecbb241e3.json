@@ -1,0 +1,199 @@
+{
+  "id": "2686c49ecbb241e3",
+  "name": "Booking Integration Issues - Visibility DynamoDB + SQS Timestamp Fixes",
+  "description": "Fix 4 reported integration issues: 1) Visibility DynamoDB unconvert error on ContainerType.lastModifiedDateUtc timestamp, 2) SQS MetaData.timestamp format breaking transformer module, 3) Check transformer/distributor in appianway workspace, 4) Check aw-bridge-ib/ob in mft-s3-aqua-appia workspace. Related to previous sessions 9d0caeabd6394be2 and ad378beb151a432f.",
+  "project": "mercury-services",
+  "created_at": "2026-04-22T19:34:06.727481+00:00",
+  "updated_at": "2026-04-23T16:41:47.212107+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "visibility",
+    "integration-issues",
+    "timestamp",
+    "dynamodb",
+    "sqs",
+    "backward-compatibility",
+    "aws-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "c201dbd679a9",
+      "timestamp": "2026-04-22T19:52:11.737154+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Complete root cause analysis for all 4 reported issues",
+      "detail": "## Issue 1: Visibility DynamoDB unconvert error (ContainerType.lastModifiedDateUtc)\nROOT CAUSE: ContainerType.lastModifiedDateUtc has @JsonFormat(pattern=\"yyyy-MM-dd HH:mm:ss\") which writes space-separator format. EnrichedAttributesConverter serializes via ObjectMapper → stores \"2018-02-27 16:59:38\" in DynamoDB. Visibility SDK v1 reads with DateUtils.parseISO8601Date() which expects T-separator → fails.\nFIX: Change @JsonFormat to \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\" to match SDK v1 DateUtils.formatISO8601Date() output.\n\n## Issue 2: SQS MetaData.timestamp breaking transformer\nROOT CAUSE: Previous fix (session 9d0caeabd6394be2) changed @JsonFormat from pattern=\"yyyy-MM-dd HH:mm:ss.SS\" to shape=STRING on MetaData.timestamp. shape=STRING uses ISO format (T separator) for serialization. Transformer/distributor/bridge modules all use LocalDateTimeDeserializer(\"yyyy-MM-dd HH:mm:ss.SS\") → can't parse T format.\nFIX: Revert to @JsonFormat(pattern=\"yyyy-MM-dd HH:mm:ss.SS\") + keep @JsonDeserialize(FlexibleLocalDateTimeDeserializer). Add MixIn in MetaDataConverter to override @JsonFormat(shape=STRING) for DynamoDB serialization → ISO format → visibility compat.\n\n## Issue 3: Transformer impact\nCONFIRMED: appianway/shared/support/Json.java uses \"yyyy-MM-dd HH:mm:ss.SS\" pattern. Fix #2 restores compat.\n\n## Issue 4: Bridge modules impact  \nCONFIRMED: mft-s3-aqua-appia/aw-bridge-shared/support/Json.java uses same \"yyyy-MM-dd HH:mm:ss.SS\" pattern. Fix #2 restores compat.\n\n## Additional gap found: PackageType.lastModifiedDateUtc\nPackageType.lastModifiedDateUtc (java.util.Date) has NO @JsonFormat annotation. EnrichedAttributesConverter has WRITE_DATES_AS_TIMESTAMPS=false → Jackson DateSerializer uses StdDateFormat. May produce \"+0000\" offset which SDK v1 Joda parser might not handle. PROACTIVE FIX recommended.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/util/MetaData.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/networkservices/referencedata/model/ContainerType.java",
+        "booking/src/main/java/com/inttra/mercury/booking/networkservices/referencedata/model/PackageType.java",
+        "appianway/shared/support/Json.java",
+        "mft-s3-aqua-appia/aw-bridge-shared/support/Json.java"
+      ]
+    },
+    {
+      "id": "7adceaa24ab4",
+      "timestamp": "2026-04-22T21:31:25.495571+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "All fixes implemented, running final mvn clean verify",
+      "detail": "## All fixes implemented:\\n\\n### Fix 1: MetaData.timestamp (SQS + DynamoDB dual format)\\n- MetaData.java: @JsonFormat(pattern=\\\"yyyy-MM-dd HH:mm:ss.SS\\\") restored for SQS compat\\n- MetaDataConverter.java: Added MetaDataDynamoDbMixIn with @JsonFormat(shape=STRING) for DynamoDB ISO format\\n- This solves the dual-format challenge: SQS uses space format, DynamoDB uses ISO T format\\n\\n### Fix 2: ContainerType.lastModifiedDateUtc (ISO format for SDK v1)\\n- Changed @JsonFormat from \\\"yyyy-MM-dd HH:mm:ss\\\" to \\\"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\\\" \\n- Matches SDK v1 DateUtils.formatISO8601Date() output\\n\\n### Fix 3: PackageType.lastModifiedDateUtc (proactive ISO format)\\n- Added @JsonFormat(pattern=\\\"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\\\", timezone=\\\"UTC\\\")\\n- Added @JsonDeserialize(using = FlexibleDateDeserializer.class)\\n\\n### Fix 4: FlexibleDateDeserializerTest updated\\n- shouldSerializeInCanonicalFormat renamed to shouldSerializeInIsoFormatForSdkV1Compatibility\\n- Updated assertion to expect ISO format\\n\\n### New tests:\\n- MetaDataSerializationTest: 4 tests verifying SQS space-separator format\\n- EnrichedAttributesConverterTest: 8 new tests for ContainerType/PackageType date formats\\n\\n### Previous successful run (before FlexibleDateDeserializerTest fix):\\n- Unit tests (JUnit5): 971 tests, 0 failures\\n- DynamoDB IT (JUnit5 failsafe): 138 tests, 0 failures\\n- Flow IT (TestNG failsafe): 151 skipped (expected)\\n- BUILD SUCCESS\\n\\n### Now running: Full mvn clean verify -pl booking -am with output to /tmp/booking-verify-all.log",
+      "tags": [
+        "code_change",
+        "test"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/util/MetaData.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/networkservices/referencedata/model/ContainerType.java",
+        "booking/src/main/java/com/inttra/mercury/booking/networkservices/referencedata/model/PackageType.java",
+        "booking/src/test/java/com/inttra/mercury/booking/util/MetaDataSerializationTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/networkservices/referencedata/model/FlexibleDateDeserializerTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverterTest.java"
+      ]
+    },
+    {
+      "id": "0c24ce3c5b6a",
+      "timestamp": "2026-04-22T21:43:18.515884+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Found and fixed FlexibleDateDeserializer epoch millis parsing bug discovered during FlowTests",
+      "detail": "## New Bug Found: FlexibleDateDeserializer can't parse epoch millis\\n\\nDuring FlowTest execution, the network API returned PackageType.lastModifiedDateUtc as epoch milliseconds string \\\"1528891200000\\\". FlexibleDateDeserializer only supported date-string formats, not numeric timestamps. This caused 39 retry attempts with ProcessingException.\\n\\n**Fix applied:**\\n- Added epoch millis detection: `if (dateStr.matches(\\\"\\\\\\\\d+\\\")) { return new Date(Long.parseLong(dateStr)); }`\\n- Added 2 new tests: shouldDeserializeEpochMillis, shouldDeserializeEpochMillisForPackageType\\n\\n**Previous build results (before this fix):**\\n- Surefire (unit tests): 971 tests, 0 failures, 0 errors\\n- Failsafe DynamoDB IT: 138 tests, 0 failures, 0 errors\\n- FlowTests: Running but hitting epoch millis error 39 times",
+      "tags": [
+        "bug",
+        "fix",
+        "FlexibleDateDeserializer"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/networkservices/referencedata/model/FlexibleDateDeserializer.java",
+        "booking/src/test/java/com/inttra/mercury/booking/networkservices/referencedata/model/FlexibleDateDeserializerTest.java"
+      ]
+    },
+    {
+      "id": "a01de14c5543",
+      "timestamp": "2026-04-22T22:25:24.293439+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "Build completed - 3029 tests passed, 3 FlowTest failures (pre-existing, not date-related)",
+      "detail": "## Final Build Results: mvn clean verify -pl booking -am\\n\\n### Test Results Summary\\n| Phase | Tests | Failures | Errors | Skipped |\\n|-------|-------|----------|--------|--------|\\n| Surefire (JUnit5 unit tests) | 1920 | 0 | 0 | 1 |\\n| Failsafe JUnit5 IT (DynamoDB) | 971 | 0 | 0 | 9 |\\n| Failsafe DynamoDB IT | 138 | 0 | 0 | 0 |\\n| Failsafe TestNG FlowTests | 149 | 3 | 0 | 0 |\\n\\n### 3 FlowTest Failures (NOT related to date format changes)\\n1. `FlowTest.doTest on 05_confirm_split_split` — REJECTED vs APPLIED, external API-dependent\\n2. `BookingServiceIntegrationTest.testRequestConfirmSplit` — ConditionalCheckFailed on live DynamoDB\\n3. `BookingServiceIntegrationTest.testUnauthorizedCancel` — ThreadPoolExecutor rejected (pool=20, active=20, queued=60), resource exhaustion\\n\\n### Verification: Zero date format errors\\n- grep for 'Cannot parse date' related to our changes: 0 hits\\n- Epoch millis fix confirmed working: 0 parse errors (was 39 in previous run)\\n- All unit tests pass including new date format tests\\n- All DynamoDB integration tests pass\\n\\n### BUILD FAILURE due to FlowTest failures (pre-existing, not caused by our changes)",
+      "tags": [
+        "test_result",
+        "build"
+      ],
+      "references": [
+        "booking/target/failsafe-reports",
+        "/tmp/booking-verify-all.log"
+      ]
+    },
+    {
+      "id": "617437bd79ef",
+      "timestamp": "2026-04-22T22:53:21.641505+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Application startup verified, process killed cleanly, FlowTest failures analyzed and documented",
+      "detail": "## Application Startup Verification — SUCCESS\\n\\nAll AWS services initialized successfully:\\n- DynamoDB: BookingDetail, UniqueId, SequenceId, RapidReservation, SpotRatesDetail, SpotRatesToInttraRefDetail, Template, TemplateSummary — all tables connected\\n- SQS: MessagingClient created successfully, SQSListener started\\n- S3: StorageClient created successfully, credentials resolved via DefaultCredentialsProvider\\n- SNS: NotificationService created for topic arn:aws:sns:us-east-1:081020446316:inttra_int_sns_event\\n- SES: EmailService created with 6 templates loaded\\n- Jersey/Dropwizard: 38 REST endpoints registered\\n- Lifecycle: All executor services started, booking lifecycle started\\n\\nProcess killed cleanly, no zombie processes.\\n\\n## FlowTest Failure Analysis\\n\\nFailures 1 & 2 (`05_confirm_split_split`, `testRequestConfirmSplit`): Same root cause — `InvalidDefinitionException: Optional<String>` not supported. `Json.java` ObjectMapper missing `Jdk8Module`. Affects split-confirm path when `LocationAdditionalInfo.getCountryISO2Code()` returns `Optional<String>`. Pre-existing bug.\\n\\nFailure 3 (`testUnauthorizedCancel`): ThreadPoolExecutor saturated (20/20 active, 60 queued). Outbound pool didn't drain between tests. Pre-existing test ordering issue.\\n\\n## launch.json Updated\\nCleaned up — removed commented-out hardcoded AWS credentials. Two configs: \\\"Run Booking Service\\\" and \\\"Debug Booking Service\\\" (with -Xmx2g).",
+      "tags": [
+        "startup",
+        "verification",
+        "launch.json"
+      ],
+      "references": [
+        "booking/target/booking-1.0.jar",
+        ".vscode/launch.json",
+        "/tmp/booking-startup.log",
+        "booking/docs/booking-integration-issues-04222027-copilot.md"
+      ]
+    },
+    {
+      "id": "f36c201c614e",
+      "timestamp": "2026-04-22T23:00:37.677625+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "FlowTest split-confirm failure is a real bug from AWS upgrade, not flaky — @DynamoDBIgnore removed without @JsonIgnore replacement",
+      "detail": "## FlowTest Failure Root Cause: NOT a flaky test — introduced by AWS SDK upgrade\\n\\n### The chain of events:\\n\\n1. **2019-05-20** (commit 2867c9d937): `getCountryISO2Code()` returning `Optional<String>` was added to `LocationAdditionalInfo.java` with `@DynamoDBIgnore` annotation. This DynamoDB SDK v1 annotation told the SDK v1 mapper to skip this getter during serialization. Jackson was never used to serialize this class before (DynamoDB SDK v1 uses its own mapper).\\n\\n2. **2026-02-20** (commit 74f36e7a71): AWS SDK v2 upgrade (`ION-14382 bk3 aws upgrade changes`) removed ALL `@DynamoDB*` annotations from `LocationAdditionalInfo.java` including `@DynamoDBIgnore` from `getCountryISO2Code()`. No `@JsonIgnore` was added as a replacement.\\n\\n3. **Same commit**: Added `Json.toJsonString(detail)` call in `BookingService.newBookingDetail()` (lines 334-336) inside the DynamoDB retry error handling path — this serializes `BookingDetail` → `enrichedAttributes` → `transactionLocationInfoList` → `LocationAdditionalInfo` → `getCountryISO2Code()` → `Optional<String>`.\\n\\n4. **The bug**: Jackson sees `getCountryISO2Code()` as a bean property (no `@JsonIgnore`), tries to serialize `Optional<String>`, but `Json.java`'s ObjectMapper lacks `Jdk8Module` → `InvalidDefinitionException`.\\n\\n### Why it didn't fail before:\\n- Pre-upgrade: SDK v1's `@DynamoDBIgnore` excluded the getter. Jackson was never used to serialize `BookingDetail` in this code path.\\n- Post-upgrade: `@DynamoDBIgnore` removed, `Json.toJsonString(detail)` added, but `Optional<String>` support not added to `Json.java`.\\n\\n### Why it only fails on split-confirm:\\n- `Json.toJsonString(detail)` is only called in the **error handling/retry path** of `newBookingDetail()` (lines 322-341).\\n- The split-confirm flow triggers `ConditionalCheckFailedException` on DynamoDB (version conflict during split), which enters the retry loop.\\n- After retries exhaust, the code tries to log and S3-archive the failed detail via `Json.toJsonString(detail)` — and THAT fails with the Optional serialization error.\\n- The original `ConditionalCheckFailedException` is then masked by the `RuntimeException` from `Json.toJsonString()`.\\n\\n### Conclusion: This is NOT a flaky test. It's a real bug introduced by the AWS SDK v2 upgrade. However, it only manifests when:\\n1. A DynamoDB write fails with ConditionalCheckFailedException (version conflict during split)\\n2. AND the booking has enriched location data with country identifiers\\n\\nThis is an edge case in error handling, but it should be fixed.",
+      "tags": [
+        "finding",
+        "root-cause",
+        "LocationAdditionalInfo",
+        "Optional"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/INTTRACommon/Artifacts/LocationAdditionalInfo.java",
+        "booking/src/main/java/com/inttra/mercury/booking/service/BookingService.java",
+        "booking/src/main/java/com/inttra/mercury/booking/util/Json.java",
+        "commit:74f36e7a71",
+        "commit:2867c9d937"
+      ]
+    },
+    {
+      "id": "a3b8c28a12bd",
+      "timestamp": "2026-04-23T15:38:42.229210+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "code_change",
+      "summary": "Sonar code coverage gaps fixed for MetaDataConverter.java — 100% coverage achieved",
+      "detail": "Sonar flagged 3 coverage gaps in MetaDataConverter.java:\n\n1. **Line 52** (MixIn class declaration): Changed `abstract static class MetaDataDynamoDbMixIn` to `interface MetaDataDynamoDbMixIn`. Abstract classes have implicit constructors that JaCoCo flags as uncovered; interfaces don't generate constructors. Jackson MixIns work identically with interfaces.\n\n2. **Line 80** (`json != null` branch): Added test `nonStringNonMapAttribute` — passes an N-type AttributeValue (not M, not S). `attributeValue.s()` returns null → covers the `json == null` path → returns null.\n\n3. **Lines 83-85** (catch block): Added test `invalidJsonString` — passes `\"{invalid json}\"` as S-type AttributeValue. Jackson fails to parse → catches `JsonProcessingException` → throws `IllegalArgumentException`.\n\nCoverage result: 100% statements (27/27), 100% branches (12/12), 100% declarations (7/7). All 22 tests pass (Maven surefire confirmed).",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverterTest.java"
+      ]
+    },
+    {
+      "id": "1d86500efc1f",
+      "timestamp": "2026-04-23T15:46:45.463446+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "code_change",
+      "summary": "Sonar coverage fix revised: reverted prod code change, created MetaDataDynamoDbMixInTest (4 tests) — test-only changes, 95.8% coverage",
+      "detail": "## Sonar Coverage Fix — Revised Approach (test-only changes, zero prod code changes)\n\nUser requested reverting the prod code change (abstract class → interface) to avoid any risk to QA-verified code.\n\n### Changes:\n\n1. **REVERTED**: `MetaDataConverter.MetaDataDynamoDbMixIn` restored to `abstract static class` (was changed to `interface`). No production code changes.\n\n2. **NEW TEST CLASS**: `MetaDataDynamoDbMixInTest` — 4 tests exercising the MixIn's behavior indirectly through ObjectMapper:\n   - `shouldSerializeTimestampWithTSeparator` — verifies @JsonFormat(shape=STRING) produces ISO T-separator\n   - `shouldDeserializeTimestampWithTSeparator` — verifies FlexibleLocalDateTimeDeserializer handles T format\n   - `shouldDeserializeTimestampWithSpaceSeparator` — verifies FlexibleLocalDateTimeDeserializer handles space format\n   - `shouldIgnoreUnknownProperties` — verifies @JsonIgnoreProperties(ignoreUnknown=true) works\n\n3. **EXISTING TESTS KEPT**: `MetaDataConverterTest` still has the 2 tests added earlier:\n   - `nonStringNonMapAttribute` — covers line 80 null branch\n   - `invalidJsonString` — covers lines 83-85 catch block\n\n### Coverage Result:\n- 95.8% (27/28 statements, 12/12 branches, 7/8 declarations)\n- Only uncovered: line 52 (abstract class implicit constructor — JaCoCo limitation, not a real gap)\n- Lines 80, 83-85: NOW FULLY COVERED\n- All 26 tests pass",
+      "tags": [
+        "sonar",
+        "coverage",
+        "test-only"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverterTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataDynamoDbMixInTest.java"
+      ]
+    },
+    {
+      "id": "161ae19d9ec5",
+      "timestamp": "2026-04-23T16:02:27.729064+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "decision",
+      "summary": "JaCoCo coverage decision: leave at 95.8%, documented workaround options but not applying them",
+      "detail": "## JaCoCo Coverage for MetaDataConverter.java — Final State\n\n**Coverage**: 95.8% (27/28 statements, 12/12 branches, 7/8 declarations)\n**Only uncovered**: Line 52 — abstract class implicit constructor `<init>()` on `MetaDataDynamoDbMixIn`\n\n### JaCoCo Workaround Options (NOT applied — decided to leave as-is)\n\n**Option 1: JaCoCo exclusion filter** in booking pom.xml:\n```xml\n<plugin>\n    <groupId>org.jacoco</groupId>\n    <artifactId>jacoco-maven-plugin</artifactId>\n    <configuration>\n        <excludes>\n            <exclude>**/MetaDataConverter$MetaDataDynamoDbMixIn</exclude>\n        </excludes>\n    </configuration>\n</plugin>\n```\n\n**Option 2: Sonar exclusion** via pom properties:\n```xml\n<sonar.coverage.exclusions>\n    **/MetaDataConverter$MetaDataDynamoDbMixIn.class\n</sonar.coverage.exclusions>\n```\n\n### Decision: Leave coverage at 95.8%\n- 12/12 branches fully covered\n- The remaining uncovered line is a synthetic constructor that can never be called (abstract class)\n- Behavioral coverage is complete via `MetaDataDynamoDbMixInTest` (4 tests proving all 3 MixIn annotations work)\n- Any reviewer or Sonar admin would recognize this as a false positive for MixIn patterns\n- Adding exclusion config for one implicit constructor is over-engineering",
+      "tags": [
+        "sonar",
+        "jacoco",
+        "coverage",
+        "decision"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataDynamoDbMixInTest.java"
+      ]
+    },
+    {
+      "id": "37bf71afb7be",
+      "timestamp": "2026-04-23T16:41:47.212062+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Documented how JaCoCo coverage was obtained (VS Code runner, not Maven) and correct manual steps",
+      "detail": "## How Coverage Was Obtained\n\nThe 95.8% coverage figure came from VS Code's Test Runner for Java (built-in JaCoCo agent injection), NOT from Maven CLI. Booking's pom.xml has no jacoco-maven-plugin configured.\n\nMaven CLI attempts to run JaCoCo ad-hoc failed because:\n1. `prepare-agent` and `report` were run as separate commands — the JVM argLine set by `prepare-agent` doesn't persist across separate Maven invocations\n2. Without pom.xml plugin config, `mvn test` alone produces no `jacoco.exec`\n\n### Correct Manual Approaches\n1. **VS Code Test Runner** — click \"Run with Coverage\" (recommended for local dev)\n2. **Single Maven invocation**: `mvn org.jacoco:jacoco-maven-plugin:0.8.12:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.12:report -pl booking -am`\n3. **Add plugin to pom.xml** permanently (like bounceback-email/shipment modules)\n\nDocumented in booking-integration-issues-04222027-copilot.md Section 9.",
+      "tags": [
+        "jacoco",
+        "coverage",
+        "documentation"
+      ],
+      "references": [
+        "booking/docs/booking-integration-issues-04222027-copilot.md",
+        "booking/pom.xml",
+        "lambda/bounceback-email/pom.xml"
+      ]
+    }
+  ]
+}

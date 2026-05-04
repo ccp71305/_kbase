@@ -1,0 +1,41 @@
+{
+  "id": "e43f49ac4e1340a7",
+  "name": "Oceanschedules Module Design Review & Documentation",
+  "description": "Comprehensive review of the oceanschedules module: design, architecture, components, data flows, dependencies, test strategy, configuration, and critical assessment. Output: DESIGN-PRE-AWS-upgrade.md",
+  "project": "mercury-services",
+  "created_at": "2026-04-27T23:08:15.394548+00:00",
+  "updated_at": "2026-04-27T23:28:51.591394+00:00",
+  "status": "active",
+  "tags": [
+    "oceanschedules",
+    "design-review",
+    "documentation",
+    "pre-aws-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "2e091c4f00d8",
+      "timestamp": "2026-04-27T23:28:47.875179+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "progress",
+      "summary": "Completed comprehensive design review and documentation of oceanschedules + oceanschedules-process modules. Created DESIGN-PRE-AWS-upgrade.md with 15 sections covering architecture, components, data flows, dependencies, test strategy, and critical review.",
+      "detail": "Document created at oceanschedules/docs/DESIGN-PRE-AWS-upgrade.md. Key findings: 132 production Java files, 59 test classes in API module. 9 sub-modules in process pipeline (collector, inbound, staging, aggregator, loader, outbound, port-pair-generator, common, maps). All using AWS SDK v1. Critical issues: Jest client (deprecated), mixed ES versions, always-true retry condition, no cloud-sdk abstraction, no DynamoDB integration tests, overly large CarrierService class.",
+      "tags": [],
+      "references": [
+        "oceanschedules/docs/DESIGN-PRE-AWS-upgrade.md",
+        "oceanschedules/pom.xml",
+        "oceanschedules-process/"
+      ]
+    },
+    {
+      "id": "2e0e417db57f",
+      "timestamp": "2026-04-27T23:28:51.591379+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "model_info",
+      "summary": "Agent model: Claude Opus 4.6",
+      "detail": "Claude Opus 4.6",
+      "tags": [],
+      "references": []
+    }
+  ]
+}

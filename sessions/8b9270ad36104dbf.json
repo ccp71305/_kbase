@@ -1,0 +1,62 @@
+{
+  "id": "8b9270ad36104dbf",
+  "name": "Visibility AWS 2.x Plan - CargoVisibilitySubscription Gap Fix",
+  "description": "Fix missing CargoVisibilitySubscription DynamoDB table entity from the visibility-aws2x-plan.md, CONFLUENCE-visibility.md, and DESIGN-curr-state.md documents. CargoVisibilitySubscription is a key DynamoDB model in visibility-wm-inbound-processor that was completely missed in the initial analysis.",
+  "project": "mercury-services",
+  "created_at": "2026-03-31T13:16:57.351278+00:00",
+  "updated_at": "2026-03-31T13:41:35.315364+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "aws-upgrade",
+    "documentation",
+    "cargovisibilitysubscription",
+    "gap-fix"
+  ],
+  "entries": [
+    {
+      "id": "9f14b885f8ea",
+      "timestamp": "2026-03-31T13:17:14.215521+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "CRITICAL GAP: CargoVisibilitySubscription DynamoDB table entity completely missed in all 3 planning documents. This is the 4th DynamoDB table in the visibility module with its own DAO, processor, and 4+ nested @DynamoDBDocument model classes.",
+      "detail": "CargoVisibilitySubscription is a DynamoDB table entity (@DynamoDBTable(tableName = \"CargoVisibilitySubscription\")) in visibility-wm-inbound-processor module at com.inttra.mercury.cargo.visibility.model.CargoVisibilitySubscription.\n\nKey details:\n- Table: CargoVisibilitySubscription (4th DynamoDB table in visibility module!)\n- Hash Key: id (String) via @DynamoDBHashKey\n- GSIs: bookingNumber-index, subscriptionReference-index\n- Converter: DateToEpochSecond on expiresOn\n- Enums: @DynamoDBTypeConvertedEnum on state (SubscriptionState) and type (SubscriptionSource)\n- Nested @DynamoDBDocument: Reference (referenceValue + ReferenceType enum), TransportLeg (sequenceNumber + 5 enum fields + 2 Location objects), Location (locationType enum + List<LocationDate> + identifierType enum + Country), LocationDate (type enum + dateFormat enum + dateValue)\n- Additional enums: ReferenceType, TransportStageType, TransportModeType, TransportMeansType, TransportMode, LocationType, LocationIdentifierType, LocationDateType, DateFormat\n\nDAO: CargoVisibilitySubscriptionDao extends DynamoDBCrudRepository<CargoVisibilitySubscription, DynamoHashKey<String>>\nMethods: findById (PK lookup), findBySubscriptionReference (GSI query), findBySubscriptionReferenceFromIndex (GSI query helper)\nUsed by: CargoVisibilitySubscriptionProcessor (update subscription state on ACKNOWLEDGED/REJECTED responses)\n\nAlso found: IDENTICAL model+DAO in watermill-publisher/watermill-cargo-visibility-subscription/ but with MORE GSIs (3 vs 2) and additional fields. This is the PUBLISHER side of CargoVisibilitySubscription, outside visibility module scope but shares the same DynamoDB table.\n\nALL THREE DOCUMENTS missed this entirely:\n1. visibility-aws2x-plan.md - not in entity count (said 5, should be 6), not in model migration, not in DAO migration, not in file change matrix\n2. CONFLUENCE-visibility.md - not in DynamoDB table structure, not in DAO list, not in converter list\n3. DESIGN-curr-state.md - Section 6.1 only lists 3 tables (missing 4th: CargoVisibilitySubscription), Section 12 missing from DAO list, Appendix A missing DAO",
+      "tags": [],
+      "references": [
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/cargo/visibility/model/CargoVisibilitySubscription.java",
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/visibility/wm/dao/CargoVisibilitySubscriptionDao.java",
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/visibility/wm/processor/CargoVisibilitySubscriptionProcessor.java"
+      ]
+    },
+    {
+      "id": "2261f201ec5a",
+      "timestamp": "2026-03-31T13:41:23.819791+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "All 3 documents updated with CargoVisibilitySubscription - comprehensive changes across plan, confluence, and current state docs",
+      "detail": "Updated all 3 documents to include CargoVisibilitySubscription:\n\n## visibility-aws2x-plan.md changes:\n1. Executive Summary: Entity count 5→6, DAO count 5→6, added CargoVisibilitySubscription to entity list\n2. Section 6.1.6: New subsection for CargoVisibilitySubscription model migration (annotation mapping table, GSI details, TTL, 4 nested @DynamoDBDocument classes, 11 enum fields, note about watermill-publisher split model)\n3. Section 6.1.7: Renumbered BookingDetailVisibility (was 6.1.5)\n4. Section 6.2: Added ReferencesAttributeConverter and TransportLegsAttributeConverter to converter table\n5. Section 6.3: Updated intro to clarify 5 DAOs in commons + 1 in wm-inbound-processor\n6. Section 7.5: Expanded from 3 bullet points to comprehensive 12-point change list covering model migration, DAO rewrite, processor update, Guice registration\n7. Section 10.4: Added CargoVisibilitySubscription.class to ENTITY_CLASSES list\n8. Section 17: Added 3 new unit tests (ReferencesAttributeConverterTest, TransportLegsAttributeConverterTest, CargoVisibilitySubscriptionDaoTest)\n9. Section 18: Added CargoVisibilitySubscriptionDaoIT (6-8 tests)\n10. Section 20: Added 2 new risk rows (split model compatibility, nested @DynamoDBDocument enum migration)\n11. Appendix A: Added complete wm-inbound-processor file change matrix (17 files listed)\n\n## CONFLUENCE-visibility.md changes:\n1. DynamoDB Table Structure: Added CargoVisibilitySubscription table with GSIs, TTL, nested beans note, watermill-publisher cross-reference\n2. Summary of Changes table: Updated DynamoDB row (5→6 DAOs, ~9→~11 converters)\n3. Key Components table: Added CargoVisibilitySubscriptionProcessor, CargoVisibilitySubscription entity, CargoVisibilitySubscriptionDao\n4. DAO Classes table: Added CargoVisibilitySubscriptionDao row\n5. AttributeConverter table: Added ReferencesAttributeConverter and TransportLegsAttributeConverter rows\n6. DynamoDB Annotation Removal table: Updated counts (~15→~19 @DynamoDBDocument, ~3→~14 @DynamoDBTypeConvertedEnum, ~8→~9 @DynamoDBTypeConverted, ~5→~6 @DynamoDBIgnore)\n7. Guice Module Loading: Added note about CargoVisibilitySubscriptionDao being in wm-inbound-processor module\n8. Unit Tests: Added 3 new test classes\n9. Integration Tests: Added CargoVisibilitySubscriptionDaoIT\n\n## DESIGN-curr-state.md changes:\n1. Section 6.1: Added CargoVisibilitySubscription row to DynamoDB Tables table + new GSI table for CargoVisibilitySubscription + note about watermill-publisher cross-module sharing\n2. Section 5.6: Expanded DynamoDB Models subsection with full CargoVisibilitySubscription table details, DAO description, and watermill-publisher cross-reference\n3. Section 7: Updated DynamoDB row to mention cargo visibility subscriptions\n4. Section 12.1: Added CargoVisibilitySubscriptionDao to DynamoDB locations\n5. Appendix A DAO Classes: Added CargoVisibilitySubscriptionDao + BookingDao rows, added explanatory note about module locations\n6. New Appendix D: Cross-Module DynamoDB Table Sharing - documents the split model between visibility-wm-inbound-processor and watermill-publisher",
+      "tags": [],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md",
+        "visibility/docs/DESIGN-curr-state.md"
+      ]
+    },
+    {
+      "id": "c5055991db96",
+      "timestamp": "2026-03-31T13:41:35.315340+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "COMPLETE: All 3 documents updated with CargoVisibilitySubscription gap fix. Model: Claude Opus 4.6",
+      "detail": "Session complete. Model: Claude Opus 4.6\\n\\nAll 3 documents updated to include CargoVisibilitySubscription as the 6th DynamoDB entity in the visibility module. Key facts:\\n- Table: CargoVisibilitySubscription (in visibility-wm-inbound-processor, NOT visibility-commons)\\n- DAO: CargoVisibilitySubscriptionDao extends DynamoDBCrudRepository\\n- Processor: CargoVisibilitySubscriptionProcessor (subscription APPROVED/REJECTED lifecycle)\\n- 4 nested @DynamoDBDocument classes: Reference, TransportLeg, Location, LocationDate (with 11 total @DynamoDBTypeConvertedEnum fields)\\n- 2 new AttributeConverters needed: ReferencesAttributeConverter, TransportLegsAttributeConverter\\n- Cross-module table sharing with watermill-publisher documented\\n- Previous session: 6fd63aa02b1c4a75 (original plan creation)\\n- Parent session for current state: 2babd71b97554f30",
+      "tags": [],
+      "references": [
+        "6fd63aa02b1c4a75",
+        "2babd71b97554f30",
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md",
+        "visibility/docs/DESIGN-curr-state.md"
+      ]
+    }
+  ]
+}

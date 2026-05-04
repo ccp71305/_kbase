@@ -1,0 +1,177 @@
+{
+  "id": "6fd63aa02b1c4a75",
+  "name": "Visibility Module - AWS 2.x Upgrade Plan",
+  "description": "Create a detailed AWS 2.x upgrade plan for the visibility module. Produce visibility-aws2x-plan.md and CONFLUENCE-visibility.md under visibility/docs. Reference patterns from webbl, booking-bridge, and booking modules.",
+  "project": "mercury-services",
+  "created_at": "2026-03-30T16:56:34.465247+00:00",
+  "updated_at": "2026-03-30T18:17:58.852472+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "aws-upgrade",
+    "cloud-sdk",
+    "planning",
+    "documentation"
+  ],
+  "entries": [
+    {
+      "id": "7f5bc5b14f1e",
+      "timestamp": "2026-03-30T16:58:35.697319+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Session started: Reading current state doc and reference materials from webbl, booking-bridge, and booking modules",
+      "detail": "Read DESIGN-curr-state.md (visibility), DESIGN.md (webbl, booking-bridge), CONFLUENCE-webbl.md. Now reading remaining Confluence reference docs and will checkout booking feature branch for its design docs.",
+      "tags": [],
+      "references": [
+        "visibility/docs/DESIGN-curr-state.md",
+        "webbl/docs/DESIGN.md",
+        "webbl/docs/CONFLUENCE-webbl.md",
+        "booking-bridge/docs/DESIGN.md"
+      ]
+    },
+    {
+      "id": "202d954b2ea1",
+      "timestamp": "2026-03-30T17:00:56.455120+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Analysis complete: 11 sub-modules, 134 test files, 5 DAOs, 4+ DynamoDB entity classes, heavy AWS SDK v1 usage",
+      "detail": "Comprehensive analysis completed:\\n- 11 sub-modules (6 DW services, 4 Lambdas, 1 shared lib)\\n- 134 test files total\\n- 5 DAO classes extending DynamoDBCrudRepository (dynamo-client)\\n- 4 DynamoDB entity classes with @DynamoDBTable annotations: ContainerEvent, ContainerEventOutbound, ContainerEventPending, ContainerTrackingEvent, BookingDetailVisibility\\n- AWS SDK v1 used for: DynamoDB (DynamoDBMapper), SQS (AmazonSQS), S3 (AmazonS3), SNS (SNSClient wrapper), SSM (AWSSimpleSystemsManagement), Lambda events\\n- SES v2 already used in visibility-inbound\\n- commons version: 1.R.01.021, dynamo-client version: 1.R.01.021\\n- Booking dependency: com.inttra.mercury:booking:2.1.8.M (needs upgrade to cloud-sdk version)\\n- Reference modules read: webbl DESIGN.md + CONFLUENCE-webbl.md, booking-bridge DESIGN.md + CONFLUENCE_DESIGN_DOC.md, booking DESIGN-AWS2x.md + CONFLUENCE_DESIGN_DOC.md",
+      "tags": [],
+      "references": [
+        "visibility/pom.xml",
+        "visibility/visibility-commons/pom.xml",
+        "visibility/visibility-inbound/pom.xml",
+        "visibility/docs/DESIGN-curr-state.md"
+      ]
+    },
+    {
+      "id": "e2e2028db182",
+      "timestamp": "2026-03-30T17:07:56.589271+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Both documents created successfully: visibility-aws2x-plan.md and CONFLUENCE-visibility.md",
+      "detail": "Created both deliverables:\\n1. visibility/docs/visibility-aws2x-plan.md — Comprehensive upgrade plan with 19 sections covering all 11 sub-modules, POM changes, DynamoDB model migration, SQS/S3/SNS/SES/SSM migration, unit test plan, integration test plan, verification strategy, risk matrix, file change matrix, and tooling commands used.\\n2. visibility/docs/CONFLUENCE-visibility.md — Confluence design document following the pattern from webbl, booking-bridge, and booking modules with all standard sections (Requirements, HLD, LLD, Configuration, Security, Test Plan, etc.)",
+      "tags": [],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md"
+      ]
+    },
+    {
+      "id": "12d18a8c5652",
+      "timestamp": "2026-03-30T17:08:08.772577+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Documented key architectural decisions for visibility AWS SDK 2.x upgrade",
+      "detail": "Key architectural decisions for the visibility AWS upgrade:\\n1. Phase approach: commons first (Phase 2), then 6 DW services (Phase 3), then 4 Lambdas (Phase 4), then booking dep (Phase 5)\\n2. SQS: Keep custom SqsMessageHandler polling framework but swap internals to cloud-sdk MessagingClient<String>; change processor interface from Message to QueueMessage<String>\\n3. DynamoDB: All 5 DAOs move from DynamoDBCrudRepository to DatabaseRepository wrapper pattern; ~9 new AttributeConverters for complex nested types (JSON-serialized)\\n4. S3 Archiver Lambda: Replace DynamoDB Document API with DynamoRepositoryFactory (no Guice in Lambda)\\n5. SES: Migrate inbound's direct SesClient to cloud-sdk EmailService via VisibilityEmailModule\\n6. SSM: Lambda functions migrate from SDK v1 AWSSimpleSystemsManagement to SDK v2 SsmClient or cloud-sdk paramstore API\\n7. Booking dependency upgrade deferred to Phase 5 (requires booking module merge first)\\n8. New Guice modules: VisibilityDynamoModule, VisibilityMessagingModule, VisibilityStorageModule (shared across all DW services)\\n9. Integration tests: Use BaseDynamoDbIT from dynamo-integration-test for ~30-40 new DynamoDB integration tests",
+      "tags": [],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md"
+      ]
+    },
+    {
+      "id": "606d5cf18c2f",
+      "timestamp": "2026-03-30T17:08:16.839079+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Session complete - all deliverables produced. Model: Claude Opus 4.6",
+      "detail": "Model: Claude Opus 4.6\\nSession complete. Both deliverables produced:\\n- visibility-aws2x-plan.md: Detailed 5-phase plan covering POM changes, 5 DAO migrations, 7 SQS processor updates, S3/SNS/SES/SSM migration, 134 existing tests + ~30 new tests + ~30-40 new integration tests, risk matrix, file change matrix, and tooling commands\\n- CONFLUENCE-visibility.md: Standard Confluence design doc following webbl/booking-bridge/booking pattern with all required sections",
+      "tags": [],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md"
+      ]
+    },
+    {
+      "id": "0f0c9c0345be",
+      "timestamp": "2026-03-30T17:49:51.956924+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "code_change",
+      "summary": "Fixed section numbering in visibility-aws2x-plan.md after branch strategy insertion",
+      "detail": "After inserting Section 2 (Branch & Git Strategy) via multi_replace_string_in_file, section numbers were inconsistent (duplicate ## 4. and ## 9.). Applied 34 replacements to renumber all sections and subsections to be consecutive 1-20. TOC was already correct from the initial insertion. All 20 section headings now verified consecutive.",
+      "tags": [
+        "numbering-fix",
+        "document-update"
+      ],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md"
+      ]
+    },
+    {
+      "id": "9f1e6c8ddfe1",
+      "timestamp": "2026-03-30T18:01:02.905104+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "CORRECTED: Booking commit only touches booking/ files (223). Zero overlap with develop. Cherry-pick is conflict-free.",
+      "detail": "Git analysis of booking commit 74f36e7a71 vs latest develop:\\n\\n1. Booking commit touches ONLY 223 booking/ files — zero visibility, zero db-migration, zero network files. Previous analysis was incorrect (compared full branch diff, not single commit).\\n\\n2. Develop is 11 commits ahead of booking branch base (abee9cc33d):\\n   - ION-15057: touches 5 visibility files (CargoVisibilityEventProcessor, CargoVisibilitySubscriptionProcessor + tests, visibility/pom.xml)\\n   - ION-14875: Commercial Entity Role changes\\n   - One develop commit (43a5f917ff ION-15057) touches booking/ files but different ones than the booking AWS commit\\n\\n3. ZERO file overlap between booking commit and new develop commits — cherry-pick onto latest develop is guaranteed conflict-free.\\n\\n4. Booking branch does NOT need rebasing — the commit itself only touches booking/ and there's no overlap.\\n\\nConclusion: Cherry-pick strategy is even cleaner than originally thought. No visibility files in the booking commit means the rebase-drop is trivially clean.",
+      "tags": [
+        "git-analysis",
+        "booking-branch",
+        "cherry-pick",
+        "correction"
+      ],
+      "references": [
+        "74f36e7a71",
+        "abee9cc33d",
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md"
+      ]
+    },
+    {
+      "id": "dad4d0833443",
+      "timestamp": "2026-03-30T18:01:12.506006+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "code_change",
+      "summary": "Updated both plan and Confluence docs with corrected git findings and branch strategy",
+      "detail": "Updated both documents:\\n\\n1. visibility-aws2x-plan.md:\\n   - Fixed 'Verified Facts' section: corrected to 223 booking-only files, added develop-ahead details (11 commits, ION-15057/ION-14875), noted zero overlap\\n   - Fixed 'Why This Works' section: removed incorrect '5 visibility files' reference, added 'self-contained' explanation\\n   - Updated Edge Case section: clarified draft PR will show booking + visibility separately\\n\\n2. CONFLUENCE-visibility.md:\\n   - Rewrote Assumptions: replaced 'booking must merge first' with cherry-pick strategy description\\n   - Updated Open Issues: booking dep version now says 'compiled against cherry-picked commit'\\n   - Added new 'Branch Strategy' subsection under Assumptions with link to plan doc Section 2",
+      "tags": [
+        "document-update",
+        "branch-strategy"
+      ],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md"
+      ]
+    },
+    {
+      "id": "489169c9cf5f",
+      "timestamp": "2026-03-30T18:09:19.745566+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "FINAL: All documents reviewed, corrected, and verified. Plan subsections renumbered, Phase 5 corrected, Confluence doc self-contained with inline branch strategy. Session context updated with full implementation details.",
+      "detail": "FINAL REVIEW — All documents and session context updated. Summary of all corrections applied:\\n\\n## Document Fixes Applied\\n1. Plan doc subsection renumbering: Section 6 (Phase 2) subs 5.x→6.x + 5.1.x→6.1.x, Section 7 (Phase 3) subs 6.x→7.x, Section 8 (Phase 4) subs 7.x→8.x\\n2. Plan doc Phase 5 (Section 9): Removed incorrect claim that booking commit changes visibility files. Corrected to state booking commit only provides upgraded booking/ code (BookingDetail, booking DAOs, Guice modules, converters). Removed action item 4 about reviewing '5 visibility files'\\n3. Confluence doc: Removed plan.md cross-reference. Inlined full branch strategy with all key facts and step-by-step workflow\\n4. Previous fixes: TOC + section heading numbering 1-20, Verified Facts correction (223 booking-only files), Why This Works rewrite\\n\\n## Git Branching Strategy (verified 2026-03-30)\\n- Branch name: feature/visibility-aws-sdk-2x-upgrade\\n- Base: latest develop (HEAD = ab1f48b483)\\n- Cherry-pick: 74f36e7a71 from feature/ION-14382-bk3-aws-upgrade-2\\n- Booking commit scope: 223 files, ALL in booking/ — zero overlap with develop HEAD\\n- develop is 11 commits ahead of booking branch base (abee9cc33d)\\n- New develop commits touching visibility: ION-15057 (5 files: CargoVisibilityEventProcessor, CargoVisibilitySubscriptionProcessor + tests, visibility/pom.xml)\\n- Rebase-drop: When booking merges, git rebase -i develop → drop booking cherry-pick → force-with-lease\\n- Edge case: If PR ready before booking merge, draft PR or change base to booking branch\\n\\n## Implementation Phases (from plan)\\n- Phase 0: Branch setup + cherry-pick\\n- Phase 1: POM changes (add cloud-sdk 1.0.22-SNAPSHOT, remove dynamo-client)\\n- Phase 2: visibility-commons (DynamoDB models, 9 AttributeConverters, 5 DAOs, SQS/S3/SNS wrappers, 3 Guice modules, config)\\n- Phase 3: 6 Dropwizard services (Guice module updates, processor QueueMessage<String> migration)\\n- Phase 4: 4 Lambda functions (factory-based client creation, SSM migration)\\n- Phase 5: Booking dependency alignment (BookingDetailVisibility, BookingDao, BookingServiceImpl)\\n- Verification: mvn verify -pl visibility -am\\n\\n## Key Technical Details\\n- Commons remains at 1.R.01.021, cloud-sdk at 1.0.22-SNAPSHOT\\n- 5 DynamoDB entity classes, 5 DAO classes, 7 SQS processors, 9 new AttributeConverters\\n- 134 existing tests to migrate + ~30 new unit tests + ~30-40 new DynamoDB integration tests\\n- Integration tests use BaseDynamoDbIT from dynamo-integration-test (DynamoDB Local, no Docker)\\n- Reference modules: webbl (merged), booking-bridge (merged), booking (feature branch)\\n\\n## Deliverables\\n- visibility/docs/visibility-aws2x-plan.md — 20 sections, fully numbered and consistent\\n- visibility/docs/CONFLUENCE-visibility.md — Self-contained, no external references, ready for Confluence upload\\n- Model: Claude Opus 4.6",
+      "tags": [
+        "final-review",
+        "document-update",
+        "branch-strategy",
+        "implementation-plan"
+      ],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/CONFLUENCE-visibility.md",
+        "visibility/docs/DESIGN-curr-state.md",
+        "74f36e7a71",
+        "feature/ION-14382-bk3-aws-upgrade-2",
+        "feature/visibility-aws-sdk-2x-upgrade"
+      ]
+    },
+    {
+      "id": "16e08c41a2b3",
+      "timestamp": "2026-03-30T18:17:58.852452+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Added session ID to plan doc + created copilot-cli-agent-usage.md tutorial",
+      "detail": "1. Updated visibility-aws2x-plan.md header with session ID 6fd63aa02b1c4a75, prompt reference (.github/prompts/visibility-aws-upgrade-plan.prompt.md), and added a prominent 'Session Context for Agents' callout block after the TOC with: session_get command, skill references, prompt reference, current state and confluence doc references.\\n\\n2. Created visibility/docs/copilot-cli-agent-usage.md — comprehensive tutorial covering:\\n- CLI Agent vs Chat Agent comparison table and recommendation (use Chat for refactoring, terminal for git)\\n- Prompt files (.prompt.md) explained with structure, usage in Chat and CLI, plus a template for visibility implementation prompt\\n- Skills explained (java-refactoring, session-context, git-operations, aws-dynamo-check, pr-reviews)\\n- MCP Context Server usage with all available tools (session, git, jira, confluence, kb)\\n- Current visibility session details (ID: 6fd63aa02b1c4a75, 9 entries summary)\\n- copilot-instructions.md explained and how it auto-applies\\n- Best practices: phase-by-phase, one sub-module at a time, reference plan sections, persist context at boundaries, dual-workspace pattern, commit incrementally\\n- Full recommended 8-step workflow for the visibility upgrade with exact prompts for each step\\n- Prompt engineering tips: be specific, reference plan sections, give exit conditions, full error context\\n- Troubleshooting guide: context loss, wrong files, build failures, skills not loading, context window limits\\n- Quick reference card with all file paths, session IDs, branch names, versions\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "documentation",
+        "tutorial",
+        "session-reference"
+      ],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "visibility/docs/copilot-cli-agent-usage.md",
+        "6fd63aa02b1c4a75"
+      ]
+    }
+  ]
+}

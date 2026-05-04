@@ -1,0 +1,108 @@
+{
+  "id": "d5e3648bf3f74e12",
+  "name": "Netty Removal from mercury-services-commons",
+  "description": "Complete removal of Netty (io.netty:* and netty-nio-client) from cloud-sdk-aws module, replacing with AwsCrtAsyncHttpClient. Eliminates 9 HIGH OWASP CVEs. Version bumped from 1.0.22-SNAPSHOT to 1.0.23-SNAPSHOT.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-04-23T20:54:25.256168+00:00",
+  "updated_at": "2026-04-23T21:14:38.344306+00:00",
+  "status": "active",
+  "tags": [
+    "java",
+    "netty",
+    "owasp",
+    "security",
+    "aws-crt",
+    "cloud-sdk-aws"
+  ],
+  "entries": [
+    {
+      "id": "441c724c9172",
+      "timestamp": "2026-04-23T20:54:34.577203+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Investigated Netty usage across all modules — only cloud-sdk-aws had Netty references",
+      "detail": "Investigated all three modules for Netty usage:\n- cloud-sdk-api: No Netty references in POM, source, or tests. No changes needed.\n- commons: No Netty references in POM, source, or tests. Confirmed clean.\n- cloud-sdk-aws: Netty found in 1 production file (AwsHttpClientWrapper.java), 3 test files (TransferManagerFactoryTest, S3ClientFactoryTest, AwsStorageConfigTest), and POM (10 dependencies: netty-nio-client + 9 io.netty artifacts at 4.1.124.Final).\n- AwsHttpClientWrapperTest already used AwsCrtAsyncHttpClient — no changes needed.",
+      "tags": [
+        "investigation",
+        "netty"
+      ],
+      "references": [
+        "cloud-sdk-aws/pom.xml",
+        "cloud-sdk-api/pom.xml",
+        "commons/pom.xml",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpClientWrapper.java"
+      ]
+    },
+    {
+      "id": "42249964300e",
+      "timestamp": "2026-04-23T20:54:47.242972+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "code_change",
+      "summary": "Removed all Netty dependencies and replaced with AwsCrtAsyncHttpClient in production and test code",
+      "detail": "POM changes:\n- Removed 10 dependencies from cloud-sdk-aws/pom.xml: netty-nio-client, netty-codec-http2, netty-handler, netty-common, netty-buffer, netty-transport, netty-codec, netty-codec-http, netty-resolver, netty-transport-native-unix-common (all 4.1.124.Final)\n- aws-crt-client was already declared — no additions needed\n\nProduction code (AwsHttpClientWrapper.java):\n- Replaced import: NettyNioAsyncHttpClient → AwsCrtAsyncHttpClient\n- Removed DEFAULT_TLS_NEGOTIATION_TIMEOUT_MILLIS import (CRT handles TLS internally)\n- Updated defaultAsyncClient(): NettyNioAsyncHttpClient.builder() → AwsCrtAsyncHttpClient.builder(), removed .tlsNegotiationTimeout() call\n\nTest code changes:\n- TransferManagerFactoryTest.java: Replaced NettyNioAsyncHttpClient with AwsCrtAsyncHttpClient (import, builder, 2 assertions)\n- S3ClientFactoryTest.java: Removed Netty import, updated 1 assertion\n- AwsStorageConfigTest.java: Removed Netty import, removed createNettyHttpClient() helper, updated test data to use existing createCrtAsyncHttpClient()\n\nVersion bump in root pom.xml: 1.0.22-SNAPSHOT → 1.0.23-SNAPSHOT",
+      "tags": [
+        "netty-removal",
+        "aws-crt",
+        "code-change"
+      ],
+      "references": [
+        "pom.xml",
+        "cloud-sdk-aws/pom.xml",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpClientWrapper.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/storage/factory/TransferManagerFactoryTest.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/storage/factory/S3ClientFactoryTest.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/storage/config/AwsStorageConfigTest.java"
+      ]
+    },
+    {
+      "id": "836c825bb763",
+      "timestamp": "2026-04-23T20:54:56.998453+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "test_result",
+      "summary": "All tests passed, verify succeeded for all modules, installed to local Maven repo",
+      "detail": "Command 1: mvn -pl cloud-sdk-api,cloud-sdk-aws -am clean test\nResult: BUILD SUCCESS — 877 tests run, 0 failures, 0 errors, 0 skipped\n\nCommand 2: mvn clean verify (all modules)\nResult: BUILD SUCCESS — All 10 modules passed\n- cloud-sdk-api 1.0.23-SNAPSHOT: SUCCESS (9.568s)\n- cloud-sdk-aws 1.0.23-SNAPSHOT: SUCCESS (04:24 min)\n- commons 1.0.23-SNAPSHOT: SUCCESS (30.289s)\n- dynamo-client 1.0.23-SNAPSHOT: SUCCESS (8.930s)\n- email-sender 1.0.23-SNAPSHOT: SUCCESS (7.744s)\n- dynamo-integration-test 1.0.23-SNAPSHOT: SUCCESS (8.791s)\n- local-dynamodb 1.R.01.003: SUCCESS (40.982s)\n- local-elasticsearch 1.R.01.003: SUCCESS (51.638s)\nTotal time: 07:18 min\n\nCommand 3: mvn install -DskipTests\nResult: BUILD SUCCESS — All 10 modules installed to local .m2 repository (15.542s)",
+      "tags": [
+        "test-results",
+        "build",
+        "verify",
+        "install"
+      ],
+      "references": [
+        "cloud-sdk-aws/docs/2026-04-23-netty-removal.md"
+      ]
+    },
+    {
+      "id": "154b935c3ce1",
+      "timestamp": "2026-04-23T20:55:06.434084+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "decision",
+      "summary": "Decision: Remove Netty entirely rather than upgrading — eliminates 5 HIGH CVEs across 9 artifacts",
+      "detail": "Chose complete Netty removal (Section 10 of OWASP doc) over Netty upgrade (Section 4, Fix 1) because:\n1. Eliminates all 9 Netty CVEs permanently — no future Netty CVE treadmill\n2. aws-crt-client was already a dependency and already used in tests\n3. AWS recommends CRT over Netty for S3 transfers\n4. Smaller dependency footprint (removes 10 JARs from classpath)\n5. Lower maintenance burden — no more explicit Netty version pins to track\n\nCVEs eliminated: CVE-2026-33871, CVE-2026-33870, CVE-2025-58057, CVE-2025-67735, CVE-2025-58056\n\nDocumentation created: cloud-sdk-aws/docs/2026-04-23-netty-removal.md",
+      "tags": [
+        "decision",
+        "security",
+        "owasp"
+      ],
+      "references": []
+    },
+    {
+      "id": "a73722d76a70",
+      "timestamp": "2026-04-23T21:14:38.344287+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Transitive Netty still present via AWS SDK BOM — fixed with exclusions on all 13 AWS SDK dependencies in cloud-sdk-aws",
+      "detail": "After integrating cloud-sdk-aws:1.0.23-SNAPSHOT into the booking module, Netty was still present at runtime. Root cause: removing the direct netty-nio-client dependency only removed the explicit declaration — all AWS SDK v2 service clients (ssm, sesv2, s3, sns, sqs, dynamodb, sso, ssooidc, etc.) still pull netty-nio-client transitively through the AWS SDK BOM (2.30.24). The Netty version also regressed from pinned 4.1.124.Final to BOM default 4.1.118.Final.\n\nFix: Added exclusion for software.amazon.awssdk:netty-nio-client to all 13 AWS SDK v2 dependencies in cloud-sdk-aws/pom.xml (ssm, sesv2, s3, s3-transfer-manager, sns, sqs, dynamodb, dynamodb-enhanced, apache-client, url-connection-client, aws-crt-client, sso, ssooidc). This ensures Netty is excluded at the library level so no downstream consumer needs exclusions.\n\nNo functionality impact — all sync services use ApacheHttpClient, async uses AwsCrtAsyncHttpClient (already migrated), and AWS SDK SPI will discover CRT as the async provider.",
+      "tags": [
+        "finding",
+        "netty",
+        "transitive-dependency",
+        "exclusion",
+        "fix"
+      ],
+      "references": [
+        "cloud-sdk-aws/pom.xml",
+        "cloud-sdk-aws/docs/2026-04-23-netty-removal.md"
+      ]
+    }
+  ]
+}

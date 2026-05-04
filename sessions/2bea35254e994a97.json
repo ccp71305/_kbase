@@ -1,0 +1,18 @@
+{
+  "id": "2bea35254e994a97",
+  "name": "ION-14382 Booking Lambda JAR Size Bloat & Lambda Separation Plan",
+  "description": "Investigate booking JAR size increase from ~94MB to ~135MB after AWS SDK v2 upgrade, plan to reduce size and separate S3ArchiveHandler and IndexHandler lambdas into standalone modules.",
+  "project": "mercury-services",
+  "created_at": "2026-03-23T17:39:42.365447+00:00",
+  "updated_at": "2026-03-23T17:39:42.365457+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "lambda",
+    "jar-size",
+    "aws-upgrade",
+    "ION-14382",
+    "blocker"
+  ],
+  "entries": []
+}

@@ -1,0 +1,147 @@
+{
+  "id": "161b48d240384d79",
+  "name": "WebBL Connection Pool Shutdown - Deep Analysis",
+  "description": "Deep analysis of connection pool shutdown issue in webbl module. Answering 10 specific questions from prompt file, checking production logs, comparing with other modules, and updating investigation document.",
+  "project": "mercury-services",
+  "created_at": "2026-03-31T20:53:41.028496+00:00",
+  "updated_at": "2026-03-31T23:21:49.901335+00:00",
+  "status": "completed",
+  "tags": [
+    "webbl",
+    "sqs",
+    "connection-pool",
+    "aws-sdk-v2",
+    "apache-httpclient",
+    "production-issue"
+  ],
+  "entries": [
+    {
+      "id": "321edd297134",
+      "timestamp": "2026-03-31T21:08:45.253862+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "ROOT CAUSE FOUND: InttraDBListener loads 1.87M records → OutOfMemoryError → connection pool destroyed",
+      "detail": "Exact sequence on task 4ad01fb7:\\n1. 15:29:20.378 — InttraDBListener: Number of Web BL found for archiving to S3 :1867870 (1.87M records loaded!)\\n2. 15:29:51.336 — java.lang.OutOfMemoryError: Java heap space (384m heap exhausted)\\n3. 15:29:51.337 — SQSListener: OutOfMemoryError propagated\\n4. 15:29:51.340 — Connection pool shut down (OOM-triggered GC destroys Apache HTTP pool)\\n\\n90-day frequency: millions of errors per day (10.3M on Mar 31 alone). 9 different tasks affected in 7 days. Tight-loop retry with no backoff generates massive log volume.\\n\\nAWS SDK v2 version: 2.30.24",
+      "tags": [
+        "root-cause",
+        "OOM",
+        "InttraDBListener",
+        "1.87M-records"
+      ],
+      "references": [
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/InttraDBListener.java",
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/support/ListenerManager.java"
+      ]
+    },
+    {
+      "id": "74782d89fa6b",
+      "timestamp": "2026-03-31T21:10:01.024534+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Full chain traced: MyBatis query has NO LIMIT, loads 1.87M records. OOM confirmed across all tasks. Other modules compared.",
+      "detail": "InttraDBListener chain: WebBLMapper.getWebBLProcessRequests() runs SELECT with NO LIMIT — loads ALL 'SUBMITTED' records. 1.87M records on 384m heap → OOM → pool destroyed.\\n\\nPattern confirmed across ALL tasks:\\n- task 25818ea1: 1,870,385 records → OOM at 20:04:54\\n- task 4ad01fb7: 1,870,259 records → OOM at 19:52, again 1,867,870 → OOM at 15:29\\n- task 25818ea1: 1,869,817 records → OOM at 18:59\\n\\nDouble-start causes duplicate scheduled runs every 30 min.\\n\\nModules comparison: booking & booking-bridge have same double-start. visibility does NOT.\\n\\nAWS SDK v2 version: 2.30.24, apache-client included.",
+      "tags": [
+        "WebBLMapper",
+        "no-limit",
+        "OOM",
+        "double-start",
+        "module-comparison"
+      ],
+      "references": [
+        "webbl/src/main/java/com/inttra/mercury/webbl/persistence/WebBLMapper.java",
+        "webbl/src/main/java/com/inttra/mercury/webbl/inbound/xml/WebBLArchiveTask.java"
+      ]
+    },
+    {
+      "id": "6768b6bb9bd0",
+      "timestamp": "2026-03-31T21:15:06.474551+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Updated investigation document with all 10 answers. Session complete.",
+      "detail": "Updated webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md with complete analysis answering all 10 questions from the prompt file.\\n\\nKey findings:\\n1. ROOT CAUSE: InttraDBListener loads 1.87M records via WebBLMapper.getWebBLProcessRequests() (NO LIMIT clause) → OOM on 384m heap → JVM finalization destroys Apache HTTP connection pool\\n2. FREQUENCY: 35M+ errors in 7 days across 9 tasks. 10M+ errors/day on some days\\n3. IMPACT: Tasks become zombies — health check passes but SQS processing is dead\\n4. No explicit close() exists anywhere — pool shutdown is caused by JVM finalization during OOM\\n5. booking and booking-bridge have same double-start bug; visibility does NOT\\n6. Duplicate submit() queues backup listener; duplicate scheduleWithFixedDelay creates independent schedules\\n7. DBConnections = NetworkDBListener (retry records) + InttraDBListener (1.87M archive records)\\n8. JVM_Xmx=384m > ECS memory=256 MiB — fundamentally broken sizing\\n9. Need permanent failure detection + backoff in SQSListener\\n10. Need AutoCloseable on MessagingClient + awaitTermination in ListenerManager.stop()\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "document-updated",
+        "complete",
+        "all-questions-answered"
+      ],
+      "references": [
+        "webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md",
+        ".github/prompts/webbl.connpool-issue.prompt.md"
+      ]
+    },
+    {
+      "id": "789c13f35eac",
+      "timestamp": "2026-03-31T21:43:34.460612+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Definitive timeline: OOM from ION-12446 (2025-06), pool shutdown from ION-14546 AWS upgrade (deployed Mar 14). Externally-managed HTTP client correction.",
+      "detail": "DEFINITIVE TIMELINE:\\n- 2025-06-03: Sumesh Jacob (ION-12446) introduces InttraDBListener + unbounded query. NOT the AWS upgrade.\\n- 2026-03-03/04: Arijit Kundu (ION-14546) commits WebBL AWS SDK v2 upgrade\\n- 2026-03-14: AWS upgrade deployed to prod. FIRST pool shutdown errors: 3,421,520\\n\\nBefore Mar 14: 0 pool shutdown, 10-69 OOM/day\\nAfter Mar 14: millions pool shutdown/day, 4-35 OOM/day\\n\\nThe OOM was always there. The AWS upgrade (Apache HTTP client) made OOM CATASTROPHIC because PoolingHttpClientConnectionManager.shutdown() is permanent + tight-loop retry.\\n\\nCRITICAL CORRECTION: .httpClient(createHttpClient()) makes HTTP client externally managed → SqsClient.close() will NOT close it. AutoCloseable on MessagingClient alone won't fix it for graceful shutdown. Must either change to .httpClientBuilder() or keep separate reference to ApacheHttpClient.",
+      "tags": [
+        "timeline",
+        "ION-12446",
+        "ION-14546",
+        "externally-managed",
+        "correction"
+      ],
+      "references": [
+        "ION-12446",
+        "ION-14546",
+        "webbl/src/main/java/com/inttra/mercury/webbl/persistence/WebBLMapper.java"
+      ]
+    },
+    {
+      "id": "4ef7880094f5",
+      "timestamp": "2026-03-31T21:45:31.914750+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Document updated with git history, pre/post comparison, and externally-managed HTTP client correction",
+      "detail": "Added 3 new sections to investigation document:\\n\\n§11. Git History — Sumesh Jacob introduced unbounded query in ION-12446 (2025-06-03), NOT the AWS upgrade\\n§12. Pre/Post AWS Upgrade comparison — ZERO pool shutdown before Mar 14, 3.4M on Mar 14 (deployment day), millions daily after\\n§13. Externally-Managed HTTP Client analysis — AutoCloseable alone won't help because .httpClient() makes SDK NOT close it. Must change to .httpClientBuilder() or keep separate ApacheHttpClient reference. For OOM root cause, AutoCloseable is irrelevant — the fix is LIMIT clause.\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "document-updated",
+        "git-history",
+        "pre-post-comparison",
+        "externally-managed"
+      ],
+      "references": [
+        "webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md"
+      ]
+    },
+    {
+      "id": "9c1ff8f1bab4",
+      "timestamp": "2026-03-31T22:03:18.244499+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Completed §14 SDK 1.x vs 2.x resilience analysis and §15 cloud-sdk-aws refactoring recommendations",
+      "detail": "Key findings:\n\nSDK 1.x vs 2.x:\n- Decompiled apache-client-2.42.23.jar: NO Cleaner, finalize, PhantomReference, or ShutdownHook found. Pool shutdown is NOT caused by GC finalization.\n- SDK 1.x: AmazonSQSClientBuilder.defaultClient() creates internally-managed HTTP client. Pool survives OOM. Task eventually crashes → ECS restarts → fresh pool.\n- SDK 2.x: ApacheHttpClient created externally, passed via .httpClient(). Pool gets permanently destroyed within 4ms of OOM. Task stays alive as zombie.\n- The irony: SDK 2.x's pool destruction PREVENTS the task from crashing (no memory pressure from fast-failing ISE), keeping the zombie alive.\n- Pre-Mar-14 CloudWatch: OOM at 17:03:17 → task restart at 17:05:01, ZERO pool-shutdown errors.\n\nCloud-sdk-aws refactoring (7 issues identified):\n1. SqsMessagingClient not AutoCloseable\n2. MessagingClient interface missing close() contract  \n3. Factory uses .httpClient() (externally managed) — reference LOST, cannot be closed\n4. handleException() doesn't classify permanent failures (pool shutdown)\n5. SnsService not AutoCloseable\n6. HTTP client config not configurable\n7. Listener interface missing AutoCloseable\n\nRecommended: Phase 1 in commons 1.0.23-SNAPSHOT (change to .httpClientBuilder(), add AutoCloseable, add ConnectionPoolShutdownException). Phase 2 in webbl/booking-bridge (lifecycle management, backoff, double-start fix).\n\nDocument updated: webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md now has 16 sections.",
+      "tags": [
+        "sdk-comparison",
+        "refactoring",
+        "cloud-sdk-aws",
+        "resilience"
+      ],
+      "references": [
+        "webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md",
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/factory/MessagingClientFactory.java",
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClient.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/MessagingClient.java"
+      ]
+    },
+    {
+      "id": "150763c7ad86",
+      "timestamp": "2026-03-31T23:21:49.901287+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "ECS memory metrics prove spikes existed before Mar 14 — SDK 2.x made them SUSTAINED (no more restarts)",
+      "detail": "ECS Memory Metrics (hourly, Mar 13-14):\n- Before deployment: Avg=184-190%, Max=240-244%, Min periodically drops to 29-94% (TASK RESTARTS from OOM crashes)\n- Mar 14 at 05:00: Min=94.1% (last restart before deployment)\n- Mar 14 at 10:00: Min=26.7% (DEPLOYMENT - new task definition rolled out)\n- Mar 14 after 10:00: Min NEVER drops below 159% again. Avg climbs steadily 176→187→193→195→200→201%\n- After deployment, NO MORE low-Min-value hours = tasks stopped crashing\n\nInttraDBListener Record Count Growth (weekly, Jan-Mar 2026):\n- Jan 1: 998K-1.05M records, 403 executions/week\n- Feb 1: 1.28M-1.36M, 387 exec/week\n- Mar 1: 1.57M-1.62M, 260 exec/week\n- Mar 8: 1.62M-1.70M, 247 exec/week\n- Mar 15 (post-deploy): 1.70M-1.76M, **34 exec/week** (MASSIVE drop!)\n- Mar 29: 1.84M-1.87M, 37 exec/week\n\nKEY INSIGHT: Record count grew from 1M to 1.87M over 3 months. The Max memory spike was ALWAYS ~245%. What changed on Mar 14 is that tasks stopped crashing and restarting (zombie behavior), making the spike SUSTAINED instead of transient sawtooth.",
+      "tags": [
+        "ecs-metrics",
+        "memory",
+        "evidence"
+      ],
+      "references": [
+        "CloudWatch ECS MemoryUtilization",
+        "CloudWatch InttraDBListener record counts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "id": "2babd71b97554f30",
+  "name": "Visibility Module - Current State Documentation",
+  "description": "Document the current state of the visibility module including all sub-modules, data flow, architecture, design, key classes, dependencies, lambda functions, and build interactions. This is before the AWS 2.x upgrade.",
+  "project": "mercury-services",
+  "created_at": "2026-03-30T15:39:21.103750+00:00",
+  "updated_at": "2026-03-30T16:08:53.488044+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "documentation",
+    "architecture",
+    "current-state",
+    "pre-aws-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "aaccf3688297",
+      "timestamp": "2026-03-30T15:54:50.712662+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Completed analysis of all 11 visibility sub-modules. Identified 5 Dropwizard services (inbound, matcher, outbound, pending, wm-inbound-processor, itv-gps-processor) and 4 Lambda functions (s3-archiver, error-email, pending-start, outbound-poller). All use AWS SDK v1 for DynamoDB, SQS, SNS, S3. Commons is shared library. Architecture is event-driven pipeline: inbound -> DynamoDB Stream -> matcher -> outbound SQS -> outbound processor -> S3/GIS.",
+      "detail": "Sub-modules: visibility-commons (shared library), visibility-inbound (REST API + SQS processor), visibility-matcher (DynamoDB stream consumer), visibility-outbound (GIS file generation), visibility-pending (retry unmatched events), visibility-wm-inbound-processor (Watermill/Shippeo events), visibility-itv-gps-processor (GPS events from ITV), visibility-s3-archiver (Lambda: archive to S3), visibility-error-email (Lambda: send error emails), visibility-pending-start (Lambda: trigger pending processing), visibility-outbound-poller (Lambda: poll MySQL outbound thresholds)",
+      "tags": [],
+      "references": [
+        "visibility/pom.xml",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/VisibilityInboundApplication.java",
+        "visibility/visibility-matcher/src/main/java/com/inttra/mercury/visibility/matcher/processor/MatchingProcessor.java"
+      ]
+    },
+    {
+      "id": "6325c65990c3",
+      "timestamp": "2026-03-30T16:08:16.432903+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Completed DESIGN-curr-state.md document for the visibility module. Document covers all 11 sub-modules, architecture, data flow, AWS SDK v1 usage, and dependencies.",
+      "detail": "Created comprehensive design document at visibility/docs/DESIGN-curr-state.md covering:\\n- Executive summary\\n- 11 sub-module deep dives (6 Dropwizard services, 4 Lambdas, 1 shared lib)\\n- High-level architecture diagram (ASCII)\\n- Full data flow pipeline (4 stages: inbound → matching → outbound → pending retry)\\n- Database & storage layer (DynamoDB tables, MySQL, Oracle, Elasticsearch, S3)\\n- AWS services usage matrix\\n- Network services integration (12 REST API clients)\\n- Build & deployment details (Docker + Lambda ZIP)\\n- Sub-module dependency matrix\\n- Configuration reference (SQS queues, thread pools)\\n- Complete AWS SDK v1 usage inventory for future upgrade planning\\n- Appendices: class responsibility summary, StatusEventProcessor lifecycle pattern, external dependencies",
+      "tags": [],
+      "references": [
+        "visibility/docs/DESIGN-curr-state.md"
+      ]
+    },
+    {
+      "id": "50ef697cf0c0",
+      "timestamp": "2026-03-30T16:08:53.488029+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Task COMPLETE. Created visibility/docs/DESIGN-curr-state.md documenting the full current state of the visibility module before AWS 2.x upgrade.",
+      "detail": "Deliverable: visibility/docs/DESIGN-curr-state.md\\n\\nDocument covers:\\n- Executive summary of 11 sub-modules (6 Dropwizard services, 4 Lambdas, 1 shared lib)\\n- ASCII architecture diagrams showing full event-driven pipeline\\n- 4-stage data flow: Inbound → Matching → Outbound → Pending Retry\\n- Deep dive into each sub-module: purpose, key classes, processing flow, dependencies\\n- Database layer: 3 DynamoDB tables + GSIs, MySQL OutboundThreshold, Oracle legacy, Elasticsearch\\n- AWS services usage matrix (DynamoDB, SQS, SNS, S3, SES, SSM, Lambda, CloudWatch)\\n- Network services integration (12 REST API clients to Network module)\\n- Build & deployment (Docker containers for services, ZIP for Lambdas, CloudFormation)\\n- Sub-module dependency matrix with compile-scope Maven deps\\n- Complete AWS SDK v1 usage inventory for upgrade planning\\n- Appendices: class responsibility tables, StatusEventProcessor lifecycle pattern\\n\\nKey findings:\\n- All modules use AWS SDK v1 except SES in visibility-inbound (already v2)\\n- Legacy commons version 1.R.01.021 (not latest 1.0.22-SNAPSHOT)\\n- DynamoDB access via dynamo-client library (DynamoDBMapper wrapper)\\n- S3 Archiver Lambda uses DynamoDB Document API directly (not shared DAO)\\n- visibility-pending and visibility-wm-inbound-processor have cross-module source imports from visibility-matcher and visibility-inbound\\n- Model info: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "visibility/docs/DESIGN-curr-state.md",
+        "visibility/pom.xml",
+        "visibility/visibility-commons/pom.xml",
+        "visibility/visibility-inbound/pom.xml"
+      ]
+    }
+  ]
+}

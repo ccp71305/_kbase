@@ -1,0 +1,56 @@
+{
+  "id": "461148258696485b",
+  "name": "ION-14382 Runtime Issues Verification - Undo SUBMITTER, Verify JAR, Categorize Tests",
+  "description": "Continuation from session 6790c561ea174275. Tasks: 1) Verify changes reflected in shaded JAR, 2) Undo SUBMITTER fix and related tests, 3) Categorize all tests from mvn verify log, 4) Update summary document, 5) Document test commands.",
+  "project": "mercury-services",
+  "created_at": "2026-03-26T20:55:41.885551+00:00",
+  "updated_at": "2026-03-26T21:33:09.392625+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "lambda",
+    "runtime-fix",
+    "ION-14382",
+    "verification",
+    "test-categorization"
+  ],
+  "entries": [
+    {
+      "id": "b5280535de09",
+      "timestamp": "2026-03-26T20:55:47.491603+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Session started - continuing from previous session, user confirmed mvn verify passed",
+      "detail": "Continuation from session 6790c561ea174275. Previous session completed Indexer Jetty fix, FlexibleDateDeserializer, and SUBMITTER fix. User wants SUBMITTER changes undone. mvn clean verify -pl booking -am completed successfully (exit code 0) and log is at /tmp/mvn-verify.log.",
+      "tags": [],
+      "references": [
+        "session:6790c561ea174275"
+      ]
+    },
+    {
+      "id": "6b4edd75b569",
+      "timestamp": "2026-03-26T21:33:00.223483+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "All tasks completed: SUBMITTER undo, JAR verification, test categorization, document update, mvn commands",
+      "detail": "1. SUBMITTER code change reverted from ValidationContext.java (removed SUBMITTER case from switch)\n2. SUBMITTER test methods reverted from ValidationContextTest.java (removed 4 tests: testIsActivatedSubmitterCompanyIdIn, testIsActivatedSubmitterCompanyIdNotIn, testIsActivatedSubmitterCompanyIdNotMatching, testIsActivatedSubmitterNullActor)\n3. mvn clean verify -pl booking -am → BUILD SUCCESS\n   - Surefire JUnit5: 1837 tests, 0 failures, 1 skipped\n   - Surefire TestNG: 913 tests (was 917, minus 4 SUBMITTER tests), 0 failures, 9 skipped\n   - Failsafe DynamoDB IT: 138 tests, 0 failures\n   - Failsafe Flow/Service IT: 149 tests, 0 failures\n   - Total: 3037 tests, 0 failures\n4. Verified fixes in new clean-build JAR:\n   - booking-lambdas-1.0.jar (75MB): Indexer.class uses UncheckedIOException, FlexibleDateDeserializer present, ContainerType has @JsonDeserialize\n   - booking-1.0.jar (134MB): FlexibleDateDeserializer present, ContainerType has @JsonDeserialize\n5. Summary document updated with SUBMITTER undo, detailed test tables (200 JUnit classes, 69 TestNG classes, 9 DynamoDB IT classes, 19 Flow/Service IT classes), and mvn command reference",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/validation/ValidationContext.java",
+        "booking/src/test/java/com/inttra/mercury/booking/validation/ValidationContextTest.java",
+        "booking/docs/2026-03-25-runtime-issue-fixes-summary.md",
+        "/tmp/mvn-verify-final.log"
+      ]
+    },
+    {
+      "id": "a19631b70dba",
+      "timestamp": "2026-03-26T21:33:09.392604+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Agent model: Claude Opus 4.6",
+      "detail": "Claude Opus 4.6",
+      "tags": [],
+      "references": []
+    }
+  ]
+}

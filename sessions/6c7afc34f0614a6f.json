@@ -1,0 +1,70 @@
+{
+  "id": "6c7afc34f0614a6f",
+  "name": "OWASP HIGH Vulnerability Fix — mercury-services-commons",
+  "description": "Analysis and fix plan for 11 HIGH OWASP findings in booking module's transitive dependencies from mercury-services-commons. Covers Netty removal (replacing with AWS CRT), Dropwizard upgrade, Logback override, and Jetty EOL handling.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-04-16T22:24:43.136517+00:00",
+  "updated_at": "2026-04-16T22:25:12.855442+00:00",
+  "status": "active",
+  "tags": [
+    "owasp",
+    "security",
+    "netty",
+    "aws-crt",
+    "dropwizard",
+    "vulnerability"
+  ],
+  "entries": [
+    {
+      "id": "6e287780d670",
+      "timestamp": "2026-04-16T22:24:52.033202+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Completed full analysis of 11 HIGH OWASP findings in booking module from mercury-services-commons transitive deps",
+      "detail": "11 HIGH CVEs from 3 sources:\n- 9 Netty CVEs (4.1.124.Final) from cloud-sdk-aws explicit pins via netty-nio-client\n- 1 Jetty CVE (11.0.26, EOL) from Dropwizard 4.0.16 via commons\n- 1 Logback CVE (1.5.18) from Dropwizard 4.0.16 via commons\n\nOWASP evidence heuristic differences between individual JAR vs shaded JAR scanning explain why cloud-sdk-aws report didn't show Netty HIGHs but booking did.",
+      "tags": [
+        "netty",
+        "jetty",
+        "logback",
+        "owasp"
+      ],
+      "references": [
+        "cloud-sdk-aws/docs/2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md",
+        "cloud-sdk-aws/pom.xml"
+      ]
+    },
+    {
+      "id": "2244724ad240",
+      "timestamp": "2026-04-16T22:25:04.203954+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Netty removal feasibility: HIGH — only 1 production file, 3 test files impacted. aws-crt-client already a dependency.",
+      "detail": "Netty removal impact analysis completed:\n\nPRODUCTION IMPACT (1 file):\n- AwsHttpClientWrapper.java: defaultAsyncClient() uses NettyNioAsyncHttpClient → replace with AwsCrtAsyncHttpClient\n\nOnly S3 Transfer Manager uses async clients. All other services (SQS, SNS, SSM, SES, DynamoDB) are sync-only with ApacheHttpClient.\n\nTEST IMPACT (3 files):\n- TransferManagerFactoryTest.java: Netty builder + isInstanceOf assertions\n- S3ClientFactoryTest.java: Partially migrated (has both Netty and CRT references)\n- AwsStorageConfigTest.java: createNettyHttpClient() helper + parameterized tests\n- AwsHttpClientWrapperTest.java: Already uses CRT — no changes needed\n\nPOM IMPACT: Remove netty-nio-client + 9 explicit io.netty:* version pins (10 deps total). aws-crt-client already declared.\n\nRECOMMENDATION: Remove Netty entirely, replace with AwsCrtAsyncHttpClient (already in tests, AWS-recommended for S3).",
+      "tags": [
+        "netty",
+        "aws-crt",
+        "impact-analysis"
+      ],
+      "references": [
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpClientWrapper.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/storage/factory/TransferManagerFactory.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/BaseAwsConfig.java"
+      ]
+    },
+    {
+      "id": "cb4d6e10e7f6",
+      "timestamp": "2026-04-16T22:25:12.855428+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "decision",
+      "summary": "Fix plan: Remove Netty entirely (replace with CRT), upgrade Dropwizard 4.0.17, override Logback 1.5.32, suppress Jetty EOL CVE",
+      "detail": "Fix plan documented at cloud-sdk-aws/docs/2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md\n\nRevised execution order (Netty REMOVAL instead of upgrade):\n1. Remove netty-nio-client + 9 io.netty:* deps from cloud-sdk-aws/pom.xml\n2. Replace NettyNioAsyncHttpClient → AwsCrtAsyncHttpClient in AwsHttpClientWrapper.defaultAsyncClient()\n3. Update 3 test files to use CRT instead of Netty\n4. Upgrade Dropwizard 4.0.16 → 4.0.17 in root pom.xml\n5. Override Logback to 1.5.32 if DW 4.0.17 doesn't fix it\n6. Handle Jetty 11.x EOL CVE via suppression or risk acceptance\n7. Publish commons SNAPSHOT, rebuild booking, re-run OWASP",
+      "tags": [
+        "fix-plan",
+        "decision"
+      ],
+      "references": [
+        "cloud-sdk-aws/docs/2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md"
+      ]
+    }
+  ]
+}

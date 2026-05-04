@@ -1,0 +1,76 @@
+{
+  "id": "145646203c574b32",
+  "name": "ION-14382 Lambda JAR Size Fix - Aggressive Shade Lambda JAR",
+  "description": "Implement a second shade execution in booking/pom.xml to produce a separate Lambda-specific JAR (booking-lambdas) with aggressive dependency exclusions to get under the 250MB Lambda unzipped size limit. Update build.sh for the new naming convention.",
+  "project": "mercury-services",
+  "created_at": "2026-03-24T17:12:29.504112+00:00",
+  "updated_at": "2026-03-24T17:48:47.977481+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "lambda",
+    "jar-size",
+    "shade-plugin",
+    "ION-14382",
+    "quick-fix"
+  ],
+  "entries": [
+    {
+      "id": "7401759a6f68",
+      "timestamp": "2026-03-24T17:12:42.934164+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Decision: Single lambda JAR with aggressive shade exclusions. Keep Jest/ES for IndexerHandler. Target ~225MB.",
+      "detail": "Previous session dbdbd4a24ab54c33 analyzed root cause: booking JAR unzipped = 342MB vs Lambda 250MB limit.\\n\\nDecision: Implement Section 8 from 2026-03-23-lambda-jar-size-fix-plan.md:\\n- Add second shade execution producing booking-lambdas-${project.version}.jar\\n- Single lambda JAR for both S3ArchiveHandler and IndexerHandler (must include Jest/Elasticsearch for IndexerHandler)\\n- Aggressive exclusions: aws-crt, netty, ssm, sesv2, sso, ssooidc, s3-transfer-manager, mysql, jetty, dropwizard, swagger, webjars, hibernate, hystrix, rx, openxmlformats, javers, etc.\\n- Must keep: Jest, Elasticsearch, cloud-sdk-aws (DynamoDB, S3, SNS), jackson, guava, commons-lang3, logback, jersey-client\\n- Target: ~225MB unzipped (under 250MB limit)\\n- Update build.sh to produce Booking-Lambdas-${RELEASE_NAME}.jar\\n\\nLong-term: Separate lambda modules (documented separately)\\nModel: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-03-23-lambda-jar-size-fix-plan.md",
+        "booking/pom.xml",
+        "booking/build.sh",
+        "session:dbdbd4a24ab54c33"
+      ]
+    },
+    {
+      "id": "5d0821d5836d",
+      "timestamp": "2026-03-24T17:46:29.756517+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Code changes complete: Lambda JAR at 174MB unzipped (46.7% reduction), all tests pass.",
+      "detail": "Changes made:\\n1. booking/pom.xml: Added shade-lambda execution (BEFORE shade-main) with aggressive artifact exclusions. Uses shadedArtifactAttached=true so both executions process the original unshaded artifact.\\n2. booking/build.sh: Added mv command to move booking-lambdas-1.0.jar to build_tmp as Booking-Lambdas-{RELEASE_NAME}.jar\\n\\nFixed groupId issues:\\n- mysql:* (not com.mysql:*)\\n- software.amazon.awssdk.crt:* (not software.amazon.awssdk:aws-crt)\\n- org.apache.poi:* and org.apache.xmlbeans:* (not org.openxmlformats:*)\\n\\nResults:\\n- Main JAR: 133.5MB compressed, 326.3MB unzipped (unchanged)\\n- Lambda JAR: 74.3MB compressed, 174.0MB unzipped (well under 250MB limit)\\n- Savings: 152.3MB unzipped (46.7% reduction)\\n- All 2648 tests pass (1735 JUnit + 913 TestNG)\\n- All essential classes for both Lambda handlers verified present in lambda JAR\\n\\nModel: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "booking/build.sh",
+        "booking/target/booking-lambdas-1.0.jar"
+      ]
+    },
+    {
+      "id": "9e0836dfe59a",
+      "timestamp": "2026-03-24T17:48:38.596802+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "All documentation created. 4 files changed/created total.",
+      "detail": "Files created:\\n1. booking/docs/2026-03-24-lambda-jar-size-fix-summary.md — Summary of all changes, results, verification, and deployment notes\\n2. booking/docs/2026-03-24-lambda-module-refactor-plan.md — Detailed long-term plan for extracting Lambda handlers into dedicated modules under lambda/\\n\\nFiles modified:\\n1. booking/pom.xml — Added shade-lambda execution before shade-main with 30+ artifact exclusions and native lib filters\\n2. booking/build.sh — Added mv command for booking-lambdas-1.0.jar → Booking-Lambdas-{RELEASE_NAME}.jar\\n\\nKey technical decisions:\\n- shade-lambda runs BEFORE shade-main (order matters: shade-main replaces artifact, shade-lambda needs original)\\n- shade-lambda uses shadedArtifactAttached=true to preserve original artifact\\n- Single lambda JAR for both handlers (keeps Jest/ES for IndexerHandler)\\n- GroupId fixes: mysql:* (not com.mysql:*), software.amazon.awssdk.crt:* (not software.amazon.awssdk:aws-crt), org.apache.poi:* (not org.openxmlformats:*)\\n\\nModel: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "booking/build.sh",
+        "booking/docs/2026-03-24-lambda-jar-size-fix-summary.md",
+        "booking/docs/2026-03-24-lambda-module-refactor-plan.md"
+      ]
+    },
+    {
+      "id": "4fe654ffd613",
+      "timestamp": "2026-03-24T17:48:47.977467+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "All tests pass. Lambda JAR 174MB unzipped (76MB under limit). Build verified.",
+      "detail": "mvn verify -pl booking --also-make:\\n- BUILD SUCCESS\\n- Surefire (unit tests): 1735 JUnit + 913 TestNG = 2648 tests, 0 failures\\n- Failsafe (integration tests): 138 DynamoDB integration tests passed, 151 integration tests skipped (require external server)\\n- Lambda JAR: 174.0 MB unzipped (76 MB under 250 MB Lambda limit)\\n- Main JAR: 326.3 MB unzipped (unchanged from before)\\n- All 31 essential Lambda classes verified present in lambda JAR\\n\\nModel: Claude Opus 4.6",
+      "tags": [],
+      "references": [
+        "booking/target/booking-lambdas-1.0.jar",
+        "booking/target/booking-1.0.jar"
+      ]
+    }
+  ]
+}

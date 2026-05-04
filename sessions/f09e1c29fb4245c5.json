@@ -1,0 +1,84 @@
+{
+  "id": "f09e1c29fb4245c5",
+  "name": "ION-14382 Booking Email Test Content Verification Review",
+  "description": "Review of email test changes in the AWS SDK v2 upgrade PR. Analyzing loss of email content verification (HTML/text body assertions) in OutBoundEmailSenderTest and LegalTermsEmailTest, and proposing strategies to restore it using the new cloud-sdk-aws EmailService API.",
+  "project": "mercury-services",
+  "created_at": "2026-03-24T21:35:46.684423+00:00",
+  "updated_at": "2026-03-24T21:42:38.773383+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "email",
+    "testing",
+    "review",
+    "aws-upgrade",
+    "ION-14382",
+    "cloud-sdk"
+  ],
+  "entries": [
+    {
+      "id": "144faf8122d6",
+      "timestamp": "2026-03-24T21:36:00.323788+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Identified 2 test files with email content verification removed; ~28 test methods total lost subject/HTML/text assertions.",
+      "detail": "Analyzed the full-diff.patch for email test changes. Two main test files had email content verification removed:\\n\\n1. OutBoundEmailSenderTest.java — ~20 test methods affected. Previously used `verify(rawEmailSender).sendEmail(new EmailContent(...subject, htmlContent, textContent), vars)` to assert exact email subject, HTML body, and text body. Now replaced with `verify(emailService).sendTemplateEmail(anyString(), anyList(), any(Map.class))` — only verifying the method was called, not its arguments.\\n\\n2. LegalTermsEmailTest.java — ~8 test methods affected. Same pattern: previously verified full EmailContent (subject, HTML, text) + template vars via rawEmailSender. Now only verifies emailService.sendTemplateEmail is called with the correct template name and recipient list.\\n\\nOther files (OutboundServiceTest, OutboundServiceAddnlTest, OutboundServiceImplTest, OutboundServiceTestBase, OutboundResourceTest) only had type renames (EmailSenderConfig → BookingEmailConfig) — no email content verification was present in those files before.\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "analysis",
+        "email-tests"
+      ],
+      "references": [
+        "booking/src/test/java/com/inttra/mercury/booking/outbound/email/OutBoundEmailSenderTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/outbound/email/LegalTermsEmailTest.java",
+        ".github/skills/pr-reviews/full-diff.patch"
+      ]
+    },
+    {
+      "id": "2362e9efa510",
+      "timestamp": "2026-03-24T21:36:12.891801+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "EmailSendResult.emailRequest contains rendered contentHtml/contentText. Content verification IS possible but requires different approach since EmailService is mocked in unit tests.",
+      "detail": "Critical finding: The new cloud-sdk-aws EmailService.sendTemplateEmail() returns EmailResultCollector<EmailSendResult>, and EmailSendResult contains an EmailRequest field. EmailRequest has contentHtml and contentText fields that hold the rendered template output.\\n\\nIn SesEmailServiceImpl.processSuccessResult(), the EmailRequest is constructed from TemplateContent which holds the fully-rendered Handlebars HTML and text. This means the rendered email content IS accessible in the result — via emailSendResult.getEmailRequest().getContentHtml() and getContentText().\\n\\nHowever, in the tests, emailService is MOCKED, so sendTemplateEmail returns a pre-built mock collector. The real rendering never happens in unit tests.\\n\\nTwo approaches to restore content verification:\\n1. ArgumentCaptor on vars: Capture the Map<String, Object> vars passed to sendTemplateEmail. Verify that the template variable map contains the correct values (subject, carrier, shipper, etc). This validates the converter logic but NOT the template rendering.\\n2. Integration-style: Use real EmailTemplatesLoader + HandlebarsTemplateServiceImpl to render the template with captured vars, then assert on the rendered HTML/text. This is closer to the old tests but requires the template files on classpath.\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "analysis",
+        "cloud-sdk-aws",
+        "email-content"
+      ],
+      "references": [
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/email/impl/SesEmailServiceImpl.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/email/model/EmailSendResult.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/email/model/EmailRequest.java"
+      ]
+    },
+    {
+      "id": "1f81fecf234a",
+      "timestamp": "2026-03-24T21:42:33.748264+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Analysis complete. Recommended Strategy B: real SesEmailServiceImpl + mocked SesV2Client to restore full email content verification in tests.",
+      "detail": "Created comprehensive analysis document at booking/docs/2026-03-24-email-test-review-summary.md.\\n\\nKey findings:\\n1. 2 test files affected: OutBoundEmailSenderTest.java (~20 methods) and LegalTermsEmailTest.java (~8 methods) lost email content verification\\n2. 8 additional removed tests were legacy email-sender internals (RawEmailSender, HandlebarsTemplateEmailSender, filterInvalidAddress) — deletion justified\\n3. 6 other test files only had type renames (EmailSenderConfig → BookingEmailConfig)\\n4. 49 expected-output resource files (expected_*_email.html/txt) still exist but are now unused\\n\\nRecommendation: Restore content verification using Strategy B — real SesEmailServiceImpl with mocked SesV2Client. This provides full content verification equivalent to old tests, reuses existing expected-output resource files, and primarily requires changes only in setUp() methods. EmailSendResult.emailRequest contains rendered contentHtml/contentText/subject from the real Handlebars rendering pipeline.\\n\\nModel: Claude Opus 4.6",
+      "tags": [
+        "decision",
+        "recommendation"
+      ],
+      "references": [
+        "booking/docs/2026-03-24-email-test-review-summary.md",
+        "booking/src/test/java/com/inttra/mercury/booking/outbound/email/OutBoundEmailSenderTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/outbound/email/LegalTermsEmailTest.java",
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/email/impl/SesEmailServiceImpl.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/email/model/EmailSendResult.java"
+      ]
+    },
+    {
+      "id": "65b6698af936",
+      "timestamp": "2026-03-24T21:42:38.773337+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Agent using Claude Opus 4.6 for this session.",
+      "detail": "Agent model: Claude Opus 4.6",
+      "tags": [],
+      "references": []
+    }
+  ]
+}

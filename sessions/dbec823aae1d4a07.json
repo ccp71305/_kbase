@@ -1,0 +1,35 @@
+{
+  "id": "dbec823aae1d4a07",
+  "name": "ION-14382-rebase-onto-develop",
+  "description": "Rebase feature/ION-14382-bk3-aws-upgrade onto develop, resolve conflicts, force push, and create git-operations skill",
+  "project": "mercury-services",
+  "created_at": "2026-03-11T18:00:45.280089+00:00",
+  "updated_at": "2026-03-11T18:10:29.247577+00:00",
+  "status": "completed",
+  "tags": [
+    "git",
+    "rebase",
+    "ION-14382",
+    "booking"
+  ],
+  "entries": [
+    {
+      "id": "2499e198fba6",
+      "timestamp": "2026-03-11T18:10:29.247555+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Rebase completed, force-pushed, stash restored, git-operations skill created",
+      "detail": "Rebased feature/ION-14382-bk3-aws-upgrade onto develop (61 incoming commits, 0 conflicts). Single outgoing commit preserved: ff70a91893 'feature/ION-14382 bk3 aws upgrade initial commit'. Force-pushed with --force-with-lease. Stash popped to restore local docs/generated files. Created .github/skills/git-operations/SKILL.md with rebase workflow, conflict resolution guide, and safety notes.",
+      "tags": [
+        "rebase",
+        "force-push",
+        "skill"
+      ],
+      "references": [
+        "feature/ION-14382-bk3-aws-upgrade",
+        "ff70a91893",
+        ".github/skills/git-operations/SKILL.md"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "id": "c6ed69b1e0a74b35",
+  "name": "WebBL SQS connection pool shutdown investigation",
+  "description": "Investigate MessagingException while receiving from SQS in WebBL ECS task and identify root cause/fix.",
+  "project": "mercury-services",
+  "created_at": "2026-03-31T14:38:59.092008+00:00",
+  "updated_at": "2026-03-31T16:59:09.107923+00:00",
+  "status": "completed",
+  "tags": [
+    "webbl",
+    "sqs",
+    "ecs",
+    "incident",
+    "prod"
+  ],
+  "entries": [
+    {
+      "id": "6e6245454fec",
+      "timestamp": "2026-03-31T14:53:45.433954+00:00",
+      "agent": "copilot-gpt5-codex",
+      "category": "progress",
+      "summary": "Started ECS/WebBL incident investigation with live AWS context",
+      "detail": "Validated active profile 642960533737_INTTRA2-QATeam and fetched ECS service/task metadata for WebBL-prod in cluster ANEPRWEBSVC-001. Next step: correlate CloudWatch exceptions with lifecycle and health events.",
+      "tags": [
+        "webbl",
+        "ecs",
+        "cloudwatch",
+        "incident"
+      ],
+      "references": [
+        "arn:aws:ecs:us-east-1:642960533737:task/ANEPRWEBSVC-001/4ad01fb7680f4b48b43aa8f580c0df1f",
+        "inttra2-ecs-logs"
+      ]
+    },
+    {
+      "id": "e286e30cb4e7",
+      "timestamp": "2026-03-31T15:30:11.646300+00:00",
+      "agent": "copilot-gpt5-codex",
+      "category": "finding",
+      "summary": "Collected ECS and CloudWatch evidence for reported webbl exception",
+      "detail": "Checked cluster ANEPRWEBSVC-001 service WebBL-prod and task streams. Provided stream WebBL-latest-prod/WebBL-prod-Container/7ebc597433714a7fab0c50951bfb1779 contains startup + healthcheck logs only (no MessagingException/pool-shutdown entries). Running task streams 4ad01fb... and 8cdad922... also have no pool-shutdown entries. ECS service events show task replacements due to ALB health check request timeout around 2026-03-31 07:06.",
+      "tags": [
+        "webbl",
+        "sqs",
+        "ecs",
+        "cloudwatch"
+      ],
+      "references": [
+        "webbl/src/main/java/com/inttra/mercury/webbl/WebBLApplication.java",
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/support/ListenerManager.java",
+        "arn:aws:ecs:us-east-1:642960533737:service/ANEPRWEBSVC-001/WebBL-prod",
+        "WebBL-latest-prod/WebBL-prod-Container/7ebc597433714a7fab0c50951bfb1779"
+      ]
+    },
+    {
+      "id": "54ddc89ab9c2",
+      "timestamp": "2026-03-31T15:30:11.660094+00:00",
+      "agent": "copilot-gpt5-codex",
+      "category": "finding",
+      "summary": "Identified code-level lifecycle risk likely contributing to instability",
+      "detail": "WebBLApplication.startListener() both registers ListenerManager with Dropwizard lifecycle and invokes listenerManager.start() directly. This can start schedulers/listeners twice. Observed duplicate NetworkDBListener log lines in same task stream at near-identical timestamps, consistent with duplicate scheduleWithFixedDelay registration. This increases load and can contribute to health-check timeouts and unstable runtime behavior.",
+      "tags": [
+        "webbl",
+        "lifecycle",
+        "listener",
+        "stability"
+      ],
+      "references": [
+        "webbl/src/main/java/com/inttra/mercury/webbl/WebBLApplication.java:79-80",
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/support/ListenerManager.java:37-42"
+      ]
+    },
+    {
+      "id": "cf859a3763e3",
+      "timestamp": "2026-03-31T15:30:11.671052+00:00",
+      "agent": "copilot-gpt5-codex",
+      "category": "model_info",
+      "summary": "Logged model information",
+      "detail": "Investigation performed by GPT-5.3-Codex (model ID: gpt-5.3-codex).",
+      "tags": [
+        "model-info"
+      ],
+      "references": [
+        "gpt-5.3-codex"
+      ]
+    },
+    {
+      "id": "44c256eb952f",
+      "timestamp": "2026-03-31T16:26:32.833870+00:00",
+      "agent": "copilot-gpt5-codex",
+      "category": "progress",
+      "summary": "Investigation summary and probable root cause for SQS pool-shutdown error",
+      "detail": "Reviewed webbl code + ECS/CloudWatch runtime evidence. Reported log stream 7ebc... does not contain the cited exception; it only has startup/healthcheck logs. However, code has lifecycle bug: WebBLApplication registers ListenerManager as Managed and also calls listenerManager.start() directly, causing duplicate listener/scheduler start. Confirmed by duplicate NetworkDBListener log lines in each task stream at near-identical timestamps. ECS service events show periodic task replacement due to ALB health check timeouts. This combination can lead to shutdown/restart races where SDK HTTP pool is closed while SQS receive loop is still active, surfacing as MessagingException with cause \"Connection pool shut down\".",
+      "tags": [
+        "webbl",
+        "sqs",
+        "incident",
+        "root-cause"
+      ],
+      "references": [
+        "webbl/src/main/java/com/inttra/mercury/webbl/WebBLApplication.java:79-80",
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/support/ListenerManager.java:37-53",
+        "webbl/src/main/java/com/inttra/mercury/webbl/common/listener/SQSListener.java:89-103",
+        "webbl/src/main/java/com/inttra/mercury/webbl/config/WebBLMessagingModule.java:46-49",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClient.java:311-329"
+      ]
+    },
+    {
+      "id": "07ade1143bda",
+      "timestamp": "2026-03-31T16:45:34.444951+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "User provided full stack trace confirming IllegalStateException: Connection pool shut down in running task",
+      "detail": "Full stack trace provided by user:\\nERROR [2026-03-31 15:40:03.475] SqsMessagingClient: Unexpected SDK error while receiving from queue .../inttra2_pr_sqs_webbl_zip_inbound\\njava.lang.IllegalStateException: Connection pool shut down\\n  at PoolingHttpClientConnectionManager.requestConnection\\n  at ApacheSdkHttpClient.execute\\n  at ApacheHttpClient.execute\\n  via MakeHttpRequestStage pipeline\\n\\nTask: 4ad01fb7680f4b48b43aa8f580c0df1f (currently RUNNING, started 06:10:47)\\nThis means the ApacheHttpClient connection pool was permanently closed while the task was still alive and polling SQS.",
+      "tags": [
+        "webbl",
+        "sqs",
+        "connection-pool",
+        "root-cause"
+      ],
+      "references": [
+        "arn:aws:ecs:us-east-1:642960533737:task/ANEPRWEBSVC-001/4ad01fb7680f4b48b43aa8f580c0df1f",
+        "inttra2_pr_sqs_webbl_zip_inbound"
+      ]
+    },
+    {
+      "id": "f23e47ac30e5",
+      "timestamp": "2026-03-31T16:59:09.107905+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Created investigation document with root cause and fixes",
+      "detail": "Created comprehensive investigation document at webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md covering:\\n- Full exception trace and component chain\\n- 7 identified issues with severity ratings\\n- 6 proposed fixes with code samples\\n- Recommended implementation order\\n- ECS service timeline",
+      "tags": [
+        "webbl",
+        "sqs",
+        "connection-pool",
+        "document"
+      ],
+      "references": [
+        "webbl/docs/2026-03-31-sqs-connection-pool-shutdown-investigation.md"
+      ]
+    }
+  ]
+}

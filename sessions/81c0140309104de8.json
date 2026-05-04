@@ -1,0 +1,98 @@
+{
+  "id": "81c0140309104de8",
+  "name": "Booking OWASP HIGH Vulnerability Origin Analysis",
+  "description": "Identify origin and dependency paths of HIGH severity findings from booking/target/owasp/dependency-check-report.html",
+  "project": "mercury-services",
+  "created_at": "2026-04-16T21:49:15.680957+00:00",
+  "updated_at": "2026-04-16T21:51:00.691900+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "owasp",
+    "dependency-check",
+    "security"
+  ],
+  "entries": [
+    {
+      "id": "2a3020b4050e",
+      "timestamp": "2026-04-16T21:49:34.245306+00:00",
+      "agent": "copilot-gpt5.3-codex",
+      "category": "model_info",
+      "summary": "Model used for analysis",
+      "detail": "Analysis and reporting performed using GPT-5.3-Codex.",
+      "tags": [
+        "model",
+        "traceability"
+      ],
+      "references": [
+        "booking/target/owasp/dependency-check-report.html"
+      ]
+    },
+    {
+      "id": "f48b3418b844",
+      "timestamp": "2026-04-16T21:49:34.257144+00:00",
+      "agent": "copilot-gpt5.3-codex",
+      "category": "finding",
+      "summary": "Identified all HIGH vulnerability origins in booking OWASP report",
+      "detail": "Found 11 HIGH rows total: 1 from ch.qos.logback:logback-core:1.5.18, 9 from io.netty modules at 4.1.124.Final, and 1 from org.eclipse.jetty:jetty-http:11.0.26. All are reported as shaded content under booking-1.0.jar.",
+      "tags": [
+        "owasp",
+        "high",
+        "booking",
+        "dependencies"
+      ],
+      "references": [
+        "booking/target/owasp/dependency-check-report.html"
+      ]
+    },
+    {
+      "id": "ec54017c2edd",
+      "timestamp": "2026-04-16T21:49:34.269216+00:00",
+      "agent": "copilot-gpt5.3-codex",
+      "category": "progress",
+      "summary": "Documented HIGH vulnerability origin summary in booking docs",
+      "detail": "Created markdown summary with dependency origins, evidence line ranges, and dependency-tree provenance for HIGH findings.",
+      "tags": [
+        "documentation",
+        "booking",
+        "security"
+      ],
+      "references": [
+        "booking/docs/2026-04-16-owasp-high-vulnerability-origin-summary.md"
+      ]
+    },
+    {
+      "id": "02336c3f816e",
+      "timestamp": "2026-04-16T21:51:00.679010+00:00",
+      "agent": "copilot-gpt5.3-codex",
+      "category": "decision",
+      "summary": "Added remediation-priority section for HIGH dependency sources",
+      "detail": "Documented prioritized remediation sequence: P0 Netty (transitive via cloud-sdk-aws), P1 Jetty HTTP (via Dropwizard/Jetty path), P2 Logback core (via Dropwizard logging path). Included upgrade approach, risks, mitigations, and verification commands per dependency.",
+      "tags": [
+        "remediation",
+        "owasp",
+        "high",
+        "booking"
+      ],
+      "references": [
+        "booking/docs/2026-04-16-owasp-high-vulnerability-origin-summary.md"
+      ]
+    },
+    {
+      "id": "095874b14a50",
+      "timestamp": "2026-04-16T21:51:00.691886+00:00",
+      "agent": "copilot-gpt5.3-codex",
+      "category": "progress",
+      "summary": "Updated booking docs with actionable remediation guidance",
+      "detail": "Extended the OWASP HIGH origin summary with a full remediation section and suggested incremental execution strategy (Netty -> Jetty -> Logback) with post-step validation expectations.",
+      "tags": [
+        "documentation",
+        "security",
+        "dependency-upgrade"
+      ],
+      "references": [
+        "booking/docs/2026-04-16-owasp-high-vulnerability-origin-summary.md"
+      ]
+    }
+  ]
+}

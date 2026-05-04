@@ -1,0 +1,73 @@
+{
+  "id": "ad378beb151a432f",
+  "name": "Visibility-Booking Model Compatibility Analysis",
+  "description": "Analyze how visibility module uses booking model (BookingDetailVisibility extends BookingDetail), how model versioning works, and whether booking's AWS SDK v2 upgrade causes breaking changes for the non-upgraded visibility module.",
+  "project": "mercury-services",
+  "created_at": "2026-04-17T13:32:29.766968+00:00",
+  "updated_at": "2026-04-17T14:20:55.335516+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "booking",
+    "model-compatibility",
+    "aws-upgrade",
+    "breaking-changes"
+  ],
+  "entries": [
+    {
+      "id": "13bec959c71f",
+      "timestamp": "2026-04-17T13:36:25.887948+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Complete analysis of visibility-booking model compatibility and breaking change assessment",
+      "detail": "## Key Findings\n\n### Current Dependency Chain\n- visibility-commons depends on `booking:2.1.8.M` (published artifact, pre-upgrade)\n- visibility uses `dynamo-client` (AWS SDK v1 DynamoDBMapper)\n- booking (current workspace) now uses cloud-sdk-api/cloud-sdk-aws (AWS SDK v2 Enhanced Client)\n\n### BookingDetailVisibility\n- Location: visibility/visibility-commons/src/main/java/.../BookingDetailVisibility.java\n- Simply extends BookingDetail with @DynamoDBTable(tableName=\"booking_BookingDetail\") (SDK v1 annotation)\n- Empty class — all fields and methods inherited from BookingDetail\n\n### BookingDetail (post-upgrade)\n- Now uses SDK v2 annotations: @DynamoDbBean, @DynamoDbPartitionKey, @DynamoDbSortKey, @DynamoDbVersionAttribute\n- Uses cloud-sdk annotations: @Table, @TTL, @GsiConfig, @DynamoDBStream\n- Converters now implement SDK v2 AttributeConverter interface (software.amazon.awssdk.enhanced.dynamodb.AttributeConverter)\n- No longer has @DynamoDBTable, @DynamoDBHashKey, @DynamoDBRangeKey (SDK v1)\n- No longer has getHashKey() method\n\n### Visibility BookingDao\n- Uses DynamoDBMapper (SDK v1) — won't recognize SDK v2 annotations\n- Calls bookingDetail.getHashKey() — method no longer exists in BookingDetail\n- Extends DynamoDBCrudRepository from dynamo-client (SDK v1 wrapper)\n\n### Breaking Changes (when visibility updates booking dependency to post-upgrade version):\n1. COMPILE ERROR: getHashKey() removed from BookingDetail\n2. RUNTIME FAILURE: DynamoDBMapper can't map SDK v2 annotated BookingDetail\n3. CONVERTER INCOMPATIBILITY: Converters use SDK v2 AttributeConverter interface\n4. ANNOTATION MISMATCH: @DynamoDBTable on BookingDetailVisibility vs @Table/@DynamoDbBean on parent\n5. TRANSITIVE DEPENDENCY CONFLICTS: cloud-sdk deps pulled in through booking\n\n### Current State (Safe)\n- visibility-commons pins booking at 2.1.8.M (pre-upgrade version) — NO BREAKING CHANGE YET\n- The break will happen when visibility updates its booking dependency to a post-upgrade version",
+      "tags": [
+        "breaking-change",
+        "model-compatibility",
+        "aws-sdk-v2"
+      ],
+      "references": [
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDetailVisibility.java",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDao.java",
+        "visibility/visibility-commons/pom.xml"
+      ]
+    },
+    {
+      "id": "428ee58e77b7",
+      "timestamp": "2026-04-17T14:18:36.414483+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Complete git diff analysis of SDK v1 annotations removed during booking upgrade — confirmed all breaking annotation removals and data format change",
+      "detail": "## Git Diff Analysis — BookingDetail Pre vs Post Upgrade (c76288ed → 74f36e7a)\n\n### SDK v1 Annotations REMOVED from BookingDetail:\n1. `@DynamoDBTable(tableName = \"BookingDetail\")` → `@Table(name = \"BookingDetail\")` + `@DynamoDbBean`\n2. `@DynamoDBHashKey` on `getHashKey()` → `@DynamoDbPartitionKey` on `getBookingId()` (METHOD RENAMED)\n3. `@DynamoDBRangeKey` on `getSortKey()` → `@DynamoDbSortKey` on `getSequenceNumber()` (METHOD RENAMED)\n4. `@DynamoDBVersionAttribute` → `@DynamoDbVersionAttribute`\n5. `@DynamoDBTypeConverted(converter = ContractTypeConverter.class)` on payload field → `@DynamoDbConvertedBy(ContractAttributeConverter.class)` on getter\n6. `@DynamoDBTypeConverted(converter = DateToEpochSecond.class)` on expiresOn field → `@DynamoDbConvertedBy(DateEpochSecondAttributeConverter.class)` on getter\n7. `@DynamoDBTypeConvertedEnum` on payloadType, state, channel fields → REMOVED (Enhanced Client handles natively)\n8. `@DynamoDBIndexHashKey` / `@DynamoDBIndexRangeKey` → `@DynamoDbSecondaryPartitionKey` / `@DynamoDbSecondarySortKey`\n9. `@DynamoDBAttribute` on ALL fields → REMOVED\n10. `@DynamoDBIgnore` on getters → `@DynamoDbIgnore`\n11. `implements DynamoHashAndSortKey<String, String>` → REMOVED (getHashKey()/getSortKey() gone)\n\n### SDK v1 Annotations REMOVED from MetaData:\n1. `@DynamoDBDocument` → REMOVED\n2. `@DynamoDBTypeConverted(converter = LocalDateTimeTypeConverter.class)` on timestamp → REMOVED\n3. `@DynamoDBIgnore` on getTimestampAsString() → REMOVED\n\n### SDK v1 Annotations REMOVED from Audit:\n1. `@DynamoDBDocument` → REMOVED\n2. `@DynamoDBTypeConverted(converter = OffsetDateTimeTypeConverter.class)` on createdDateUtc, lastModifiedDateUtc → REMOVED\n\n### SDK v1 Annotations REMOVED from EnrichedAttributes:\n1. `@DynamoDBDocument` → REMOVED\n2. `@DynamoDBIgnore` on getLocationAdditionalInfoForLocation(), isMatch() → REMOVED\n\n### Old LocalDateTimeTypeConverter:\n- Used `DateTimeFormatter.ISO_DATE_TIME` → writes `\"2020-04-14T10:21:53.78\"` (T separator)\n- Still exists but no longer implements DynamoDBTypeConverter (orphaned)\n\n### New MetaDataConverter (SDK v2):\n- Uses ObjectMapper with JavaTimeModule + WRITE_DATES_AS_TIMESTAMPS=false\n- @JsonFormat(pattern=\"yyyy-MM-dd HH:mm:ss.SS\") on MetaData.timestamp\n- WRITES timestamps with SPACE separator: \"2020-04-14 10:21:53.78\"\n- This is a DATA FORMAT CHANGE from the old T-separator format\n\n### Timestamp Format Incompatibility:\n- OLD booking code wrote: \"2020-04-14T10:21:53.78\" (ISO with T via LocalDateTimeTypeConverter)\n- NEW booking code writes: \"2020-04-14 10:21:53.78\" (space via @JsonFormat pattern in MetaDataConverter)\n- This is a BACKWARD INCOMPATIBLE change in data format",
+      "tags": [
+        "git-diff",
+        "annotation-changes",
+        "breaking-change",
+        "timestamp-format"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java",
+        "booking/src/main/java/com/inttra/mercury/booking/util/MetaData.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/Audit.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/LocalDateTimeTypeConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java"
+      ]
+    },
+    {
+      "id": "d4375e29c7e6",
+      "timestamp": "2026-04-17T14:20:55.335502+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Analysis document created with full impact assessment, hidden issues, and fix strategies",
+      "detail": "Created comprehensive analysis document: visibility/docs/2026-04-17-booking-sdk-upgrade-impact-on-visibility.md\\n\\nKey findings:\\n1. 12+ breaking changes identified (3 compile-time, 9+ runtime)\\n2. Root cause confirmed: MetaData lost @DynamoDBDocument + @DynamoDBTypeConverted during upgrade\\n3. Hidden issue: MetaDataConverter timestamp round-trip bug (no test coverage for timestamp)\\n4. Hidden issue: Audit class has similar OffsetDateTime parse risk\\n5. Data format change: old=ISO T-separator, new=space-separator via @JsonFormat\\n6. Fix strategies documented: pin pre-upgrade dep (P0), dual-annotate (P1), full upgrade (P2)\\n7. MetaDataConverter needs lenient deserializer for both timestamp formats\"",
+      "tags": [
+        "documentation",
+        "analysis-complete"
+      ],
+      "references": [
+        "visibility/docs/2026-04-17-booking-sdk-upgrade-impact-on-visibility.md"
+      ]
+    }
+  ]
+}

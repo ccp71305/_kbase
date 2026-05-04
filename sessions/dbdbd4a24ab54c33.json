@@ -1,0 +1,52 @@
+{
+  "id": "dbdbd4a24ab54c33",
+  "name": "ION-14382 Booking JAR Size Blocker - Lambda Deployment Failure",
+  "description": "",
+  "project": "mercury-services",
+  "created_at": "2026-03-23T16:44:20.166378+00:00",
+  "updated_at": "2026-03-23T17:37:28.401183+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "lambda",
+    "jar-size",
+    "blocker",
+    "aws-upgrade",
+    "ION-14382"
+  ],
+  "entries": [
+    {
+      "id": "3cf7af975181",
+      "timestamp": "2026-03-23T16:44:26.777641+00:00",
+      "agent": "unknown",
+      "category": "blocker",
+      "summary": "Lambda deployment fails: Unzipped size must be smaller than 262144000 bytes (~250MB). JAR grew from ~94MB to ~135MB after AWS SDK v2 upgrade.",
+      "detail": "Build script deploys booking JAR as Lambda code for S3ArchiveLambda and ElasticsearchLambda. After AWS SDK v2 upgrade, unzipped JAR exceeds Lambda 250MB limit. Previous size was ~94MB, now ~135MB. Model: Claude Opus 4.6",
+      "tags": [
+        "blocker",
+        "lambda",
+        "jar-size"
+      ],
+      "references": [
+        "booking/pom.xml"
+      ]
+    },
+    {
+      "id": "9a5f4f7be045",
+      "timestamp": "2026-03-23T17:37:28.401157+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Root cause: aws-crt native libs (+43.7MB), AWS SDK v2 services (+54.3MB), dual SDK v1+v2. Total unzipped 342MB vs 250MB limit.",
+      "detail": "Root cause analysis complete. New JAR unzipped = 342MB vs Lambda limit 250MB. Old JAR = 230MB.\n\nSize increase breakdown (112MB unzipped):\n1. aws-crt native libs: +43.7MB (linux 35.7MB + osx 4.2MB + windows 3.8MB) — native JNI binaries for 7 platforms. NOT present in old JAR.\n2. AWS SDK v2 services: +54.3MB unzipped — SSM(17.7MB), S3(11MB), DynamoDB(9MB), SESv2(8MB), SNS(3.6MB), SQS(2.8MB), SSO(1+1.3MB)\n3. AWS SDK v2 core/http/regions: ~11MB  \n4. Partially offset by removed SDK v1 services: DynamoDB(-), SSM(-), SES(-), DataPipeline(-) \n5. SDK v1 services STILL present via cloud-sdk-aws: S3, KMS, SNS, SQS (extended client uses v1)\n\nKey targets for exclusion:\n- aws-crt + aws-crt-client: -43.7MB unzipped (native libs for ALL platforms). Booking runs on x86_64 Linux only (Lambda + EC2). CRT is optional high-performance HTTP client — apache-client and netty-nio-client suffice.\n- SSM (software.amazon.awssdk:ssm): -17.7MB if booking doesn't use SSM directly. Need to check if cloud-sdk-aws SSM is needed at Lambda runtime.\n- SES v2 (software.amazon.awssdk:sesv2): -8MB if booking uses SNSClient not SES directly\n\nIf all 3 excluded: 342MB - 43.7MB - 17.7MB - 8MB = 272.6MB. Still over 250MB. Need deeper cuts.\nAdditional targets:\n- SSO + SSO OIDC: -2.3MB (credential resolution, may be needed)\n- S3 transfer manager can be excluded if not used directly\n- netty-nio-client could be excluded if apache-client is the primary HTTP client",
+      "tags": [
+        "analysis",
+        "root-cause"
+      ],
+      "references": [
+        "booking/pom.xml",
+        "booking/src/main/java/com/inttra/mercury/booking/lambda/S3ArchiveHandler.java",
+        "booking/src/main/java/com/inttra/mercury/booking/lambda/IndexerHandler.java"
+      ]
+    }
+  ]
+}
