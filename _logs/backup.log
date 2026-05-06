@@ -760,3 +760,280 @@ Manifest written → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-wor
 2026-05-05 18:44:55 [INFO   ]     templates                       3 file(s)
 2026-05-05 18:44:55 [INFO   ]     claude-skills                   1 file(s)
 2026-05-05 18:44:55 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ] Config          : C:\Users\arijit.kundu\projects\_kb-tools\kb_config.json
+2026-05-06 19:29:58 [INFO   ] Source base     : C:/Users/arijit.kundu/projects
+2026-05-06 19:29:58 [INFO   ] Destination base: C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase
+2026-05-06 19:29:58 [INFO   ] 
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ]   PROJECT : mercury-services
+2026-05-06 19:29:58 [INFO   ]   Source  : C:\Users\arijit.kundu\projects\mercury-services
+2026-05-06 19:29:58 [INFO   ]   Dest    : C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\mercury-services
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ] 
+  ── .github  [module=-, loc-cat=github-prompts]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\copilot-instructions.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): copilot-instructions.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\bk-runtime-issues.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): bk-runtime-issues.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\bk-visibility-audit-unconvert-05062026.prompt.md
+2026-05-06 19:29:58 [INFO   ]     COPY: bk-visibility-audit-unconvert-05062026.prompt.md  →  .../mercury-services/github-prompts/prompts/bk-visibility-audit-unconvert-05062026.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\bk-watermill-datetimeex-04292026.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): bk-watermill-datetimeex-04292026.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\booking-dataformat-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-dataformat-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\booking-email-test-restore.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-email-test-restore.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\booking-email-test-review.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-email-test-review.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\booking-integration-issues.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-integration-issues.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\lambda-workaround.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): lambda-workaround.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\network-ov-runtime-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): network-ov-runtime-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\visibility-aws-upgrade-plan.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): visibility-aws-upgrade-plan.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\visibility-curr-state.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): visibility-curr-state.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\webbl.connpool-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): webbl.connpool-issue.prompt.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\aws-dynamo-check.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): aws-dynamo-check.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\enrichedAttributes.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): enrichedAttributes.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_BookingDetail.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_BookingDetail.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_RapidReservation.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_RapidReservation.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SequenceId.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SequenceId.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SpotRatesDetail.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SpotRatesDetail.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SpotRatesToInttraRefDetail.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SpotRatesToInttraRefDetail.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_Template.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_Template.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_UniqueId.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_UniqueId.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\build-errors\SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\git-operations\SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\java-refactoring\SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-context.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): pr-context.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-review-comments.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): pr-review-comments.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-review-responses.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): pr-review-responses.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\session-context\SKILL.md
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── .claude  [module=-, loc-cat=claude-skills]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\settings.local.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): settings.local.json
+2026-05-06 19:29:58 [INFO   ] 
+  ── .vscode  [module=-, loc-cat=vscode-settings]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\launch.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): launch.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\mcp.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): mcp.json
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\settings.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-05-06 19:29:58 [INFO   ] 
+  ── booking/docs  [module=booking, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-25-runtime-issue-fixes-summary.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-03-25-runtime-issue-fixes-summary.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-27-aws-upgrade-branch-migration-summary.md
+2026-05-06 19:29:58 [DEBUG  ]     category='uncategorized' (no match)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-03-27-aws-upgrade-branch-migration-summary.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-27-booking-dev-log-review.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-03-27-booking-dev-log-review.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-13-rebase-conflict-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-13-rebase-conflict-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-16-owasp-high-vulnerability-origin-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-16-owasp-high-vulnerability-origin-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-17-booking-dataformat-issue-fixes.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-17-booking-dataformat-issue-fixes.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-22-qa-outbound-pipeline-debug-findings.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *findings*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-22-qa-outbound-pipeline-debug-findings.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-23-owasp-netty.md
+2026-05-06 19:29:58 [DEBUG  ]     category='uncategorized' (no match)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-owasp-netty.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-05-booking-business-rules-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-05-05-booking-business-rules-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-05-booking-redshift-audit-field-issue.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-05-05-booking-redshift-audit-field-issue.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-06-visibility-audit-unconvert-issue-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [INFO   ]     COPY: 2026-05-06-visibility-audit-unconvert-issue-claude.md  →  .../mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-06-visibility-audit-unconvert-issue-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [INFO   ]     COPY: 2026-05-06-visibility-audit-unconvert-issue-copilot.md  →  .../mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-business-rules.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-business-rules.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-integration-issues-04222027-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issues*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-integration-issues-04222027-copilot.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\claude-review-integration-issue-fix.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): claude-review-integration-issue-fix.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\DESIGN-AWS2x.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN-AWS2x.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\integration-issues-qa-verification-apr232027.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issues*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): integration-issues-qa-verification-apr232027.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\visibility-integration-issue-04212026.md
+2026-05-06 19:29:58 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): visibility-integration-issue-04212026.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── booking-bridge/docs  [module=booking-bridge, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\05042026-booking-bridge-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 05042026-booking-bridge-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\booking-bridge-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): booking-bridge-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\DESIGN.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── oceanschedules/docs  [module=oceanschedules, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\05042026-oceanschedules-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 05042026-oceanschedules-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\CONFLUENCE-os.md
+2026-05-06 19:29:58 [DEBUG  ]     category='templates' (filename: *confluence*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): CONFLUENCE-os.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\DESIGN-PRE-AWS-upgrade.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN-PRE-AWS-upgrade.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\oceanschedules-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): oceanschedules-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\os-aws2x-plan.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *plan*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): os-aws2x-plan.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── visibility/docs  [module=visibility, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\05042026-visibility-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 05042026-visibility-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\2026-04-17-booking-sdk-upgrade-impact-on-visibility.md
+2026-05-06 19:29:58 [DEBUG  ]     category='uncategorized' (no match)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-17-booking-sdk-upgrade-impact-on-visibility.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\CONFLUENCE-visibility.md
+2026-05-06 19:29:58 [DEBUG  ]     category='templates' (filename: *confluence*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): CONFLUENCE-visibility.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\copilot-cli-agent-usage.md
+2026-05-06 19:29:58 [DEBUG  ]     category='uncategorized' (no match)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): copilot-cli-agent-usage.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\DESIGN-curr-state.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN-curr-state.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\visibility-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): visibility-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\visibility-aws2x-plan.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *plan*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): visibility-aws2x-plan.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── watermill-publisher/docs  [module=watermill-publisher, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\watermill-publisher\docs\bk-watermill-dateformat-exception-analysis-04292026.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): bk-watermill-dateformat-exception-analysis-04292026.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\watermill-publisher\docs\DESIGN-watermill-publisher.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN-watermill-publisher.md
+2026-05-06 19:29:58 [INFO   ] 
+  ── webbl/docs  [module=webbl, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\05042026-webbl-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 05042026-webbl-business-rules-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\2026-03-31-sqs-connection-pool-shutdown-investigation.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *investigation*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-03-31-sqs-connection-pool-shutdown-investigation.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\CONFLUENCE-webbl.md
+2026-05-06 19:29:58 [DEBUG  ]     category='templates' (filename: *confluence*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): CONFLUENCE-webbl.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\DESIGN.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): DESIGN.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\webbl-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): webbl-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\webbl-aws-upgrade.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (content: '## Current State')
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): webbl-aws-upgrade.md
+2026-05-06 19:29:58 [INFO   ] 
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ]   PROJECT : mercury-services-commons
+2026-05-06 19:29:58 [INFO   ]   Source  : C:\Users\arijit.kundu\projects\mercury-services-commons
+2026-05-06 19:29:58 [INFO   ]   Dest    : C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\mercury-services-commons
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ] 
+  ── .github  [module=-, loc-cat=github-prompts]
+2026-05-06 19:29:58 [INFO   ]      (no matching files)
+2026-05-06 19:29:58 [INFO   ] 
+  ── .vscode  [module=-, loc-cat=vscode-settings]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\.vscode\mcp.json
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): mcp.json
+2026-05-06 19:29:58 [INFO   ] 
+  ── cloud-sdk-aws/docs  [module=cloud-sdk-aws, loc-cat=none]
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-23-handlebars-owasp-impact-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-handlebars-owasp-impact-analysis.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-23-netty-removal.md
+2026-05-06 19:29:58 [DEBUG  ]     category='analysis' (content: '## Findings')
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-netty-removal.md
+2026-05-06 19:29:58 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\cloud-sdk-aws-architecture-design-claude.md
+2026-05-06 19:29:58 [DEBUG  ]     category='design' (filename: *design*)
+2026-05-06 19:29:58 [DEBUG  ]     SKIP (up-to-date): cloud-sdk-aws-architecture-design-claude.md
+2026-05-06 19:29:58 [INFO   ] 
+Skipping disabled project: appianway
+2026-05-06 19:29:58 [INFO   ] 
+Skipping disabled project: inttra-ai
+2026-05-06 19:29:58 [INFO   ] 
+Skipping disabled project: mft-s3-aqua-appia
+2026-05-06 19:29:58 [INFO   ] 
+Manifest written → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\manifest.json
+2026-05-06 19:29:58 [INFO   ] Index written    → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\knowledge-base-index.md
+2026-05-06 19:29:58 [INFO   ] 
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ]   SUMMARY
+2026-05-06 19:29:58 [INFO   ] =================================================================
+2026-05-06 19:29:58 [INFO   ]   Total files scanned : 81
+2026-05-06 19:29:58 [INFO   ]   Copied (new/updated): 3
+2026-05-06 19:29:58 [INFO   ]   Skipped (up-to-date): 78
+2026-05-06 19:29:58 [INFO   ] 
+2026-05-06 19:29:58 [INFO   ]   By category:
+2026-05-06 19:29:58 [INFO   ]     github-prompts                 29 file(s)
+2026-05-06 19:29:58 [INFO   ]     design                         14 file(s)
+2026-05-06 19:29:58 [INFO   ]     analysis                       12 file(s)
+2026-05-06 19:29:58 [INFO   ]     issues                          8 file(s)
+2026-05-06 19:29:58 [INFO   ]     business-rules                  6 file(s)
+2026-05-06 19:29:58 [INFO   ]     vscode-settings                 4 file(s)
+2026-05-06 19:29:58 [INFO   ]     uncategorized                   4 file(s)
+2026-05-06 19:29:58 [INFO   ]     templates                       3 file(s)
+2026-05-06 19:29:58 [INFO   ]     claude-skills                   1 file(s)
+2026-05-06 19:29:58 [INFO   ] =================================================================

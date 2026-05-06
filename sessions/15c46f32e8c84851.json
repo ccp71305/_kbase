@@ -1,0 +1,170 @@
+{
+  "id": "15c46f32e8c84851",
+  "name": "Visibility Audit Unconvert Exception - 2026-05-06",
+  "description": "Investigating DynamoDBMappingException in visibility matcher: BookingDetailVisibility[audit] could not unconvert attribute. Root cause is DateTimeParseException in OffsetDateTimeTypeConverter trying to parse datetime as LocalDate.",
+  "project": "mercury-services",
+  "created_at": "2026-05-06T17:05:56.343725+00:00",
+  "updated_at": "2026-05-06T22:02:54.314235+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "booking",
+    "dynamodb",
+    "audit",
+    "unconvert",
+    "bug"
+  ],
+  "entries": [
+    {
+      "id": "e05a6d94291a",
+      "timestamp": "2026-05-06T17:17:53.804277+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Root cause identified: Yesterday's @JsonFormat revert (XXX→Z) on Audit.java makes booking write +0000 format. Old OffsetDateTimeTypeConverter in booking:2.1.8.M (used by visibility) cannot parse +0000 — its unconvert() uses ISO_OFFSET_DATE_TIME which requires +HH:MM or Z, not +HHMM.",
+      "detail": "Stack trace: BookingDetailVisibility[audit] → Audit[createdDateUtc] → OffsetDateTimeTypeConverter.unconvert() → ISO_OFFSET_DATE_TIME.parse('2026-05-06T12:47:47.044+0000') FAILS → LocalDate.parse() FAILS at index 10. The analysis doc section 15.4 incorrectly stated 'Visibility SDK v1 DynamoDBMapper does not touch the audit attribute at all' — this is wrong because BookingDetailVisibility extends BookingDetail which has @DynamoDBAttribute Audit audit with @DynamoDBDocument, so DynamoDBMapper recursively unconverts it.",
+      "tags": [
+        "root-cause",
+        "visibility",
+        "audit",
+        "+0000",
+        "unconvert"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/Audit.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/OffsetDateTimeTypeConverter.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDetailVisibility.java",
+        "booking/docs/2026-05-05-booking-redshift-audit-field-issue.md"
+      ]
+    },
+    {
+      "id": "58f0871e7e05",
+      "timestamp": "2026-05-06T17:17:53.820253+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Why the analysis was wrong: Section 15.4 confused two distinct deserialization paths. The previous visibility issue (ContainerType.lastModifiedDateUtc) was about Jackson-based EnrichedAttributesConverter. The current issue is about SDK v1 DynamoDBMapper unconverting the audit Map field using @DynamoDBDocument + @DynamoDBTypeConverted. These are completely separate code paths.",
+      "detail": "Old BookingDetail (in 2.1.8.M) has @DynamoDBAttribute Audit audit. Audit has @DynamoDBDocument, createdDateUtc has @DynamoDBTypeConverted(converter=OffsetDateTimeTypeConverter.class). When SDK v1 DynamoDBMapper reads BookingDetailVisibility, it processes ALL annotated fields including audit, recursively unconverting the Audit document.",
+      "tags": [
+        "analysis-error",
+        "visibility",
+        "DynamoDBMapper"
+      ],
+      "references": []
+    },
+    {
+      "id": "3f6991081fe1",
+      "timestamp": "2026-05-06T17:18:10.884249+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Converter comparison: old 2.1.8.M vs current workspace. The current converter has +0000 normalization logic; the old one does not.",
+      "detail": "Old converter unconvert():\\n1. OffsetDateTime.parse(date, ISO_OFFSET_DATE_TIME) — handles Z, +HH:MM but NOT +HHMM\\n2. Fallback: LocalDate.parse(date, ISO_DATE) — fails on full datetime string\\n\\nCurrent converter unconvert():\\n1. OffsetDateTime.parse(date, ISO_OFFSET_DATE_TIME) — handles Z, +HH:MM\\n2. Normalize +HHMM → +HH:MM and re-parse — handles +0000\\n3. Fallback: LocalDate.parse(date, ISO_DATE)\\n\\nThe normalization step (added in the AWS upgrade) is what handles +0000. The old 2.1.8.M artifact lacks this step.",
+      "tags": [
+        "converter",
+        "comparison",
+        "parsing"
+      ],
+      "references": []
+    },
+    {
+      "id": "b8d54531feef",
+      "timestamp": "2026-05-06T17:18:10.895059+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Format compatibility matrix: no single format satisfies both visibility and ETL. ETL must be fixed regardless.",
+      "detail": "Format timeline in DynamoDB:\\n- Pre-2026-03-27 (SDK v1, ISO_DATE_TIME): Z — e.g., 2020-11-30T04:23:30.153845Z\\n- 2026-03-27 to 2026-04-16 (SDK v2 initial, SSSZ): +0000 — e.g., 2026-05-04T06:29:32.691+0000\\n- 2026-04-17 to 2026-05-04 (data-format fix, SSSXXX): Z — e.g., 2026-05-04T06:29:32.691Z\\n- 2026-05-05 to present (redshift revert, SSSZ): +0000 — e.g., 2026-05-06T12:47:47.044+0000\\n\\nVisibility old converter can parse: Z ✅, +00:00 ✅, +0000 ❌\\nRedshift ETL can parse: +0000 ✅, Z ❌",
+      "tags": [
+        "format-matrix",
+        "compatibility",
+        "ETL",
+        "visibility"
+      ],
+      "references": []
+    },
+    {
+      "id": "32b3e8c84c26",
+      "timestamp": "2026-05-06T17:21:07.341521+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Analysis document created with root cause and fix recommendation",
+      "detail": "Created analysis document at booking/docs/2026-05-06-visibility-audit-unconvert-issue-copilot.md with full root cause analysis, format compatibility matrix, and recommended fix (revert @JsonFormat back to SSSXXX).",
+      "tags": [
+        "document",
+        "analysis"
+      ],
+      "references": [
+        "booking/docs/2026-05-06-visibility-audit-unconvert-issue-copilot.md"
+      ]
+    },
+    {
+      "id": "abfe493574ed",
+      "timestamp": "2026-05-06T17:27:45.892936+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "decision",
+      "summary": "Decision point: user requires both ETL and visibility working. Need to fix visibility's read path rather than changing booking's write format.",
+      "detail": "User requires BOTH visibility AND ETL to work simultaneously. No single @JsonFormat pattern satisfies both consumers:\\n- SSSZ → +0000 → ETL ✅, Visibility ❌\\n- SSSXXX → Z → Visibility ✅, ETL ❌\\n\\nSince the format can't satisfy both, the fix must be on the consumer side. Two approaches:\\n1. Fix visibility's converter to handle +0000 (classpath shadow in visibility-commons)\\n2. Publish new booking model artifact with fixed converter\\n\\nApproach 1 is faster and doesn't require artifact publishing.",
+      "tags": [
+        "decision",
+        "compatibility",
+        "approach"
+      ],
+      "references": []
+    },
+    {
+      "id": "93cfbb7105d6",
+      "timestamp": "2026-05-06T19:39:49.344894+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Critical insight: pre-upgrade had decoupled DynamoDB (Z) and REST API (+0000) formats. The upgrade coupled them via AuditAttributeConverter using Jackson @JsonFormat for DynamoDB writes.",
+      "detail": "CRITICAL INSIGHT from production data:\\n\\nPre-upgrade production uses TWO DIFFERENT serialization paths:\\n- DynamoDB path: DynamoDBTypeConverter.convert() → ISO_DATE_TIME → stores Z (e.g., 2026-05-05T15:19:27.210972723Z)\\n- REST API path: Jackson @JsonFormat(SSSZ) → renders +0000 (e.g., 2026-05-05T15:19:27.210+0000)\\n\\nThese were DECOUPLED before the upgrade. After the upgrade, AuditAttributeConverter.transformFrom() uses Jackson (with @JsonFormat) for BOTH DynamoDB AND REST paths — coupling them. This coupling is the root cause of the format conflict.\\n\\nThe @JsonFormat pattern now controls DynamoDB format (didn't before), so changing it affects both paths simultaneously.",
+      "tags": [
+        "insight",
+        "decoupling",
+        "root-cause",
+        "format"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java"
+      ]
+    },
+    {
+      "id": "5e9e9267bdb1",
+      "timestamp": "2026-05-06T20:08:39.991220+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Document updated with exhaustive detail and decoupled fix design",
+      "detail": "Updated analysis document with extensive detail including:\\n- Layman's summary (Section 2)\\n- Detailed terminology (serialization vs deserialization)\\n- Pre-upgrade vs post-upgrade architecture diagrams\\n- Production data proof\\n- Decoupled fix design (Section 6)\\n- Architectural lesson (Section 8)\\n\\nThe fix is to create a DYNAMO_OBJECT_MAPPER in AuditAttributeConverter that uses ISO_DATE_TIME for timestamps (producing Z), while keeping @JsonFormat(SSSZ) on Audit.java for REST API output (producing +0000).",
+      "tags": [
+        "document",
+        "updated",
+        "decoupled-fix"
+      ],
+      "references": [
+        "booking/docs/2026-05-06-visibility-audit-unconvert-issue-copilot.md"
+      ]
+    },
+    {
+      "id": "bb1206d6b69d",
+      "timestamp": "2026-05-06T20:32:48.766819+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Added Sections 10-13 to analysis doc: Z tutorial (pattern vs literal, DateTimeFormatter reference, production examples), all three format issues summary matrix, how dual formatting was missed (what was tested vs what wasn't), updated references",
+      "detail": "Section 10: Complete tutorial on Z pattern letter vs Z literal. Includes DateTimeFormatter pattern letter table with examples for UTC, ISO_OFFSET_DATE_TIME parse compatibility matrix, and the irony that pattern Z produces +0000 not literal Z.\n\nSection 11: Summary of all three AWS upgrade format issues (MetaData, ContainerType, Audit) in a matrix. Common root cause: Jackson respects @JsonFormat that SDK v1 ignored. Noted that Issue 2 (ContainerType) may still be a latent bug since the fix only added a deserializer but didn't fix the write path.\n\nSection 12: How we missed dual formatting. What SDK v2 Enhanced Client actually does, why Jackson was chosen for converters (good reasons), what was tested (structure) vs what wasn't (timestamp string values, cross-module compatibility), the specific miss for Audit where @JsonFormat went from dormant to active.\n\nSection 13: Updated references table including EnrichedAttributesConverter.",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-05-06-visibility-audit-unconvert-issue-copilot.md"
+      ]
+    },
+    {
+      "id": "43d39db349b4",
+      "timestamp": "2026-05-06T22:02:54.314197+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Added Section 13: Correction of yesterday's ISO_DATE_TIME error. Yesterday's doc claimed pre-upgrade format was +00:00, but production proves it was Z. ISO_DATE_TIME uses appendOffsetId() which calls ZoneOffset.UTC.getId() = 'Z'. There is no way in Java to get +00:00 from ISO_DATE_TIME for UTC.",
+      "detail": "The previous analysis (2026-05-05-booking-redshift-audit-field-issue.md, Section 2.1 line 79) claimed ISO_DATE_TIME produces +00:00 for UTC. This is WRONG.\n\nJava proof:\n- DateTimeFormatter.ISO_DATE_TIME uses appendOffsetId()\n- appendOffsetId() outputs ZoneOffset.getId()\n- ZoneOffset.UTC.getId() returns 'Z' (literal)\n- Java normalizes ALL zero offsets to ZoneOffset.UTC singleton\n- Therefore ISO_DATE_TIME ALWAYS produces Z for UTC, never +00:00\n\nProduction confirms: 2026-05-05T15:19:27.210972723Z (Z suffix)\n\nCorrected format timeline:\n- Pre-upgrade: Z (via ISO_DATE_TIME convert())\n- SDK v2 initial (03/27-04/16): +0000 (via @JsonFormat SSSZ Jackson)\n- Data-format fix (04/17-05/04): Z (via @JsonFormat SSSXXX Jackson)\n- Redshift revert (05/05-present): +0000 (via @JsonFormat SSSZ Jackson)\n\nThe data-format fix on 04/17 actually CORRECTLY restored pre-upgrade format.\nYesterday's analysis incorrectly saw three distinct formats (Z, +0000, +00:00) when there were only two (Z and +0000).\n\nAlso noted: ISO_DATE_TIME preserves nanosecond precision (0-9 digits) vs @JsonFormat SSS truncates to 3 digits (millis).",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-05-06-visibility-audit-unconvert-issue-copilot.md",
+        "booking/docs/2026-05-05-booking-redshift-audit-field-issue.md"
+      ]
+    }
+  ]
+}
