@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"OffsetDateTime\\\\|LocalDateTime\" \"c:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\\\\booking\\\\src\\\\main\\\\java\\\\com\\\\inttra\\\\mercury\\\\booking\\\\model\" 2>nul | grep -i \"date\\\\|time\" | head -20)",
+      "Bash(mvn -pl booking -am test -Dtest=\"BookingDetailDateFormatCompatibilityTest\" -DfailIfNoTests=false -q)",
+      "Bash(mvn test *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\arijit.kundu\\projects\\mercury-services"
+    ]
+  }
+}

@@ -59,7 +59,8 @@ The core story is a sequence of well-intentioned fixes that each addressed one c
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  STAGE 0: PRE-UPGRADE  (SDK v1)  — PRODUCTION TODAY                         ║
-║  Audit.java: @JsonFormat(pattern="SSSZ")  ← always existed, SDK v1 IGNORED  ║
+║  Audit.java: @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ",             ║
+║                          timezone = "UTC")  ← always existed, SDK v1 IGNORED ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
                             Java OffsetDateTime
