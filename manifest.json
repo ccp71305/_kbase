@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-05-15T21:01:03.141685",
+  "generated_at": "2026-05-26T23:36:34.339651",
   "dry_run": false,
   "knowledge_base": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase",
-  "total_files": 87,
+  "total_files": 122,
   "categories": [
     "analysis",
     "business-rules",
@@ -16,6 +16,7 @@
     "vscode-settings"
   ],
   "projects": [
+    "appianway",
     "mercury-services",
     "mercury-services-commons"
   ],
@@ -31,7 +32,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\copilot-instructions.md",
       "relative_path": "mercury-services/github-prompts/copilot-instructions.md",
       "last_modified": "2026-03-19T15:13:56",
-      "backed_up_at": "2026-05-15T21:01:03.103835",
+      "backed_up_at": "2026-05-26T23:36:34.287245",
       "action": "skipped"
     },
     {
@@ -44,7 +45,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-runtime-issues.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/bk-runtime-issues.prompt.md",
       "last_modified": "2026-05-01T17:48:18.378300",
-      "backed_up_at": "2026-05-15T21:01:03.104139",
+      "backed_up_at": "2026-05-26T23:36:34.287666",
       "action": "skipped"
     },
     {
@@ -57,7 +58,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-visibility-audit-unconvert-05062026.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/bk-visibility-audit-unconvert-05062026.prompt.md",
       "last_modified": "2026-05-06T12:58:00.846679",
-      "backed_up_at": "2026-05-15T21:01:03.104430",
+      "backed_up_at": "2026-05-26T23:36:34.288233",
       "action": "skipped"
     },
     {
@@ -70,7 +71,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-watermill-datetimeex-04292026.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/bk-watermill-datetimeex-04292026.prompt.md",
       "last_modified": "2026-04-29T17:30:59.875009",
-      "backed_up_at": "2026-05-15T21:01:03.104533",
+      "backed_up_at": "2026-05-26T23:36:34.288635",
       "action": "skipped"
     },
     {
@@ -83,7 +84,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-dataformat-issue.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/booking-dataformat-issue.prompt.md",
       "last_modified": "2026-04-17T20:16:21.242265",
-      "backed_up_at": "2026-05-15T21:01:03.104628",
+      "backed_up_at": "2026-05-26T23:36:34.289044",
       "action": "skipped"
     },
     {
@@ -96,7 +97,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-email-test-restore.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/booking-email-test-restore.prompt.md",
       "last_modified": "2026-03-24T19:47:52",
-      "backed_up_at": "2026-05-15T21:01:03.104720",
+      "backed_up_at": "2026-05-26T23:36:34.289400",
       "action": "skipped"
     },
     {
@@ -109,7 +110,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-email-test-review.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/booking-email-test-review.prompt.md",
       "last_modified": "2026-03-24T17:31:24",
-      "backed_up_at": "2026-05-15T21:01:03.104806",
+      "backed_up_at": "2026-05-26T23:36:34.289917",
       "action": "skipped"
     },
     {
@@ -122,7 +123,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-integration-issues.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/booking-integration-issues.prompt.md",
       "last_modified": "2026-04-22T15:31:42.065024",
-      "backed_up_at": "2026-05-15T21:01:03.104899",
+      "backed_up_at": "2026-05-26T23:36:34.290041",
       "action": "skipped"
     },
     {
@@ -135,7 +136,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\lambda-workaround.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/lambda-workaround.prompt.md",
       "last_modified": "2026-03-24T13:10:26",
-      "backed_up_at": "2026-05-15T21:01:03.104989",
+      "backed_up_at": "2026-05-26T23:36:34.290139",
       "action": "skipped"
     },
     {
@@ -148,7 +149,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\network-ov-runtime-issue.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/network-ov-runtime-issue.prompt.md",
       "last_modified": "2026-03-31T19:33:16",
-      "backed_up_at": "2026-05-15T21:01:03.105073",
+      "backed_up_at": "2026-05-26T23:36:34.290227",
       "action": "skipped"
     },
     {
@@ -161,7 +162,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\visibility-aws-upgrade-plan.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/visibility-aws-upgrade-plan.prompt.md",
       "last_modified": "2026-03-30T12:55:47",
-      "backed_up_at": "2026-05-15T21:01:03.105161",
+      "backed_up_at": "2026-05-26T23:36:34.290327",
       "action": "skipped"
     },
     {
@@ -174,7 +175,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\visibility-curr-state.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/visibility-curr-state.prompt.md",
       "last_modified": "2026-03-30T11:38:34",
-      "backed_up_at": "2026-05-15T21:01:03.105246",
+      "backed_up_at": "2026-05-26T23:36:34.290425",
       "action": "skipped"
     },
     {
@@ -187,7 +188,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\webbl.connpool-issue.prompt.md",
       "relative_path": "mercury-services/github-prompts/prompts/webbl.connpool-issue.prompt.md",
       "last_modified": "2026-03-31T16:52:55",
-      "backed_up_at": "2026-05-15T21:01:03.105329",
+      "backed_up_at": "2026-05-26T23:36:34.290518",
       "action": "skipped"
     },
     {
@@ -200,7 +201,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\aws-dynamo-check.md",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/aws-dynamo-check.md",
       "last_modified": "2026-03-17T20:00:20",
-      "backed_up_at": "2026-05-15T21:01:03.105423",
+      "backed_up_at": "2026-05-26T23:36:34.290623",
       "action": "skipped"
     },
     {
@@ -213,7 +214,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\enrichedAttributes.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/enrichedAttributes.json",
       "last_modified": "2026-03-19T15:04:23",
-      "backed_up_at": "2026-05-15T21:01:03.105510",
+      "backed_up_at": "2026-05-26T23:36:34.290717",
       "action": "skipped"
     },
     {
@@ -226,7 +227,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_BookingDetail.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_BookingDetail.json",
       "last_modified": "2026-03-17T19:16:11",
-      "backed_up_at": "2026-05-15T21:01:03.105598",
+      "backed_up_at": "2026-05-26T23:36:34.290812",
       "action": "skipped"
     },
     {
@@ -239,7 +240,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_RapidReservation.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_RapidReservation.json",
       "last_modified": "2026-03-17T19:48:21",
-      "backed_up_at": "2026-05-15T21:01:03.105793",
+      "backed_up_at": "2026-05-26T23:36:34.290899",
       "action": "skipped"
     },
     {
@@ -252,7 +253,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SequenceId.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SequenceId.json",
       "last_modified": "2026-03-17T19:48:47",
-      "backed_up_at": "2026-05-15T21:01:03.106003",
+      "backed_up_at": "2026-05-26T23:36:34.290987",
       "action": "skipped"
     },
     {
@@ -265,7 +266,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SpotRatesDetail.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SpotRatesDetail.json",
       "last_modified": "2026-03-17T19:28:14",
-      "backed_up_at": "2026-05-15T21:01:03.106165",
+      "backed_up_at": "2026-05-26T23:36:34.291076",
       "action": "skipped"
     },
     {
@@ -278,7 +279,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SpotRatesToInttraRefDetail.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SpotRatesToInttraRefDetail.json",
       "last_modified": "2026-03-17T19:58:03",
-      "backed_up_at": "2026-05-15T21:01:03.106310",
+      "backed_up_at": "2026-05-26T23:36:34.291171",
       "action": "skipped"
     },
     {
@@ -291,7 +292,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_Template.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_Template.json",
       "last_modified": "2026-03-17T19:49:53",
-      "backed_up_at": "2026-05-15T21:01:03.106404",
+      "backed_up_at": "2026-05-26T23:36:34.291265",
       "action": "skipped"
     },
     {
@@ -304,7 +305,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_UniqueId.json",
       "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_UniqueId.json",
       "last_modified": "2026-03-17T19:49:20",
-      "backed_up_at": "2026-05-15T21:01:03.106507",
+      "backed_up_at": "2026-05-26T23:36:34.291360",
       "action": "skipped"
     },
     {
@@ -317,7 +318,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\build-errors\\SKILL.md",
       "relative_path": "mercury-services/github-prompts/skills/build-errors/SKILL.md",
       "last_modified": "2026-03-11T16:49:53",
-      "backed_up_at": "2026-05-15T21:01:03.106605",
+      "backed_up_at": "2026-05-26T23:36:34.291454",
       "action": "skipped"
     },
     {
@@ -330,7 +331,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\git-operations\\SKILL.md",
       "relative_path": "mercury-services/github-prompts/skills/git-operations/SKILL.md",
       "last_modified": "2026-04-13T19:20:56.849587",
-      "backed_up_at": "2026-05-15T21:01:03.106697",
+      "backed_up_at": "2026-05-26T23:36:34.291544",
       "action": "skipped"
     },
     {
@@ -343,7 +344,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\java-refactoring\\SKILL.md",
       "relative_path": "mercury-services/github-prompts/skills/java-refactoring/SKILL.md",
       "last_modified": "2026-03-11T13:36:50",
-      "backed_up_at": "2026-05-15T21:01:03.106788",
+      "backed_up_at": "2026-05-26T23:36:34.291670",
       "action": "skipped"
     },
     {
@@ -356,7 +357,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-context.md",
       "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-context.md",
       "last_modified": "2026-03-17T17:31:04",
-      "backed_up_at": "2026-05-15T21:01:03.106882",
+      "backed_up_at": "2026-05-26T23:36:34.291761",
       "action": "skipped"
     },
     {
@@ -369,7 +370,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-review-comments.md",
       "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-review-comments.md",
       "last_modified": "2026-03-17T19:06:24",
-      "backed_up_at": "2026-05-15T21:01:03.106971",
+      "backed_up_at": "2026-05-26T23:36:34.291847",
       "action": "skipped"
     },
     {
@@ -382,7 +383,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-review-responses.md",
       "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-review-responses.md",
       "last_modified": "2026-03-19T23:34:30",
-      "backed_up_at": "2026-05-15T21:01:03.107059",
+      "backed_up_at": "2026-05-26T23:36:34.291948",
       "action": "skipped"
     },
     {
@@ -395,7 +396,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\session-context\\SKILL.md",
       "relative_path": "mercury-services/github-prompts/skills/session-context/SKILL.md",
       "last_modified": "2026-03-10T19:09:55",
-      "backed_up_at": "2026-05-15T21:01:03.107148",
+      "backed_up_at": "2026-05-26T23:36:34.292036",
       "action": "skipped"
     },
     {
@@ -408,8 +409,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\claude-skills\\settings.json",
       "relative_path": "mercury-services/claude-skills/settings.json",
       "last_modified": "2026-05-07T17:47:08.004810",
-      "backed_up_at": "2026-05-15T21:01:03.110470",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.292608",
+      "action": "skipped"
     },
     {
       "project": "mercury-services",
@@ -421,7 +422,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\claude-skills\\settings.local.json",
       "relative_path": "mercury-services/claude-skills/settings.local.json",
       "last_modified": "2026-05-04T12:08:20.481781",
-      "backed_up_at": "2026-05-15T21:01:03.110669",
+      "backed_up_at": "2026-05-26T23:36:34.292703",
       "action": "skipped"
     },
     {
@@ -434,7 +435,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\launch.json",
       "relative_path": "mercury-services/vscode-settings/launch.json",
       "last_modified": "2026-04-22T18:50:39.160136",
-      "backed_up_at": "2026-05-15T21:01:03.111232",
+      "backed_up_at": "2026-05-26T23:36:34.293350",
       "action": "skipped"
     },
     {
@@ -447,7 +448,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\mcp.json",
       "relative_path": "mercury-services/vscode-settings/mcp.json",
       "last_modified": "2026-04-02T18:17:22.835567",
-      "backed_up_at": "2026-05-15T21:01:03.111332",
+      "backed_up_at": "2026-05-26T23:36:34.293436",
       "action": "skipped"
     },
     {
@@ -460,7 +461,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\settings.json",
       "relative_path": "mercury-services/vscode-settings/settings.json",
       "last_modified": "2026-04-22T19:22:48.389313",
-      "backed_up_at": "2026-05-15T21:01:03.111421",
+      "backed_up_at": "2026-05-26T23:36:34.293515",
       "action": "skipped"
     },
     {
@@ -473,7 +474,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-03-25-runtime-issue-fixes-summary.md",
       "relative_path": "mercury-services/issues/booking/2026-03-25-runtime-issue-fixes-summary.md",
       "last_modified": "2026-04-22T21:23:40.051457",
-      "backed_up_at": "2026-05-15T21:01:03.112864",
+      "backed_up_at": "2026-05-26T23:36:34.294881",
       "action": "skipped"
     },
     {
@@ -486,7 +487,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-03-27-aws-upgrade-branch-migration-summary.md",
       "relative_path": "mercury-services/uncategorized/booking/2026-03-27-aws-upgrade-branch-migration-summary.md",
       "last_modified": "2026-04-22T21:23:40.052627",
-      "backed_up_at": "2026-05-15T21:01:03.114109",
+      "backed_up_at": "2026-05-26T23:36:34.296076",
       "action": "skipped"
     },
     {
@@ -499,7 +500,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-03-27-booking-dev-log-review.md",
       "relative_path": "mercury-services/analysis/booking/2026-03-27-booking-dev-log-review.md",
       "last_modified": "2026-04-22T21:23:40.053917",
-      "backed_up_at": "2026-05-15T21:01:03.114307",
+      "backed_up_at": "2026-05-26T23:36:34.296210",
       "action": "skipped"
     },
     {
@@ -512,7 +513,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-13-rebase-conflict-analysis.md",
       "relative_path": "mercury-services/analysis/booking/2026-04-13-rebase-conflict-analysis.md",
       "last_modified": "2026-04-22T21:23:40.055212",
-      "backed_up_at": "2026-05-15T21:01:03.114451",
+      "backed_up_at": "2026-05-26T23:36:34.296332",
       "action": "skipped"
     },
     {
@@ -525,7 +526,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-16-owasp-high-vulnerability-origin-analysis.md",
       "relative_path": "mercury-services/analysis/booking/2026-04-16-owasp-high-vulnerability-origin-analysis.md",
       "last_modified": "2026-04-22T21:23:40.056567",
-      "backed_up_at": "2026-05-15T21:01:03.114587",
+      "backed_up_at": "2026-05-26T23:36:34.296447",
       "action": "skipped"
     },
     {
@@ -538,7 +539,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-04-17-booking-dataformat-issue-fixes.md",
       "relative_path": "mercury-services/issues/booking/2026-04-17-booking-dataformat-issue-fixes.md",
       "last_modified": "2026-04-22T21:23:40.057858",
-      "backed_up_at": "2026-05-15T21:01:03.114736",
+      "backed_up_at": "2026-05-26T23:36:34.296692",
       "action": "skipped"
     },
     {
@@ -551,7 +552,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-22-qa-outbound-pipeline-debug-findings.md",
       "relative_path": "mercury-services/analysis/booking/2026-04-22-qa-outbound-pipeline-debug-findings.md",
       "last_modified": "2026-04-22T21:23:40.059206",
-      "backed_up_at": "2026-05-15T21:01:03.114866",
+      "backed_up_at": "2026-05-26T23:36:34.296841",
       "action": "skipped"
     },
     {
@@ -564,7 +565,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
       "relative_path": "mercury-services/analysis/booking/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
       "last_modified": "2026-04-23T16:17:24.860941",
-      "backed_up_at": "2026-05-15T21:01:03.114987",
+      "backed_up_at": "2026-05-26T23:36:34.296952",
       "action": "skipped"
     },
     {
@@ -577,7 +578,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-04-23-owasp-netty.md",
       "relative_path": "mercury-services/uncategorized/booking/2026-04-23-owasp-netty.md",
       "last_modified": "2026-04-23T18:35:40.059411",
-      "backed_up_at": "2026-05-15T21:01:03.115906",
+      "backed_up_at": "2026-05-26T23:36:34.297815",
       "action": "skipped"
     },
     {
@@ -590,7 +591,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking\\2026-05-05-booking-business-rules-copilot.md",
       "relative_path": "mercury-services/business-rules/booking/2026-05-05-booking-business-rules-copilot.md",
       "last_modified": "2026-05-04T12:21:38.281052",
-      "backed_up_at": "2026-05-15T21:01:03.116086",
+      "backed_up_at": "2026-05-26T23:36:34.297977",
       "action": "skipped"
     },
     {
@@ -603,7 +604,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-05-booking-redshift-audit-field-issue.md",
       "relative_path": "mercury-services/issues/booking/2026-05-05-booking-redshift-audit-field-issue.md",
       "last_modified": "2026-05-05T16:43:51.953367",
-      "backed_up_at": "2026-05-15T21:01:03.116281",
+      "backed_up_at": "2026-05-26T23:36:34.298114",
       "action": "skipped"
     },
     {
@@ -616,8 +617,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-06-visibility-audit-unconvert-issue-claude.md",
       "relative_path": "mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-claude.md",
       "last_modified": "2026-05-06T19:48:59.276065",
-      "backed_up_at": "2026-05-15T21:01:03.118155",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.298254",
+      "action": "skipped"
     },
     {
       "project": "mercury-services",
@@ -629,7 +630,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-06-visibility-audit-unconvert-issue-copilot.md",
       "relative_path": "mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-copilot.md",
       "last_modified": "2026-05-06T18:02:39.140220",
-      "backed_up_at": "2026-05-15T21:01:03.118413",
+      "backed_up_at": "2026-05-26T23:36:34.298398",
       "action": "skipped"
     },
     {
@@ -642,8 +643,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-05-15-visibility-matcher-invalid-audit-old-record.md",
       "relative_path": "mercury-services/uncategorized/booking/2026-05-15-visibility-matcher-invalid-audit-old-record.md",
       "last_modified": "2026-05-15T17:27:04.137586",
-      "backed_up_at": "2026-05-15T21:01:03.120233",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.298957",
+      "action": "skipped"
     },
     {
       "project": "mercury-services",
@@ -655,7 +656,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking\\booking-architecture-design-claude.md",
       "relative_path": "mercury-services/design/booking/booking-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:24:35.366169",
-      "backed_up_at": "2026-05-15T21:01:03.120434",
+      "backed_up_at": "2026-05-26T23:36:34.299077",
       "action": "skipped"
     },
     {
@@ -668,7 +669,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking\\booking-business-rules.md",
       "relative_path": "mercury-services/business-rules/booking/booking-business-rules.md",
       "last_modified": "2026-04-27T19:39:40.447048",
-      "backed_up_at": "2026-05-15T21:01:03.120593",
+      "backed_up_at": "2026-05-26T23:36:34.299214",
       "action": "skipped"
     },
     {
@@ -681,7 +682,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\booking-integration-issues-04222027-copilot.md",
       "relative_path": "mercury-services/issues/booking/booking-integration-issues-04222027-copilot.md",
       "last_modified": "2026-04-23T14:23:03.140892",
-      "backed_up_at": "2026-05-15T21:01:03.120738",
+      "backed_up_at": "2026-05-26T23:36:34.299353",
       "action": "skipped"
     },
     {
@@ -694,7 +695,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\claude-review-integration-issue-fix.md",
       "relative_path": "mercury-services/analysis/booking/claude-review-integration-issue-fix.md",
       "last_modified": "2026-04-22T21:23:40.061754",
-      "backed_up_at": "2026-05-15T21:01:03.120902",
+      "backed_up_at": "2026-05-26T23:36:34.299470",
       "action": "skipped"
     },
     {
@@ -707,7 +708,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking\\DESIGN-AWS2x.md",
       "relative_path": "mercury-services/design/booking/DESIGN-AWS2x.md",
       "last_modified": "2026-04-14T18:09:58.816797",
-      "backed_up_at": "2026-05-15T21:01:03.121029",
+      "backed_up_at": "2026-05-26T23:36:34.299588",
       "action": "skipped"
     },
     {
@@ -720,7 +721,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\integration-issues-qa-verification-apr232027.md",
       "relative_path": "mercury-services/issues/booking/integration-issues-qa-verification-apr232027.md",
       "last_modified": "2026-04-23T12:02:14.973799",
-      "backed_up_at": "2026-05-15T21:01:03.121169",
+      "backed_up_at": "2026-05-26T23:36:34.299722",
       "action": "skipped"
     },
     {
@@ -733,7 +734,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\visibility-integration-issue-04212026.md",
       "relative_path": "mercury-services/issues/booking/visibility-integration-issue-04212026.md",
       "last_modified": "2026-04-22T21:23:40.063062",
-      "backed_up_at": "2026-05-15T21:01:03.121306",
+      "backed_up_at": "2026-05-26T23:36:34.299855",
       "action": "skipped"
     },
     {
@@ -746,7 +747,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking-bridge\\05042026-booking-bridge-business-rules-claude.md",
       "relative_path": "mercury-services/business-rules/booking-bridge/05042026-booking-bridge-business-rules-claude.md",
       "last_modified": "2026-05-04T12:28:40.707260",
-      "backed_up_at": "2026-05-15T21:01:03.122247",
+      "backed_up_at": "2026-05-26T23:36:34.300368",
       "action": "skipped"
     },
     {
@@ -759,7 +760,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking-bridge\\booking-bridge-architecture-design-claude.md",
       "relative_path": "mercury-services/design/booking-bridge/booking-bridge-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:24:13.823498",
-      "backed_up_at": "2026-05-15T21:01:03.122501",
+      "backed_up_at": "2026-05-26T23:36:34.300519",
       "action": "skipped"
     },
     {
@@ -772,7 +773,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking-bridge\\DESIGN.md",
       "relative_path": "mercury-services/design/booking-bridge/DESIGN.md",
       "last_modified": "2026-04-02T16:33:46.446767",
-      "backed_up_at": "2026-05-15T21:01:03.122702",
+      "backed_up_at": "2026-05-26T23:36:34.300664",
       "action": "skipped"
     },
     {
@@ -785,7 +786,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\oceanschedules\\05042026-oceanschedules-business-rules-claude.md",
       "relative_path": "mercury-services/business-rules/oceanschedules/05042026-oceanschedules-business-rules-claude.md",
       "last_modified": "2026-05-04T12:36:24.041390",
-      "backed_up_at": "2026-05-15T21:01:03.123600",
+      "backed_up_at": "2026-05-26T23:36:34.301249",
       "action": "skipped"
     },
     {
@@ -798,7 +799,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\oceanschedules\\CONFLUENCE-os.md",
       "relative_path": "mercury-services/templates/oceanschedules/CONFLUENCE-os.md",
       "last_modified": "2026-05-04T15:53:16.292594",
-      "backed_up_at": "2026-05-15T21:01:03.123840",
+      "backed_up_at": "2026-05-26T23:36:34.301405",
       "action": "skipped"
     },
     {
@@ -811,7 +812,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\DESIGN-PRE-AWS-upgrade.md",
       "relative_path": "mercury-services/design/oceanschedules/DESIGN-PRE-AWS-upgrade.md",
       "last_modified": "2026-04-27T19:30:21.809188",
-      "backed_up_at": "2026-05-15T21:01:03.124032",
+      "backed_up_at": "2026-05-26T23:36:34.301566",
       "action": "skipped"
     },
     {
@@ -824,7 +825,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\oceanschedules-architecture-design-claude.md",
       "relative_path": "mercury-services/design/oceanschedules/oceanschedules-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:24:40.861578",
-      "backed_up_at": "2026-05-15T21:01:03.124177",
+      "backed_up_at": "2026-05-26T23:36:34.301754",
       "action": "skipped"
     },
     {
@@ -837,7 +838,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\os-aws2x-plan.md",
       "relative_path": "mercury-services/design/oceanschedules/os-aws2x-plan.md",
       "last_modified": "2026-05-04T15:53:16.308975",
-      "backed_up_at": "2026-05-15T21:01:03.124375",
+      "backed_up_at": "2026-05-26T23:36:34.301881",
       "action": "skipped"
     },
     {
@@ -850,7 +851,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\visibility\\05042026-visibility-business-rules-claude.md",
       "relative_path": "mercury-services/business-rules/visibility/05042026-visibility-business-rules-claude.md",
       "last_modified": "2026-05-04T12:34:38.831344",
-      "backed_up_at": "2026-05-15T21:01:03.125151",
+      "backed_up_at": "2026-05-26T23:36:34.302383",
       "action": "skipped"
     },
     {
@@ -863,7 +864,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\visibility\\2026-04-17-booking-sdk-upgrade-impact-on-visibility.md",
       "relative_path": "mercury-services/uncategorized/visibility/2026-04-17-booking-sdk-upgrade-impact-on-visibility.md",
       "last_modified": "2026-04-22T21:23:40.065588",
-      "backed_up_at": "2026-05-15T21:01:03.125973",
+      "backed_up_at": "2026-05-26T23:36:34.303093",
       "action": "skipped"
     },
     {
@@ -876,7 +877,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\visibility\\CONFLUENCE-visibility.md",
       "relative_path": "mercury-services/templates/visibility/CONFLUENCE-visibility.md",
       "last_modified": "2026-05-04T14:51:16.736199",
-      "backed_up_at": "2026-05-15T21:01:03.126151",
+      "backed_up_at": "2026-05-26T23:36:34.303257",
       "action": "skipped"
     },
     {
@@ -889,7 +890,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\visibility\\copilot-cli-agent-usage.md",
       "relative_path": "mercury-services/uncategorized/visibility/copilot-cli-agent-usage.md",
       "last_modified": "2026-04-22T21:23:40.070209",
-      "backed_up_at": "2026-05-15T21:01:03.127008",
+      "backed_up_at": "2026-05-26T23:36:34.304300",
       "action": "skipped"
     },
     {
@@ -902,7 +903,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\DESIGN-curr-state.md",
       "relative_path": "mercury-services/design/visibility/DESIGN-curr-state.md",
       "last_modified": "2026-04-22T21:23:40.068898",
-      "backed_up_at": "2026-05-15T21:01:03.127136",
+      "backed_up_at": "2026-05-26T23:36:34.305007",
       "action": "skipped"
     },
     {
@@ -915,7 +916,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\visibility-architecture-design-claude.md",
       "relative_path": "mercury-services/design/visibility/visibility-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:25:57.875224",
-      "backed_up_at": "2026-05-15T21:01:03.127259",
+      "backed_up_at": "2026-05-26T23:36:34.305405",
       "action": "skipped"
     },
     {
@@ -928,7 +929,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\visibility-aws2x-plan.md",
       "relative_path": "mercury-services/design/visibility/visibility-aws2x-plan.md",
       "last_modified": "2026-05-04T14:51:16.736199",
-      "backed_up_at": "2026-05-15T21:01:03.127382",
+      "backed_up_at": "2026-05-26T23:36:34.305693",
       "action": "skipped"
     },
     {
@@ -941,7 +942,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\watermill-publisher\\bk-watermill-dateformat-exception-analysis-04292026.md",
       "relative_path": "mercury-services/analysis/watermill-publisher/bk-watermill-dateformat-exception-analysis-04292026.md",
       "last_modified": "2026-04-29T18:44:43.650935",
-      "backed_up_at": "2026-05-15T21:01:03.127961",
+      "backed_up_at": "2026-05-26T23:36:34.306892",
       "action": "skipped"
     },
     {
@@ -954,7 +955,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\watermill-publisher\\DESIGN-watermill-publisher.md",
       "relative_path": "mercury-services/design/watermill-publisher/DESIGN-watermill-publisher.md",
       "last_modified": "2026-04-29T14:04:27.390762",
-      "backed_up_at": "2026-05-15T21:01:03.128088",
+      "backed_up_at": "2026-05-26T23:36:34.307186",
       "action": "skipped"
     },
     {
@@ -967,7 +968,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\webbl\\05042026-webbl-business-rules-claude.md",
       "relative_path": "mercury-services/business-rules/webbl/05042026-webbl-business-rules-claude.md",
       "last_modified": "2026-05-04T12:32:43.998997",
-      "backed_up_at": "2026-05-15T21:01:03.128580",
+      "backed_up_at": "2026-05-26T23:36:34.308517",
       "action": "skipped"
     },
     {
@@ -980,7 +981,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\webbl\\2026-03-31-sqs-connection-pool-shutdown-investigation.md",
       "relative_path": "mercury-services/analysis/webbl/2026-03-31-sqs-connection-pool-shutdown-investigation.md",
       "last_modified": "2026-04-22T21:23:40.074749",
-      "backed_up_at": "2026-05-15T21:01:03.128717",
+      "backed_up_at": "2026-05-26T23:36:34.308832",
       "action": "skipped"
     },
     {
@@ -993,7 +994,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\webbl\\CONFLUENCE-webbl.md",
       "relative_path": "mercury-services/templates/webbl/CONFLUENCE-webbl.md",
       "last_modified": "2026-04-22T21:23:40.076466",
-      "backed_up_at": "2026-05-15T21:01:03.128863",
+      "backed_up_at": "2026-05-26T23:36:34.309045",
       "action": "skipped"
     },
     {
@@ -1006,7 +1007,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\webbl\\DESIGN.md",
       "relative_path": "mercury-services/design/webbl/DESIGN.md",
       "last_modified": "2026-04-09T11:04:32.403250",
-      "backed_up_at": "2026-05-15T21:01:03.128979",
+      "backed_up_at": "2026-05-26T23:36:34.309163",
       "action": "skipped"
     },
     {
@@ -1019,7 +1020,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\webbl\\webbl-architecture-design-claude.md",
       "relative_path": "mercury-services/design/webbl/webbl-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:23:55.310323",
-      "backed_up_at": "2026-05-15T21:01:03.129095",
+      "backed_up_at": "2026-05-26T23:36:34.309282",
       "action": "skipped"
     },
     {
@@ -1032,7 +1033,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\webbl\\webbl-aws-upgrade.md",
       "relative_path": "mercury-services/analysis/webbl/webbl-aws-upgrade.md",
       "last_modified": "2026-04-22T21:23:40.078502",
-      "backed_up_at": "2026-05-15T21:01:03.129417",
+      "backed_up_at": "2026-05-26T23:36:34.309656",
       "action": "skipped"
     },
     {
@@ -1045,8 +1046,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\github-prompts\\copilot-instructions.md",
       "relative_path": "mercury-services-commons/github-prompts/copilot-instructions.md",
       "last_modified": "2026-05-15T18:33:31.697150",
-      "backed_up_at": "2026-05-15T21:01:03.132592",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.311382",
+      "action": "skipped"
     },
     {
       "project": "mercury-services-commons",
@@ -1058,8 +1059,21 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\vscode-settings\\mcp.json",
       "relative_path": "mercury-services-commons/vscode-settings/mcp.json",
       "last_modified": "2026-04-02T18:17:22.835567",
-      "backed_up_at": "2026-05-15T21:01:03.133528",
+      "backed_up_at": "2026-05-26T23:36:34.311743",
       "action": "skipped"
+    },
+    {
+      "project": "mercury-services-commons",
+      "module": "mercury-services-commons",
+      "scan_path": ".vscode",
+      "filename": "settings.json",
+      "category": "vscode-settings",
+      "source": "C:\\Users\\arijit.kundu\\projects\\mercury-services-commons\\.vscode\\settings.json",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\vscode-settings\\settings.json",
+      "relative_path": "mercury-services-commons/vscode-settings/settings.json",
+      "last_modified": "2026-05-26T22:13:39.227443",
+      "backed_up_at": "2026-05-26T23:36:34.315095",
+      "action": "copied"
     },
     {
       "project": "mercury-services-commons",
@@ -1071,8 +1085,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\commons\\commons-architecture-design-claude.md",
       "relative_path": "mercury-services-commons/design/commons/commons-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:45:22.131002",
-      "backed_up_at": "2026-05-15T21:01:03.135485",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.315968",
+      "action": "skipped"
     },
     {
       "project": "mercury-services-commons",
@@ -1083,8 +1097,8 @@
       "source": "C:\\Users\\arijit.kundu\\projects\\mercury-services-commons\\cloud-sdk-api\\docs\\2026-05-15-commons-rebase.md",
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\uncategorized\\cloud-sdk-api\\2026-05-15-commons-rebase.md",
       "relative_path": "mercury-services-commons/uncategorized/cloud-sdk-api/2026-05-15-commons-rebase.md",
-      "last_modified": "2026-05-15T20:51:11.124516",
-      "backed_up_at": "2026-05-15T21:01:03.138799",
+      "last_modified": "2026-05-26T23:35:26.507579",
+      "backed_up_at": "2026-05-26T23:36:34.319953",
       "action": "copied"
     },
     {
@@ -1097,8 +1111,8 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\cloud-sdk-api\\cloud-sdk-api-architecture-design-claude.md",
       "relative_path": "mercury-services-commons/design/cloud-sdk-api/cloud-sdk-api-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:39:31.725536",
-      "backed_up_at": "2026-05-15T21:01:03.140098",
-      "action": "copied"
+      "backed_up_at": "2026-05-26T23:36:34.320509",
+      "action": "skipped"
     },
     {
       "project": "mercury-services-commons",
@@ -1110,7 +1124,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md",
       "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md",
       "last_modified": "2026-04-16T18:30:34.926228",
-      "backed_up_at": "2026-05-15T21:01:03.140709",
+      "backed_up_at": "2026-05-26T23:36:34.321734",
       "action": "skipped"
     },
     {
@@ -1123,7 +1137,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-23-handlebars-owasp-impact-analysis.md",
       "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-23-handlebars-owasp-impact-analysis.md",
       "last_modified": "2026-04-23T18:59:24.372832",
-      "backed_up_at": "2026-05-15T21:01:03.140834",
+      "backed_up_at": "2026-05-26T23:36:34.322010",
       "action": "skipped"
     },
     {
@@ -1136,7 +1150,7 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-23-netty-removal.md",
       "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-23-netty-removal.md",
       "last_modified": "2026-04-23T17:15:15.391836",
-      "backed_up_at": "2026-05-15T21:01:03.141191",
+      "backed_up_at": "2026-05-26T23:36:34.322695",
       "action": "skipped"
     },
     {
@@ -1149,7 +1163,449 @@
       "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\cloud-sdk-aws\\cloud-sdk-aws-architecture-design-claude.md",
       "relative_path": "mercury-services-commons/design/cloud-sdk-aws/cloud-sdk-aws-architecture-design-claude.md",
       "last_modified": "2026-05-04T13:42:18.597245",
-      "backed_up_at": "2026-05-15T21:01:03.141336",
+      "backed_up_at": "2026-05-26T23:36:34.323028",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "appianway",
+      "scan_path": ".claude",
+      "filename": "settings.json",
+      "category": "claude-skills",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.claude\\settings.json",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\claude-skills\\settings.json",
+      "relative_path": "appianway/claude-skills/settings.json",
+      "last_modified": "2026-05-22T10:50:39.939067",
+      "backed_up_at": "2026-05-26T23:36:34.327043",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "appianway",
+      "scan_path": ".claude",
+      "filename": "settings.local.json",
+      "category": "claude-skills",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.claude\\settings.local.json",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\claude-skills\\settings.local.json",
+      "relative_path": "appianway/claude-skills/settings.local.json",
+      "last_modified": "2026-05-24T09:24:59.423009",
+      "backed_up_at": "2026-05-26T23:36:34.327136",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "appianway",
+      "scan_path": ".vscode",
+      "filename": "settings.json",
+      "category": "vscode-settings",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.vscode\\settings.json",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\vscode-settings\\settings.json",
+      "relative_path": "appianway/vscode-settings/settings.json",
+      "last_modified": "2026-05-22T10:51:12.792644",
+      "backed_up_at": "2026-05-26T23:36:34.327692",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "docs",
+      "scan_path": "docs",
+      "filename": "2026-05-24-appianway-overview-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\docs\\2026-05-24-appianway-overview-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\docs\\2026-05-24-appianway-overview-claude.design.md",
+      "relative_path": "appianway/design/docs/2026-05-24-appianway-overview-claude.design.md",
+      "last_modified": "2026-05-24T09:39:11.971489",
+      "backed_up_at": "2026-05-26T23:36:34.328068",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "dispatcher",
+      "scan_path": "dispatcher/docs",
+      "filename": "2026-05-24-dispatcher-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\dispatcher\\docs\\2026-05-24-dispatcher-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\dispatcher\\2026-05-24-dispatcher-claude.design.md",
+      "relative_path": "appianway/design/dispatcher/2026-05-24-dispatcher-claude.design.md",
+      "last_modified": "2026-05-24T09:29:27.676148",
+      "backed_up_at": "2026-05-26T23:36:34.328672",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "dispatcher",
+      "scan_path": "dispatcher/docs",
+      "filename": "2026-05-24-dispatcher-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\dispatcher\\docs\\2026-05-24-dispatcher-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\dispatcher\\2026-05-24-dispatcher-copilot.design.md",
+      "relative_path": "appianway/design/dispatcher/2026-05-24-dispatcher-copilot.design.md",
+      "last_modified": "2026-05-24T10:31:17.632388",
+      "backed_up_at": "2026-05-26T23:36:34.328785",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "distributor",
+      "scan_path": "distributor/docs",
+      "filename": "2026-05-24-distributor-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor\\docs\\2026-05-24-distributor-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor\\2026-05-24-distributor-claude.design.md",
+      "relative_path": "appianway/design/distributor/2026-05-24-distributor-claude.design.md",
+      "last_modified": "2026-05-24T09:36:51.211966",
+      "backed_up_at": "2026-05-26T23:36:34.329263",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "distributor",
+      "scan_path": "distributor/docs",
+      "filename": "2026-05-24-distributor-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor\\docs\\2026-05-24-distributor-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor\\2026-05-24-distributor-copilot.design.md",
+      "relative_path": "appianway/design/distributor/2026-05-24-distributor-copilot.design.md",
+      "last_modified": "2026-05-24T10:31:54.858177",
+      "backed_up_at": "2026-05-26T23:36:34.329379",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "distributor-rest",
+      "scan_path": "distributor-rest/docs",
+      "filename": "2026-05-24-distributor-rest-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor-rest\\docs\\2026-05-24-distributor-rest-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor-rest\\2026-05-24-distributor-rest-claude.design.md",
+      "relative_path": "appianway/design/distributor-rest/2026-05-24-distributor-rest-claude.design.md",
+      "last_modified": "2026-05-24T09:29:17.550283",
+      "backed_up_at": "2026-05-26T23:36:34.330086",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "distributor-rest",
+      "scan_path": "distributor-rest/docs",
+      "filename": "2026-05-24-distributor-rest-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor-rest\\docs\\2026-05-24-distributor-rest-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor-rest\\2026-05-24-distributor-rest-copilot.design.md",
+      "relative_path": "appianway/design/distributor-rest/2026-05-24-distributor-rest-copilot.design.md",
+      "last_modified": "2026-05-24T10:32:31.343210",
+      "backed_up_at": "2026-05-26T23:36:34.330345",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "email-sender",
+      "scan_path": "email-sender/docs",
+      "filename": "2026-05-24-email-sender-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\email-sender\\docs\\2026-05-24-email-sender-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\email-sender\\2026-05-24-email-sender-claude.design.md",
+      "relative_path": "appianway/design/email-sender/2026-05-24-email-sender-claude.design.md",
+      "last_modified": "2026-05-24T09:27:53.748070",
+      "backed_up_at": "2026-05-26T23:36:34.330924",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "email-sender",
+      "scan_path": "email-sender/docs",
+      "filename": "2026-05-24-email-sender-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\email-sender\\docs\\2026-05-24-email-sender-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\email-sender\\2026-05-24-email-sender-copilot.design.md",
+      "relative_path": "appianway/design/email-sender/2026-05-24-email-sender-copilot.design.md",
+      "last_modified": "2026-05-24T10:33:12.056866",
+      "backed_up_at": "2026-05-26T23:36:34.331045",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "error-processor",
+      "scan_path": "error-processor/docs",
+      "filename": "2026-05-24-error-processor-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\error-processor\\docs\\2026-05-24-error-processor-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\error-processor\\2026-05-24-error-processor-claude.design.md",
+      "relative_path": "appianway/design/error-processor/2026-05-24-error-processor-claude.design.md",
+      "last_modified": "2026-05-24T09:31:36.272032",
+      "backed_up_at": "2026-05-26T23:36:34.331455",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "error-processor",
+      "scan_path": "error-processor/docs",
+      "filename": "2026-05-24-error-processor-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\error-processor\\docs\\2026-05-24-error-processor-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\error-processor\\2026-05-24-error-processor-copilot.design.md",
+      "relative_path": "appianway/design/error-processor/2026-05-24-error-processor-copilot.design.md",
+      "last_modified": "2026-05-24T10:33:42.119800",
+      "backed_up_at": "2026-05-26T23:36:34.331578",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "event-writer",
+      "scan_path": "event-writer/docs",
+      "filename": "2026-05-24-event-writer-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\event-writer\\docs\\2026-05-24-event-writer-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\event-writer\\2026-05-24-event-writer-claude.design.md",
+      "relative_path": "appianway/design/event-writer/2026-05-24-event-writer-claude.design.md",
+      "last_modified": "2026-05-24T09:25:25.959085",
+      "backed_up_at": "2026-05-26T23:36:34.332066",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "event-writer",
+      "scan_path": "event-writer/docs",
+      "filename": "2026-05-24-event-writer-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\event-writer\\docs\\2026-05-24-event-writer-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\event-writer\\2026-05-24-event-writer-copilot.design.md",
+      "relative_path": "appianway/design/event-writer/2026-05-24-event-writer-copilot.design.md",
+      "last_modified": "2026-05-24T10:34:14.541758",
+      "backed_up_at": "2026-05-26T23:36:34.332186",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "functional-testing",
+      "scan_path": "functional-testing/docs",
+      "filename": "2026-05-24-functional-testing-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\functional-testing\\docs\\2026-05-24-functional-testing-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\functional-testing\\2026-05-24-functional-testing-claude.design.md",
+      "relative_path": "appianway/design/functional-testing/2026-05-24-functional-testing-claude.design.md",
+      "last_modified": "2026-05-24T09:29:54.382150",
+      "backed_up_at": "2026-05-26T23:36:34.332884",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "functional-testing",
+      "scan_path": "functional-testing/docs",
+      "filename": "2026-05-24-functional-testing-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\functional-testing\\docs\\2026-05-24-functional-testing-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\functional-testing\\2026-05-24-functional-testing-copilot.design.md",
+      "relative_path": "appianway/design/functional-testing/2026-05-24-functional-testing-copilot.design.md",
+      "last_modified": "2026-05-24T10:40:15.774035",
+      "backed_up_at": "2026-05-26T23:36:34.333010",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "ingestor",
+      "scan_path": "ingestor/docs",
+      "filename": "2026-05-24-ingestor-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\ingestor\\docs\\2026-05-24-ingestor-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\ingestor\\2026-05-24-ingestor-claude.design.md",
+      "relative_path": "appianway/design/ingestor/2026-05-24-ingestor-claude.design.md",
+      "last_modified": "2026-05-24T09:27:10.910625",
+      "backed_up_at": "2026-05-26T23:36:34.333413",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "ingestor",
+      "scan_path": "ingestor/docs",
+      "filename": "2026-05-24-ingestor-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\ingestor\\docs\\2026-05-24-ingestor-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\ingestor\\2026-05-24-ingestor-copilot.design.md",
+      "relative_path": "appianway/design/ingestor/2026-05-24-ingestor-copilot.design.md",
+      "last_modified": "2026-05-24T10:34:53.100926",
+      "backed_up_at": "2026-05-26T23:36:34.333525",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "mftdispatcher",
+      "scan_path": "mftdispatcher/docs",
+      "filename": "2026-05-24-mftdispatcher-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\mftdispatcher\\docs\\2026-05-24-mftdispatcher-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\mftdispatcher\\2026-05-24-mftdispatcher-claude.design.md",
+      "relative_path": "appianway/design/mftdispatcher/2026-05-24-mftdispatcher-claude.design.md",
+      "last_modified": "2026-05-24T09:33:05.655276",
+      "backed_up_at": "2026-05-26T23:36:34.334037",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "mftdispatcher",
+      "scan_path": "mftdispatcher/docs",
+      "filename": "2026-05-24-mftdispatcher-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\mftdispatcher\\docs\\2026-05-24-mftdispatcher-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\mftdispatcher\\2026-05-24-mftdispatcher-copilot.design.md",
+      "relative_path": "appianway/design/mftdispatcher/2026-05-24-mftdispatcher-copilot.design.md",
+      "last_modified": "2026-05-24T10:37:12.028404",
+      "backed_up_at": "2026-05-26T23:36:34.334202",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "schema-beans",
+      "scan_path": "schema-beans/docs",
+      "filename": "2026-05-24-schema-beans-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\schema-beans\\docs\\2026-05-24-schema-beans-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\schema-beans\\2026-05-24-schema-beans-claude.design.md",
+      "relative_path": "appianway/design/schema-beans/2026-05-24-schema-beans-claude.design.md",
+      "last_modified": "2026-05-24T09:28:08.996636",
+      "backed_up_at": "2026-05-26T23:36:34.334886",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "schema-beans",
+      "scan_path": "schema-beans/docs",
+      "filename": "2026-05-24-schema-beans-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\schema-beans\\docs\\2026-05-24-schema-beans-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\schema-beans\\2026-05-24-schema-beans-copilot.design.md",
+      "relative_path": "appianway/design/schema-beans/2026-05-24-schema-beans-copilot.design.md",
+      "last_modified": "2026-05-24T10:37:34.301780",
+      "backed_up_at": "2026-05-26T23:36:34.335123",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "splitter",
+      "scan_path": "splitter/docs",
+      "filename": "2026-05-24-splitter-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\splitter\\docs\\2026-05-24-splitter-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\splitter\\2026-05-24-splitter-claude.design.md",
+      "relative_path": "appianway/design/splitter/2026-05-24-splitter-claude.design.md",
+      "last_modified": "2026-05-24T09:26:41.046988",
+      "backed_up_at": "2026-05-26T23:36:34.335586",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "splitter",
+      "scan_path": "splitter/docs",
+      "filename": "2026-05-24-splitter-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\splitter\\docs\\2026-05-24-splitter-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\splitter\\2026-05-24-splitter-copilot.design.md",
+      "relative_path": "appianway/design/splitter/2026-05-24-splitter-copilot.design.md",
+      "last_modified": "2026-05-24T10:35:42.224749",
+      "backed_up_at": "2026-05-26T23:36:34.335878",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "structuralvalidator",
+      "scan_path": "structuralvalidator/docs",
+      "filename": "2026-05-24-structuralvalidator-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\structuralvalidator\\docs\\2026-05-24-structuralvalidator-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\structuralvalidator\\2026-05-24-structuralvalidator-claude.design.md",
+      "relative_path": "appianway/design/structuralvalidator/2026-05-24-structuralvalidator-claude.design.md",
+      "last_modified": "2026-05-24T09:25:26.549184",
+      "backed_up_at": "2026-05-26T23:36:34.336705",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "structuralvalidator",
+      "scan_path": "structuralvalidator/docs",
+      "filename": "2026-05-24-structuralvalidator-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\structuralvalidator\\docs\\2026-05-24-structuralvalidator-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\structuralvalidator\\2026-05-24-structuralvalidator-copilot.design.md",
+      "relative_path": "appianway/design/structuralvalidator/2026-05-24-structuralvalidator-copilot.design.md",
+      "last_modified": "2026-05-24T10:38:06.892767",
+      "backed_up_at": "2026-05-26T23:36:34.336874",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "transformer",
+      "scan_path": "transformer/docs",
+      "filename": "2026-05-24-transformer-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\transformer\\docs\\2026-05-24-transformer-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\transformer\\2026-05-24-transformer-claude.design.md",
+      "relative_path": "appianway/design/transformer/2026-05-24-transformer-claude.design.md",
+      "last_modified": "2026-05-24T09:26:42.448465",
+      "backed_up_at": "2026-05-26T23:36:34.337495",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "transformer",
+      "scan_path": "transformer/docs",
+      "filename": "2026-05-24-transformer-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\transformer\\docs\\2026-05-24-transformer-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\transformer\\2026-05-24-transformer-copilot.design.md",
+      "relative_path": "appianway/design/transformer/2026-05-24-transformer-copilot.design.md",
+      "last_modified": "2026-05-24T10:36:30.088933",
+      "backed_up_at": "2026-05-26T23:36:34.337643",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "validator",
+      "scan_path": "validator/docs",
+      "filename": "2026-05-24-validator-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\validator\\docs\\2026-05-24-validator-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\validator\\2026-05-24-validator-claude.design.md",
+      "relative_path": "appianway/design/validator/2026-05-24-validator-claude.design.md",
+      "last_modified": "2026-05-24T09:27:56.564917",
+      "backed_up_at": "2026-05-26T23:36:34.338573",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "validator",
+      "scan_path": "validator/docs",
+      "filename": "2026-05-24-validator-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\validator\\docs\\2026-05-24-validator-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\validator\\2026-05-24-validator-copilot.design.md",
+      "relative_path": "appianway/design/validator/2026-05-24-validator-copilot.design.md",
+      "last_modified": "2026-05-24T10:38:46.823027",
+      "backed_up_at": "2026-05-26T23:36:34.338717",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "watermill",
+      "scan_path": "watermill/docs",
+      "filename": "2026-05-24-watermill-claude.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\watermill\\docs\\2026-05-24-watermill-claude.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\watermill\\2026-05-24-watermill-claude.design.md",
+      "relative_path": "appianway/design/watermill/2026-05-24-watermill-claude.design.md",
+      "last_modified": "2026-05-24T09:28:10.133891",
+      "backed_up_at": "2026-05-26T23:36:34.339158",
+      "action": "skipped"
+    },
+    {
+      "project": "appianway",
+      "module": "watermill",
+      "scan_path": "watermill/docs",
+      "filename": "2026-05-24-watermill-copilot.design.md",
+      "category": "design",
+      "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\watermill\\docs\\2026-05-24-watermill-copilot.design.md",
+      "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\watermill\\2026-05-24-watermill-copilot.design.md",
+      "relative_path": "appianway/design/watermill/2026-05-24-watermill-copilot.design.md",
+      "last_modified": "2026-05-24T10:39:30.864354",
+      "backed_up_at": "2026-05-26T23:36:34.339279",
       "action": "skipped"
     }
   ],
@@ -1178,7 +1634,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\copilot-instructions.md",
           "relative_path": "mercury-services/github-prompts/copilot-instructions.md",
           "last_modified": "2026-03-19T15:13:56",
-          "backed_up_at": "2026-05-15T21:01:03.103835",
+          "backed_up_at": "2026-05-26T23:36:34.287245",
           "action": "skipped"
         },
         {
@@ -1191,7 +1647,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-runtime-issues.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/bk-runtime-issues.prompt.md",
           "last_modified": "2026-05-01T17:48:18.378300",
-          "backed_up_at": "2026-05-15T21:01:03.104139",
+          "backed_up_at": "2026-05-26T23:36:34.287666",
           "action": "skipped"
         },
         {
@@ -1204,7 +1660,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-visibility-audit-unconvert-05062026.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/bk-visibility-audit-unconvert-05062026.prompt.md",
           "last_modified": "2026-05-06T12:58:00.846679",
-          "backed_up_at": "2026-05-15T21:01:03.104430",
+          "backed_up_at": "2026-05-26T23:36:34.288233",
           "action": "skipped"
         },
         {
@@ -1217,7 +1673,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\bk-watermill-datetimeex-04292026.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/bk-watermill-datetimeex-04292026.prompt.md",
           "last_modified": "2026-04-29T17:30:59.875009",
-          "backed_up_at": "2026-05-15T21:01:03.104533",
+          "backed_up_at": "2026-05-26T23:36:34.288635",
           "action": "skipped"
         },
         {
@@ -1230,7 +1686,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-dataformat-issue.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/booking-dataformat-issue.prompt.md",
           "last_modified": "2026-04-17T20:16:21.242265",
-          "backed_up_at": "2026-05-15T21:01:03.104628",
+          "backed_up_at": "2026-05-26T23:36:34.289044",
           "action": "skipped"
         },
         {
@@ -1243,7 +1699,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-email-test-restore.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/booking-email-test-restore.prompt.md",
           "last_modified": "2026-03-24T19:47:52",
-          "backed_up_at": "2026-05-15T21:01:03.104720",
+          "backed_up_at": "2026-05-26T23:36:34.289400",
           "action": "skipped"
         },
         {
@@ -1256,7 +1712,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-email-test-review.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/booking-email-test-review.prompt.md",
           "last_modified": "2026-03-24T17:31:24",
-          "backed_up_at": "2026-05-15T21:01:03.104806",
+          "backed_up_at": "2026-05-26T23:36:34.289917",
           "action": "skipped"
         },
         {
@@ -1269,7 +1725,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\booking-integration-issues.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/booking-integration-issues.prompt.md",
           "last_modified": "2026-04-22T15:31:42.065024",
-          "backed_up_at": "2026-05-15T21:01:03.104899",
+          "backed_up_at": "2026-05-26T23:36:34.290041",
           "action": "skipped"
         },
         {
@@ -1282,7 +1738,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\lambda-workaround.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/lambda-workaround.prompt.md",
           "last_modified": "2026-03-24T13:10:26",
-          "backed_up_at": "2026-05-15T21:01:03.104989",
+          "backed_up_at": "2026-05-26T23:36:34.290139",
           "action": "skipped"
         },
         {
@@ -1295,7 +1751,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\network-ov-runtime-issue.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/network-ov-runtime-issue.prompt.md",
           "last_modified": "2026-03-31T19:33:16",
-          "backed_up_at": "2026-05-15T21:01:03.105073",
+          "backed_up_at": "2026-05-26T23:36:34.290227",
           "action": "skipped"
         },
         {
@@ -1308,7 +1764,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\visibility-aws-upgrade-plan.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/visibility-aws-upgrade-plan.prompt.md",
           "last_modified": "2026-03-30T12:55:47",
-          "backed_up_at": "2026-05-15T21:01:03.105161",
+          "backed_up_at": "2026-05-26T23:36:34.290327",
           "action": "skipped"
         },
         {
@@ -1321,7 +1777,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\visibility-curr-state.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/visibility-curr-state.prompt.md",
           "last_modified": "2026-03-30T11:38:34",
-          "backed_up_at": "2026-05-15T21:01:03.105246",
+          "backed_up_at": "2026-05-26T23:36:34.290425",
           "action": "skipped"
         },
         {
@@ -1334,7 +1790,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\prompts\\webbl.connpool-issue.prompt.md",
           "relative_path": "mercury-services/github-prompts/prompts/webbl.connpool-issue.prompt.md",
           "last_modified": "2026-03-31T16:52:55",
-          "backed_up_at": "2026-05-15T21:01:03.105329",
+          "backed_up_at": "2026-05-26T23:36:34.290518",
           "action": "skipped"
         },
         {
@@ -1347,7 +1803,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\aws-dynamo-check.md",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/aws-dynamo-check.md",
           "last_modified": "2026-03-17T20:00:20",
-          "backed_up_at": "2026-05-15T21:01:03.105423",
+          "backed_up_at": "2026-05-26T23:36:34.290623",
           "action": "skipped"
         },
         {
@@ -1360,7 +1816,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\enrichedAttributes.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/enrichedAttributes.json",
           "last_modified": "2026-03-19T15:04:23",
-          "backed_up_at": "2026-05-15T21:01:03.105510",
+          "backed_up_at": "2026-05-26T23:36:34.290717",
           "action": "skipped"
         },
         {
@@ -1373,7 +1829,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_BookingDetail.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_BookingDetail.json",
           "last_modified": "2026-03-17T19:16:11",
-          "backed_up_at": "2026-05-15T21:01:03.105598",
+          "backed_up_at": "2026-05-26T23:36:34.290812",
           "action": "skipped"
         },
         {
@@ -1386,7 +1842,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_RapidReservation.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_RapidReservation.json",
           "last_modified": "2026-03-17T19:48:21",
-          "backed_up_at": "2026-05-15T21:01:03.105793",
+          "backed_up_at": "2026-05-26T23:36:34.290899",
           "action": "skipped"
         },
         {
@@ -1399,7 +1855,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SequenceId.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SequenceId.json",
           "last_modified": "2026-03-17T19:48:47",
-          "backed_up_at": "2026-05-15T21:01:03.106003",
+          "backed_up_at": "2026-05-26T23:36:34.290987",
           "action": "skipped"
         },
         {
@@ -1412,7 +1868,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SpotRatesDetail.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SpotRatesDetail.json",
           "last_modified": "2026-03-17T19:28:14",
-          "backed_up_at": "2026-05-15T21:01:03.106165",
+          "backed_up_at": "2026-05-26T23:36:34.291076",
           "action": "skipped"
         },
         {
@@ -1425,7 +1881,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_SpotRatesToInttraRefDetail.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_SpotRatesToInttraRefDetail.json",
           "last_modified": "2026-03-17T19:58:03",
-          "backed_up_at": "2026-05-15T21:01:03.106310",
+          "backed_up_at": "2026-05-26T23:36:34.291171",
           "action": "skipped"
         },
         {
@@ -1438,7 +1894,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_Template.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_Template.json",
           "last_modified": "2026-03-17T19:49:53",
-          "backed_up_at": "2026-05-15T21:01:03.106404",
+          "backed_up_at": "2026-05-26T23:36:34.291265",
           "action": "skipped"
         },
         {
@@ -1451,7 +1907,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\aws-skills\\inttra_int_booking_UniqueId.json",
           "relative_path": "mercury-services/github-prompts/skills/aws-skills/inttra_int_booking_UniqueId.json",
           "last_modified": "2026-03-17T19:49:20",
-          "backed_up_at": "2026-05-15T21:01:03.106507",
+          "backed_up_at": "2026-05-26T23:36:34.291360",
           "action": "skipped"
         },
         {
@@ -1464,7 +1920,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\build-errors\\SKILL.md",
           "relative_path": "mercury-services/github-prompts/skills/build-errors/SKILL.md",
           "last_modified": "2026-03-11T16:49:53",
-          "backed_up_at": "2026-05-15T21:01:03.106605",
+          "backed_up_at": "2026-05-26T23:36:34.291454",
           "action": "skipped"
         },
         {
@@ -1477,7 +1933,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\git-operations\\SKILL.md",
           "relative_path": "mercury-services/github-prompts/skills/git-operations/SKILL.md",
           "last_modified": "2026-04-13T19:20:56.849587",
-          "backed_up_at": "2026-05-15T21:01:03.106697",
+          "backed_up_at": "2026-05-26T23:36:34.291544",
           "action": "skipped"
         },
         {
@@ -1490,7 +1946,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\java-refactoring\\SKILL.md",
           "relative_path": "mercury-services/github-prompts/skills/java-refactoring/SKILL.md",
           "last_modified": "2026-03-11T13:36:50",
-          "backed_up_at": "2026-05-15T21:01:03.106788",
+          "backed_up_at": "2026-05-26T23:36:34.291670",
           "action": "skipped"
         },
         {
@@ -1503,7 +1959,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-context.md",
           "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-context.md",
           "last_modified": "2026-03-17T17:31:04",
-          "backed_up_at": "2026-05-15T21:01:03.106882",
+          "backed_up_at": "2026-05-26T23:36:34.291761",
           "action": "skipped"
         },
         {
@@ -1516,7 +1972,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-review-comments.md",
           "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-review-comments.md",
           "last_modified": "2026-03-17T19:06:24",
-          "backed_up_at": "2026-05-15T21:01:03.106971",
+          "backed_up_at": "2026-05-26T23:36:34.291847",
           "action": "skipped"
         },
         {
@@ -1529,7 +1985,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\pr-reviews\\pr-review-responses.md",
           "relative_path": "mercury-services/github-prompts/skills/pr-reviews/pr-review-responses.md",
           "last_modified": "2026-03-19T23:34:30",
-          "backed_up_at": "2026-05-15T21:01:03.107059",
+          "backed_up_at": "2026-05-26T23:36:34.291948",
           "action": "skipped"
         },
         {
@@ -1542,7 +1998,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\github-prompts\\skills\\session-context\\SKILL.md",
           "relative_path": "mercury-services/github-prompts/skills/session-context/SKILL.md",
           "last_modified": "2026-03-10T19:09:55",
-          "backed_up_at": "2026-05-15T21:01:03.107148",
+          "backed_up_at": "2026-05-26T23:36:34.292036",
           "action": "skipped"
         },
         {
@@ -1555,8 +2011,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\claude-skills\\settings.json",
           "relative_path": "mercury-services/claude-skills/settings.json",
           "last_modified": "2026-05-07T17:47:08.004810",
-          "backed_up_at": "2026-05-15T21:01:03.110470",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.292608",
+          "action": "skipped"
         },
         {
           "project": "mercury-services",
@@ -1568,7 +2024,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\claude-skills\\settings.local.json",
           "relative_path": "mercury-services/claude-skills/settings.local.json",
           "last_modified": "2026-05-04T12:08:20.481781",
-          "backed_up_at": "2026-05-15T21:01:03.110669",
+          "backed_up_at": "2026-05-26T23:36:34.292703",
           "action": "skipped"
         },
         {
@@ -1581,7 +2037,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\launch.json",
           "relative_path": "mercury-services/vscode-settings/launch.json",
           "last_modified": "2026-04-22T18:50:39.160136",
-          "backed_up_at": "2026-05-15T21:01:03.111232",
+          "backed_up_at": "2026-05-26T23:36:34.293350",
           "action": "skipped"
         },
         {
@@ -1594,7 +2050,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\mcp.json",
           "relative_path": "mercury-services/vscode-settings/mcp.json",
           "last_modified": "2026-04-02T18:17:22.835567",
-          "backed_up_at": "2026-05-15T21:01:03.111332",
+          "backed_up_at": "2026-05-26T23:36:34.293436",
           "action": "skipped"
         },
         {
@@ -1607,7 +2063,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\vscode-settings\\settings.json",
           "relative_path": "mercury-services/vscode-settings/settings.json",
           "last_modified": "2026-04-22T19:22:48.389313",
-          "backed_up_at": "2026-05-15T21:01:03.111421",
+          "backed_up_at": "2026-05-26T23:36:34.293515",
           "action": "skipped"
         },
         {
@@ -1620,7 +2076,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-03-25-runtime-issue-fixes-summary.md",
           "relative_path": "mercury-services/issues/booking/2026-03-25-runtime-issue-fixes-summary.md",
           "last_modified": "2026-04-22T21:23:40.051457",
-          "backed_up_at": "2026-05-15T21:01:03.112864",
+          "backed_up_at": "2026-05-26T23:36:34.294881",
           "action": "skipped"
         },
         {
@@ -1633,7 +2089,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-03-27-aws-upgrade-branch-migration-summary.md",
           "relative_path": "mercury-services/uncategorized/booking/2026-03-27-aws-upgrade-branch-migration-summary.md",
           "last_modified": "2026-04-22T21:23:40.052627",
-          "backed_up_at": "2026-05-15T21:01:03.114109",
+          "backed_up_at": "2026-05-26T23:36:34.296076",
           "action": "skipped"
         },
         {
@@ -1646,7 +2102,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-03-27-booking-dev-log-review.md",
           "relative_path": "mercury-services/analysis/booking/2026-03-27-booking-dev-log-review.md",
           "last_modified": "2026-04-22T21:23:40.053917",
-          "backed_up_at": "2026-05-15T21:01:03.114307",
+          "backed_up_at": "2026-05-26T23:36:34.296210",
           "action": "skipped"
         },
         {
@@ -1659,7 +2115,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-13-rebase-conflict-analysis.md",
           "relative_path": "mercury-services/analysis/booking/2026-04-13-rebase-conflict-analysis.md",
           "last_modified": "2026-04-22T21:23:40.055212",
-          "backed_up_at": "2026-05-15T21:01:03.114451",
+          "backed_up_at": "2026-05-26T23:36:34.296332",
           "action": "skipped"
         },
         {
@@ -1672,7 +2128,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-16-owasp-high-vulnerability-origin-analysis.md",
           "relative_path": "mercury-services/analysis/booking/2026-04-16-owasp-high-vulnerability-origin-analysis.md",
           "last_modified": "2026-04-22T21:23:40.056567",
-          "backed_up_at": "2026-05-15T21:01:03.114587",
+          "backed_up_at": "2026-05-26T23:36:34.296447",
           "action": "skipped"
         },
         {
@@ -1685,7 +2141,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-04-17-booking-dataformat-issue-fixes.md",
           "relative_path": "mercury-services/issues/booking/2026-04-17-booking-dataformat-issue-fixes.md",
           "last_modified": "2026-04-22T21:23:40.057858",
-          "backed_up_at": "2026-05-15T21:01:03.114736",
+          "backed_up_at": "2026-05-26T23:36:34.296692",
           "action": "skipped"
         },
         {
@@ -1698,7 +2154,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-22-qa-outbound-pipeline-debug-findings.md",
           "relative_path": "mercury-services/analysis/booking/2026-04-22-qa-outbound-pipeline-debug-findings.md",
           "last_modified": "2026-04-22T21:23:40.059206",
-          "backed_up_at": "2026-05-15T21:01:03.114866",
+          "backed_up_at": "2026-05-26T23:36:34.296841",
           "action": "skipped"
         },
         {
@@ -1711,7 +2167,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
           "relative_path": "mercury-services/analysis/booking/2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md",
           "last_modified": "2026-04-23T16:17:24.860941",
-          "backed_up_at": "2026-05-15T21:01:03.114987",
+          "backed_up_at": "2026-05-26T23:36:34.296952",
           "action": "skipped"
         },
         {
@@ -1724,7 +2180,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-04-23-owasp-netty.md",
           "relative_path": "mercury-services/uncategorized/booking/2026-04-23-owasp-netty.md",
           "last_modified": "2026-04-23T18:35:40.059411",
-          "backed_up_at": "2026-05-15T21:01:03.115906",
+          "backed_up_at": "2026-05-26T23:36:34.297815",
           "action": "skipped"
         },
         {
@@ -1737,7 +2193,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking\\2026-05-05-booking-business-rules-copilot.md",
           "relative_path": "mercury-services/business-rules/booking/2026-05-05-booking-business-rules-copilot.md",
           "last_modified": "2026-05-04T12:21:38.281052",
-          "backed_up_at": "2026-05-15T21:01:03.116086",
+          "backed_up_at": "2026-05-26T23:36:34.297977",
           "action": "skipped"
         },
         {
@@ -1750,7 +2206,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-05-booking-redshift-audit-field-issue.md",
           "relative_path": "mercury-services/issues/booking/2026-05-05-booking-redshift-audit-field-issue.md",
           "last_modified": "2026-05-05T16:43:51.953367",
-          "backed_up_at": "2026-05-15T21:01:03.116281",
+          "backed_up_at": "2026-05-26T23:36:34.298114",
           "action": "skipped"
         },
         {
@@ -1763,8 +2219,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-06-visibility-audit-unconvert-issue-claude.md",
           "relative_path": "mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-claude.md",
           "last_modified": "2026-05-06T19:48:59.276065",
-          "backed_up_at": "2026-05-15T21:01:03.118155",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.298254",
+          "action": "skipped"
         },
         {
           "project": "mercury-services",
@@ -1776,7 +2232,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\2026-05-06-visibility-audit-unconvert-issue-copilot.md",
           "relative_path": "mercury-services/issues/booking/2026-05-06-visibility-audit-unconvert-issue-copilot.md",
           "last_modified": "2026-05-06T18:02:39.140220",
-          "backed_up_at": "2026-05-15T21:01:03.118413",
+          "backed_up_at": "2026-05-26T23:36:34.298398",
           "action": "skipped"
         },
         {
@@ -1789,8 +2245,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\booking\\2026-05-15-visibility-matcher-invalid-audit-old-record.md",
           "relative_path": "mercury-services/uncategorized/booking/2026-05-15-visibility-matcher-invalid-audit-old-record.md",
           "last_modified": "2026-05-15T17:27:04.137586",
-          "backed_up_at": "2026-05-15T21:01:03.120233",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.298957",
+          "action": "skipped"
         },
         {
           "project": "mercury-services",
@@ -1802,7 +2258,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking\\booking-architecture-design-claude.md",
           "relative_path": "mercury-services/design/booking/booking-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:24:35.366169",
-          "backed_up_at": "2026-05-15T21:01:03.120434",
+          "backed_up_at": "2026-05-26T23:36:34.299077",
           "action": "skipped"
         },
         {
@@ -1815,7 +2271,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking\\booking-business-rules.md",
           "relative_path": "mercury-services/business-rules/booking/booking-business-rules.md",
           "last_modified": "2026-04-27T19:39:40.447048",
-          "backed_up_at": "2026-05-15T21:01:03.120593",
+          "backed_up_at": "2026-05-26T23:36:34.299214",
           "action": "skipped"
         },
         {
@@ -1828,7 +2284,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\booking-integration-issues-04222027-copilot.md",
           "relative_path": "mercury-services/issues/booking/booking-integration-issues-04222027-copilot.md",
           "last_modified": "2026-04-23T14:23:03.140892",
-          "backed_up_at": "2026-05-15T21:01:03.120738",
+          "backed_up_at": "2026-05-26T23:36:34.299353",
           "action": "skipped"
         },
         {
@@ -1841,7 +2297,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\booking\\claude-review-integration-issue-fix.md",
           "relative_path": "mercury-services/analysis/booking/claude-review-integration-issue-fix.md",
           "last_modified": "2026-04-22T21:23:40.061754",
-          "backed_up_at": "2026-05-15T21:01:03.120902",
+          "backed_up_at": "2026-05-26T23:36:34.299470",
           "action": "skipped"
         },
         {
@@ -1854,7 +2310,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking\\DESIGN-AWS2x.md",
           "relative_path": "mercury-services/design/booking/DESIGN-AWS2x.md",
           "last_modified": "2026-04-14T18:09:58.816797",
-          "backed_up_at": "2026-05-15T21:01:03.121029",
+          "backed_up_at": "2026-05-26T23:36:34.299588",
           "action": "skipped"
         },
         {
@@ -1867,7 +2323,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\integration-issues-qa-verification-apr232027.md",
           "relative_path": "mercury-services/issues/booking/integration-issues-qa-verification-apr232027.md",
           "last_modified": "2026-04-23T12:02:14.973799",
-          "backed_up_at": "2026-05-15T21:01:03.121169",
+          "backed_up_at": "2026-05-26T23:36:34.299722",
           "action": "skipped"
         },
         {
@@ -1880,7 +2336,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\issues\\booking\\visibility-integration-issue-04212026.md",
           "relative_path": "mercury-services/issues/booking/visibility-integration-issue-04212026.md",
           "last_modified": "2026-04-22T21:23:40.063062",
-          "backed_up_at": "2026-05-15T21:01:03.121306",
+          "backed_up_at": "2026-05-26T23:36:34.299855",
           "action": "skipped"
         },
         {
@@ -1893,7 +2349,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\booking-bridge\\05042026-booking-bridge-business-rules-claude.md",
           "relative_path": "mercury-services/business-rules/booking-bridge/05042026-booking-bridge-business-rules-claude.md",
           "last_modified": "2026-05-04T12:28:40.707260",
-          "backed_up_at": "2026-05-15T21:01:03.122247",
+          "backed_up_at": "2026-05-26T23:36:34.300368",
           "action": "skipped"
         },
         {
@@ -1906,7 +2362,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking-bridge\\booking-bridge-architecture-design-claude.md",
           "relative_path": "mercury-services/design/booking-bridge/booking-bridge-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:24:13.823498",
-          "backed_up_at": "2026-05-15T21:01:03.122501",
+          "backed_up_at": "2026-05-26T23:36:34.300519",
           "action": "skipped"
         },
         {
@@ -1919,7 +2375,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\booking-bridge\\DESIGN.md",
           "relative_path": "mercury-services/design/booking-bridge/DESIGN.md",
           "last_modified": "2026-04-02T16:33:46.446767",
-          "backed_up_at": "2026-05-15T21:01:03.122702",
+          "backed_up_at": "2026-05-26T23:36:34.300664",
           "action": "skipped"
         },
         {
@@ -1932,7 +2388,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\oceanschedules\\05042026-oceanschedules-business-rules-claude.md",
           "relative_path": "mercury-services/business-rules/oceanschedules/05042026-oceanschedules-business-rules-claude.md",
           "last_modified": "2026-05-04T12:36:24.041390",
-          "backed_up_at": "2026-05-15T21:01:03.123600",
+          "backed_up_at": "2026-05-26T23:36:34.301249",
           "action": "skipped"
         },
         {
@@ -1945,7 +2401,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\oceanschedules\\CONFLUENCE-os.md",
           "relative_path": "mercury-services/templates/oceanschedules/CONFLUENCE-os.md",
           "last_modified": "2026-05-04T15:53:16.292594",
-          "backed_up_at": "2026-05-15T21:01:03.123840",
+          "backed_up_at": "2026-05-26T23:36:34.301405",
           "action": "skipped"
         },
         {
@@ -1958,7 +2414,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\DESIGN-PRE-AWS-upgrade.md",
           "relative_path": "mercury-services/design/oceanschedules/DESIGN-PRE-AWS-upgrade.md",
           "last_modified": "2026-04-27T19:30:21.809188",
-          "backed_up_at": "2026-05-15T21:01:03.124032",
+          "backed_up_at": "2026-05-26T23:36:34.301566",
           "action": "skipped"
         },
         {
@@ -1971,7 +2427,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\oceanschedules-architecture-design-claude.md",
           "relative_path": "mercury-services/design/oceanschedules/oceanschedules-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:24:40.861578",
-          "backed_up_at": "2026-05-15T21:01:03.124177",
+          "backed_up_at": "2026-05-26T23:36:34.301754",
           "action": "skipped"
         },
         {
@@ -1984,7 +2440,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\oceanschedules\\os-aws2x-plan.md",
           "relative_path": "mercury-services/design/oceanschedules/os-aws2x-plan.md",
           "last_modified": "2026-05-04T15:53:16.308975",
-          "backed_up_at": "2026-05-15T21:01:03.124375",
+          "backed_up_at": "2026-05-26T23:36:34.301881",
           "action": "skipped"
         },
         {
@@ -1997,7 +2453,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\visibility\\05042026-visibility-business-rules-claude.md",
           "relative_path": "mercury-services/business-rules/visibility/05042026-visibility-business-rules-claude.md",
           "last_modified": "2026-05-04T12:34:38.831344",
-          "backed_up_at": "2026-05-15T21:01:03.125151",
+          "backed_up_at": "2026-05-26T23:36:34.302383",
           "action": "skipped"
         },
         {
@@ -2010,7 +2466,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\visibility\\2026-04-17-booking-sdk-upgrade-impact-on-visibility.md",
           "relative_path": "mercury-services/uncategorized/visibility/2026-04-17-booking-sdk-upgrade-impact-on-visibility.md",
           "last_modified": "2026-04-22T21:23:40.065588",
-          "backed_up_at": "2026-05-15T21:01:03.125973",
+          "backed_up_at": "2026-05-26T23:36:34.303093",
           "action": "skipped"
         },
         {
@@ -2023,7 +2479,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\visibility\\CONFLUENCE-visibility.md",
           "relative_path": "mercury-services/templates/visibility/CONFLUENCE-visibility.md",
           "last_modified": "2026-05-04T14:51:16.736199",
-          "backed_up_at": "2026-05-15T21:01:03.126151",
+          "backed_up_at": "2026-05-26T23:36:34.303257",
           "action": "skipped"
         },
         {
@@ -2036,7 +2492,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\uncategorized\\visibility\\copilot-cli-agent-usage.md",
           "relative_path": "mercury-services/uncategorized/visibility/copilot-cli-agent-usage.md",
           "last_modified": "2026-04-22T21:23:40.070209",
-          "backed_up_at": "2026-05-15T21:01:03.127008",
+          "backed_up_at": "2026-05-26T23:36:34.304300",
           "action": "skipped"
         },
         {
@@ -2049,7 +2505,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\DESIGN-curr-state.md",
           "relative_path": "mercury-services/design/visibility/DESIGN-curr-state.md",
           "last_modified": "2026-04-22T21:23:40.068898",
-          "backed_up_at": "2026-05-15T21:01:03.127136",
+          "backed_up_at": "2026-05-26T23:36:34.305007",
           "action": "skipped"
         },
         {
@@ -2062,7 +2518,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\visibility-architecture-design-claude.md",
           "relative_path": "mercury-services/design/visibility/visibility-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:25:57.875224",
-          "backed_up_at": "2026-05-15T21:01:03.127259",
+          "backed_up_at": "2026-05-26T23:36:34.305405",
           "action": "skipped"
         },
         {
@@ -2075,7 +2531,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\visibility\\visibility-aws2x-plan.md",
           "relative_path": "mercury-services/design/visibility/visibility-aws2x-plan.md",
           "last_modified": "2026-05-04T14:51:16.736199",
-          "backed_up_at": "2026-05-15T21:01:03.127382",
+          "backed_up_at": "2026-05-26T23:36:34.305693",
           "action": "skipped"
         },
         {
@@ -2088,7 +2544,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\watermill-publisher\\bk-watermill-dateformat-exception-analysis-04292026.md",
           "relative_path": "mercury-services/analysis/watermill-publisher/bk-watermill-dateformat-exception-analysis-04292026.md",
           "last_modified": "2026-04-29T18:44:43.650935",
-          "backed_up_at": "2026-05-15T21:01:03.127961",
+          "backed_up_at": "2026-05-26T23:36:34.306892",
           "action": "skipped"
         },
         {
@@ -2101,7 +2557,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\watermill-publisher\\DESIGN-watermill-publisher.md",
           "relative_path": "mercury-services/design/watermill-publisher/DESIGN-watermill-publisher.md",
           "last_modified": "2026-04-29T14:04:27.390762",
-          "backed_up_at": "2026-05-15T21:01:03.128088",
+          "backed_up_at": "2026-05-26T23:36:34.307186",
           "action": "skipped"
         },
         {
@@ -2114,7 +2570,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\business-rules\\webbl\\05042026-webbl-business-rules-claude.md",
           "relative_path": "mercury-services/business-rules/webbl/05042026-webbl-business-rules-claude.md",
           "last_modified": "2026-05-04T12:32:43.998997",
-          "backed_up_at": "2026-05-15T21:01:03.128580",
+          "backed_up_at": "2026-05-26T23:36:34.308517",
           "action": "skipped"
         },
         {
@@ -2127,7 +2583,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\webbl\\2026-03-31-sqs-connection-pool-shutdown-investigation.md",
           "relative_path": "mercury-services/analysis/webbl/2026-03-31-sqs-connection-pool-shutdown-investigation.md",
           "last_modified": "2026-04-22T21:23:40.074749",
-          "backed_up_at": "2026-05-15T21:01:03.128717",
+          "backed_up_at": "2026-05-26T23:36:34.308832",
           "action": "skipped"
         },
         {
@@ -2140,7 +2596,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\templates\\webbl\\CONFLUENCE-webbl.md",
           "relative_path": "mercury-services/templates/webbl/CONFLUENCE-webbl.md",
           "last_modified": "2026-04-22T21:23:40.076466",
-          "backed_up_at": "2026-05-15T21:01:03.128863",
+          "backed_up_at": "2026-05-26T23:36:34.309045",
           "action": "skipped"
         },
         {
@@ -2153,7 +2609,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\webbl\\DESIGN.md",
           "relative_path": "mercury-services/design/webbl/DESIGN.md",
           "last_modified": "2026-04-09T11:04:32.403250",
-          "backed_up_at": "2026-05-15T21:01:03.128979",
+          "backed_up_at": "2026-05-26T23:36:34.309163",
           "action": "skipped"
         },
         {
@@ -2166,7 +2622,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\design\\webbl\\webbl-architecture-design-claude.md",
           "relative_path": "mercury-services/design/webbl/webbl-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:23:55.310323",
-          "backed_up_at": "2026-05-15T21:01:03.129095",
+          "backed_up_at": "2026-05-26T23:36:34.309282",
           "action": "skipped"
         },
         {
@@ -2179,13 +2635,13 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services\\analysis\\webbl\\webbl-aws-upgrade.md",
           "relative_path": "mercury-services/analysis/webbl/webbl-aws-upgrade.md",
           "last_modified": "2026-04-22T21:23:40.078502",
-          "backed_up_at": "2026-05-15T21:01:03.129417",
+          "backed_up_at": "2026-05-26T23:36:34.309656",
           "action": "skipped"
         }
       ]
     },
     "mercury-services-commons": {
-      "count": 9,
+      "count": 10,
       "categories": [
         "analysis",
         "design",
@@ -2204,8 +2660,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\github-prompts\\copilot-instructions.md",
           "relative_path": "mercury-services-commons/github-prompts/copilot-instructions.md",
           "last_modified": "2026-05-15T18:33:31.697150",
-          "backed_up_at": "2026-05-15T21:01:03.132592",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.311382",
+          "action": "skipped"
         },
         {
           "project": "mercury-services-commons",
@@ -2217,8 +2673,21 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\vscode-settings\\mcp.json",
           "relative_path": "mercury-services-commons/vscode-settings/mcp.json",
           "last_modified": "2026-04-02T18:17:22.835567",
-          "backed_up_at": "2026-05-15T21:01:03.133528",
+          "backed_up_at": "2026-05-26T23:36:34.311743",
           "action": "skipped"
+        },
+        {
+          "project": "mercury-services-commons",
+          "module": "mercury-services-commons",
+          "scan_path": ".vscode",
+          "filename": "settings.json",
+          "category": "vscode-settings",
+          "source": "C:\\Users\\arijit.kundu\\projects\\mercury-services-commons\\.vscode\\settings.json",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\vscode-settings\\settings.json",
+          "relative_path": "mercury-services-commons/vscode-settings/settings.json",
+          "last_modified": "2026-05-26T22:13:39.227443",
+          "backed_up_at": "2026-05-26T23:36:34.315095",
+          "action": "copied"
         },
         {
           "project": "mercury-services-commons",
@@ -2230,8 +2699,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\commons\\commons-architecture-design-claude.md",
           "relative_path": "mercury-services-commons/design/commons/commons-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:45:22.131002",
-          "backed_up_at": "2026-05-15T21:01:03.135485",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.315968",
+          "action": "skipped"
         },
         {
           "project": "mercury-services-commons",
@@ -2242,8 +2711,8 @@
           "source": "C:\\Users\\arijit.kundu\\projects\\mercury-services-commons\\cloud-sdk-api\\docs\\2026-05-15-commons-rebase.md",
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\uncategorized\\cloud-sdk-api\\2026-05-15-commons-rebase.md",
           "relative_path": "mercury-services-commons/uncategorized/cloud-sdk-api/2026-05-15-commons-rebase.md",
-          "last_modified": "2026-05-15T20:51:11.124516",
-          "backed_up_at": "2026-05-15T21:01:03.138799",
+          "last_modified": "2026-05-26T23:35:26.507579",
+          "backed_up_at": "2026-05-26T23:36:34.319953",
           "action": "copied"
         },
         {
@@ -2256,8 +2725,8 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\cloud-sdk-api\\cloud-sdk-api-architecture-design-claude.md",
           "relative_path": "mercury-services-commons/design/cloud-sdk-api/cloud-sdk-api-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:39:31.725536",
-          "backed_up_at": "2026-05-15T21:01:03.140098",
-          "action": "copied"
+          "backed_up_at": "2026-05-26T23:36:34.320509",
+          "action": "skipped"
         },
         {
           "project": "mercury-services-commons",
@@ -2269,7 +2738,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md",
           "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md",
           "last_modified": "2026-04-16T18:30:34.926228",
-          "backed_up_at": "2026-05-15T21:01:03.140709",
+          "backed_up_at": "2026-05-26T23:36:34.321734",
           "action": "skipped"
         },
         {
@@ -2282,7 +2751,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-23-handlebars-owasp-impact-analysis.md",
           "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-23-handlebars-owasp-impact-analysis.md",
           "last_modified": "2026-04-23T18:59:24.372832",
-          "backed_up_at": "2026-05-15T21:01:03.140834",
+          "backed_up_at": "2026-05-26T23:36:34.322010",
           "action": "skipped"
         },
         {
@@ -2295,7 +2764,7 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\analysis\\cloud-sdk-aws\\2026-04-23-netty-removal.md",
           "relative_path": "mercury-services-commons/analysis/cloud-sdk-aws/2026-04-23-netty-removal.md",
           "last_modified": "2026-04-23T17:15:15.391836",
-          "backed_up_at": "2026-05-15T21:01:03.141191",
+          "backed_up_at": "2026-05-26T23:36:34.322695",
           "action": "skipped"
         },
         {
@@ -2308,7 +2777,459 @@
           "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\mercury-services-commons\\design\\cloud-sdk-aws\\cloud-sdk-aws-architecture-design-claude.md",
           "relative_path": "mercury-services-commons/design/cloud-sdk-aws/cloud-sdk-aws-architecture-design-claude.md",
           "last_modified": "2026-05-04T13:42:18.597245",
-          "backed_up_at": "2026-05-15T21:01:03.141336",
+          "backed_up_at": "2026-05-26T23:36:34.323028",
+          "action": "skipped"
+        }
+      ]
+    },
+    "appianway": {
+      "count": 34,
+      "categories": [
+        "claude-skills",
+        "design",
+        "vscode-settings"
+      ],
+      "files": [
+        {
+          "project": "appianway",
+          "module": "appianway",
+          "scan_path": ".claude",
+          "filename": "settings.json",
+          "category": "claude-skills",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.claude\\settings.json",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\claude-skills\\settings.json",
+          "relative_path": "appianway/claude-skills/settings.json",
+          "last_modified": "2026-05-22T10:50:39.939067",
+          "backed_up_at": "2026-05-26T23:36:34.327043",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "appianway",
+          "scan_path": ".claude",
+          "filename": "settings.local.json",
+          "category": "claude-skills",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.claude\\settings.local.json",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\claude-skills\\settings.local.json",
+          "relative_path": "appianway/claude-skills/settings.local.json",
+          "last_modified": "2026-05-24T09:24:59.423009",
+          "backed_up_at": "2026-05-26T23:36:34.327136",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "appianway",
+          "scan_path": ".vscode",
+          "filename": "settings.json",
+          "category": "vscode-settings",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\.vscode\\settings.json",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\vscode-settings\\settings.json",
+          "relative_path": "appianway/vscode-settings/settings.json",
+          "last_modified": "2026-05-22T10:51:12.792644",
+          "backed_up_at": "2026-05-26T23:36:34.327692",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "docs",
+          "scan_path": "docs",
+          "filename": "2026-05-24-appianway-overview-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\docs\\2026-05-24-appianway-overview-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\docs\\2026-05-24-appianway-overview-claude.design.md",
+          "relative_path": "appianway/design/docs/2026-05-24-appianway-overview-claude.design.md",
+          "last_modified": "2026-05-24T09:39:11.971489",
+          "backed_up_at": "2026-05-26T23:36:34.328068",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "dispatcher",
+          "scan_path": "dispatcher/docs",
+          "filename": "2026-05-24-dispatcher-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\dispatcher\\docs\\2026-05-24-dispatcher-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\dispatcher\\2026-05-24-dispatcher-claude.design.md",
+          "relative_path": "appianway/design/dispatcher/2026-05-24-dispatcher-claude.design.md",
+          "last_modified": "2026-05-24T09:29:27.676148",
+          "backed_up_at": "2026-05-26T23:36:34.328672",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "dispatcher",
+          "scan_path": "dispatcher/docs",
+          "filename": "2026-05-24-dispatcher-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\dispatcher\\docs\\2026-05-24-dispatcher-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\dispatcher\\2026-05-24-dispatcher-copilot.design.md",
+          "relative_path": "appianway/design/dispatcher/2026-05-24-dispatcher-copilot.design.md",
+          "last_modified": "2026-05-24T10:31:17.632388",
+          "backed_up_at": "2026-05-26T23:36:34.328785",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "distributor",
+          "scan_path": "distributor/docs",
+          "filename": "2026-05-24-distributor-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor\\docs\\2026-05-24-distributor-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor\\2026-05-24-distributor-claude.design.md",
+          "relative_path": "appianway/design/distributor/2026-05-24-distributor-claude.design.md",
+          "last_modified": "2026-05-24T09:36:51.211966",
+          "backed_up_at": "2026-05-26T23:36:34.329263",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "distributor",
+          "scan_path": "distributor/docs",
+          "filename": "2026-05-24-distributor-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor\\docs\\2026-05-24-distributor-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor\\2026-05-24-distributor-copilot.design.md",
+          "relative_path": "appianway/design/distributor/2026-05-24-distributor-copilot.design.md",
+          "last_modified": "2026-05-24T10:31:54.858177",
+          "backed_up_at": "2026-05-26T23:36:34.329379",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "distributor-rest",
+          "scan_path": "distributor-rest/docs",
+          "filename": "2026-05-24-distributor-rest-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor-rest\\docs\\2026-05-24-distributor-rest-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor-rest\\2026-05-24-distributor-rest-claude.design.md",
+          "relative_path": "appianway/design/distributor-rest/2026-05-24-distributor-rest-claude.design.md",
+          "last_modified": "2026-05-24T09:29:17.550283",
+          "backed_up_at": "2026-05-26T23:36:34.330086",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "distributor-rest",
+          "scan_path": "distributor-rest/docs",
+          "filename": "2026-05-24-distributor-rest-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\distributor-rest\\docs\\2026-05-24-distributor-rest-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\distributor-rest\\2026-05-24-distributor-rest-copilot.design.md",
+          "relative_path": "appianway/design/distributor-rest/2026-05-24-distributor-rest-copilot.design.md",
+          "last_modified": "2026-05-24T10:32:31.343210",
+          "backed_up_at": "2026-05-26T23:36:34.330345",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "email-sender",
+          "scan_path": "email-sender/docs",
+          "filename": "2026-05-24-email-sender-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\email-sender\\docs\\2026-05-24-email-sender-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\email-sender\\2026-05-24-email-sender-claude.design.md",
+          "relative_path": "appianway/design/email-sender/2026-05-24-email-sender-claude.design.md",
+          "last_modified": "2026-05-24T09:27:53.748070",
+          "backed_up_at": "2026-05-26T23:36:34.330924",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "email-sender",
+          "scan_path": "email-sender/docs",
+          "filename": "2026-05-24-email-sender-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\email-sender\\docs\\2026-05-24-email-sender-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\email-sender\\2026-05-24-email-sender-copilot.design.md",
+          "relative_path": "appianway/design/email-sender/2026-05-24-email-sender-copilot.design.md",
+          "last_modified": "2026-05-24T10:33:12.056866",
+          "backed_up_at": "2026-05-26T23:36:34.331045",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "error-processor",
+          "scan_path": "error-processor/docs",
+          "filename": "2026-05-24-error-processor-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\error-processor\\docs\\2026-05-24-error-processor-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\error-processor\\2026-05-24-error-processor-claude.design.md",
+          "relative_path": "appianway/design/error-processor/2026-05-24-error-processor-claude.design.md",
+          "last_modified": "2026-05-24T09:31:36.272032",
+          "backed_up_at": "2026-05-26T23:36:34.331455",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "error-processor",
+          "scan_path": "error-processor/docs",
+          "filename": "2026-05-24-error-processor-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\error-processor\\docs\\2026-05-24-error-processor-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\error-processor\\2026-05-24-error-processor-copilot.design.md",
+          "relative_path": "appianway/design/error-processor/2026-05-24-error-processor-copilot.design.md",
+          "last_modified": "2026-05-24T10:33:42.119800",
+          "backed_up_at": "2026-05-26T23:36:34.331578",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "event-writer",
+          "scan_path": "event-writer/docs",
+          "filename": "2026-05-24-event-writer-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\event-writer\\docs\\2026-05-24-event-writer-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\event-writer\\2026-05-24-event-writer-claude.design.md",
+          "relative_path": "appianway/design/event-writer/2026-05-24-event-writer-claude.design.md",
+          "last_modified": "2026-05-24T09:25:25.959085",
+          "backed_up_at": "2026-05-26T23:36:34.332066",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "event-writer",
+          "scan_path": "event-writer/docs",
+          "filename": "2026-05-24-event-writer-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\event-writer\\docs\\2026-05-24-event-writer-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\event-writer\\2026-05-24-event-writer-copilot.design.md",
+          "relative_path": "appianway/design/event-writer/2026-05-24-event-writer-copilot.design.md",
+          "last_modified": "2026-05-24T10:34:14.541758",
+          "backed_up_at": "2026-05-26T23:36:34.332186",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "functional-testing",
+          "scan_path": "functional-testing/docs",
+          "filename": "2026-05-24-functional-testing-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\functional-testing\\docs\\2026-05-24-functional-testing-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\functional-testing\\2026-05-24-functional-testing-claude.design.md",
+          "relative_path": "appianway/design/functional-testing/2026-05-24-functional-testing-claude.design.md",
+          "last_modified": "2026-05-24T09:29:54.382150",
+          "backed_up_at": "2026-05-26T23:36:34.332884",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "functional-testing",
+          "scan_path": "functional-testing/docs",
+          "filename": "2026-05-24-functional-testing-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\functional-testing\\docs\\2026-05-24-functional-testing-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\functional-testing\\2026-05-24-functional-testing-copilot.design.md",
+          "relative_path": "appianway/design/functional-testing/2026-05-24-functional-testing-copilot.design.md",
+          "last_modified": "2026-05-24T10:40:15.774035",
+          "backed_up_at": "2026-05-26T23:36:34.333010",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "ingestor",
+          "scan_path": "ingestor/docs",
+          "filename": "2026-05-24-ingestor-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\ingestor\\docs\\2026-05-24-ingestor-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\ingestor\\2026-05-24-ingestor-claude.design.md",
+          "relative_path": "appianway/design/ingestor/2026-05-24-ingestor-claude.design.md",
+          "last_modified": "2026-05-24T09:27:10.910625",
+          "backed_up_at": "2026-05-26T23:36:34.333413",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "ingestor",
+          "scan_path": "ingestor/docs",
+          "filename": "2026-05-24-ingestor-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\ingestor\\docs\\2026-05-24-ingestor-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\ingestor\\2026-05-24-ingestor-copilot.design.md",
+          "relative_path": "appianway/design/ingestor/2026-05-24-ingestor-copilot.design.md",
+          "last_modified": "2026-05-24T10:34:53.100926",
+          "backed_up_at": "2026-05-26T23:36:34.333525",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "mftdispatcher",
+          "scan_path": "mftdispatcher/docs",
+          "filename": "2026-05-24-mftdispatcher-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\mftdispatcher\\docs\\2026-05-24-mftdispatcher-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\mftdispatcher\\2026-05-24-mftdispatcher-claude.design.md",
+          "relative_path": "appianway/design/mftdispatcher/2026-05-24-mftdispatcher-claude.design.md",
+          "last_modified": "2026-05-24T09:33:05.655276",
+          "backed_up_at": "2026-05-26T23:36:34.334037",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "mftdispatcher",
+          "scan_path": "mftdispatcher/docs",
+          "filename": "2026-05-24-mftdispatcher-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\mftdispatcher\\docs\\2026-05-24-mftdispatcher-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\mftdispatcher\\2026-05-24-mftdispatcher-copilot.design.md",
+          "relative_path": "appianway/design/mftdispatcher/2026-05-24-mftdispatcher-copilot.design.md",
+          "last_modified": "2026-05-24T10:37:12.028404",
+          "backed_up_at": "2026-05-26T23:36:34.334202",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "schema-beans",
+          "scan_path": "schema-beans/docs",
+          "filename": "2026-05-24-schema-beans-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\schema-beans\\docs\\2026-05-24-schema-beans-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\schema-beans\\2026-05-24-schema-beans-claude.design.md",
+          "relative_path": "appianway/design/schema-beans/2026-05-24-schema-beans-claude.design.md",
+          "last_modified": "2026-05-24T09:28:08.996636",
+          "backed_up_at": "2026-05-26T23:36:34.334886",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "schema-beans",
+          "scan_path": "schema-beans/docs",
+          "filename": "2026-05-24-schema-beans-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\schema-beans\\docs\\2026-05-24-schema-beans-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\schema-beans\\2026-05-24-schema-beans-copilot.design.md",
+          "relative_path": "appianway/design/schema-beans/2026-05-24-schema-beans-copilot.design.md",
+          "last_modified": "2026-05-24T10:37:34.301780",
+          "backed_up_at": "2026-05-26T23:36:34.335123",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "splitter",
+          "scan_path": "splitter/docs",
+          "filename": "2026-05-24-splitter-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\splitter\\docs\\2026-05-24-splitter-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\splitter\\2026-05-24-splitter-claude.design.md",
+          "relative_path": "appianway/design/splitter/2026-05-24-splitter-claude.design.md",
+          "last_modified": "2026-05-24T09:26:41.046988",
+          "backed_up_at": "2026-05-26T23:36:34.335586",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "splitter",
+          "scan_path": "splitter/docs",
+          "filename": "2026-05-24-splitter-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\splitter\\docs\\2026-05-24-splitter-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\splitter\\2026-05-24-splitter-copilot.design.md",
+          "relative_path": "appianway/design/splitter/2026-05-24-splitter-copilot.design.md",
+          "last_modified": "2026-05-24T10:35:42.224749",
+          "backed_up_at": "2026-05-26T23:36:34.335878",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "structuralvalidator",
+          "scan_path": "structuralvalidator/docs",
+          "filename": "2026-05-24-structuralvalidator-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\structuralvalidator\\docs\\2026-05-24-structuralvalidator-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\structuralvalidator\\2026-05-24-structuralvalidator-claude.design.md",
+          "relative_path": "appianway/design/structuralvalidator/2026-05-24-structuralvalidator-claude.design.md",
+          "last_modified": "2026-05-24T09:25:26.549184",
+          "backed_up_at": "2026-05-26T23:36:34.336705",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "structuralvalidator",
+          "scan_path": "structuralvalidator/docs",
+          "filename": "2026-05-24-structuralvalidator-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\structuralvalidator\\docs\\2026-05-24-structuralvalidator-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\structuralvalidator\\2026-05-24-structuralvalidator-copilot.design.md",
+          "relative_path": "appianway/design/structuralvalidator/2026-05-24-structuralvalidator-copilot.design.md",
+          "last_modified": "2026-05-24T10:38:06.892767",
+          "backed_up_at": "2026-05-26T23:36:34.336874",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "transformer",
+          "scan_path": "transformer/docs",
+          "filename": "2026-05-24-transformer-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\transformer\\docs\\2026-05-24-transformer-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\transformer\\2026-05-24-transformer-claude.design.md",
+          "relative_path": "appianway/design/transformer/2026-05-24-transformer-claude.design.md",
+          "last_modified": "2026-05-24T09:26:42.448465",
+          "backed_up_at": "2026-05-26T23:36:34.337495",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "transformer",
+          "scan_path": "transformer/docs",
+          "filename": "2026-05-24-transformer-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\transformer\\docs\\2026-05-24-transformer-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\transformer\\2026-05-24-transformer-copilot.design.md",
+          "relative_path": "appianway/design/transformer/2026-05-24-transformer-copilot.design.md",
+          "last_modified": "2026-05-24T10:36:30.088933",
+          "backed_up_at": "2026-05-26T23:36:34.337643",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "validator",
+          "scan_path": "validator/docs",
+          "filename": "2026-05-24-validator-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\validator\\docs\\2026-05-24-validator-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\validator\\2026-05-24-validator-claude.design.md",
+          "relative_path": "appianway/design/validator/2026-05-24-validator-claude.design.md",
+          "last_modified": "2026-05-24T09:27:56.564917",
+          "backed_up_at": "2026-05-26T23:36:34.338573",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "validator",
+          "scan_path": "validator/docs",
+          "filename": "2026-05-24-validator-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\validator\\docs\\2026-05-24-validator-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\validator\\2026-05-24-validator-copilot.design.md",
+          "relative_path": "appianway/design/validator/2026-05-24-validator-copilot.design.md",
+          "last_modified": "2026-05-24T10:38:46.823027",
+          "backed_up_at": "2026-05-26T23:36:34.338717",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "watermill",
+          "scan_path": "watermill/docs",
+          "filename": "2026-05-24-watermill-claude.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\watermill\\docs\\2026-05-24-watermill-claude.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\watermill\\2026-05-24-watermill-claude.design.md",
+          "relative_path": "appianway/design/watermill/2026-05-24-watermill-claude.design.md",
+          "last_modified": "2026-05-24T09:28:10.133891",
+          "backed_up_at": "2026-05-26T23:36:34.339158",
+          "action": "skipped"
+        },
+        {
+          "project": "appianway",
+          "module": "watermill",
+          "scan_path": "watermill/docs",
+          "filename": "2026-05-24-watermill-copilot.design.md",
+          "category": "design",
+          "source": "C:\\Users\\arijit.kundu\\projects\\appianway\\watermill\\docs\\2026-05-24-watermill-copilot.design.md",
+          "destination": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\claude-workspace\\_kbase\\appianway\\design\\watermill\\2026-05-24-watermill-copilot.design.md",
+          "relative_path": "appianway/design/watermill/2026-05-24-watermill-copilot.design.md",
+          "last_modified": "2026-05-24T10:39:30.864354",
+          "backed_up_at": "2026-05-26T23:36:34.339279",
           "action": "skipped"
         }
       ]

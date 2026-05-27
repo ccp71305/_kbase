@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls c:/Users/arijit.kundu/projects/appianway/dispatcher && echo --- && ls c:/Users/arijit.kundu/projects/appianway/dispatcher/src/main/java -R 2>nul | head -50)",
+      "Bash(ls c:/Users/arijit.kundu/projects/appianway/shared/src/main/java 2>nul && echo --- && ls c:/Users/arijit.kundu/projects/appianway/schema-beans)",
+      "Bash(mkdir -p c:/Users/arijit.kundu/projects/appianway/dispatcher/docs && ls c:/Users/arijit.kundu/projects/appianway/dispatcher/docs)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\arijit.kundu\\projects\\appianway",
+      "c:\\Users\\arijit.kundu\\projects\\appianway\\dispatcher\\docs"
+    ]
+  }
+}

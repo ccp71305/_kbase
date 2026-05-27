@@ -1,0 +1,6 @@
+{
+    "java.import.maven.enabled": true,
+    "java.project.importOnFirstTimeStartup": "automatic",
+    "java.indexing.enabled": true,
+    "java.autobuild.enabled": true
+}

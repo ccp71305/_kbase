@@ -912,3 +912,234 @@ Pull Request: https://git.dev.e2open.com/projects/INT/repos/mercury-services-com
 
 - Renamed `.gitignore.local` back / deleted after rebase (develop's `.gitignore` is now tracked)
 - No stash was needed (working directory was clean pre-rebase)
+
+---
+
+## 12. Rebase #2 — ION-15755 DW 5.0.1 Merge (2026-05-26)
+
+### 12.1 Context
+
+After the first rebase (Section 11), the ION-15755 branch (Dropwizard 5.0.1 + Jetty 12.1.9 upgrade) was merged to `develop`. This section documents the second rebase of `feature/ION-12310-commons-cloudsdk-refactoring` onto the updated `develop`.
+
+**New commits on develop (from ION-15755 merge):**
+| Commit | Description |
+|--------|-------------|
+| `ab1d0bf` | ION-15755: Upgrade DW from 4.0.16 to 5.0.1, Jetty 11.0.24 to 12.1.9 |
+| `1b6eb41` | ION-15755: Fixed commons and DW5 test failures |
+| `0aa4a06` | Merge pull request #28 — ION-15755 merge commit |
+
+### 12.2 Pre-Rebase State
+
+- **Feature branch**: `2f223af` (36 commits ahead of old develop `ce08d52`)
+- **Develop**: `0aa4a06` (3 new commits since first rebase)
+- **Backup created**: `backup/feature-ION-12310-pre-rebase-2` → `2f223af`
+- **Working directory**: Clean (no staged files, no stash)
+
+### 12.3 Delta Analysis vs Section 10 Predictions
+
+Section 10 predicted conflicts accurately with one key difference:
+
+| Prediction | Actual |
+|-----------|--------|
+| Root `pom.xml` DW/Jetty/Jackson conflicts | ✅ Confirmed — 3 conflict commits |
+| `commons/pom.xml` aws-sdk re-addition | ✅ Confirmed — ION-15755 re-added `aws-java-sdk-core/ssm/s3`; feature keeps removal |
+| `commons/pom.xml` jetty-ee10-servlets addition | ✅ Confirmed — accepted from develop |
+| `.gitignore` `docs/` pattern | ✅ Confirmed — accepted as-is (user confirmed) |
+| `dropwizard-metrics-datadog` removal | ✅ Confirmed — ION-15755 removed the module entirely |
+
+### 12.4 Conflict Resolution (4 conflicts in 36 commits)
+
+**Commit 1 (2d35e4d) — Root `pom.xml` + `commons/pom.xml`:**
+- `pom.xml`: Kept `assertj.core.version=3.27.2` (feature upgrade over develop's 3.8.0), removed duplicate `jknack` property
+- `commons/pom.xml` region 1: Kept ION-15755's cleaner comments
+- `commons/pom.xml` region 2: Kept feature's removal of `aws-java-sdk-s3` (cloud-sdk uses AWS 2.x)
+
+**Commit 23 (8c8663e) — Root `pom.xml` nested conflict:**
+- Nested conflict markers: feature commit's first-rebase values vs ION-15755's DW 5.0.1 block
+- Resolved by keeping HEAD's (develop's) entire DW 5.0.1/Jetty 12.1.9/Jackson 2.21.0 block
+
+**Commit 30 (aedb0ce) — Root `pom.xml` Jersey vulnerability fix:**
+- Original commit set DW 4.0.16/Jackson 2.19.2; resolved by keeping HEAD's DW 5.0.1/Jackson 2.21.0
+
+**Commits 2-22, 24-29, 31-36:** All clean, no conflicts.
+
+### 12.5 Post-Rebase Verification
+
+Feature branch at `4b66724` (36 commits ahead of `origin/develop` at `0aa4a06`). Key properties verified:
+
+```xml
+<dependency.version>1.0.23-SNAPSHOT</dependency.version>  <!-- pre-version-bump -->
+<dropwizard.version>5.0.1</dropwizard.version>
+<jetty.version>12.1.9</jetty.version>
+<jackson-bom.version>2.21.0</jackson-bom.version>
+<jackson-databind.version>2.21.0</jackson-databind.version>
+<assertj.core.version>3.27.2</assertj.core.version>
+<commons-lang3.version>3.20.0</commons-lang3.version>
+```
+
+### 12.6 Build Issues Discovered & Fixed
+
+#### Issue 1: Jetty Version Property Shadowing
+`dynamo-integration-test` defined `<jetty.version>11.0.24</jetty.version>` locally, shadowing parent's `<jetty.version>12.1.9</jetty.version>`. This caused `jetty-ee10-bom:11.0.24` import to fail (ee10 modules don't exist in Jetty 11).
+
+**Fix**: Renamed to `<dynamodb.local.jetty.version>` and updated the BOM import reference.
+
+#### Issue 2: DynamoDB Local Jetty 12 Binary Incompatibility
+DynamoDB Local 2.0.0 was compiled against Jetty 11 APIs. Jetty 12 changed `Handler$AbstractContainer.<init>()` access from accessible to protected, causing `IllegalAccessError` at runtime during integration tests.
+
+**Fix**: Upgraded DynamoDB Local from 2.0.0 to 2.5.2 (built for Jetty 12), removed local `jetty.version` override (inherits parent's 12.1.9), updated `jackson-databind` from 2.19.2 to 2.21.0 (matches DW 5.0.1).
+
+### 12.7 Version Bump
+
+Bumped `dependency.version` from `1.0.23-SNAPSHOT` to `1.0.24-SNAPSHOT` as a new commit after rebase.
+
+### 12.8 Test Results — Full `mvn clean install`
+
+| Module | Surefire (Unit) | Failsafe (Integration) | Install |
+|--------|----------------|----------------------|---------|
+| cloud-sdk-api | 23 ✅ | — | `cloud-sdk-api-1.0.24-SNAPSHOT.jar` |
+| dynamo-integration-test | 6 ✅ | — | `dynamo-integration-test-1.0.24-SNAPSHOT.jar` |
+| cloud-sdk-aws | 877 ✅ | 137 ✅ | `cloud-sdk-aws-1.0.24-SNAPSHOT.jar` |
+| commons | 921 ✅ | 0 | `commons-1.0.24-SNAPSHOT.jar` |
+| dynamo-client | 27 ✅ | — | `dynamo-client-1.0.24-SNAPSHOT.jar` |
+| email-sender | 9 ✅ | — | `email-sender-1.0.24-SNAPSHOT.jar` |
+| local-dynamodb | 1 ✅ | — | `local-dynamodb-1.R.01.004.jar` |
+| local-elasticsearch | 2 ✅ | — | `local-elasticsearch-1.R.01.004.jar` |
+| **Total** | **1,866** | **137** | **All installed** |
+
+**BUILD SUCCESS** — 0 failures, 0 errors across 2,003 tests.
+
+### 12.9 Commit History (Post-Rebase)
+
+```
+ca99f8d (HEAD) ION-12310: bump to 1.0.24-SNAPSHOT, upgrade DynamoDB Local for Jetty 12
+4b66724        ION-12310: remove netty
+bf6dee8        feature/ION-12310 fix for numeric partition and sort keys
+...            (36 rebased commits + 1 new = 37 total ahead of origin/develop)
+0aa4a06        (origin/develop) Merge pull request #28 — ION-15755
+```
+
+### 12.10 Pre-existing Warnings (Not Introduced by Rebase)
+
+- `version` contains expression but should be constant — all modules (by design)
+- Duplicate dependency declarations in commons/pom.xml (junit-jupiter, mockito-junit-jupiter)
+- Duplicate `dropwizard-core` in cloud-sdk-aws/pom.xml (version 4.0.10 vs BOM)
+- JaCoCo excludes still reference dropwizard-metrics-datadog classes (harmless)
+- Logback version mismatch warning (logback-classic 1.5.18 vs logback-core 1.5.26)
+
+### 12.11 Force-Push
+
+```
+git push origin feature/ION-12310-commons-cloudsdk-refactoring --force-with-lease
+
+Result:
+ + 2f223af...ca99f8d feature/ION-12310-commons-cloudsdk-refactoring -> feature/ION-12310-commons-cloudsdk-refactoring (forced update)
+```
+
+Pull Request: https://git.dev.e2open.com/projects/INT/repos/mercury-services-commons/pull-requests/29
+
+---
+
+## 13. Git Commands Reference — Rebase Workflow
+
+This section documents all the git commands used during the rebase operations (Sections 11 and 12), organized by workflow phase. Each command includes the purpose, syntax, and a clear explanation of what it does and when to use it.
+
+### 13.1 Fetching & Synchronizing with Remote
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 1 | `git fetch origin` | Fetch latest refs from remote | Downloads all new commits, branches, and tags from the remote (`origin`) without modifying the working directory or local branches. Always run this before comparing local vs remote state. |
+| 2 | `git checkout develop && git pull origin develop` | Update local develop | Switches to the local `develop` branch and fast-forwards it to match `origin/develop`. Ensures your local develop is up-to-date before rebasing onto it. |
+| 3 | `git fetch origin develop:develop` | Update develop without checkout | Fetches the remote develop branch and updates the local `develop` ref directly, without needing to switch to it. Useful when you want to stay on your feature branch. Only works if the update is a fast-forward. |
+
+### 13.2 Branch & Commit Analysis (Pre-Rebase Delta)
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 4 | `git merge-base feature/ION-12310-commons-cloudsdk-refactoring develop` | Find common ancestor | Returns the SHA of the most recent commit that is an ancestor of both branches. This is the point where the feature branch diverged from develop. Essential for understanding what has changed on each side. |
+| 5 | `git log --oneline develop..feature/ION-12310-commons-cloudsdk-refactoring` | Commits only on feature branch | Lists all commits that exist on the feature branch but NOT on develop (i.e., what the feature branch added). The `A..B` syntax means "commits reachable from B but not from A". |
+| 6 | `git log --oneline feature/ION-12310-commons-cloudsdk-refactoring..develop` | Commits only on develop | Lists all commits that exist on develop but NOT on the feature branch (i.e., what develop added since the divergence). These are the commits the feature branch needs to rebase onto. |
+| 7 | `git log --oneline origin/develop..HEAD` | Feature commits ahead of remote develop | Shows how many commits the current branch (HEAD) is ahead of `origin/develop`. Useful post-rebase to verify the expected commit count. |
+| 8 | `git rev-list --count develop..feature/ION-12310-commons-cloudsdk-refactoring` | Count commits ahead | Returns just the numeric count of commits the feature branch is ahead of develop. Useful for quick verification. |
+| 9 | `git log --oneline --graph --all --decorate -20` | Visual branch topology | Shows a text-based graph of the last 20 commits across all branches, with branch/tag labels. Helps visualize how branches relate to each other. |
+| 10 | `git log --oneline -n 5 origin/develop` | Recent develop commits | Shows the last 5 commits on `origin/develop`. Used to identify what new commits were added (e.g., ION-15755 merge commits). |
+
+### 13.3 Diff & Comparison
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 11 | `git diff develop..feature/ION-12310-commons-cloudsdk-refactoring -- pom.xml` | File-level diff between branches | Shows the exact line-by-line differences in `pom.xml` between the two branches. The `--` separates branch refs from file paths. Use this to predict which files will conflict during rebase. |
+| 12 | `git diff develop..HEAD --stat` | Summary of all file changes | Shows a summary (files changed, insertions, deletions) of all differences between develop and HEAD. Gives a quick overview without showing full diffs. |
+| 13 | `git diff develop..HEAD -- pom.xml commons/pom.xml .gitignore` | Diff multiple specific files | Compares multiple specific files between branches in a single command. Useful for focusing on known conflict-prone files. |
+| 14 | `git diff --stat` | Unstaged working directory changes | Shows which tracked files have been modified in the working directory but not yet staged. Use after conflict resolution to verify what was changed. |
+| 15 | `git diff --staged` | Staged changes (ready to commit) | Shows the diff of files that have been `git add`-ed and are ready for the next commit. Use to review what you're about to commit. |
+| 16 | `git diff HEAD~1 -- pom.xml` | Diff against previous commit | Compares a file between the current commit and its parent. Useful to verify what the last commit changed in a specific file. |
+| 17 | `git show <commit>:pom.xml` | View file at specific commit | Displays the contents of a file as it existed at a specific commit SHA. Useful during conflict resolution to see the "theirs" or "ours" version of a file. |
+
+### 13.4 Pre-Rebase Safety Checks
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 18 | `git status` | Working directory state | Shows staged, unstaged, and untracked files. **Must be clean** (no modified/staged files) before starting a rebase, otherwise git will refuse or changes may be lost. |
+| 19 | `git stash list` | Check for stashed changes | Lists any stashed changes. If there are stashed changes, you should be aware they exist but they won't interfere with rebase. If working directory is dirty, `git stash` first. |
+| 20 | `git branch backup/feature-ION-12310-pre-rebase-2` | Create backup branch | Creates a new branch at the current HEAD position as a safety net. If the rebase goes wrong, you can restore with `git reset --hard backup/feature-ION-12310-pre-rebase-2`. The backup branch is not checked out — it's just a reference. |
+| 21 | `git rev-parse HEAD` | Get current commit SHA | Returns the full SHA of the current HEAD commit. Record this before rebase so you can verify the backup and restore if needed. |
+| 22 | `git rev-parse backup/feature-ION-12310-pre-rebase-2` | Verify backup points to correct commit | Confirms the backup branch points to the expected SHA. Always verify after creating the backup. |
+
+### 13.5 Rebase Execution
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 23 | `git rebase develop` | Start rebase onto develop | Replays each commit from the feature branch on top of the latest develop. Git takes each feature commit one-by-one, applies it on top of develop's HEAD, and creates a new commit with the same changes but a new parent. Stops at each conflict for manual resolution. |
+| 24 | `git rebase --continue` | Continue after conflict resolution | After resolving conflicts in a stopped rebase, stages the resolved files and tells git to continue applying the next commit. Must `git add` resolved files first. |
+| 25 | `git rebase --abort` | Abort rebase entirely | Cancels the rebase and restores the branch to its pre-rebase state. Use when conflicts are too complex or you realize the approach is wrong. Safe — no data is lost. |
+| 26 | `git rebase --skip` | Skip current commit | Skips the currently conflicting commit entirely (its changes are dropped). Use only when the commit's changes are already included in develop or are no longer needed. **Rarely appropriate — understand what you're skipping.** |
+
+### 13.6 Conflict Resolution During Rebase
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 27 | `git status` (during rebase) | See conflicted files | During a paused rebase, shows which files have conflicts (listed as "both modified"). Also shows the current rebase progress (e.g., "Rebase in progress; onto 0aa4a06, step 1 of 36"). |
+| 28 | `git diff` (during rebase) | See conflict markers | Shows the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) in conflicted files. `HEAD` section = what's already on the rebased branch (develop's version + previously replayed commits). The other section = the current feature commit being applied. |
+| 29 | *Edit the file to resolve* | Manual conflict resolution | Open the conflicted file, find `<<<<<<<` markers, choose the correct version (or merge both), remove all conflict markers. This is the core of conflict resolution. |
+| 30 | `git add <resolved-file>` | Stage resolved file | After editing away all conflict markers, stage the file to tell git the conflict is resolved. You must stage ALL conflicted files before running `git rebase --continue`. |
+| 31 | `git add pom.xml commons/pom.xml && git rebase --continue` | Stage and continue | Combines staging all resolved files and continuing the rebase in one command. Efficient when you've resolved all conflicts for the current commit. |
+| 32 | `git log --oneline -1 REBASE_HEAD` | Identify current conflicting commit | Shows the original commit that git is currently trying to apply. Useful to understand the intent of the changes that caused the conflict, so you can resolve correctly. |
+| 33 | `git show REBASE_HEAD -- pom.xml` | View original commit's file version | Shows what the currently-replaying commit's version of a file looks like. Compare with `HEAD` version to understand both sides of the conflict. |
+| 34 | `grep -c "<<<<<<<" pom.xml` | Count remaining conflict markers | Quickly checks if any conflict markers remain in a file. Must be 0 before staging. If > 0, you missed a conflict region (can happen with nested conflicts). |
+
+### 13.7 Post-Rebase Verification
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 35 | `git log --oneline -5` | Verify rebased commits | Shows the latest commits to verify the rebase created new commits with the expected messages. Commit SHAs will be different from pre-rebase (rebasing rewrites history). |
+| 36 | `git log --oneline origin/develop..HEAD \| wc -l` | Count commits ahead of remote | Verifies the feature branch has the expected number of commits ahead of develop. Should match original count (+ any new commits added post-rebase). |
+| 37 | `git merge-base HEAD origin/develop` | Verify merge base alignment | After rebase, the merge-base between HEAD and origin/develop should be origin/develop's HEAD itself (i.e., the feature branch is now based directly on develop's tip). |
+| 38 | `git diff origin/develop..HEAD --stat` | Full delta summary | Shows all files changed between the rebased feature branch and develop. Use to verify no files were accidentally dropped or duplicated during rebase. |
+| 39 | `git log --all --oneline --graph --decorate -15` | Visual verification | Shows the branch topology post-rebase. The feature branch should be a straight line of commits extending from develop's HEAD, with no merge commits. |
+| 40 | `Select-String -Path pom.xml -Pattern "<property.name>"` | Verify critical property values | After rebase, grep key properties in pom.xml to ensure the correct versions survived conflict resolution (e.g., DW version, Jetty version, Jackson version). |
+
+### 13.8 Force-Push to Remote
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 41 | `git push origin feature/ION-12310-commons-cloudsdk-refactoring --force-with-lease` | Safe force push | Pushes the rebased branch to remote, overwriting the old history. `--force-with-lease` is safer than `--force` because it **refuses to push if someone else has pushed new commits** to the remote branch since your last fetch. This prevents accidentally overwriting a colleague's work. |
+| 42 | `git push origin feature/ION-12310-commons-cloudsdk-refactoring --force` | Unsafe force push (avoid) | Force pushes without checking if the remote has been updated. **Avoid this** — use `--force-with-lease` instead. Only use `--force` if you're absolutely certain no one else is working on the branch and `--force-with-lease` fails due to a known stale ref. |
+
+### 13.9 Recovery & Rollback
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 43 | `git reset --hard backup/feature-ION-12310-pre-rebase-2` | Restore from backup | Resets the feature branch HEAD to the backup branch's commit, discarding all rebased commits. Use when the rebase went wrong and you need to start over. The `--hard` flag also resets the working directory and staging area. |
+| 44 | `git reflog` | View recent HEAD movements | Shows a log of every position HEAD has been at, including before/after rebase. Even without a backup branch, you can find the pre-rebase commit SHA here and `git reset --hard` to it. Reflog entries expire after ~90 days. |
+| 45 | `git reflog show feature/ION-12310-commons-cloudsdk-refactoring` | Branch-specific reflog | Shows the reflog for a specific branch, including rebase start/finish entries. More targeted than the general reflog. |
+| 46 | `git branch -D backup/feature-ION-12310-pre-rebase-2` | Delete backup branch | Cleans up the backup branch after confirming the rebase is successful and pushed. Use `-D` (force delete) since the backup is not merged. Only delete after you're confident the rebase is final. |
+
+### 13.10 Useful Aliases & Combined Commands
+
+| # | Command | Purpose | Explanation |
+|---|---------|---------|-------------|
+| 47 | `git fetch origin && git log --oneline origin/develop..HEAD` | Fetch + compare in one step | Fetches latest remote state and immediately shows how your branch compares. Good as a pre-push check. |
+| 48 | `git log --oneline --left-right develop...feature/ION-12310-commons-cloudsdk-refactoring` | Three-dot symmetric diff | Shows commits unique to each branch, prefixed with `<` (develop-only) or `>` (feature-only). Gives a complete picture of divergence from both sides. |
+| 49 | `git diff develop...feature/ION-12310-commons-cloudsdk-refactoring -- pom.xml` | Three-dot diff (changes since divergence) | Shows changes introduced by the feature branch relative to the merge-base (not relative to develop's current HEAD). Useful to see "what the feature branch actually changed" without noise from develop's changes. |
+| 50 | `git log --format="%h %s" --reverse origin/develop..HEAD` | Chronological commit list | Lists feature branch commits in chronological order (oldest first) with short SHA and subject. Useful for documenting the commit sequence in rebase reports. |
