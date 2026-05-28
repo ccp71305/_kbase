@@ -10,8 +10,8 @@
             "cwd": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\aiengg\\mcp\\mcp-summary-server",
             "env": {
                 "MCP_SESSIONS_DIR": "C:\\Users\\arijit.kundu\\.mcp-context-server\\sessions",
-                "MCP_KB_ROOTS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\",\"C:\\\\Users\\\\arijit.kundu\\\\OneDrive - WiseTech Global\\\\aiengg\"]",
-                "MCP_GIT_DEFAULT_REPOS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services-commons\"]",
+                "MCP_KB_ROOTS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\",\"C:\\\\Users\\\\arijit.kundu\\\\OneDrive - WiseTech Global\\\\aiengg\",\"C:\\\\Users\\\\arijit.kundu\\\\OneDrive - WiseTech Global\\\\claude-workspace\\\\_kbase\"]",
+                "MCP_GIT_DEFAULT_REPOS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services-commons\",\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\",\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\appianway\"]",
                 "MCP_LOG_LEVEL": "INFO"
             }
         }

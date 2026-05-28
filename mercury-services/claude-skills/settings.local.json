@@ -3,11 +3,22 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\\\\network\\\\\" -Directory | Select-Object Name)",
       "Bash(grep -E \"\\(Resource|Service|Dao|Mapper\\)\\\\.java$\")",
-      "Bash(ls -la C:\\\\\\\\Users\\\\\\\\arijit.kundu\\\\\\\\projects\\\\\\\\mercury-services\\\\\\\\network\\\\\\\\)"
+      "Bash(ls -la C:\\\\\\\\Users\\\\\\\\arijit.kundu\\\\\\\\projects\\\\\\\\mercury-services\\\\\\\\network\\\\\\\\)",
+      "Read(//c/Users/arijit.kundu/projects/mercury-services-commons/cloud-sdk-api/docs/**)",
+      "Bash(mvn -pl booking compile -q -DskipTests)",
+      "Bash(mvn -pl booking compile -DskipTests)",
+      "Bash(mvn -pl booking compile -DskipTests 2>&1 > C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\\\\booking\\\\target\\\\build-errors.log)",
+      "Bash(awk -F'[:/]' '{print $7\"/\"$8\"/\"$9\"/\"$10\"/\"$11}')",
+      "Bash(mvn -pl booking dependency:tree -DskipTests)",
+      "Bash(mvn -pl booking compile -DskipTests -X)",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(mvn -pl booking compile -DskipTests -Dmaven.compiler.proc=full)"
     ],
     "additionalDirectories": [
       "c:\\Users\\arijit.kundu\\projects\\mercury-services\\watermill-publisher",
-      "C:\\Users\\arijit.kundu\\projects\\mercury-services\\network"
+      "C:\\Users\\arijit.kundu\\projects\\mercury-services\\network",
+      "C:\\Users\\arijit.kundu\\projects\\mercury-services"
     ]
   }
 }
