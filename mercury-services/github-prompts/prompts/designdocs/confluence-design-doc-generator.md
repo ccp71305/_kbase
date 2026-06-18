@@ -24,10 +24,10 @@ following the standard template, and publish it to Confluence using the **mcp-co
 write tools**. This prompt is parameter-driven — change only the PARAMETERS block to reuse it
 for any ticket, module, or parent page.
 
-> **Setup prerequisite (one-time, machine-level):** the mcp-context-server must be configured
-> and authenticated for Confluence/Jira. If any Confluence/Jira tool returns
-> `"... is not configured"` or `401`, follow `.github/prompts/designdocs/SETUP-confluence-mcp.md`
-> before continuing. Do **not** fall back to `curl` or hard-coded credentials.
+> **Session protocol:** see `.github/prompts/_base-session-protocol.md` — follow it strictly.
+> **Publish steps (4–5):** see `.github/prompts/designdocs/_base-confluence-publisher.md`.
+> **Setup prerequisite (one-time):** see `.github/prompts/designdocs/SETUP-confluence-mcp.md`
+> if any tool returns `"... is not configured"` or `401`. Do **not** fall back to `curl`.
 
 ---
 
@@ -48,7 +48,7 @@ CONFLUENCE_SPACE_KEY: "<space-key>"             # e.g. ~akundu (personal) or BRM
 CONFLUENCE_PAGE_TITLE: "<Page Title>"           # must be unique within the space
 
 # ─── TEMPLATE & STYLE REFERENCE ───────────────────────────────────────
-DESIGN_DOC_TEMPLATE: ".github/prompts/designdocs/confluence-design-doc-template.md"
+DESIGN_DOC_TEMPLATE: ".github/prompts/designdocs/templates/architecture-template.md"
 REFERENCE_PAGE_ID: ""          # optional: an existing Confluence page to match style/depth
 ```
 
@@ -63,27 +63,23 @@ REFERENCE_PAGE_ID: ""          # optional: an existing Confluence page to match 
 3. **Lucid and crisp** — clear, scannable prose; prefer tables and diagrams over walls of text.
 4. **Publish via MCP write tools** — use `confluence_create_page` / `confluence_update_page`.
    NEVER use `curl`, and never prompt for or hard-code credentials (the MCP server handles auth).
-5. **Escape XHTML** — see Step 4c. This is the #1 cause of publish failures.
+5. **Escape XHTML** — the #1 cause of publish failures. Full rules in `_base-confluence-publisher.md` Step 4c.
 6. **Review before publish** — generate the markdown, show the user, publish only after
    confirmation (skip the wait only if the user explicitly says "publish without review").
 
 ---
 
-## Session Context Protocol — FOLLOW STRICTLY
+## Session Context Protocol
 
-Before starting:
-1. `session_list` — look for an existing session for these Jira tickets / this doc.
-2. If found, `session_get` to load it. If not, `session_create` with:
-   - name: `design-doc-<first-jira-ticket>-<yyyy-mm-dd>`
-   - project: the repo name (e.g. `mercury-services`)
-   - tags: all Jira tickets, `"design-doc"`, `"confluence"`, the module name.
-
-During work, add context entries:
-- After reading analysis file → `finding`
-- After generating the design doc → `progress`
-- After publishing (with page id + URL) → `progress`
-- On any blocker → `blocker`
-- Log the model used → `model_info`
+> Follow `.github/prompts/_base-session-protocol.md` strictly.
+>
+> **Session name pattern:** `design-doc-<first-jira-ticket>-<yyyy-mm-dd>`
+> **Tags:** all Jira ticket keys + module name + `"design-doc"` + `"confluence"`
+>
+> Design-doc-specific context entries:
+> - After reading analysis file → `finding`
+> - After generating the design doc → `progress`
+> - After publishing (include page id + URL) → `progress`
 
 ---
 
@@ -134,7 +130,7 @@ Map content from the analysis file onto each template section. Guidance:
   traversal, and injection.
 - **Required Documentation Changes** — answer the user/API/ops questions.
 - **Blocking Issues** — leave empty or note known blockers.
-- **Review** — Author = Draft; reviewers = Pending.
+- **Review** — Author = Approved; reviewers = Pending.
 
 ---
 
@@ -146,105 +142,20 @@ publishing (unless the user opted out of review).
 
 ---
 
-## Step 4 — Publish to Confluence (via MCP write tools)
+## Step 4 — Publish to Confluence
 
-### 4a. Verify the parent page
-`confluence_get_page(CONFLUENCE_PARENT_PAGE_ID)` — confirm it exists and note its space key.
-
-### 4b. Check for an existing page (avoid duplicates)
-`confluence_search('title = "<CONFLUENCE_PAGE_TITLE>" AND space = "<CONFLUENCE_SPACE_KEY>"')`.
-If a page already exists, ask whether to **update** it (Step 4d, update form) or create a new one.
-
-### 4c. Convert Markdown → Confluence storage format (XHTML)
-
-| Markdown | Storage format |
-|----------|----------------|
-| `## Title` | `<h2>Title</h2>` |
-| table | `<table><thead><tr><th>…</th></tr></thead><tbody><tr><td>…</td></tr></tbody></table>` |
-| ` ```lang ` fenced block | `<ac:structured-macro ac:name="code"><ac:parameter ac:name="language">lang</ac:parameter><ac:plain-text-body><![CDATA[…]]></ac:plain-text-body></ac:structured-macro>` |
-| Mermaid block | `<ac:structured-macro ac:name="mermaid-cloud"><ac:plain-text-body><![CDATA[…]]></ac:plain-text-body></ac:structured-macro>` — if the Mermaid macro is not installed, render the diagram as ASCII inside a `code` block, or as a table |
-| `**bold**` / `*italic*` | `<strong>…</strong>` / `<em>…</em>` |
-| `` `inline code` `` | `<code>…</code>` |
-| `[text](url)` | `<a href="url">text</a>` |
-| Jira key (e.g. `ION-1234`) | `<ac:structured-macro ac:name="jira"><ac:parameter ac:name="key">ION-1234</ac:parameter></ac:structured-macro>` |
-| TOC | `<ac:structured-macro ac:name="toc" />` |
-
-> ### ⚠️ CRITICAL — escape XHTML special characters (the #1 failure mode)
-> Confluence storage format is **strict XHTML**. Any literal `&`, `<`, or `>` in **text or
-> inline-code** content makes Confluence reject the entire page with
-> `400 "Error parsing xhtml: Unexpected character …"`.
-> - Escape `&`→`&amp;`, `<`→`&lt;`, `>`→`&gt;` in all prose, table cells, and inline `code`.
->   Watch for prose like `(<actual class>)` and inline code containing `&`/`<`/`>`/regex.
-> - Escape the **raw text first, then** insert your own tags/macros — otherwise you escape your
->   own markup.
-> - Content inside `<![CDATA[ … ]]>` (fenced code blocks, Mermaid) is exempt — keep ASCII
->   diagrams inside code/CDATA blocks.
-> - A working reference converter is in the repo root: `convert_design_doc.py`
->   (it `html.escape`s first, then transforms). Reuse or adapt it; write the storage output to a
->   file and read it back rather than hand-assembling a 20 KB+ string inline.
-
-### 4d. Create (or update) the page via MCP
-
-**Create a new page:**
-```
-confluence_create_page(
-  space_key      = "<CONFLUENCE_SPACE_KEY>",
-  title          = "<CONFLUENCE_PAGE_TITLE>",
-  body           = "<CONVERTED_XHTML>",        # param is `body`, NOT `content`
-  parent_id      = "<CONFLUENCE_PARENT_PAGE_ID>",
-  representation = "storage"
-)
-```
-
-**Update an existing page** (pass the FULL body; version auto-increments):
-```
-confluence_update_page(
-  page_id        = "<EXISTING_PAGE_ID>",
-  body           = "<CONVERTED_XHTML>",
-  title          = "<CONFLUENCE_PAGE_TITLE>",   # optional; omit to keep current
-  representation = "storage",
-  minor_edit     = false                         # false = notify watchers
-)
-```
-
-**Rules:**
-- Send the **entire** body in one `create`/`update` call. Do NOT publish a partial page and then
-  `confluence_append_to_page` the rest — append re-sends the combined body and will hit the same
-  XHTML `400` if any chunk is unescaped, leaving a half-populated page. Fix escaping and re-send
-  the whole document.
-- On `400 "Error parsing xhtml"`: the row/col in the message points at the offending character —
-  almost always an unescaped `&`/`<`/`>`. Fix the converter and re-send.
-- On `401`: the SSO session expired — see `SETUP-confluence-mcp.md` (re-run `sso_login.py`).
-- On `"Confluence is not configured"`: the server is missing `MCP_CONFLUENCE_BASE_URL` — see
-  `SETUP-confluence-mcp.md`.
+> Follow all steps in `.github/prompts/designdocs/_base-confluence-publisher.md` (Steps 4–5):
+> XHTML conversion table, `confluence_create_page` / `confluence_update_page` call signatures,
+> error handling (`400` / `401` / not-configured), and verify & report.
 
 ---
 
-## Step 5 — Verify & Report
+## Output Checklist
 
-1. `confluence_get_page(<page_id>)` — confirm the body contains every expected section.
-2. Share the page URL with the user.
-3. Update the session with the final status, page id, version, and URL.
-
----
-
-## Output checklist
-
-- [ ] Session context with full traceability
+- [ ] Session context with full traceability (findings, decisions, publish URL)
 - [ ] Design-doc markdown at `<MODULE>/docs/<yyyy-mm-dd>-design-doc-<first-jira-ticket>.md`
 - [ ] Confluence page created/updated under the specified parent
 - [ ] All template sections populated (content or `N/A`)
-- [ ] Diagrams for architecture/flow; Jira keys linked via the jira macro
+- [ ] Mermaid diagrams for architecture/flow; Jira keys linked via the jira macro
 - [ ] XHTML fully escaped; page verified by reading it back
-- [ ] Page URL shared
-
----
-
-## Reuse Instructions
-
-1. Edit the **PARAMETERS** block above (analysis file, parent page id, space key, title, Jira
-   tickets, module).
-2. Run this prompt. The agent reads the analysis, generates the markdown, converts it to escaped
-   storage format, and publishes via the MCP write tools.
-3. If the MCP server is not configured/authenticated, complete the one-time setup in
-   `SETUP-confluence-mcp.md` first.
+- [ ] Page URL shared with user
