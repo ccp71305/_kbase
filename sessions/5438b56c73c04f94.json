@@ -1,0 +1,185 @@
+{
+  "id": "5438b56c73c04f94",
+  "name": "ION-11462-oceanschedules-aws-upgrade-impl",
+  "description": "Full implementation of AWS SDK 2.x upgrade for oceanschedules and oceanschedules-process modules using cloud-sdk-api/cloud-sdk-aws from mercury-services-commons. Branch feature/ION-11462-os-aws-upgrade-copilot.",
+  "project": "mercury-services",
+  "created_at": "2026-05-31T04:35:01.097297+00:00",
+  "updated_at": "2026-05-31T21:41:58.583426+00:00",
+  "status": "active",
+  "tags": [
+    "oceanschedules",
+    "oceanschedules-process",
+    "aws-upgrade",
+    "cloud-sdk",
+    "ION-11462",
+    "implementation"
+  ],
+  "entries": [
+    {
+      "id": "2c57374c96cf",
+      "timestamp": "2026-05-31T04:35:43.274487+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Scope assessment: ~80 files use AWS SDK v1 across oceanschedules + oceanschedules-process",
+      "detail": "AWS SDK v1 usages span DynamoDB (entities SchedulesProStaging, RealTimeCache; DAOs RealTimeCacheDao, SchedulesProStagingDao; DynamoSupport; DynamoTableCommand), S3 (S3Service, AWSUtil, S3WorkspaceService, MultiPartUploader, S3MergeService, S3UploadObject), SQS (SQSClient, SQSListener, SqsThreadPoolListener, QueueExceptionEventHandler), SNS (SNSClient x2), and Spark/EMR jobs (DynamoSparkService, AwsRequestSigner, SchedulesAggregatorService, aggregator). Jira ION-11462 inaccessible (401 Unauthorized). AWS creds OK (account 081020446316). Currently on branch feature/ION-12316-visibiilty-aws-upgrade-copilot. Session id 5438b56c73c04f94.",
+      "tags": [],
+      "references": [
+        "oceanschedules",
+        "oceanschedules-process"
+      ]
+    },
+    {
+      "id": "74c68305bb80",
+      "timestamp": "2026-05-31T04:41:39.782002+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Verified cloud-sdk API signatures and Guice/DAO/entity patterns from booking reference module",
+      "detail": "Verified from booking source (commons cloud-sdk):\n- Entity: @Table(name=...) from com.inttra.mercury.cloudsdk.database.annotation.Table + @DynamoDbBean (software.amazon.awssdk.enhanced.dynamodb.mapper.annotations) + lombok @Data/@NoArgsConstructor; getters annotated @DynamoDbPartitionKey/@DynamoDbSortKey/@DynamoDbSecondaryPartitionKey(indexNames={...})/@DynamoDbAttribute(\"x\")/@DynamoDbVersionAttribute. Converters via @DynamoDbConvertedBy.\n- DAO: plain class holding DatabaseRepository<T, DefaultPartitionKey<String>> or DefaultCompositeKey<String,String>, injected via constructor. Methods: repository.save(e), findById(new DefaultPartitionKey<>(k)), findAll(), delete(e), query(DefaultQuerySpec).\n- Guice: BookingDynamoModule provides DynamoDbClientConfig via config.getDynamoDbConfig().toClientConfigBuilder().consistentRead(false).build(); repositories via static DynamoRepositoryFactory.createEnhancedRepository(clientConfig, tableName, domainType, DynamoRepositoryConfig.builder().domainType(..).isFindAllUnpaginatedScanEnabled(bool).build()); tableName = clientConfig.getTablePrefix()+tableAnnotation.name().\n- Query: DefaultQuerySpec.builder().partitionKeyValue(CloudAttributeValue.ofString(x)).indexName(IDX).consistentRead(true).build(); from com.inttra.mercury.cloudsdk.database.impl.DefaultQuerySpec + model.CloudAttributeValue.\n- IT: BaseDynamoDbIT (dynamo-integration-test), JUnit5, createTable(name, class), DynamoDbClientConfig.builder().\nRoot pom registers all 9 OS modules: oceanschedules + oceanschedules-process/{common,inbound,outbound,loader,staging,collector,port-pair-generator,aggregator}. There is NO oceanschedules-process/pom.xml aggregator; build via -pl from root.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java",
+        "booking/src/main/java/com/inttra/mercury/booking/util/SequenceId.java",
+        "booking/src/main/java/com/inttra/mercury/booking/carrierspotrates/dao/SpotRatesDao.java"
+      ]
+    },
+    {
+      "id": "86f408aee83b",
+      "timestamp": "2026-05-31T04:44:43.428696+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Verified cloud-sdk gaps: SQS delay-send + extended-client; S3 delimiter-listing + batch-delete. SSM/paramstore fully supported.",
+      "detail": "VERIFIED cloud-sdk-api gaps (commons source):\n- MessagingClient<T>: sendMessage(url,body); sendMessage(url,body,Map<String,String> attributes); deleteMessage(url,receiptHandle); listMessages(url,max,wait); receiveMessages(ReceiveMessageOptions). GAP: NO delay-seconds send (OS SQSClient.sendMessage(target,content,delay) used by retry/backoff). GAP: NO extended-client large-payload (>256KB S3 offload) support (OS uses amazon-sqs-java-extended-client-lib 1.2.6).\n- QueueMessage<T>: getMessageId/getReceiptHandle/getPayload/getAttributes/getSentTimestamp.\n- NotificationService.publish(topicArn,message) - OK.\n- CloudParameterStore.getParameter(name[,decryption])->Optional<CloudParameter>; putParameter; replacePlaceholders - SSM SUPPORTED (no gap). pkg com.inttra.mercury.cloudsdk.paramstore.api.\n- StorageClient: putObject(byte[]/InputStream+len/File/String), getObject->StorageObject, getContent(bucket,file,charset), deleteObject, listObjects(bucket,keyPrefix)->List<StorageObject>, objectExists, copyObject, generatePresignedUrl, bucket ops. GAP: no delimiter/common-prefix listSubFolders (OS S3Service.listSubFolders); no batch deleteObjects (deleteFolder); multipart handled internally via putObject(File)/S3TransferManagerUploader.\n- ReceiveMessageOptions.builder(): queueUrl,maxMessages,visibilityTimeoutSeconds,waitTimeSeconds,attributes.\nKEY GAPS to flag in design doc: (1) SQS DelaySeconds send, (2) SQS extended large-payload client, (3) S3 delimiter listing (sub-folders), (4) S3 batch delete. Workarounds available in-module for 3&4; 1&2 need commons change requests.",
+      "tags": [],
+      "references": [
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/MessagingClient.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/api/StorageClient.java"
+      ]
+    },
+    {
+      "id": "e2051c4c13a1",
+      "timestamp": "2026-05-31T04:51:05.895423+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Plan peer-review: SSM is unused (not migrated), extended-SQS in collector+ppg, aggregator uses RestHighLevelClient, S3 multipart is a real gap",
+      "detail": "Sub-agent plan review corrections (grounded in source):\n1. SSM: NO AWSSimpleSystemsManagement usage anywhere. aws-java-sdk-ssm is an UNUSED dep in outbound(1.12.773) and aggregator(1.12.638). Param store handled by commons com.inttra.mercury.config.ParameterStoreLookup (out of scope). ACTION: just drop the unused ssm deps. (Plan SSM-migration claim was wrong.)\n2. SQS extended client (AmazonSQSExtendedClient, amazon-sqs-java-extended-client-lib:1.2.6) is wired in collector (OceanSchedulesCollectorModule ~line50) and port-pair-generator (~line60), NOT common. common/pom declares the dep but code is in those two modules.\n3. collector OceanSchedulesCollectorModule directly builds AmazonSNS/AmazonS3/AmazonSQS(+extended). Plan understated.\n4. S3 multipart REAL GAP: common MultiPartUploader uses low-level S3 multipart API; oceanschedules S3Service/AWSUtil use TransferManager. cloud-sdk StorageClient has NO multipart/transfer API. Add as GAP-5 (putObject(File) may suffice; else SDK v2 S3TransferManager in-module).\n5. aggregator SchedulesAggregatorModule builds RestHighLevelClient (NOT Jest) signed via AWS4Signer+AwsRequestSigner + legacy com.inttra.mercury.config.ElasticSearchServiceConfig, plus direct AmazonSNS/S3/SQS. Jest-swap does not apply to aggregator.\n6. RealTimeCache: Java field hashKey -> attribute cacheKey (@DynamoDbPartitionKey @DynamoDbAttribute(\"cacheKey\")). Keep deprecated getHashKey/setHashKey. SchedulesProStaging confirmed scac(PK)/portPairIndicator(SK)/scheduleSource(GSI schedules_pro_source_index). Both have unused <T> -> remove.\n7. port-pair DynamoService uses low-level PutItemRequest (not Document API) with >400KB size-reduction + 3-retry path to preserve.\n8. v1 version skew across modules: 1.12.558/1.12.638/1.12.773.",
+      "tags": [],
+      "references": [
+        "oceanschedules-process/docs/2026-05-31-os-aws-upgrade-plan.md",
+        "oceanschedules-process/common/src/main/java/com/inttra/mercury/oceanschedules/process/common/s3/MultiPartUploader.java",
+        "oceanschedules-process/aggregator/src/main/java/com/inttra/mercury/oceanschedules/process/aggregator/module/SchedulesAggregatorModule.java"
+      ]
+    },
+    {
+      "id": "cdd85fd0f7ef",
+      "timestamp": "2026-05-31T04:55:57.012604+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Committed docs + additive cloud-sdk POM change to oceanschedules; module compiles offline",
+      "detail": "Commit 1 (08965b70eb): plan + design docs. Commit 2: oceanschedules/pom.xml adds mercury.cloudsdk.version=1.0.26-SNAPSHOT and cloud-sdk-api, cloud-sdk-aws, dynamo-integration-test(test) ADDITIVELY (dynamo-client retained). Verified `mvn -o -pl oceanschedules compile` exit 0. commons 1.0.26-SNAPSHOT confirmed present in local .m2 for all three artifacts. Reusable converter exists: com.inttra.mercury.cloudsdk.database.converter.DateEpochSecondAttributeConverter (cloud-sdk-aws) — reuse for RealTimeCache/SchedulesProStaging epoch-second date fields. KEY GAP found reading DatabaseRepository: only saveIfNotExist available; NO arbitrary conditional-write. RealTimeCacheDao.acquireLock uses conditional save (LOCKED != value) → needs in-module SDK v2 enhanced-client conditional putItem adapter (new GAP-6).",
+      "tags": [],
+      "references": [
+        "oceanschedules/pom.xml",
+        "oceanschedules/src/main/java/com/inttra/mercury/oceanschedules/persistence/cache/RealTimeCacheDao.java",
+        "com.inttra.mercury.cloudsdk.database.converter.DateEpochSecondAttributeConverter"
+      ]
+    },
+    {
+      "id": "c3ec5bb4da29",
+      "timestamp": "2026-05-31T04:57:23.587950+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Checkpoint: Phases 0-3 + Phase 4 start complete & committed (green branch); detailed continuation guide for remaining code migration persisted",
+      "detail": "SESSION STATUS (active, branch feature/ION-11462-os-aws-upgrade-copilot, 3 commits on top of develop 46e40a3ef2):\n- 08965b70eb: plan + design docs\n- 789945c024: oceanschedules/pom.xml additive cloud-sdk deps (compiles offline)\n- (latest): design doc GAP-6 + change log\n\nDONE: Phase 0 (context/scope/session), cloud-sdk API ground-truth verification, Phase 1 (plan), Phase 1.1 (peer review+corrections), Phase 2 (design w/ Mermaid), Phase 3 (branch), Phase 4 START (oceanschedules additive POM, verified compiling).\n\nREMAINING (Phases 4-10, multi-session): full code migration ~80 files / 9 deployable units. Branch is GREEN; do not half-migrate entities (SDK v2 annotations incompatible with v1 DynamoDBMapper still used by DAOs — module is the atomic unit).\n\noceanschedules module = 14 main files using v1: dynamodb/{RealTimeCache,SchedulesProStaging,DynamoSupport}, persistence/{cache/RealTimeCacheDao,portpair/SchedulesProStagingDao}, module/{OceanschedulesModule,AWSClientConfiguration}, util/{sns/SNSClient,s3/S3Service,AWSUtil}, config/{DynamoTableCommand,OceanSchedulesConfig}, service/CarrierService, client/external/ExternalClient + tests.\n\nNEXT-SESSION ORDER for oceanschedules module (atomic): \n1) entities RealTimeCache(table os_realtime_cache, hashKey field->attr 'cacheKey', TTL expiresOn epoch-sec, keep getHashKey/setHashKey, remove <T>) + SchedulesProStaging(table schedules_pro_staging, PK scac SK portPairIndicator, GSI schedules_pro_source_index on scheduleSource) to @DynamoDbBean + commons @Table.\n2) Reuse com.inttra.mercury.cloudsdk.database.converter.DateEpochSecondAttributeConverter via @DynamoDbConvertedBy on Date getters.\n3) DAOs: hold DatabaseRepository<T,DefaultPartitionKey/DefaultCompositeKey<String[,String]>>; RealTimeCacheDao.findCacheByCacheKey->query(DefaultQuerySpec consistentRead) + expiresOn filter; acquireLock-> GAP-6 in-module SDK v2 enhanced putItem conditional adapter; SchedulesProStagingDao.getExistingAPICarrierScacCodes-> per-scac query(DefaultQuerySpec partitionKeyValue=ofString(scac)).\n4) OceanSchedulesDynamoModule per booking BookingDynamoModule (static DynamoRepositoryFactory.createEnhancedRepository(clientConfig,prefix+tableName,domainType,DynamoRepositoryConfig...)); also provide enhanced client for GAP-6 adapter.\n5) OceanSchedulesConfig add BaseDynamoDbConfig dynamoDbConfig; YAML cvt/int/qa/prod.\n6) SNSClient->NotificationService; S3Service/AWSUtil->StorageClient(+S3 multipart GAP-5, delimiter GAP-3); DynamoTableCommand->createTable via enhanced client.\n7) Swap Jest/ES imports to cloudsdk.\n8) Remove dynamo-client + v1 deps; mvn -pl oceanschedules -am verify (offline-friendly: use -o; note `git fetch` hangs in this env).\n9) Unit + IT (BaseDynamoDbIT): RealTimeCacheDaoIT, SchedulesProStagingDaoIT.\nThen process sub-modules per plan §4-7 (common first).</detail>\n<parameter name=\"references\">[\"feature/ION-11462-os-aws-upgrade-copilot\", \"oceanschedules/docs/2026-05-31-os-aws2x-upgrade-design-copilot.md\", \"oceanschedules-process/docs/2026-05-31-os-aws-upgrade-plan.md\", \"booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "b4b5d735c6cd",
+      "timestamp": "2026-05-31T18:12:35.642554+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Expanded design-doc gap section to implementation-ready specs (+GAP-7) and committed; branch green",
+      "detail": "Resumed ION-11462 on branch feature/ION-11462-os-aws-upgrade-copilot (was on HEAD cd7f4b5189). Verified prior state: Phases 0-3 + Phase 4-start done (plan + design docs + additive oceanschedules/pom.xml cloud-sdk deps). \n\nTHIS TURN: Per user emphasis (\"call out cloud-sdk gaps in complete detail in a separate section of the design doc\"), rewrote Section 11 of oceanschedules/docs/2026-05-31-os-aws2x-upgrade-design-copilot.md from terse 6-item list to fully implementation-ready specs grounded in actual OS source I read (RealTimeCacheDao.acquireLock conditional save; S3Service.listSubFolders/deleteFolder; SNSClient retry; DynamoTableCommand create/TTL/GSI-wait; SchedulesProStagingDao per-scac query; SQSClient delay/extended from prior findings). Each gap now lists: consuming OS call-site(s), exact proposed cloud-sdk-api signature + target file path in mercury-services-commons, cloud-sdk-aws impl approach (SDK v2 classes), config/wiring impact, required commons unit+IT tests, and interim in-module workaround with // TODO(ION-11462): requires commons change GAP-n marker. NEW: GAP-7 (table/TTL/GSI DDL helper, DynamoTableAdmin in cloud-sdk-aws) for DynamoTableCommand. Added gap->call-site quick-map table. Updated change-log table.\n\nCommit b067f61229 \"ION_11462: Expand cloud-sdk gap section to implementation-ready specs (+GAP-7 DDL helper, gap->call-site map)\" (1 file, +127/-8). Branch still GREEN (doc-only change). 4 commits now on top of develop 46e40a3ef2: 08965b70eb, 789945c024, cd7f4b5189, b067f61229.\n\nVerified commons API ground-truth: DatabaseRepository<T,ID extends EntityId> has findById/findAll/save/update/saveIfNotExist/save(Iterable)/exists/query(QuerySpec)/delete*/batch*/export — confirms NO generic conditional saveIf (GAP-6 real). cloud-sdk-api/cloud-sdk-aws located at C:\\Users\\arijit.kundu\\projects\\mercury-services-commons.\n\nREMAINING (Phases 4 code -> 10): full atomic migration of oceanschedules module first (13 v1 files: dynamodb/{RealTimeCache,SchedulesProStaging,DynamoSupport}, persistence/{cache/RealTimeCacheDao,portpair/SchedulesProStagingDao}, module/{OceanschedulesModule,AWSClientConfiguration}, util/{sns/SNSClient,s3/S3Service,AWSUtil}, config/{DynamoTableCommand,OceanSchedulesConfig}, service/CarrierService, client/external/ExternalClient) + GAP-6 RealTimeCacheConditionalWriter adapter + GAP-7 OsTableProvisioner adapter + OceanSchedulesDynamoModule + unit/IT tests; then 8 process sub-modules (common first). Do NOT half-migrate entities (v2 @DynamoDbBean breaks v1 DynamoDBMapper DAOs) — module is atomic. Next-session order unchanged from checkpoint c3ec5bb4da29.</detail>\n<parameter name=\"references\">[\"oceanschedules/docs/2026-05-31-os-aws2x-upgrade-design-copilot.md\", \"feature/ION-11462-os-aws-upgrade-copilot\", \"b067f61229\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "5f4f65524502",
+      "timestamp": "2026-05-31T18:53:30.254166+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Test files migrated to cloud-sdk (AWS 2.x); pausing for resume",
+      "detail": "oceanschedules main sources fully migrated and compiling. This turn rewrote 4 of 6 failing unit test files to cloud-sdk/SDK v2 APIs:\n- RealTimeCacheDaoTest.java: mocks DatabaseRepository<RealTimeCache, DefaultPartitionKey<String>> + RealTimeCacheConditionalWriter; new RealTimeCacheDao(repository, conditionalWriter); non-generic RealTimeCache; addCache->verify(repository).save; acquireLock->stub conditionalWriter.acquireLock; added findCacheByCacheKey tests (unexpired/expired/empty/exception->isReadWriteError).\n- SchedulesProStagingDaoTest.java: mocks DatabaseRepository<SchedulesProStaging, DefaultCompositeKey<String,String>>; single-arg constructor; non-generic SchedulesProStaging; stubQueryByScac uses repository.query(any(DefaultQuerySpec)) thenAnswer reading spec.getPartitionKeyAttributeValue().s() (CloudAttributeValue has NO string getter; DefaultQuerySpec exposes getPartitionKeyAttributeValue() returning AWS AttributeValue with .s()); removed TestableSchedulesProStagingDao subclass.\n- AWSUtilTest.java: SDK v2 exceptions — AwsServiceException.builder().awsErrorDetails(errorCode ThrottlingException) retryable; SdkClientException with IOException cause retryable; plain SdkClientException not; null not.\n- SNSClientTest.java: mocks NotificationService; doThrow(throttling AwsServiceException)/doNothing on publish(anyString,anyString); retry/fail paths.\n\nPENDING (next): S3ServiceTest.java (mock S3Client, listObjectsV2/deleteObjects/copyObject, List<S3Object>) and CarrierServiceTest.java line ~396 thenReturn List<S3Object>. Then test-compile via `mvn -o -pl oceanschedules -am install -DskipTests -Dmaven.test.skip=false`, run unit tests, create DynamoDB integration tests (RealTimeCacheDaoIT, SchedulesProStagingDaoIT using BaseDynamoDbIT), update YAML dynamoDbConfig to BaseDynamoDbConfig shape, full verify, commit with ION_11462 prefix (git add specific files only, NEVER push).</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "ION-11462",
+        "oceanschedules",
+        "aws-sdk-upgrade",
+        "tests",
+        "cloud-sdk"
+      ],
+      "references": [
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/persistence/cache/RealTimeCacheDaoTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/persistence/portpair/SchedulesProStagingDaoTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/util/s3/AWSUtilTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/util/sns/SNSClientTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/util/s3/S3ServiceTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/service/CarrierServiceTest.java",
+        "ION-11462"
+      ]
+    },
+    {
+      "id": "766d541092ae",
+      "timestamp": "2026-05-31T21:26:29.967211+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Rewrote remaining 2 unit tests (S3ServiceTest, CarrierServiceTest) to AWS SDK v2",
+      "detail": "S3ServiceTest fully rewritten: mocks software.amazon.awssdk.services.s3.S3Client; uses listObjectsV2(ListObjectsV2Request)->ListObjectsV2Response with commonPrefixes()/contents()/isTruncated()/nextContinuationToken(); continuation-token paging instead of listNextBatchOfObjects; deleteObjects(DeleteObjectsRequest)->DeleteObjectsResponse.deleted(); copyObject(CopyObjectRequest)->CopyObjectResponse. Throttling exceptions via AwsServiceException.builder().awsErrorDetails(errorCode=ThrottlingException); non-retryable via SdkClientException.builder(). CarrierServiceTest: replaced @Mock S3ObjectSummary field (final class, unmockable) with real S3Object.builder().key(..).build() instances in testPurgeS3Data; import S3ObjectSummary->S3Object. No remaining com.amazonaws refs in oceanschedules/src except 1 javadoc comment. get_errors clean on both files.",
+      "tags": [],
+      "references": [
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/util/s3/S3ServiceTest.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/service/CarrierServiceTest.java"
+      ]
+    },
+    {
+      "id": "1bd6c4f84bbd",
+      "timestamp": "2026-05-31T21:41:25.575908+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Completed oceanschedules AWS SDK 2.x upgrade: all unit + DynamoDB integration tests green",
+      "detail": "Unit tests: 572 run, 0 failures (surefire:test). Added two DynamoDB Local ITs: RealTimeCacheDaoIT (7 tests: addCache/findCacheByCacheKey round-trip, expired-filtered, missing-key, legacy epoch-second read-back, acquireLock success/contention/re-acquire) and SchedulesProStagingDaoIT (4 tests: getExistingAPICarrierScacCodes existing/empty/missing/legacy-epoch). 11 IT total, 0 failures.\n\nNotable fix: DynamoDB Local 2.5.2 failed with NoClassDefFoundError com/amazonaws/services/dynamodbv2/model/OnDemandThroughput. Root cause: integration-test-commons:1.0 pins aws-java-sdk-dynamodb:1.12.638 (lacks OnDemandThroughput), winning mediation over the 1.12.721 DynamoDBLocal 2.5.2 needs. Fixed by excluding aws-java-sdk-dynamodb from integration-test-commons in oceanschedules/pom.xml.\n\nAlso added region: us-east-1 to dynamoDbConfig in conf/{cvt,int,prod,qa}/config.yaml. Updated design doc change log + GAP-7 resolution; updated progress doc status table; created 2026-05-31-aws-sdk-upgrade-summary.md.\n\nOffline limitation: mvn -am verify fails at maven-shade-plugin (jdependency:2.10 absent offline) before integration-test phase; ran failsafe goals directly instead. Unrelated to migration.",
+      "tags": [
+        "aws-sdk-upgrade",
+        "oceanschedules",
+        "integration-test",
+        "dynamodb"
+      ],
+      "references": [
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/persistence/cache/RealTimeCacheDaoIT.java",
+        "oceanschedules/src/test/java/com/inttra/mercury/oceanschedules/persistence/portpair/SchedulesProStagingDaoIT.java",
+        "oceanschedules/pom.xml",
+        "oceanschedules/conf/int/config.yaml",
+        "oceanschedules/docs/2026-05-31-aws-sdk-upgrade-summary.md",
+        "ION-11462"
+      ]
+    },
+    {
+      "id": "b5b9ec2e955e",
+      "timestamp": "2026-05-31T21:41:58.583189+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "oceanschedules AWS SDK 2.x upgrade complete and committed (not pushed)",
+      "detail": "Committed 55543e16b9 on feature/ION-11462-os-aws-upgrade-copilot (13 files, +752/-331), NOT pushed. oceanschedules module AWS SDK 2.x upgrade is functionally complete: all main sources migrated (interim 7e0138f961), all 6 unit test classes on SDK v2 (572 pass), 2 new DynamoDB Local ITs (11 pass), YAML region added, IT dependency conflict resolved (GAP-7). Remaining future work (separate scope): oceanschedules-process 8 sub-modules (Kafka/Spark unchanged), and commons enhancements for GAP-3/4/6/7. Session left active.",
+      "tags": [
+        "aws-sdk-upgrade",
+        "oceanschedules",
+        "commit",
+        "complete"
+      ],
+      "references": [
+        "55543e16b9",
+        "ION-11462",
+        "oceanschedules/docs/2026-05-31-aws-sdk-upgrade-summary.md"
+      ]
+    }
+  ]
+}

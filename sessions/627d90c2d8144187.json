@@ -1,0 +1,116 @@
+{
+  "id": "627d90c2d8144187",
+  "name": "booking-prod-release-checkout-2026-06-13",
+  "description": "Post-release production checkout for booking module AWS SDK v2 upgrade. Verify ECS deployment, booking volume, Lambda health, API traffic, outbound processing, and DynamoDB record integrity.",
+  "project": "mercury-services",
+  "created_at": "2026-06-14T04:00:28.128374+00:00",
+  "updated_at": "2026-06-14T04:56:15.508074+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "ION-14382",
+    "production",
+    "post-release",
+    "checkout",
+    "aws-sdk-v2"
+  ],
+  "entries": [
+    {
+      "id": "e64d5572c625",
+      "timestamp": "2026-06-14T04:00:33.747330+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "model_info",
+      "summary": "Session started - Production release checkout for booking module AWS SDK v2 (ION-14382)",
+      "detail": "Model: Claude Opus 4.6 (copilot CLI). Task: Post-release production verification of booking module deployed 2026-06-13.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "810c52fa4f80",
+      "timestamp": "2026-06-14T04:18:03.716369+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Major findings: Deployment healthy, 15K bookings processed, DynamoDB format preserves backward compat (by design), all Lambdas working, DateTimeParseException is pre-existing",
+      "detail": "ECS Deployment: Two deployments on 2026-06-13. First at 12:34 ET (deployment ecs-svc/2372481715727276327), second at 20:00 ET (deployment ecs-svc/6928980687515073556). Both use task-def:16 with image Booking-prod from ECR. 8 tasks running. Steady state reached at 20:15 ET. Memory placement issue during second deploy was transient.\n\nBooking Volume: 15,309 bookings created since noon. States: CONFIRM=11,120, REQUEST=2,257, DECLINE=1,932. First booking at 16:00 UTC (noon EDT).\n\nDynamoDB Format: Post-deploy records STILL use N-type booleans, have splitCopy, have partyId, no NULL fields — SAME as SDK v1. This is BY DESIGN — backward compatibility preserves old format. QA shows BOOL/NULL (14 BOOL, 64 NULL, no splitCopy) confirming SDK v2 is different code but production backward compat works.\n\nExceptions: NotFoundException=445,987 (benign), DateTimeParseException=21,646 (pre-existing: 175K in 3 days prior), BookingValidationException=619, NullPointerException=157, SocketException=143, IllegalStateException=109.\n\nLambdas: ES Lambda=382,143 invocations/483 errors (all ES conflicts), S3Archive=382,144 invocations/0 errors, Partner Integration=3 errors (502/timeout), Outbound=0 errors.\n\nSQS: All queues healthy (0 pending messages).\n\nAPI Traffic: 175,099 requests. Top: POST /booking/outbound/partnerintegration=133,399, POST /booking/search/simple=14,470, GET /booking/search/summary=3,933.\n\nOutbound: Email=506,345, Watermill=266,142, Subscriptions=1,394,938, Partner OB=3,715,138.",
+      "tags": [
+        "deployment",
+        "dynamodb",
+        "lambda",
+        "exceptions",
+        "sqs",
+        "api-traffic"
+      ],
+      "references": [
+        "inttra2-pr-lg-bkapi",
+        "inttra2_prod_booking_BookingDetail",
+        "Booking-latest-prod-Task:16"
+      ]
+    },
+    {
+      "id": "fdc50e56a1ae",
+      "timestamp": "2026-06-14T04:23:48.332236+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Production checkout completed - documents written, release is HEALTHY",
+      "detail": "Production release checkout complete. Documents created:\n1. booking/docs/2026-06-13-booking-prod-release-checkout.md - Full findings\n2. booking/docs/2026-06-13-booking-prod-release-checkout-scripts.md - Reusable queries\n\nKey conclusion: Release is HEALTHY. No new exceptions, all Lambdas working, DynamoDB backward compat maintained, 15K bookings processed successfully. DateTimeParseException pre-existing (confirmed with 3-day pre-release comparison).",
+      "tags": [
+        "complete",
+        "documentation"
+      ],
+      "references": [
+        "booking/docs/2026-06-13-booking-prod-release-checkout.md",
+        "booking/docs/2026-06-13-booking-prod-release-checkout-scripts.md"
+      ]
+    },
+    {
+      "id": "c77e0d3901bd",
+      "timestamp": "2026-06-14T04:33:59.411672+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "CORRECTION: PROD records still in v1 format post-deploy - needs investigation",
+      "detail": "CORRECTION: Production records created AFTER deploy are NOT in SDK v2 format. Python analysis confirms:\nPROD post-deploy: BOOL=0, NULL=0, N(0/1)=5 (coreBooking, bookingWithMigratedParties, splitCopy, nonInttraBooking, version), splitCopy=present, partyId=present (8 occurrences)\nQA: BOOL=14, NULL=64, N(0/1)=2, splitCopy=absent, coreBooking/nonInttraBooking use BOOL type.\n\nThis is NOT by design. Post SDK v2 upgrade, PROD records should match QA format. Either the deployed image doesn't contain SDK v2 code, or there's a runtime config difference.",
+      "tags": [
+        "dynamodb",
+        "format",
+        "investigation-needed"
+      ],
+      "references": [
+        "booking/docs/2026-06-13-booking-prod-release-checkout.md"
+      ]
+    },
+    {
+      "id": "95a90b986ef7",
+      "timestamp": "2026-06-14T04:39:27.028953+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "SDK v2 IS deployed. N-type booleans in nested attrs caused by LegacyMapConverter + Jackson. Top-level N-type and splitCopy presence need further investigation.",
+      "detail": "INVESTIGATION COMPLETE: SDK v2 code IS deployed (proven by CloudWatch init logs at 00:06 UTC showing BookingDynamoModule and cloud-sdk-aws factory usage). BookingDetailDao.save() uses EnhancedDynamoRepository.table.putItem(). BookingDetail has @DynamoDbBean, splitCopy has @DynamoDbIgnore.\n\nRoot cause for N-type booleans in nested enrichedAttributes: EnrichedAttributesConverter uses Jackson convertValue(input, Map.class) then LegacyMapConverter.toAttributeValueMap(). Jackson serializes booleans as Integer in raw Map, LegacyMapConverter treats Number as N-type.\n\nRoot cause for top-level coreBooking/nonInttraBooking as N-type: Unexpected — Enhanced Client should use BOOL. Needs further investigation.\n\nRoot cause for splitCopy present despite @DynamoDbIgnore: Possible Lombok boolean is-prefix interaction with Enhanced Client bean introspection. Needs investigation.",
+      "tags": [
+        "dynamodb",
+        "format",
+        "investigation",
+        "root-cause"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/LegacyMapConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java:83,152,154,227"
+      ]
+    },
+    {
+      "id": "c4bf4767adb9",
+      "timestamp": "2026-06-14T04:56:15.508041+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "RESOLVED: DynamoDB format confirmed correct SDK v2. Earlier analysis mistakenly examined a year-old record.",
+      "detail": "RESOLVED: DynamoDB format IS correct SDK v2. Bookings 2109617001 (22 BOOL, 119 NULL, no splitCopy) and 2109610006 (17 BOOL, 83 NULL, no splitCopy) confirmed proper format. The earlier false alarm was caused by analyzing booking 2081895165 which was created in June 2025 (sequence epoch 1749873684861 = 2025-06-14). The 208xxxxx inttraRef series is from 2025, the 2109xxxxx series is from 2026 post-upgrade.",
+      "tags": [
+        "dynamodb",
+        "format",
+        "resolved"
+      ],
+      "references": []
+    }
+  ]
+}

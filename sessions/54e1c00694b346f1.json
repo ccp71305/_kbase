@@ -1,0 +1,86 @@
+{
+  "id": "54e1c00694b346f1",
+  "name": "ION-12310 Rebase #2 — ION-15755 DW 5.0.1 Merge",
+  "description": "Second rebase of feature/ION-12310-commons-cloudsdk-refactoring onto develop after ION-15755 (DW 5.0.1 + Jetty 12.1.9) merge. Follows first rebase completed 2026-05-15.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-05-27T01:57:21.286529+00:00",
+  "updated_at": "2026-05-27T03:21:37.307711+00:00",
+  "status": "completed",
+  "tags": [
+    "rebase",
+    "ION-12310",
+    "ION-15755",
+    "dropwizard-5",
+    "jetty-12",
+    "cloud-sdk"
+  ],
+  "entries": [
+    {
+      "id": "6ec0f00fbfd3",
+      "timestamp": "2026-05-27T02:00:56.025273+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Initial state assessment: Feature at 2f223af (36 commits), develop at 0aa4a06 (3 new ION-15755 commits). Working dir clean, no stash. Model: Claude Opus 4.6",
+      "detail": "ION-15755 commits on develop:\n- ab1d0bf: ION-15755 - Remove Datadog dropwizard metrics implementation\n- 1b6eb41: ION-15755 - DW 5.0.1 and Jetty 12.1.9 upgrade\n- 0aa4a06: Pull request #40: ION-15755 (merge commit)\n\nMerge base is ce08d52 (feature is already rebased onto this from May 15 rebase).\n\nConflict files identified:\n1. pom.xml (root) - HIGH: DW 5.0.1, Jetty 12.1.9, Jackson 2.21.0, remove datadog props, add Jetty/DW BOMs, AWS deps re-added\n2. commons/pom.xml - HIGH: jetty-ee10-servlets, remove datadog dep, remove junit-jupiter-params/mockito-core, add vintage/lombok, AWS deps re-added, flattenDependencyMode\n3. .gitignore - LOW: adds .codegraph/, .github/, docs/, flattened_pom.xml\n4. dynamo-client/pom.xml - LOW: version vars + flattenDependencyMode\n5. email-sender/pom.xml - LOW: version vars + flattenDependencyMode\n6. build_deploy.sh - MEDIUM: feature added cloud-sdk blocks that develop doesn't have\n7. build_utils_deploy.sh - LOW: datadog deploy block removed\n8. README.md - MEDIUM: feature's SNAPSHOT changelog vs develop\n\nClean merges expected:\n- InttraServer.java (DoSFilter import change)\n- LocalCacheProvider.java (null check bugfix)\n- InttraServerBootstrapTest.java (new test)\n- utils/dropwizard-metrics-datadog/ (37 files deleted)",
+      "tags": [
+        "conflict-analysis",
+        "ION-15755",
+        "rebase"
+      ],
+      "references": [
+        "pom.xml",
+        "commons/pom.xml",
+        ".gitignore",
+        "dynamo-client/pom.xml",
+        "email-sender/pom.xml",
+        "build_deploy.sh",
+        "build_utils_deploy.sh",
+        "README.md"
+      ]
+    },
+    {
+      "id": "2843447b2eb2",
+      "timestamp": "2026-05-27T02:04:09.272328+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Conflict analysis compared to Section 10 predictions — confirmed and updated",
+      "detail": "Section 10 predictions vs actual:\n- M1 pom.xml HIGH ✅ Confirmed — all predicted property changes present\n- M2 commons/pom.xml HIGH ✅ Confirmed — additional: AWS 1.x deps re-added on develop (aws-java-sdk-sqs/sns/core/ssm/s3)\n- M3 .gitignore LOW ✅ Confirmed — docs/ pattern will ignore cloud-sdk-api/docs/\n- M4 dynamo-client/email-sender LOW ✅ Confirmed\n\nAdditional conflicts not in Section 10:\n- build_deploy.sh: Feature added cloud-sdk deploy blocks, develop doesn't have them\n- README.md: Feature's SNAPSHOT changelog entries\n\nKEY DIFFERENCE from Section 10 prediction:\n- ION-15755 RE-ADDS aws-java-sdk-core, aws-java-sdk-ssm, aws-java-sdk-s3 to root pom.xml dependencyManagement AND commons/pom.xml\n- Feature branch REMOVED these same deps. This is a critical resolution point.\n- Resolution: KEEP FEATURE BRANCH removal (cloud-sdk uses AWS 2.x, not 1.x)\n\n.gitignore docs/ pattern:\n- ION-15755 adds 'docs/' which ignores ALL docs/ dirs including cloud-sdk-api/docs/\n- Resolution: Change to '/docs/' (root only) or add '!cloud-sdk-api/docs/' exception",
+      "tags": [
+        "conflict-analysis",
+        "aws-deps",
+        "gitignore"
+      ],
+      "references": []
+    },
+    {
+      "id": "5a7605233515",
+      "timestamp": "2026-05-27T03:20:43.609041+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "test_result",
+      "summary": "Full mvn clean install SUCCESS — all 2,003 tests pass, all modules installed as 1.0.24-SNAPSHOT",
+      "detail": "cloud-sdk-api: 23, dynamo-integration-test: 6, cloud-sdk-aws: 877+137, commons: 921, dynamo-client: 27, email-sender: 9, local-dynamodb: 1, local-elasticsearch: 2. Committed ca99f8d (version bump + DDB Local upgrade). Section 12 appended to rebase doc.",
+      "tags": [],
+      "references": [
+        "pom.xml",
+        "dynamo-integration-test/pom.xml",
+        "README.md",
+        "cloud-sdk-api/docs/2026-05-15-commons-rebase.md"
+      ]
+    },
+    {
+      "id": "57f31bf08a6d",
+      "timestamp": "2026-05-27T03:21:37.307687+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "progress",
+      "summary": "Rebase #2 COMPLETE — force-pushed to remote, PR #29 updated",
+      "detail": "Force-pushed ca99f8d (was 2f223af). 37 commits ahead of develop (0aa4a06). Backup at backup/feature-ION-12310-pre-rebase-2 → 2f223af. All 2,003 tests pass. Version bumped to 1.0.24-SNAPSHOT. Section 12 appended to rebase doc.",
+      "tags": [],
+      "references": [
+        "PR#29",
+        "ca99f8d",
+        "0aa4a06",
+        "backup/feature-ION-12310-pre-rebase-2"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "id": "284a7cba1d4244ee",
+  "name": "ION-12316-visibility-aws-upgrade-impl",
+  "description": "",
+  "project": "mercury-services",
+  "created_at": "2026-05-31T02:40:40.018836+00:00",
+  "updated_at": "2026-05-31T06:18:02.577167+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "aws-upgrade",
+    "cloud-sdk",
+    "ION-12316",
+    "implementation"
+  ],
+  "entries": [
+    {
+      "id": "95a599ee2d60",
+      "timestamp": "2026-05-31T02:40:44.346439+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "model_info",
+      "summary": "Agent starting ION-12316 visibility AWS SDK 2.x upgrade implementation",
+      "detail": "Agent using Claude Opus 4.6 for full implementation of visibility module AWS SDK upgrade",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "3ea24c5fb19c",
+      "timestamp": "2026-05-31T02:50:07.752433+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "Phase 0 complete - codebase analysis and reference material gathered",
+      "detail": "Completed comprehensive codebase analysis. Key findings:\n- 5 DynamoDB entity classes in visibility-commons: ContainerEvent, ContainerEventOutbound, ContainerEventPending, ContainerTrackingEvent, BookingDetailVisibility\n- 1 additional entity in visibility-wm-inbound-processor: CargoVisibilitySubscription\n- 5 DAOs extending DynamoDBCrudRepository: ContainerEventDao, ContainerEventOutboundDao, ContainerEventPendingDao, ContainerTrackingEventDao, BookingDao\n- 9 existing converters using SDK v1 DynamoDBTypeConverter\n- SqsMessageHandler uses commons SQS (SDK v1)\n- S3WorkspaceService uses AmazonS3 (SDK v1)\n- SES already on SDK v2 (SesClient) in inbound module\n- 11 sub-modules total\n- Reference implementations studied: BookingDynamoModule, MetaDataConverter (booking), LegacyMapConverter, BookingDetail entity\n- Cloud-sdk-api: DatabaseRepository, DefaultPartitionKey, DefaultCompositeKey, QuerySpec, BaseDynamoDbConfig\n- commons version for cloud-sdk: 1.0.23-SNAPSHOT",
+      "tags": [],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md",
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/MetaDataConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/LegacyMapConverter.java"
+      ]
+    },
+    {
+      "id": "4d42faa5d685",
+      "timestamp": "2026-05-31T03:50:28.420396+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Fixed all test files: S3WorkspaceServiceTest (StorageClient mock), CargoVisibilitySubscriptionDaoTest (DatabaseRepository mock), VisibilityApplicationInjectorTest (removed bindS3 call), VisibilityGPSEventApplicationInjectorTest (DatabaseRepository binding), VisibilityWMEventApplicationInjectorTest, VisibilityPendingApplicationInjectorTest, VisibilityInboundApplicationInjectorTest (all replaced DynamoDBMapper/Config with DatabaseRepository bindings, removed bindS3 calls), ContainerEventTableDaoTest (anyIterable→anyList). Full test-compile passes for all visibility modules.",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "visibility/visibility-commons/src/test/java/com/inttra/mercury/visibility/common/service/S3WorkspaceServiceTest.java",
+        "visibility/visibility-wm-inbound-processor/src/test/java/com/inttra/mercury/visibility/wm/dao/CargoVisibilitySubscriptionDaoTest.java",
+        "visibility/visibility-commons/src/test/java/com/inttra/mercury/visibility/common/config/VisibilityApplicationInjectorTest.java",
+        "visibility/visibility-itv-gps-processor/src/test/java/com/inttra/mercury/visibility/itv/config/VisibilityGPSEventApplicationInjectorTest.java",
+        "visibility/visibility-wm-inbound-processor/src/test/java/com/inttra/mercury/visibility/wm/config/VisibilityWMEventApplicationInjectorTest.java",
+        "visibility/visibility-pending/src/test/java/com/inttra/mercury/visibility/pending/config/VisibilityPendingApplicationInjectorTest.java",
+        "visibility/visibility-inbound/src/test/java/com/inttra/mercury/visibility/inbound/config/VisibilityInboundApplicationInjectorTest.java",
+        "visibility/visibility-inbound/src/test/java/com/inttra/mercury/visibility/inbound/persistence/dynamodb/ContainerEventTableDaoTest.java"
+      ]
+    },
+    {
+      "id": "69d32fd25450",
+      "timestamp": "2026-05-31T03:57:04.194319+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Fixed InboundEdiProcessorTest.failedS3Read: changed IOException mock to RuntimeException since StorageClient.getContent() no longer throws checked exceptions. Removed unused IOException import. visibility-inbound tests now pass (EXIT 0). Running full visibility test suite for final verification.",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "visibility/visibility-inbound/src/test/java/com/inttra/mercury/visibility/inbound/processor/InboundEdiProcessorTest.java"
+      ]
+    },
+    {
+      "id": "cd19b2feb418",
+      "timestamp": "2026-05-31T04:05:27.256787+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "ALL visibility module tests pass (EXIT 0). Fixed: S3WorkspaceServiceTest, CargoVisibilitySubscriptionDaoTest, 4 injector tests (replaced DynamoDBMapper/bindS3 with DatabaseRepository/StorageClient), InboundEdiProcessorTest (IOException→RuntimeException), ContainerEventTableDaoTest (anyIterable→anyList), added BookingDetailVisibility binding to pending test.",
+      "detail": "mvn test -pl visibility -amd -am -q → EXIT: 0. All visibility module tests pass including: visibility-commons (DAO tests, S3WorkspaceServiceTest, VisibilityApplicationInjectorTest), visibility-inbound (InboundEdiProcessorTest, ContainerEventTableDaoTest, VisibilityInboundApplicationInjectorTest), visibility-pending (VisibilityPendingApplicationInjectorTest with BookingDetailVisibility binding, PendingSqsProcessor tests), visibility-wm-inbound-processor (CargoVisibilitySubscriptionDaoTest, VisibilityWMEventApplicationInjectorTest), visibility-itv-gps-processor (VisibilityGPSEventApplicationInjectorTest), visibility-lambda modules.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "cd8de4d3a469",
+      "timestamp": "2026-05-31T04:24:31.862043+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "CRITICAL: booking-2.1.8.M.jar in visibility lib had OLD SDK v1 annotations. Generated new booking-3.0.0.M.jar from current develop source with SDK v2 annotations. Fixed BookingDao.getHashKey()→getBookingId() (DynamoHashAndSortKey interface removed in SDK v2). Updated visibility-commons/pom.xml from 2.1.8.M to 3.0.0.M.",
+      "detail": "Old JAR (booking-2.1.8.M.jar): Created Apr 2, 2026. Contains com.amazonaws.services.dynamodbv2.datamodeling.* annotations.\\nNew JAR (booking-3.0.0.M.jar): Built from current develop source. Contains software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.* and com.inttra.mercury.cloudsdk.database.annotation.* annotations.\\nGenerated using: mvn compile -pl booking -am, then jar cf from booking/target/classes with same includes as booking-model profile.\\nBookingDao fix: getHashKey() was from DynamoHashAndSortKey interface (removed in SDK v2), replaced with getBookingId() in two log statements.",
+      "tags": [],
+      "references": [
+        "visibility/visibility-commons/lib/com/inttra/mercury/booking/3.0.0.M/booking-3.0.0.M.jar",
+        "visibility/visibility-commons/pom.xml",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDao.java"
+      ]
+    },
+    {
+      "id": "cae36572d7a6",
+      "timestamp": "2026-05-31T04:25:56.869430+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "All visibility tests pass with new booking-3.0.0.M.jar containing SDK v2 annotations. EXIT: 0.",
+      "detail": "Full visibility test suite passes with new booking-3.0.0.M.jar (SDK v2 annotations). Command: mvn test -pl visibility -amd -am -q → EXIT: 0. BookingDao.getHashKey()→getBookingId() fix verified. No regressions from booking model upgrade.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "dfe71d0c31fb",
+      "timestamp": "2026-05-31T04:30:44.547514+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Phase 5 committed (2a593bf407). Design doc created. Session paused for context window management. Phases 6-10 remain.",
+      "detail": "Committed as 2a593bf407 on branch feature/ION-12316-visibiilty-aws-upgrade-copilot. 61 files changed, 1984 insertions, 1610 deletions. Design doc created at visibility/docs/2026-05-31-visibility-aws-upgrade-copilot.md.\\n\\nREMAINING WORK:\\n- Phase 6: Dropwizard service internals (ContainerEventTableDao DynamoDB Document API migration, table creation commands, ElasticSearch auth, sub-module Guice injector updates)\\n- Phase 7: Lambda functions (visibility-s3-archiver, visibility-pending-start, visibility-outbound-poller, visibility-error-email)\\n- Phase 8: Full mvn verify, app startup test\\n- Phase 9: Update design doc with final changes\\n- Phase 10: Final commit\\n\\nKEY NOTES FOR NEXT SESSION:\\n- cloud-sdk version is 1.0.26-SNAPSHOT\\n- booking model JAR is 3.0.0.M (SDK v2, built from develop source)\\n- SQS usage via commons SqsMessageHandler should NOT change (commons library still SDK v1)\\n- Lambda runtime event models (SQSEvent, SNSEvent, etc.) must stay SDK v1 (AWS provides these)\\n- ElasticSearch auth (AWS4Signer) may stay SDK v1 as ES migration is separate scope\\n- ContainerEventTableDao uses DynamoDB Document API for GSI queries — consider delegating to ContainerEventDao repository\\n- All visibility entities have getHashKey() methods defined on themselves (not inherited), so those compile fine",
+      "tags": [],
+      "references": [
+        "visibility/docs/2026-05-31-visibility-aws-upgrade-copilot.md",
+        "commit:2a593bf407"
+      ]
+    },
+    {
+      "id": "c899c637a813",
+      "timestamp": "2026-05-31T05:04:25.997303+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Resuming implementation - Phase 5 commit exists, checking compilation and test state",
+      "detail": "Branch feature/ION-12316-visibiilty-aws-upgrade-copilot has 1 commit: 'ION_12316: Migrate visibility-commons entities, DAOs, converters, S3 to cloud-sdk (Phase 5)' with 60 files changed. Now checking compilation state.",
+      "tags": [
+        "progress",
+        "resume"
+      ],
+      "references": []
+    },
+    {
+      "id": "ce4c2b047d5d",
+      "timestamp": "2026-05-31T05:04:29.906832+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.6",
+      "detail": "Agent using Claude Opus 4.6 for continuing implementation of visibility module AWS SDK upgrade",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "c70ac519daaf",
+      "timestamp": "2026-05-31T05:25:23.711216+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Phase 6 progress: ContainerEventTableDao migrated to cloud-sdk GSI query; discovered VisibilityDynamoModule wiring gap",
+      "detail": "DONE this session:\n1. ProvisionedThroughputExceededException v1->v2 import swap in MatchingProcessor, OutboundSingleTransactionProcessor, PendingSqsProcessor, InboundEdiProcessor (compiles green).\n2. Added ContainerEventDao.queryIndex(indexName, partitionKeyName, partitionKeyValue) using DefaultQuerySpec.builder().indexName().partitionKeyName().partitionKeyValue(CloudAttributeValue.ofString()).consistentRead(false) -> repository.query(). \n3. Rewrote ContainerEventTableDao: removed SDK v1 Document API (DynamoDB/Table/Index/QuerySpec/ValueMap) + DynamoDB constructor param + VisibilityInboundApplicationConfig param. New constructor (ContainerTrackingEventDao, ContainerEventDao). queryIndex now calls containerEventDao.queryIndex(...), filters by item.getHashKey().startsWith(\"ce:\") into ceIds, then containerEventDao.findAll(ceIds). Preserves two-step mixed-model behavior.\n4. Rewrote ContainerEventTableDaoTest for new constructor + queryIndex mock. Added queryIndexFiltersOnlyContainerEventIds test.\nTESTS: visibility-commons + visibility-inbound full suite = 411 tests, 0 failures, 2 skipped. BUILD SUCCESS.\n\nCRITICAL FINDING (blocker for app startup): VisibilityDynamoModule (the cloud-sdk DAO provider created in Phase 5) is NOT installed in ANY application. All 7 visibility apps still use legacy `new DynamoDBModule(c.getDynamoDbConfig(), e)` from dynamo.respository: VisibilityInboundApplication, VisibilityMatcherApplication, VisibilityOutboundApplication, VisibilityPendingApplication, VisibilityGPSEventApplication, VisibilityWMEventApplication, and visibility-s3-archiver HandlerSupport. Booking pattern (reference): .moduleGenerator((c,e)->new BookingDynamoModule(c,e)) + .command(new BookingDynamoDbAdminCommand()) extending cloud-sdk DynamoDbAdminCommand listing entity classes.\n\nREMAINING Phase 6/7 TODO:\n- Install VisibilityDynamoModule(c) in all apps; remove legacy DynamoDBModule generator (verify no other consumers of DynamoDBMapper/AmazonDynamoDB bindings remain).\n- Replace 3 table-creation commands (DynamoContainerEventsTableCommand/OutboundTableCommand/PendingTableCommand) + CreateTables with single VisibilityDynamoDbAdminCommand extends DynamoDbAdminCommand listing ContainerEvent, ContainerEventOutbound, ContainerEventPending (and ContainerTrackingEvent for shared table?). Update DynamoContainerEventsTableCommandTest.\n- Migrate 4 lambdas (Phase 7).\n- Phase 8 full verify + integration tests; Phase 9 design doc; Phase 10 commit ION_12316.",
+      "tags": [],
+      "references": [
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/persistence/ContainerEventDao.java",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/persistence/dynamodb/ContainerEventTableDao.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/config/VisibilityDynamoModule.java",
+        "ION-12316"
+      ]
+    },
+    {
+      "id": "52ddd3e83c38",
+      "timestamp": "2026-05-31T05:51:06.924353+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Phase 7 complete: migrated all 4 visibility lambdas to cloud-sdk (S3/DynamoDB/SQS/SSM)",
+      "detail": "Migrated visibility-s3-archiver (S3->StorageClient, DynamoDB v1 Document API->v2 DynamoDbClient.getItem with raw-map conversion helpers toJavaMap/toJavaObject; dropped v1 com.amazonaws.util.IOUtils from test using inputStream.readAllBytes()), visibility-pending-start (AmazonSQS->MessagingClient<String> via MessagingClientFactory), visibility-outbound-poller (AmazonSQS->MessagingClient, SSM->CloudParameterStore; FIXED static-init mockStatic conflict by making PARAMETER_STORE lazy via double-checked getParameterStore()), visibility-error-email (ParameterStoreResolver AWSSimpleSystemsManagement->CloudParameterStore with package-private constructor for testing, region resolution via DefaultAwsRegionProviderChain w/ US_EAST_1 fallback; removed unused SdkClientException import). Deliberate v1 retained: lambda.runtime.events.* and dynamodbv2.model.OperationType. Tests: s3-archiver 9, pending-start 4(1 skip), outbound-poller 2, error-email 14(1 skip), all visibility-commons 183 — BUILD SUCCESS.",
+      "tags": [],
+      "references": [
+        "visibility/visibility-s3-archiver",
+        "visibility/visibility-pending-start",
+        "visibility/visibility-outbound-poller",
+        "visibility/visibility-error-email",
+        "ION-12316"
+      ]
+    },
+    {
+      "id": "691a77010c39",
+      "timestamp": "2026-05-31T06:06:07.880288+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Task 4 complete: all 5 remaining visibility apps swapped to cloud-sdk VisibilityDynamoModule (commit 3bb89dc2e3)",
+      "detail": "Swapped outbound, pending, matcher, itv-gps, wm applications from legacy DynamoDBModule to VisibilityDynamoModule. itv-gps and wm configs refactored to extend VisibilityApplicationConfig. wm had an extra entity CargoVisibilitySubscription not covered by VisibilityDynamoModule. First attempt added @Provides provideCargoVisibilitySubscriptionDao(DynamoDbClientConfig) directly into VisibilityWMEventApplicationInjector, which broke VisibilityWMEventApplicationInjectorTest (Guice MissingConstructor for DynamoDbClientConfig — the test instantiates the injector standalone and mocks the repository). FIX: created dedicated VisibilityWMDynamoModule (AbstractModule) that provides CargoVisibilitySubscriptionDao from DynamoDbClientConfig, wired in VisibilityWMEventApplication via .moduleGenerator((c,e)->new VisibilityWMDynamoModule()); reverted the injector to its original form so unit tests can still bind a mocked DatabaseRepository. Test results: itv-gps + commons 183/410(2 skip); wm 117 tests 0 errors; BUILD SUCCESS. Committed 3bb89dc2e3 (8 files).",
+      "tags": [
+        "ION-12316",
+        "phase7.5",
+        "dynamo",
+        "guice"
+      ],
+      "references": [
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/visibility/wm/config/VisibilityWMDynamoModule.java",
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/visibility/wm/VisibilityWMEventApplication.java",
+        "commit:3bb89dc2e3"
+      ]
+    },
+    {
+      "id": "5a9cd12ce562",
+      "timestamp": "2026-05-31T06:18:02.577146+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Phase 7.5/8/9 complete: app module swaps committed, full online verify BUILD SUCCESS, summary doc committed",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "3bb89dc2e3",
+        "69d9344e13",
+        "visibility/docs/2026-06-01-aws-sdk-upgrade-summary.md",
+        "ION-12316"
+      ]
+    }
+  ]
+}

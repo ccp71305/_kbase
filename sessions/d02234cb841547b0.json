@@ -1,0 +1,59 @@
+{
+  "id": "d02234cb841547b0",
+  "name": "DW4 Remnants Cleanup - 1.0.25-SNAPSHOT",
+  "description": "Scan and clean up old Dropwizard 4.x era remnants after upgrade to DW 5.0.1 / 1.0.25-SNAPSHOT",
+  "project": "mercury-services-commons",
+  "created_at": "2026-05-27T22:09:24.658595+00:00",
+  "updated_at": "2026-05-27T23:18:32.262296+00:00",
+  "status": "active",
+  "tags": [
+    "dropwizard5",
+    "cleanup",
+    "javax",
+    "jaxb",
+    "1.0.25-SNAPSHOT"
+  ],
+  "entries": [
+    {
+      "id": "25521a3bc42b",
+      "timestamp": "2026-05-27T22:09:38.682473+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Completed scan for DW 4.x era remnants. Found 4 categories of leftovers.",
+      "detail": "1. cloud-sdk-aws/effective-pom.xml — stale generated file from version 1.0.22-SNAPSHOT showing dropwizard.version=4.0.16\n2. Root pom.xml line 194 — comment referencing \"Dropwizard 4.0.10\"\n3. javax.xml.bind JAXB deps (root + commons pom.xml) — no Java code uses javax.xml.bind anywhere, was needed for DW4-era Jersey\n4. javax.activation-api in commons — no Java code in commons uses it; cloud-sdk-aws uses it but gets it transitively from javax.mail:1.6.2",
+      "tags": [],
+      "references": [
+        "pom.xml:194",
+        "pom.xml:136-155",
+        "commons/pom.xml:216-231",
+        "cloud-sdk-aws/effective-pom.xml"
+      ]
+    },
+    {
+      "id": "efd26494ee2e",
+      "timestamp": "2026-05-27T22:20:12.414480+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "code_change",
+      "summary": "Removed hardcoded DW 4.0.10 dep and fixed stale comment",
+      "detail": "1. Removed hardcoded dropwizard-core:4.0.10 from cloud-sdk-aws/pom.xml (lines 216-220). The duplicate version-less declaration at line 257 correctly inherits 5.0.1 from root dependencyManagement.\n2. Fixed stale comment in root pom.xml referencing \"Dropwizard 4.0.10\" → \"Dropwizard 5.0.1\"",
+      "tags": [],
+      "references": [
+        "cloud-sdk-aws/pom.xml",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "246604af34df",
+      "timestamp": "2026-05-27T23:18:32.262171+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Pushed 1.0.25-SNAPSHOT with DW4 cleanup and aws-java-sdk-core fix to remote",
+      "detail": "Committed 08e1627 and pushed to remote. All 4 core modules verified and installed: cloud-sdk-api, dynamo-integration-test, cloud-sdk-aws, commons.",
+      "tags": [],
+      "references": [
+        "commit:08e1627",
+        "PR:29"
+      ]
+    }
+  ]
+}

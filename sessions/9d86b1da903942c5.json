@@ -1,0 +1,153 @@
+{
+  "id": "9d86b1da903942c5",
+  "name": "ION-12310 cloud-sdk Gap-Closure (G1–G7) Enhancements",
+  "description": "Plan, design, and implement cloud-sdk-api/cloud-sdk-aws enhancements to close the appianway-documented gaps G1–G7 (concurrent SQS listener, putObject metadata, S3 event-notification parsing, DynamoDB version attribute, Thymeleaf template service, composable config chain, cloud-sdk health checks). One feature branch per gap off feature/ION-12310-commons-cloudsdk-refactoring. Design docs under cloud-sdk-api/docs as 2026-06-01-<desc>-copilot-design.md. Backward compatibility mandatory.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-05-31T21:49:15.575600+00:00",
+  "updated_at": "2026-05-31T22:19:11.042787+00:00",
+  "status": "active",
+  "tags": [
+    "cloud-sdk-api",
+    "cloud-sdk-aws",
+    "ION-12310",
+    "aws2x",
+    "gap-closure",
+    "appianway"
+  ],
+  "entries": [
+    {
+      "id": "c10968821153",
+      "timestamp": "2026-05-31T21:49:49.819204+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Session started for cloud-sdk gap-closure G1–G7. Running as Claude Opus 4.8 (GitHub Copilot).",
+      "detail": "Model: Claude Opus 4.8 via GitHub Copilot. Task: plan/design/implement cloud-sdk-api & cloud-sdk-aws enhancements to close appianway-documented gaps G1-G7. Parent branch feature/ION-12310-commons-cloudsdk-refactoring; one feature branch + one design doc (cloud-sdk-api/docs/2026-06-01-*-copilot-design.md) per gap. Backward compatibility mandatory.",
+      "tags": [
+        "ION-12310",
+        "cloud-sdk",
+        "model_info"
+      ],
+      "references": []
+    },
+    {
+      "id": "8a4c6def518f",
+      "timestamp": "2026-05-31T21:51:53.944779+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Master plan: 7 gaps (G1–G7), each its own feature branch off feature/ION-12310-commons-cloudsdk-refactoring + design doc under cloud-sdk-api/docs. Backward-compatible/additive. git_log shows commons now decoupled from cloud-sdk-aws (commit 8497efa).",
+      "detail": "Gaps sourced from appianway shared DESIGN §1A.6 + plan §11. One feature branch per gap off feature/ION-12310-commons-cloudsdk-refactoring (already exists locally+origin). One design doc per gap under cloud-sdk-api/docs/2026-06-01-<desc>-copilot-design.md.\n\nMaster gap → branch → design-doc map:\nG1 Concurrent SQS listener + Task base -> feature/ION-12310-cloudsdk-g1-concurrent-sqs-listener -> 2026-06-01-concurrent-sqs-listener-copilot-design.md. API: add MessageTask<T>, AbstractTask<T>, ConcurrentListener; AWS: ConcurrentSqsListener<T> (semaphore-bounded ThreadPoolExecutor over MessagingClient.receiveMessages, surfaces QueueMessage<T>, deletes on success). Additive only; existing SqsListener kept.\nG2 StorageClient.putObject metadata+contentType -> feature/ION-12310-cloudsdk-g2-putobject-metadata -> 2026-06-01-storage-putobject-metadata-copilot-design.md. API: add putObject(bucket,key,byte[],Map<String,String>,String) + InputStream+length overload (default methods to preserve compat). AWS: S3StorageClient builds PutObjectRequest.metadata/contentType/contentLength.\nG3 S3 event-notification parsing -> feature/ION-12310-cloudsdk-g3-s3-event-notification -> 2026-06-01-s3-event-notification-parsing-copilot-design.md. API: record S3EventRecord + interface S3EventParser. AWS: S3EventParserImpl handling S3->SQS and S3->SNS->SQS envelopes, URL-decode key.\nG4 DynamoDB version attribute / optimistic lock -> feature/ION-12310-cloudsdk-g4-dynamo-version-attribute -> 2026-06-01-dynamodb-version-attribute-copilot-design.md. API: @DynamoDbVersionAttribute annotation, OptimisticLockException, incrementAndGet helper on DatabaseRepository (default method). AWS: EnhancedDynamoRepository -> VersionedRecordExtension; StandardDynamoRepository conditional UpdateItem.\nG5 Thymeleaf TemplateService -> feature/ION-12310-cloudsdk-g5-thymeleaf-template-service -> 2026-06-01-thymeleaf-template-service-copilot-design.md. AWS: ThymeleafTemplateService implements TemplateService; EmailClientFactory overloads to select engine. No api change.\nG6 Composable config-transform chain (commons) -> feature/ION-12310-cloudsdk-g6-composable-config-chain -> 2026-06-01-composable-config-transform-chain-copilot-design.md. commons: ConfigProcessingServerCommand.getConfigTransformer pluggable ordered list; keep default trim+awsps.\nG7 cloud-sdk health checks -> feature/ION-12310-cloudsdk-g7-cloud-sdk-health-checks -> 2026-06-01-cloud-sdk-health-checks-copilot-design.md. AWS: thin read/write health probes over injected cloud-sdk clients for S3/SQS/SNS/Dynamo.\n\nConstraints: additive-only (no public API break; new overloads via default methods / new types / new classes), AWS SDK 2.x only, align with existing client/repository/factory/Guice patterns, JUnit 5 tests, do not modify appianway. Recent context (git_log): all recent work is ION-12310; commit 8497efa decoupled commons from cloud-sdk-aws via ParameterStoreLookup SPI (commons no longer compiles against cloud-sdk-aws) — relevant to G6 (commons-only) and G7 (must stay in cloud-sdk-aws, not commons).\n\nExecution order: G2, G1 (unblock most consumers), then G3, G4, G5, then cross-cutting G6, G7.",
+      "tags": [
+        "ION-12310",
+        "master-plan",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7"
+      ],
+      "references": [
+        "cloud-sdk-api/docs",
+        "appianway/shared/docs/2026-05-31-shared-aws2x-upgrade-DESIGN.md",
+        "feature/ION-12310-commons-cloudsdk-refactoring",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "b74e0f87ffe1",
+      "timestamp": "2026-05-31T21:55:38.503406+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Design phase complete: 7 detailed, additive, backward-compatible design docs (G1–G7) written to cloud-sdk-api/docs. Implementation not started — paused for confirmation before code phase.",
+      "detail": "Created under cloud-sdk-api/docs/:\n- 2026-06-01-concurrent-sqs-listener-copilot-design.md (G1)\n- 2026-06-01-storage-putobject-metadata-copilot-design.md (G2)\n- 2026-06-01-s3-event-notification-parsing-copilot-design.md (G3)\n- 2026-06-01-dynamodb-version-attribute-copilot-design.md (G4)\n- 2026-06-01-thymeleaf-template-service-copilot-design.md (G5)\n- 2026-06-01-composable-config-transform-chain-copilot-design.md (G6)\n- 2026-06-01-cloud-sdk-health-checks-copilot-design.md (G7)\n\nEach doc: gap ref + sources, problem statement, current-state with workspace-relative links to real classes (verified by reading source), proposed design (api + aws) with mermaid class/sequence diagrams, additive-only API-compat analysis, Maven/OWASP impact, JUnit5 test plan, rollout/back-out.\n\nVerified current code: SqsListener single-threaded + leaks v2 Message (G1); StorageClient.putObject has no metadata overload, S3StorageClient.uploadToS3 builds bare PutObjectRequest (G2); no S3 event model (G3); database/annotation has only @Table/@DynamoDbField/@TTL, DatabaseRepository has no incrementAndGet/optimistic-lock (G4); TemplateService is engine-agnostic, EmailClientFactory hardcodes Handlebars, SesEmailServiceImpl already takes a TemplateService (G5); commons getConfigTransformer hardcodes trim+awsps and commons is decoupled from cloud-sdk-aws via ParameterStoreLookup SPI (G6); no cloud-sdk health probes (G7).\n\nParent branch feature/ION-12310-commons-cloudsdk-refactoring already exists (local+origin). Per-gap feature branches NOT yet created. Implementation NOT yet started — paused for user confirmation before code phase (large/risky, per prompt §5).\n\nNEXT: on confirmation, implement gap-by-gap starting with G2 (lowest risk), each on its own feature branch off parent, with mvn package -pl cloud-sdk-api,cloud-sdk-aws -am + mvn test/verify between gaps.",
+      "tags": [
+        "ION-12310",
+        "design-complete",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7"
+      ],
+      "references": [
+        "cloud-sdk-api/docs",
+        "ION-12310",
+        "feature/ION-12310-commons-cloudsdk-refactoring"
+      ]
+    },
+    {
+      "id": "3a5bb9dd558a",
+      "timestamp": "2026-05-31T22:05:00.483994+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "G2 complete: StorageClient.putObject with metadata + content-type",
+      "detail": "Branch feature/ION-12310-cloudsdk-g2-putobject-metadata (off feature/ION-12310-commons-cloudsdk-refactoring). Commit bef4fa3.\n- cloud-sdk-api StorageClient.java: added two additive default putObject overloads: (String,String,byte[],Map,String) and (String,String,InputStream,long,Map,String). Defaults delegate to existing overloads -> source-compatible, no breaking change.\n- cloud-sdk-aws S3StorageClient.java: override both; build PutObjectRequest with .metadata()/.contentType()/.contentLength(); omit null/empty metadata and blank contentType; reuse validateInput + handleS3Exception/handleSdkException/handleUnexpectedException helpers and RequestBody.fromBytes/fromInputStream.\n- Added S3StorageClientPutObjectMetadataTest (JUnit5 + Mockito ArgumentCaptor): 4 tests, all pass. Full putObject suite: 62 + 4 tests, 0 failures. BUILD SUCCESS.\nCommitted code+test only; design docs in cloud-sdk-api/docs/ remain gitignored/untracked. Next: G1 concurrent SQS listener.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/api/StorageClient.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/storage/impl/S3StorageClient.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/storage/impl/S3StorageClientPutObjectMetadataTest.java",
+        "commit:bef4fa3"
+      ]
+    },
+    {
+      "id": "aa2e5aa8cd34",
+      "timestamp": "2026-05-31T22:10:15.913637+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "G1 complete: concurrent semaphore-bounded SQS listener + Task base",
+      "detail": "Branch feature/ION-12310-cloudsdk-g1-concurrent-sqs-listener (off parent). Commit 4ecd8fe.\ncloud-sdk-api (new types, additive): MessageTask<T> (typed contract over QueueMessage<T>), AbstractTask<T> (final process() wraps doProcess with onSuccess/onFailure hooks, rethrows), ConcurrentListener (marker extends Listener), QueueMessageAttributes.APPROXIMATE_RECEIVE_COUNT.\ncloud-sdk-aws: ConcurrentSqsListener<T> (Semaphore + fixed ThreadPoolExecutor sized to concurrency=maxMessages default; long-polls via MessagingClient.receiveMessages; per message: semaphore.acquire then executor.execute -> task.process then deleteMessage on success, release in finally; delete-on-success only; shutdown() sets running=false + executor graceful shutdown/awaitTermination 30s). Builder pattern. MessagingClientFactory.createConcurrentListener(...) added.\nTests: AbstractTaskTest (2) + ConcurrentSqsListenerTest (5: builder validation, delete-on-success, no-delete-on-failure, bounded concurrency via latches, graceful shutdown). All pass. BUILD SUCCESS. SqsListener untouched; no signature changes; no new dependency. Next: G3 S3 event-notification parsing.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/MessageTask.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/AbstractTask.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/ConcurrentListener.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/ConcurrentSqsListener.java",
+        "commit:4ecd8fe"
+      ]
+    },
+    {
+      "id": "d813fdf2c3d6",
+      "timestamp": "2026-05-31T22:12:43.630281+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "G3 complete: S3 event-notification parsing",
+      "detail": "Branch feature/ION-12310-cloudsdk-g3-s3-event-notification (off parent). Commit 62d0ee5.\ncloud-sdk-api new package storage.event: S3EventRecord record(bucket,key,size,eTag,eventName); S3EventParser interface parse(String)->List<S3EventRecord>, tolerant.\ncloud-sdk-aws storage.event.impl.S3EventParserImpl (Jackson, stateless/thread-safe): unwraps SNS envelope (Type=Notification + Message string) then parses inner S3 event; iterates Records[] eventSource=aws:s3; reads s3.bucket.name + s3.object.key/size/eTag + eventName; URL-decodes key (UTF-8); skips non-s3 records; s3:TestEvent/malformed/null -> empty list. StorageClientFactory.createS3EventParser() added.\nTests: S3EventParserImplTest 12 cases, all pass. BUILD SUCCESS. Jackson already on classpath; no new dep; all new types in new package, no signature changes. Next: G4 DynamoDB version attribute / optimistic lock.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/event/S3EventRecord.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/event/S3EventParser.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/storage/event/impl/S3EventParserImpl.java",
+        "commit:62d0ee5"
+      ]
+    },
+    {
+      "id": "a5dae9bd95e6",
+      "timestamp": "2026-05-31T22:19:11.042592+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pause checkpoint: G2, G1, G3 complete; G4 core landed (partial); G5–G7 remaining. Stopping at clean state per user request.",
+      "detail": "Per-gap feature branches off feature/ION-12310-commons-cloudsdk-refactoring (none merged, none pushed):\n- G2 putObject metadata+contentType: branch feature/ION-12310-cloudsdk-g2-putobject-metadata, commit bef4fa3. StorageClient 2 default overloads + S3StorageClient overrides + S3StorageClientPutObjectMetadataTest. DONE.\n- G1 concurrent SQS listener: branch feature/ION-12310-cloudsdk-g1-concurrent-sqs-listener, commit 4ecd8fe. api: MessageTask/AbstractTask/ConcurrentListener; aws: ConcurrentSqsListener (semaphore ThreadPoolExecutor, delete-on-success) + MessagingClientFactory overload + tests. DONE.\n- G3 S3 event-notification parsing: branch feature/ION-12310-cloudsdk-g3-s3-event-notification, commit 62d0ee5. api: S3EventRecord record + S3EventParser; aws: S3EventParserImpl (S3->SQS and SNS->SQS, URL-decode keys, Jackson) + StorageClientFactory method + 12 fixture tests. DONE.\n- G4 DynamoDB version attribute: branch feature/ION-12310-cloudsdk-g4-dynamo-version-attribute, commit a94e9ba. api: @DynamoDbVersionAttribute marker, OptimisticLockException extends DynamoSupportException, DatabaseRepository.incrementAndGet default method; aws: StandardDynamoRepository.incrementAndGet atomic UpdateItem ADD impl + StandardDynamoRepositoryIncrementAndGetTest (4 green). PARTIAL.\n\nG4 REMAINDER: conditional UpdateItem (version check -> OptimisticLockException on ConditionalCheckFailedException); register VersionedRecordExtension on EnhancedDynamoRepository (currently built without extensions); add DynamoDB-local IT for concurrent increments + version conflict.\n\nNOT STARTED: G5 Thymeleaf TemplateService (aws-only, EmailClientFactory overload + EmailTemplateEngine enum default HANDLEBARS, add org.thymeleaf:thymeleaf + OWASP scan), G6 composable config-transform chain (commons-only, ConfigSourceTransform SPI + configTransforms() hook, no cloud-sdk-aws dep, honor ParameterStoreLookup SPI), G7 cloud-sdk health checks (api HealthProbe+HealthStatus no Dropwizard dep, aws S3/SQS/SNS/Dynamo probes).\n\nAll builds: mvn package -pl cloud-sdk-api,cloud-sdk-aws -am clean; tests via mvn test -pl cloud-sdk-aws -Dsurefire.failIfNoSpecifiedTests=false. Currently on branch feature/ION-12310-cloudsdk-g4-dynamo-version-attribute.\n\nDo NOT commit stray untracked: .claude/, cloud-sdk-aws/dynamodb-local-metadata.json, cloud-sdk-aws/effective-pom.xml, dynamo-integration-test/dynamodb-local-metadata.json. Design docs under cloud-sdk-api/docs/ are gitignored (stay untracked). Progress summary written to cloud-sdk-api/docs/2026-06-01-cloud-sdk-enhancement-progress-summary.md.",
+      "tags": [
+        "ION-12310",
+        "cloud-sdk",
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "checkpoint",
+        "pause"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-06-01-cloud-sdk-enhancement-progress-summary.md",
+        "feature/ION-12310-cloudsdk-g2-putobject-metadata@bef4fa3",
+        "feature/ION-12310-cloudsdk-g1-concurrent-sqs-listener@4ecd8fe",
+        "feature/ION-12310-cloudsdk-g3-s3-event-notification@62d0ee5",
+        "feature/ION-12310-cloudsdk-g4-dynamo-version-attribute@a94e9ba"
+      ]
+    }
+  ]
+}

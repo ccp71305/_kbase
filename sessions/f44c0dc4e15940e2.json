@@ -1,0 +1,107 @@
+{
+  "id": "f44c0dc4e15940e2",
+  "name": "Netty + Jetty Dual CRITICAL CVE Fix — commons flatten-maven-plugin",
+  "description": "Investigated and resolved dual CRITICAL vulnerability problem in commons module: Netty CVEs from flattenDependencyMode=all promoting transitive AWS SDK deps, and Jetty CVEs from DW 5.0.1 managing Jetty 12.1.5. Solution: remove all mode + add explicit Jetty direct deps pinned at 12.1.9.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-05-28T17:54:49.969953+00:00",
+  "updated_at": "2026-05-28T20:32:16.927589+00:00",
+  "status": "active",
+  "tags": [
+    "netty",
+    "jetty",
+    "cve",
+    "critical",
+    "flatten-maven-plugin",
+    "commons",
+    "owasp"
+  ],
+  "entries": [
+    {
+      "id": "fe38916195c5",
+      "timestamp": "2026-05-28T17:55:01.301402+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "progress",
+      "summary": "RESOLVED: Dual CRITICAL CVE fix — removed flattenDependencyMode=all (eliminates Netty promotion) + added 7 explicit Jetty direct deps pinned at 12.1.9 (overrides DW 5.0.1's 12.1.5 via Maven nearest-wins). Flattened POM: 214KB→10KB, 0 Netty refs, all Jetty at 12.1.9. 921 tests pass. No ParameterStoreLookup refactoring needed.",
+      "detail": "Changes to commons/pom.xml:\\n1. Replaced flattenDependencyMode=all with explanatory comment\\n2. Removed ineffective Netty exclusions from cloud-sdk-aws dependency\\n3. Added 7 Jetty direct deps: jetty-server, jetty-http, jetty-io, jetty-util, jetty-security, jetty-session, jetty-ee10-servlet (versions inherited from parent Jetty BOM at 12.1.9)\\n\\nDoc updated: Sections 11-12 appended to 2026-05-28-netty-critical.md covering Jetty version propagation analysis, failed approaches, and final solution.",
+      "tags": [
+        "fix",
+        "verified"
+      ],
+      "references": [
+        "commons/pom.xml",
+        "cloud-sdk-aws/docs/2026-05-28-netty-critical.md"
+      ]
+    },
+    {
+      "id": "c5d48afd139c",
+      "timestamp": "2026-05-28T17:55:07.481798+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "test_result",
+      "summary": "All verification passed: 921 tests pass, 0 Netty, all Jetty 12.1.9, 10KB flattened POM",
+      "detail": "Build: SUCCESS (commons + all upstream modules)\\nTests: 921 run, 0 failures, 0 errors, 0 skipped\\nInstall: SUCCESS to local .m2 repo\\nFlattened POM validation:\\n  - Size: 10KB (down from 214KB)\\n  - Netty grep matches: 0\\n  - All Jetty artifacts resolve to 12.1.9",
+      "tags": [
+        "verified"
+      ],
+      "references": []
+    },
+    {
+      "id": "d87d93060c3c",
+      "timestamp": "2026-05-28T19:03:36.128112+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "finding",
+      "summary": "Section 13 added: Impact analysis confirms zero runtime loss for consumers. All 178 promoted artifacts resolve through other dependency paths. all mode was redundant.",
+      "detail": "Compared all-mode (221 artifacts, 214KB) vs direct-mode (43 artifacts, 10KB) flattened POMs.\\n\\n178 extra artifacts in all-mode categorized: AWS SDK v2 (43), Dropwizard (23), Jersey/Glassfish (17), Jackson (14), Apache (14), Netty (11), AWS SDK v1 (7), Logging (7), Jakarta (6), Google/Guava (6), Jetty extras (5), Other (24), Persistence (1).\\n\\nVerified against booking module: ALL 178 are resolved through booking's own dependency paths (cloud-sdk-aws direct dep, dropwizard transitives from commons, etc.). Zero truly missing artifacts.\\n\\nBooking Jetty: all compile-scope at 12.1.9 (from commons direct deps). Netty: test scope only (from dynamo-integration-test chain).\\n\\nConclusion: all mode was redundant for Dropwizard consumers — added no runtime value, only CVE exposure and POM bloat.",
+      "tags": [
+        "analysis",
+        "verified",
+        "booking"
+      ],
+      "references": [
+        "cloud-sdk-aws/docs/2026-05-28-netty-critical.md",
+        "commons/pom.xml",
+        "mercury-services/booking/pom.xml"
+      ]
+    },
+    {
+      "id": "996ffcfd11db",
+      "timestamp": "2026-05-28T19:10:00.625442+00:00",
+      "agent": "copilot-claude-opus-4",
+      "category": "finding",
+      "summary": "Sections 14-15 added: Consumer module inventory (11 modules, 3 categories) and key commands used for analysis",
+      "detail": "Consumer modules with direct commons dependency (excluding visibility, oceanschedules, partner-integrator):\\n\\nUpgraded + cloud-sdk-aws (4): auth (1.0.23), booking (1.0.25), booking-bridge (1.0.21), webbl (1.0.22) — zero runtime impact\\nUpgraded, no cloud-sdk-aws (3): db-migration (1.0.18), registration (1.0.17), tx-tracking (1.0.17) — zero impact, don't need AWS SDK\\nLegacy (4): bill-of-lading, rates, shipping-instruction, value-added-service (1.R.01.021) — not yet on SNAPSHOT\\n\\nnetwork does NOT depend on commons directly (only uses mercury.commons.version for dynamo-integration-test test scope).",
+      "tags": [
+        "consumers",
+        "mercury-services",
+        "analysis"
+      ],
+      "references": [
+        "mercury-services/auth/pom.xml",
+        "mercury-services/booking/pom.xml",
+        "mercury-services/booking-bridge/pom.xml",
+        "mercury-services/webbl/pom.xml",
+        "mercury-services/db-migration/pom.xml",
+        "mercury-services/registration/pom.xml",
+        "mercury-services/tx-tracking/pom.xml"
+      ]
+    },
+    {
+      "id": "b01d3296f754",
+      "timestamp": "2026-05-28T20:32:16.927576+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Committed and pushed 841fdf5: ION-12310 fix Netty+Jetty CRITICAL CVEs, bump to 1.0.26-SNAPSHOT",
+      "detail": "Commit 841fdf5 pushed to origin/feature/ION-12310-commons-cloudsdk-refactoring. 3 files: pom.xml (version bump), commons/pom.xml (remove flattenDependencyMode=all + add 7 Jetty direct deps), README.md (1.0.26-SNAPSHOT section with CVE fix changelog, intro text moved from 1.0.25).",
+      "tags": [
+        "committed",
+        "pushed",
+        "1.0.26-SNAPSHOT"
+      ],
+      "references": [
+        "pom.xml",
+        "commons/pom.xml",
+        "README.md",
+        "PR-29"
+      ]
+    }
+  ]
+}

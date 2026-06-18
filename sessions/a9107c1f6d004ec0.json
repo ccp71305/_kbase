@@ -1,0 +1,71 @@
+{
+  "id": "a9107c1f6d004ec0",
+  "name": "Booking 1.0.26-SNAPSHOT Jackson/DW Version Conflict",
+  "description": "Diagnosing build failures in booking after upgrading commons to 1.0.26-SNAPSHOT. Jackson version mismatch between DW 2.1.1 (mercury-services) and DW 5.0.1 (commons).",
+  "project": "mercury-services",
+  "created_at": "2026-05-28T21:06:55.580306+00:00",
+  "updated_at": "2026-05-29T00:22:42.750823+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "jackson",
+    "dropwizard",
+    "version-conflict",
+    "commons-1.0.26"
+  ],
+  "entries": [
+    {
+      "id": "e0c44e5e57d3",
+      "timestamp": "2026-05-28T21:07:08.291629+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Root cause: Dropwizard version divergence between mercury-services (DW 2.1.1 → Jackson 2.13.4) and commons 1.0.26-SNAPSHOT (DW 5.0.1 → Jackson 2.21.0)",
+      "detail": "The installed commons-1.0.26-SNAPSHOT.pom (10KB, flatten fix applied) directly declares DW 5.0.1 modules and jackson-dataformat-csv:2.21.0. These transitively bring Jackson 2.21.0 into booking's classpath, conflicting with booking's DW 2.1.1 which expects Jackson 2.13.4.\n\nError 1: NoSuchField READ_DATE_TIMESTAMPS_AS_NANOSECONDS — this DeserializationFeature was removed in Jackson 2.19+ (moved to DateTimeFeature in jackson-datatype-jsr310). With jackson-databind:2.21.0 on classpath, code referencing this field fails.\n\nError 2: NoSuchMethod YAMLFactory._createContentReference(Object) — jackson-dataformat-yaml at an older version (2.17.2 from local-elasticsearch) is binary-incompatible with jackson-core:2.21.0 from DW 5.0.1.\n\nAdditionally, DW 2.1.1 uses javax.* APIs while DW 5.0.1 uses jakarta.* — this is a fundamental API incompatibility beyond just Jackson.",
+      "tags": [],
+      "references": [
+        "mercury-services/pom.xml",
+        "commons-1.0.26-SNAPSHOT.pom",
+        "mercury-services-commons/pom.xml"
+      ]
+    },
+    {
+      "id": "01348ca0fc35",
+      "timestamp": "2026-05-28T21:31:18.978041+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Root cause confirmed: local-elasticsearch:1.R.01.004 wins Maven nearest-wins for jackson-databind (2.17.2) over commons' 2.21.0, causing a 4-way Jackson version split",
+      "detail": "local-elasticsearch:1.R.01.004 (test scope) directly declares jackson-databind:2.17.2 and jackson-dataformat-yaml:2.17.2. These are at depth 2 from booking (booking → local-elasticsearch → jackson-*), while commons → DW 5.0.1 → jackson-*:2.21.0 are at depth 3. Maven nearest-wins picks 2.17.2 for databind and yaml.\n\nResolved Jackson version split:\n- jackson-core: 2.21.0 (from commons)\n- jackson-databind: 2.17.2 (from local-elasticsearch, WINS by nearest)\n- jackson-annotations: 2.17.0 (from swagger-core)\n- jackson-datatype-jsr310: 2.21.0 (from commons)\n- jackson-dataformat-yaml: 2.17.2 (from local-elasticsearch, WINS by nearest)\n- jackson-dataformat-xml: 2.21.0 (from commons)\n\nThis 4-way version split causes binary incompatibilities:\n1. jsr310:2.21.0 + databind:2.17.2 → NoSuchField READ_DATE_TIMESTAMPS_AS_NANOSECONDS\n2. yaml:2.17.2 + core:2.21.0 → NoSuchMethod YAMLFactory._createContentReference",
+      "tags": [],
+      "references": [
+        "local-elasticsearch:1.R.01.004",
+        "booking/pom.xml:167-170"
+      ]
+    },
+    {
+      "id": "60a2ac154818",
+      "timestamp": "2026-05-28T23:05:00.535639+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "test_result",
+      "summary": "Jackson classpath ordering fix WORKING - build results: 3,243 tests total, 2 pre-existing DynamoDB failures, 0 Jackson errors",
+      "detail": "Fix: Added explicit Jackson deps (jackson-databind, jackson-core, jackson-annotations, jackson-dataformat-yaml) without version (managed by BOM) BEFORE local-elasticsearch in booking/pom.xml. This ensures standalone Jackson jars appear first on classpath, beating the uber-jar's bundled old classes.\n\nResults:\n- Surefire JUnit5: 1,969 run, 0 fail, 1 skip\n- Surefire TestNG: 983 run, 0 fail, 9 skip  \n- Failsafe JUnit5: 142 run, 0 fail\n- Failsafe TestNG: 149 run, 2 fail (DynamoDB ConditionalCheckFailed - pre-existing, not Jackson-related)\n- Total: 3,243 tests, 2 failures (pre-existing)\n\nKey learnings:\n1. test scope for Jackson deps overrides compile-scope transitives from commons - breaks main code compilation\n2. jackson-annotations versioning changed in 2.20+ (uses 2.21 not 2.21.0)\n3. Removed local-dynamodb dep (stale, booking uses dynamo-integration-test)\n4. dynamo-integration-test is 18KB normal jar, no uber-jar issue",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "BookingServiceIntegrationTest.java"
+      ]
+    },
+    {
+      "id": "e6bb35e36576",
+      "timestamp": "2026-05-29T00:22:42.750805+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Final fix: exclusions on local-elasticsearch + BOM safety net. All 2,952 unit tests pass.",
+      "detail": "Switched from explicit Jackson deps to exclusions-only approach. Final booking/pom.xml changes:\\n1. Jackson BOM in dependencyManagement (safety net for swagger-core, elasticsearch, aws-sdk transitives)\\n2. Exclusions for all 4 Jackson modules on local-elasticsearch (jackson-databind, jackson-core, jackson-annotations, jackson-dataformat-yaml)\\n3. Removed stale local-dynamodb dependency\\n4. No explicit Jackson deps — all comes from commons via DW 5.0.1\\n\\nBuild: 3,243 tests, 0 unit test failures, 2-6 flaky integration failures (pre-existing)\\nUpdated netty-critical.md §10.5-10.7",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "cloud-sdk-aws/docs/2026-05-28-netty-critical.md"
+      ]
+    }
+  ]
+}

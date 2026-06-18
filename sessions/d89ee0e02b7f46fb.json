@@ -1,0 +1,17 @@
+{
+  "id": "d89ee0e02b7f46fb",
+  "name": "Visibility AWS 2.x Upgrade Plan",
+  "description": "Create detailed plan to upgrade visibility module and sub-modules to cloud-sdk-api/cloud-sdk-aws libraries. Produce visibility-aws2x-plan.md and CONFLUENCE-visibility.md",
+  "project": "mercury-services",
+  "created_at": "2026-05-31T05:00:38.415828+00:00",
+  "updated_at": "2026-05-31T05:00:38.415857+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "aws-upgrade",
+    "cloud-sdk",
+    "planning",
+    "confluence"
+  ],
+  "entries": []
+}

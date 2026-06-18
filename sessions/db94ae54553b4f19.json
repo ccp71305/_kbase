@@ -1,0 +1,89 @@
+{
+  "id": "db94ae54553b4f19",
+  "name": "ION-15743 DW5/Jetty12 Booking Upgrade Issues",
+  "description": "Tracking compilation and runtime issues when upgrading commons to 1.0.24-SNAPSHOT (DW5 + Jetty 12) in the booking module",
+  "project": "mercury-services",
+  "created_at": "2026-05-27T20:43:56.668965+00:00",
+  "updated_at": "2026-05-28T00:16:47.476579+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "dropwizard5",
+    "jetty12",
+    "jackson",
+    "upgrade",
+    "ION-15743"
+  ],
+  "entries": [
+    {
+      "id": "bf636104d091",
+      "timestamp": "2026-05-27T20:45:33.795925+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "Completed fixes for DW5/Jetty12 upgrade in booking module (commons 1.0.23→1.0.24-SNAPSHOT)",
+      "detail": "## Changes Made (BUILD SUCCESS)\n\n1. **MessageSupport.java**: Replaced `com.sun.el.ExpressionFactoryImpl` with `ExpressionFactory.newInstance()` — GlassFish EL impl class no longer available in DW5.\n\n2. **jackson-annotations removed**: Was pinned at 2.18.1, conflicting with jackson-databind 2.21.0 from DW5. Now comes transitively from DW5.\n\n3. **jackson-module-afterburner removed**: Zero code usage in booking. DW5 uses blackbird. Was also excluded from shade JAR. Removing this eliminated the direct dep.\n\n4. **hystrix-dropwizard-bundle → hystrix-core**: Only `com.netflix.hystrix.HystrixCommand` and related core classes used. The bundle pulled in hystrix-serialization → afterburner:2.7.5 which caused `NoSuchMethodError: SettableBeanProperty.<init>` at runtime (incompatible with Jackson 2.21.0).\n\n5. **Jackson versions aligned**: jsonSchema and dataformat-xml updated from 2.18.1 to 2.21.0.\n\n6. **AWSUtil.java deleted**: Referenced AWS SDK v1 classes, breaking Lombok annotation chain.\n\n## Remaining Issues (NOT fixed)\n\n1. **AwsRegionProvider NoClassDefFoundError at runtime**: `aws-signing-request-interceptor:0.0.22` (from cloud-sdk-aws) pulls `aws-java-sdk-core:1.10.19` which wins Maven conflict over 1.12.721. This ancient version lacks AwsRegionProvider. **Needs commons fix.**\n\n2. **ElasticsearchConfig.getMaxRetries()**: New abstract method in commons interface needs override in booking.\n\n3. **AWS SDK v1 CollectionUtils**: Used in OutboundServiceImpl.java and MigrationLogic.java — trivially replaceable.",
+      "tags": [
+        "booking",
+        "dropwizard5",
+        "jetty12",
+        "jackson",
+        "hystrix"
+      ],
+      "references": [
+        "booking/pom.xml",
+        "booking/src/main/java/com/inttra/mercury/booking/util/MessageSupport.java",
+        "booking/src/main/java/com/inttra/mercury/booking/common/AWSUtil.java",
+        "booking/docs/2026-05-27-dw-jetty-upgrade-issues.md",
+        "ION-15743"
+      ]
+    },
+    {
+      "id": "b0fef74f0237",
+      "timestamp": "2026-05-27T20:45:47.482934+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "finding",
+      "summary": "BLOCKER: aws-java-sdk-core:1.10.19 version conflict from cloud-sdk-aws causes AwsRegionProvider NoClassDefFoundError",
+      "detail": "Root cause: `vc.inreach.aws:aws-signing-request-interceptor:0.0.22` (used in cloud-sdk-aws for Elasticsearch request signing) declares `com.amazonaws:aws-java-sdk-core:1.10.19`. Maven nearest-first resolution picks this ancient version over 1.12.721/1.12.730 from other deps. Version 1.10.19 predates the `com.amazonaws.regions.AwsRegionProvider` class.\\n\\nThis must be fixed in mercury-services-commons cloud-sdk-aws module — either:\\n1. Exclude aws-java-sdk-core from aws-signing-request-interceptor\\n2. Add dependencyManagement to force aws-java-sdk-core:1.12.721+\\n3. Replace aws-signing-request-interceptor with modern AWS SDK v2 signing",
+      "tags": [
+        "blocker",
+        "commons",
+        "aws-sdk-v1"
+      ],
+      "references": [
+        "cloud-sdk-aws",
+        "aws-signing-request-interceptor:0.0.22",
+        "aws-java-sdk-core:1.10.19"
+      ]
+    },
+    {
+      "id": "9647d7ef3157",
+      "timestamp": "2026-05-27T20:45:52.806659+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.6 via GitHub Copilot",
+      "detail": "Agent: GitHub Copilot using Claude Opus 4.6",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "97265f07de68",
+      "timestamp": "2026-05-28T00:16:47.476550+00:00",
+      "agent": "copilot-claude-opus",
+      "category": "progress",
+      "summary": "All booking-side fixes complete. Netty OWASP finding root-caused to stale cloud-sdk-aws POM in local Maven repo.",
+      "detail": "Final status:\n- BUILD SUCCESS: mvn clean verify -pl booking -am (984 unit + 149 integration tests, 0 failures)\n- Runtime startup: PASS (no more AwsRegionProvider error with commons 1.0.25-SNAPSHOT)\n- WireMock fix: switched wiremock → wiremock-jetty12:3.5.4 for Jetty 12 compatibility\n- Integration test fix: Added CallerRunsPolicy to outbound executor in test/PR config\n- CollectionUtils SDK v1 refs: Removed from OutboundServiceImpl and MigrationLogic\n- OWASP Netty finding: Root cause is stale installed cloud-sdk-aws-1.0.25-SNAPSHOT.pom missing 2 netty-nio-client exclusions (cloud-sdk-api, amazon-sqs-java-extended-client-lib). Fix: rebuild commons with mvn clean install -DskipTests, then rebuild booking.\n- Documentation updated: booking/docs/2026-05-27-dw-jetty-upgrade-issues.md",
+      "tags": [
+        "DW5",
+        "Jetty12",
+        "netty",
+        "OWASP",
+        "wiremock"
+      ],
+      "references": [
+        "booking/docs/2026-05-27-dw-jetty-upgrade-issues.md",
+        "booking/pom.xml",
+        "cloud-sdk-aws/pom.xml"
+      ]
+    }
+  ]
+}

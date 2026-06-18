@@ -1,0 +1,57 @@
+{
+  "id": "a8666741fee34c39",
+  "name": "ION-16032 Template Jetty 400 QA Investigation",
+  "description": "Investigating why QA still gets HTTP 400 for template names with / after the UriCompliance fix was deployed",
+  "project": "mercury-services",
+  "created_at": "2026-06-17T16:33:49.889270+00:00",
+  "updated_at": "2026-06-17T16:43:14.911110+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "jetty-12",
+    "uri-compliance",
+    "ION-16032",
+    "qa-debug"
+  ],
+  "entries": [
+    {
+      "id": "3f9099141670",
+      "timestamp": "2026-06-17T16:34:12.750166+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "ROOT CAUSE: Jetty 12 ee10 Servlet layer (ServletContextRequest) performs a SECOND, independent URI violation check that ignores connector-level UriCompliance configuration",
+      "detail": "The deployed fix sets UriCompliance.DEFAULT.with(\"BOOKING\", AMBIGUOUS_PATH_SEPARATOR) on HttpConnectorFactory — this works at the Jetty HTTP layer. HOWEVER, the ee10 Servlet layer (ServletContextRequest) does a separate check: httpURI.hasViolations() → then checks if UriCompliance.AMBIGUOUS_VIOLATIONS.contains(violation) → if YES and ServletHandler.isDecodeAmbiguousURIs() is FALSE (default), it throws AmbiguousURI error (400).\n\nEvidence from QA logs:\n- OPTIONS /booking/template/BK_Test%2F001 → 400 (with %2F, 0 bytes body, 3ms)\n- OPTIONS /booking/template/Arijit-test-001 → 200 (without %2F, works fine)\n- Requests with %2F never reach Jersey (no MercuryRequestLoggingFilter log)\n- UriCompliance IS configured (confirmed in startup log at 13:26 UTC)\n- Routes DO show {name: .+} (confirmed in route listing)\n\nFIX NEEDED: In addition to the current UriCompliance config, must also call:\nenvironment.getApplicationContext().getServletHandler().setDecodeAmbiguousURIs(true)\n\nThis is the ee10 Servlet 6.0 compliance enforcement — it's independent of the Jetty HTTP connector compliance. See Jetty GitHub issue #11298.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java",
+        "org.eclipse.jetty.ee10.servlet.ServletContextRequest",
+        "org.eclipse.jetty.ee10.servlet.ServletHandler.isDecodeAmbiguousURIs()",
+        "https://github.com/jetty/jetty.project/issues/11298"
+      ]
+    },
+    {
+      "id": "125f1cdd3694",
+      "timestamp": "2026-06-17T16:40:53.571295+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "User confirmed findings, requested documentation before code change",
+      "detail": "User reviewed findings. Next steps: 1) Document full investigation in booking/docs/2026-06-17-booking-template-jetty-issue-part2.md. 2) Apply fix locally on previous branch. 3) Test/debug locally before pushing to QA. Documenting first for user review.",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-06-17-booking-template-jetty-issue-part2.md"
+      ]
+    },
+    {
+      "id": "5089549c166c",
+      "timestamp": "2026-06-17T16:43:14.911095+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Documentation complete, awaiting user review before applying fix locally",
+      "detail": "Created comprehensive investigation document at booking/docs/2026-06-17-booking-template-jetty-issue-part2.md. Document covers: all AWS CLI queries used, Jetty bytecode analysis steps, root cause explanation (dual-layer compliance in Jetty 12 ee10), architecture diagram, required fix (setDecodeAmbiguousURIs), security assessment, testing plan, and timeline. Awaiting user review before applying code changes.",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-06-17-booking-template-jetty-issue-part2.md"
+      ]
+    }
+  ]
+}

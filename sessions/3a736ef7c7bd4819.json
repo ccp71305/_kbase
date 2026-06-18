@@ -1,0 +1,44 @@
+{
+  "id": "3a736ef7c7bd4819",
+  "name": "Booking Field Format Diff Impact Analysis",
+  "description": "Deep analysis of PROD vs QA DynamoDB field format differences found in booking REQUEST and CONFIRM records after AWS SDK v2 upgrade. Tracing each gap to pre-upgrade and post-upgrade code.",
+  "project": "mercury-services",
+  "created_at": "2026-06-08T19:47:29.417019+00:00",
+  "updated_at": "2026-06-08T20:00:47.900944+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "aws-upgrade",
+    "dynamodb",
+    "field-format-diff",
+    "impact-analysis"
+  ],
+  "entries": [
+    {
+      "id": "74c1122e33c9",
+      "timestamp": "2026-06-08T20:00:47.874402+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Completed deep impact analysis of PROD vs QA DynamoDB field format diffs. All 7 gaps traced to SDK v1 vs Jackson serialization behavior differences. No functional regressions found. Document written to booking/docs/2026-08-08-booking-field-format-diff-impact.md",
+      "detail": "Key findings: (1) partyId/partyScac missing = SDK v1 didn't respect @JsonIgnore, (2) splitCopy missing = pre-upgrade annotation placement bug fixed, (3) Boolean N→BOOL = SDK type difference, both readable by both SDKs, (4) notificationParties missing = SDK v1 didn't respect @JsonInclude(NON_EMPTY), (5) null expansion = Jackson writes nulls, SDK v1 skipped them. All traced with code citations.",
+      "tags": [],
+      "references": [
+        "booking/docs/2026-08-08-booking-field-format-diff-impact.md",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java",
+        "booking/src/main/java/com/inttra/mercury/booking/model/Common/Artifacts/TransactionParty.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/LegacyMapConverter.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/EnrichedAttributesConverter.java"
+      ]
+    },
+    {
+      "id": "cec23dde56e4",
+      "timestamp": "2026-06-08T20:00:47.900918+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "general",
+      "summary": "Model info: Claude Opus 4.6",
+      "detail": "",
+      "tags": [],
+      "references": []
+    }
+  ]
+}

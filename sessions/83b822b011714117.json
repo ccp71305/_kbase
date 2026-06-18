@@ -1,0 +1,203 @@
+{
+  "id": "83b822b011714117",
+  "name": "appianway-aws2x-upgrade-planning",
+  "description": "Planning and design for migrating appianway workspace from AWS Java SDK v1 (1.12.720) to AWS SDK v2 via cloud-sdk-api/cloud-sdk-aws (mercury-services-commons). Per-module plan + design docs for all aggregator-pom modules. Analysis/design only — no production code changes.",
+  "project": "appianway",
+  "created_at": "2026-05-31T16:34:40.405871+00:00",
+  "updated_at": "2026-05-31T17:37:58.652751+00:00",
+  "status": "active",
+  "tags": [
+    "aws-upgrade",
+    "cloud-sdk",
+    "planning",
+    "appianway"
+  ],
+  "entries": [
+    {
+      "id": "daf0271b6f55",
+      "timestamp": "2026-05-31T16:34:54.755539+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Session started for appianway AWS SDK v1 → v2 (cloud-sdk) upgrade planning & design",
+      "detail": "Running as GitHub Copilot using Claude Opus 4.8. Task: produce per-module upgrade PLAN + DESIGN docs for all appianway aggregator-pom modules migrating from AWS Java SDK v1 (1.12.720) to AWS SDK v2 via cloud-sdk-api/cloud-sdk-aws from mercury-services-commons. Analysis/design only, no production code/pom edits.",
+      "tags": [
+        "model_info",
+        "aws-upgrade"
+      ],
+      "references": []
+    },
+    {
+      "id": "4b74b13b20f9",
+      "timestamp": "2026-05-31T16:35:20.872294+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "AWS v1 surface inventory complete: shared is the chokepoint; com.amazonaws SQS Message type ripples to every service via SQSListener/Task",
+      "detail": "AWS v1 (com.amazonaws.*) surface across appianway:\n- shared (CHOKEPOINT): workspace/S3WorkspaceService, workspace/WorkspaceService, workspace/AWSUtil (com.amazonaws.retry.RetryUtils), messaging/SQSClient, messaging/SNSClient, messaging/SQSListenerClient, listener/SQSListener, config/AWSClientConfiguration, config/AWSClientConfigHelper (auth: AWSCredentialsProvider, DefaultAWSCredentialsProviderChain, BasicAWSCredentials; AwsClientBuilder). Plus SSM param store (to confirm).\n- Service modules bind AWS clients in their own ExternalServicesModule (Guice): dispatcher, distributor, distributor-rest, event-writer, error-processor, email-sender each import AmazonS3/AmazonS3ClientBuilder, AmazonSNS/Builder, AmazonSQS/Builder. email-sender also AmazonSimpleEmailService (SES).\n- Most Task/service classes only import com.amazonaws.services.sqs.model.Message (the SQS message DTO) — pervasive shallow coupling: dispatcher, splitter(?), distributor, distributor-rest, event-writer, error-processor, email-sender, ingestor, watermill-publisher.\n- email-sender SES surface: simpleemail.model.{Message,Body,Content,Destination,SendEmailRequest,SendEmailResult}, AmazonSimpleEmailService.\n- dispatcher: s3.event.S3EventNotification (S3 event parsing), s3.model.ObjectMetadata, util.IOUtils.\n- distributor: util.IOUtils (ZipCompression).\n- Out-of-scope dirs also have usage: cerberus, fulfiller, router, mftdispatcher, load-testing (NOT in aggregator pom — skip).\nKey takeaway: com.amazonaws.services.sqs.model.Message is the most widespread type; SDK v2 equivalent is software.amazon.awssdk.services.sqs.model.Message (different API). The shared SQSListener delivers v1 Message to Task subclasses, so the Message type change ripples to EVERY service unless shared adapts/abstracts it.",
+      "tags": [
+        "analysis",
+        "shared",
+        "aws-surface"
+      ],
+      "references": [
+        "shared/src/main/java/com/inttra/mercury/shared/workspace/S3WorkspaceService.java",
+        "shared/src/main/java/com/inttra/mercury/shared/workspace/AWSUtil.java",
+        "shared/src/main/java/com/inttra/mercury/shared/messaging/SQSClient.java",
+        "shared/src/main/java/com/inttra/mercury/shared/config/AWSClientConfigHelper.java"
+      ]
+    },
+    {
+      "id": "3692a1402df0",
+      "timestamp": "2026-05-31T16:39:30.146194+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "cloud-sdk-api/aws/commons target API mapped. Critical: commons=Dropwizard 5.0.1+JUnit5 vs appianway DW4.0.16+JUnit4 — big lever for Option A vs B",
+      "detail": "cloud-sdk target API (from mercury-services-commons, v1.0.26-SNAPSHOT; AWS SDK v2 BOM 2.30.24):\n- cloud-sdk-api (com.inttra.mercury:cloud-sdk-api): MessagingClient<T> (sendMessage/deleteMessage/receiveMessages/getQueueAttributes), QueueMessage<T> (getPayload/getReceiptHandle/getMessageId/getAttributes — HIDES sdk v2 Message), Listener (startup/shutdown), ReceiveMessageOptions; NotificationService extends EventPublisher (publish/publishEvent(List<Event>)); StorageClient (putObject/getObject/copyObject/getContent/objectExists/generatePresignedUrl...), StorageObject; CloudParameterStore (getParameter/putParameter/replacePlaceholders('${awsps:..}')/describeParameters), CloudParameter; EmailService (SES v2).\n- cloud-sdk-aws (com.inttra.mercury:cloud-sdk-aws): impls SqsMessagingClient(SqsClient, MessageConverter<T>), SqsListener(MessagingClient,wait,maxMsgs,queueUrl,BiConsumer), SqsMessage; SnsService; S3StorageClient(S3Client[,S3Presigner]); SsmCloudParameterStore; SesEmailServiceImpl(SesV2Client). Static factories: MessagingClientFactory, NotificationClientFactory, S3ClientFactory.createDefaultS3Client(), ParameterStoreClientFactory, EmailClientFactory.createDefaultSesClient(templates). Clients built via SDK v2 builders, DefaultCredentialsProvider, Region default US_EAST_1, ApacheHttpClient/UrlConnectionHttpClient (Netty excluded), DefaultRetryStrategy.\n- commons (com.inttra.mercury:commons, DW 5.0.1, Guice 7, Jackson 2.21): InttraServer extends io.dropwizard.core.Application (builder w/ moduleGenerators, SSM '${awsps:..}' config substitution), PostSetupHook, FixedDelayListenerManager, ServiceExceptionMapper. NOTE commons targets Dropwizard 5.0.1 — appianway is on Dropwizard 4.0.16. This is a MAJOR compatibility gap for Option B.\n- Reference modules (auth/network) deps: commons + cloud-sdk-api + cloud-sdk-aws (1.0.26-SNAPSHOT) + dynamo-integration-test (test). Wiring: factories in Guice modules bind StorageClient/EmailService as singletons. Tasks see QueueMessage<String>, use getPayload()/getReceiptHandle().\n- Tests: cloud-sdk + commons use JUnit 5 (Jupiter); dynamo-integration-test uses DynamoDBLocal 2.5.2 (JUnit5). No in-memory SQS/SNS/S3 fakes provided — they rely on LocalStack/mocks. appianway's functional-testing harness has its own in-memory v1 fakes (S3/SQS/DynamoDB/SES) that would need v2 rework.\nKEY RISK for Option B: commons=Dropwizard 5 + JUnit 5 vs appianway=Dropwizard 4.0.16 + JUnit 4. Adopting commons forces a DW4→DW5 + JUnit4→JUnit5 migration across all services. Option A (keep shared, delegate wrappers to cloud-sdk-aws only) avoids the DW5/JUnit5 jump.",
+      "tags": [
+        "analysis",
+        "cloud-sdk",
+        "reference",
+        "dropwizard-gap"
+      ],
+      "references": [
+        "c:/Users/arijit.kundu/projects/mercury-services-commons/cloud-sdk-api",
+        "c:/Users/arijit.kundu/projects/mercury-services-commons/cloud-sdk-aws",
+        "c:/Users/arijit.kundu/projects/mercury-services-commons/commons"
+      ]
+    },
+    {
+      "id": "910469bc88ca",
+      "timestamp": "2026-05-31T16:40:31.789401+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "shared AWS wrapper inventory + root pom versions captured; ready to author shared plan/design",
+      "detail": "Root pom (appianway/pom.xml): aws-java-sdk.version=1.12.720 (line25), io.dropwizard.version=4.0.16 (line15). Aggregator <modules> (lines 35-50): shared, structuralvalidator, schema-beans, gen2-parser, functional-testing, event-writer, dispatcher, splitter, transformer, distributor, distributor-rest, ingestor, error-processor, email-sender, watermill-publisher, watermill. (canonical-beans NOT a module; cerberus/fulfiller/router/mftdispatcher/validator/load-testing NOT in aggregator.)\nshared AWS wrapper inventory (the chokepoint, all v1):\n- workspace/S3WorkspaceService implements WorkspaceService: copyObject, copyObjectWithMetaDate, putObject(String/byte[]), putObjectWithMetaData, getFileSize, getContent(+charset), getS3ObjectWrapper, getS3InputStream, getMetaData, copyS3FileToFileSystem. Uses AmazonS3 + s3.model.{CopyObjectRequest,GetObjectMetadataRequest,GetObjectRequest,ObjectMetadata,PutObjectResult,S3Object,S3ObjectInputStream}, util.IOUtils, SdkClientException→RecoverableException. NOTE: WorkspaceService interface return type PutObjectResult LEAKS v1 type → public API change.\n- messaging/SQSClient implements MessageSender: sendMessage(target,content[,delay[,failedAttempts]]), deleteMessage, getVisibilityTimeout. Uses AmazonSQS injected @Named('amazonSQSForSender'). SendMessageRequest/MessageAttributeValue/DeleteMessageRequest/GetQueueAttributes*.\n- messaging/SNSClient implements MessageSender: sendMessage(target,content). AmazonSNS + sns.model.PublishRequest.\n- messaging/SQSListenerClient: receiveMessage(ReceiveMessageRequest)→ReceiveMessageResult. AmazonSQS @Named('amazonSQSForListener').\n- listener/SQSListener implements Listener: long-poll loop, dispatcher.getIdleThreadCount() gates maxNoOfMessages, submits List<com.amazonaws...sqs.model.Message> to Dispatcher. Catches com.amazonaws.AbortedException.\n- config/AWSClientConfigHelper: newClient(builder, AWSClientConfig) using AwsClientBuilder.withCredentials/withRegion; getCredentialsProvider → DefaultAWSCredentialsProviderChain or BasicAWSCredentials/AWSStaticCredentialsProvider. config/AWSClientConfiguration + AWSClientConfig.\n- parameterstore/ParameterStore: AWSSimpleSystemsManagement.getParameters(...withDecryption) → ssm.model.Parameter. Plus SsmParameterSupplier, ParameterSupplier, PassThroughParameterSupplier, ParameterStoreModule.\nPervasive leak: com.amazonaws.services.sqs.model.Message is the type Dispatcher/AsyncDispatcher/AbstractTask/Task and every service ErrorHandler+Task consume → biggest API-compat lever. shared also has threaddispatcher/{Dispatcher,AsyncDispatcher}, task/AbstractTask, task/errorhandler/ErrorHelper, EventLogger.",
+      "tags": [
+        "analysis",
+        "shared",
+        "inventory"
+      ],
+      "references": [
+        "pom.xml#L15",
+        "pom.xml#L25",
+        "shared/src/main/java/com/inttra/mercury/shared/workspace/S3WorkspaceService.java",
+        "shared/src/main/java/com/inttra/mercury/shared/messaging/SQSClient.java",
+        "shared/src/main/java/com/inttra/mercury/shared/listener/SQSListener.java",
+        "shared/src/main/java/com/inttra/mercury/shared/parameterstore/ParameterStore.java"
+      ]
+    },
+    {
+      "id": "941c0f335662",
+      "timestamp": "2026-05-31T16:46:59.976020+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "shared PLAN written + peer-reviewed (Option A recommended)",
+      "detail": "Created shared/docs/2026-05-31-shared-aws2x-upgrade-plan-copilot.md. Both options documented; recommendation = Option A (keep shared, delegate AWS wrappers to cloud-sdk-aws; stay DW4/JUnit4). Peer review by Explore subagent incorporated (§8): added §2.6a health-check inventory (S3WriteHealthCheck/Inbound+OutboundSqsHealthCheck/SnsPublishHealthCheck/DynamoTableWriteHealthCheck build own v1 clients via *ClientBuilder.defaultClient()); corrected JUnit framing (commons parent declares junit 4.13.2 — hard forcing function is Dropwizard 4→5, not JUnit; commons/cloud-sdk own tests are Jupiter); confirmed all putObject* callers ignore PutObjectResult so interface can go straight to void; added API-compat spike precondition (QueueMessage payload/receiptHandle/attrs, credential/region parity, AWSUtil retry parity); effort revised Medium→Medium-High.",
+      "tags": [
+        "shared",
+        "plan",
+        "peer-review-done"
+      ],
+      "references": [
+        "shared/docs/2026-05-31-shared-aws2x-upgrade-plan-copilot.md"
+      ]
+    },
+    {
+      "id": "11da27a81cfb",
+      "timestamp": "2026-05-31T16:49:21.634310+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Per-module AWS v1 surface inventory mapped",
+      "detail": "Per-module AWS v1 surface (grep com.amazonaws across aggregator). NO-AWS (build/transitive only): schema-beans, structuralvalidator, gen2-parser. STANDARD SQS consumers binding AWS in own ExternalServicesModule via *ClientBuilder.standard().withClientConfiguration(AWSClientConfiguration.*): event-writer (SQS+S3), dispatcher (SQS+SNS+S3 + S3EventNotification/ObjectMetadata/IOUtils), distributor (S3 + IOUtils zip), error-processor (SQS+SNS+S3). Message-DTO-only consumers (no own AWS binding, use shared): splitter, transformer, distributor-rest, ingestor (Jest ES). SES special: email-sender (AmazonSimpleEmailService → cloud-sdk EmailService/SESv2, behavior change classic→v2). DynamoDB special: watermill aggregator's 5 sub-modules (consumer-commons + itv-gps/cargoscreen/booking-inbound/visibility-inbound consumers) use DynamoDBMapper + datamodeling annotations on WatermillOffset VO + DynamoTableCommand + S3/SNS/SQS; DynamoDBMapper→v2 Enhanced Client is biggest rewrite, uses dynamo-integration-test. watermill-publisher: SQS+S3 own dispatcher copies + DeadLetterService. functional-testing special: AmazonS3Adaptor implements AmazonS3 + AmazonSESAdaptor implements AmazonSimpleEmailService (full v1 interface fakes) — must re-point to cloud-sdk-api interfaces; lockstep unblock for all downstream test compiles. Saved to .github/memory/repo/aws-v1-surface-inventory.md.",
+      "tags": [
+        "inventory",
+        "all-modules",
+        "dynamodb",
+        "ses",
+        "functional-testing"
+      ],
+      "references": [
+        ".github/memory/repo/aws-v1-surface-inventory.md"
+      ]
+    },
+    {
+      "id": "357e69c0c564",
+      "timestamp": "2026-05-31T17:02:23.225861+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Completed AWS v1→v2 (cloud-sdk) per-module PLAN + DESIGN for all 16 aggregator modules; corrected 4 misclassified modules",
+      "detail": "Delivered 32 markdown docs (16 modules × {plan-copilot.md, DESIGN.md}, dated 2026-05-31, under each <module>/docs/). No production source or pom.xml was modified (analysis/planning/design only). Recommendation across ALL modules = Option A (keep shared/own bootstrap + Dropwizard 4 + JUnit 4, delegate AWS to cloud-sdk-api/cloud-sdk-aws). Each DESIGN has Mermaid class/component/sequence diagrams, config + Maven + test sections, rollout, risks. Each PLAN has scope/surface, options A/B (ref shared plan §3-§8), recommendation, peer-review outcome, sequencing, risks.\n\nIMPORTANT CORRECTION made this session: splitter, transformer, distributor-rest, ingestor were initially mis-classified as \"DTO-only\" consumers. Direct read of their ExternalServicesModule files proved they are STANDARD CONSUMERS binding their own AmazonSQS/S3(/SNS) clients. Their 4 doc pairs were deleted and rewritten correctly. Biggest correction: TRANSFORMER also uses DynamoDB DynamoDBMapper (controlnumbers/sequence/ControlNumberSequence VO with @DynamoDBVersionAttribute optimistic locking + ControlNumberSequenceDao, CONSISTENT reads) — so it is the SECOND DynamoDB Enhanced-Client rewrite alongside watermill. Confirmed via repo-wide grep that ONLY transformer and watermill use DynamoDB. ingestor binds SQS+S3 only (no SNS). Repo memory inventory file (.github/memory/repo/aws-v1-surface-inventory.md) corrected accordingly.\n\nModule classification (final):\n- Chokepoint: shared.\n- No-AWS: schema-beans, structuralvalidator, gen2-parser.\n- Standard consumers (SQS/S3[/SNS] rebind to cloud-sdk-aws + Message→MessageRef): event-writer, dispatcher, distributor, error-processor, splitter, distributor-rest, ingestor.\n- Standard consumer + DynamoDB Enhanced-Client rewrite: transformer.\n- SES classic→v2 special: email-sender.\n- Test-fakes lockstep enabler: functional-testing.\n- DynamoDB side-bus: watermill (5 sub-modules) + watermill-publisher (SQS+S3, DeadLetterService receive, Test.java=delete-candidate).",
+      "tags": [
+        "aws-sdk-v2",
+        "cloud-sdk",
+        "migration-plan",
+        "design",
+        "dynamodb",
+        "transformer",
+        "watermill",
+        "completed"
+      ],
+      "references": [
+        "splitter/docs/2026-05-31-splitter-aws2x-upgrade-plan-copilot.md",
+        "splitter/docs/2026-05-31-splitter-aws2x-upgrade-DESIGN.md",
+        "transformer/docs/2026-05-31-transformer-aws2x-upgrade-plan-copilot.md",
+        "transformer/docs/2026-05-31-transformer-aws2x-upgrade-DESIGN.md",
+        "distributor-rest/docs/2026-05-31-distributor-rest-aws2x-upgrade-plan-copilot.md",
+        "distributor-rest/docs/2026-05-31-distributor-rest-aws2x-upgrade-DESIGN.md",
+        "ingestor/docs/2026-05-31-ingestor-aws2x-upgrade-plan-copilot.md",
+        "ingestor/docs/2026-05-31-ingestor-aws2x-upgrade-DESIGN.md",
+        "watermill/docs/2026-05-31-watermill-aws2x-upgrade-plan-copilot.md",
+        "watermill/docs/2026-05-31-watermill-aws2x-upgrade-DESIGN.md",
+        "watermill-publisher/docs/2026-05-31-watermill-publisher-aws2x-upgrade-plan-copilot.md",
+        "watermill-publisher/docs/2026-05-31-watermill-publisher-aws2x-upgrade-DESIGN.md",
+        "transformer/src/main/java/com/inttra/mercury/transformer/controlnumbers/sequence/ControlNumberSequence.java",
+        "transformer/src/main/java/com/inttra/mercury/transformer/controlnumbers/sequence/ControlNumberSequenceDao.java",
+        ".github/memory/repo/aws-v1-surface-inventory.md"
+      ]
+    },
+    {
+      "id": "074d5e02aa6d",
+      "timestamp": "2026-05-31T17:27:59.027515+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Directive change to Option B (commons/DW5/JUnit5) + cloud-sdk gap analysis; gathered full cloud-sdk-api/aws surface, confirmed MetaData identical, config-processing difference, 7 gaps (G1-G7)",
+      "detail": "Stakeholder directive (2026-05-31) overrides the earlier Option-A recommendation. New directives for ALL 16 module plan+design docs + the prompt file:\n1. Use Dropwizard 5 (commons 1.0.26-SNAPSHOT publishes DW 5.0.1) → recommendation flips to OPTION B (adopt commons + cloud-sdk).\n2. New tests in JUnit 5 (Jupiter via dropwizard-testing junit5); existing JUnit 4 may remain during transition (junit-vintage).\n3. Each PLAN must list cloud-sdk-api/cloud-sdk-aws DEFICIENCIES/gaps; each DESIGN must give full technical spec of the new abstractions+impls to add to cloud-sdk-api/cloud-sdk-aws (AWS SDK 2.x) in a separate section, so they can be implemented.\n4. Goal: ALL AWS service comms go through cloud-sdk (abstracted behind cloud-sdk-api), same as mercury-services consumers.\n5. Config-change section MUST address appianway reading yaml differently than mercury-services.\n6. User strongly prefers commons classes unless categorical technical limitation.\n\nKEY EVIDENCE GATHERED from mercury-services-commons:\n- cloud-sdk-api packages: messaging(MessagingClient<T>, Listener[startup/shutdown], QueueMessage<T>{getMessageId/getReceiptHandle/getPayload/getAttributes/getSentTimestamp}, ReceiveMessageOptions), storage(StorageClient{putObject variants, getObject->StorageObject{getMetadata/getContentType/getContent}, getContent, copyObject, listObjects, presignedUrl}, StorageObject), notification(NotificationService extends EventPublisher; workflow pkg: MetaData, Event, EventGenerator, EventLogger, EventPublisher, WorkflowAware), paramstore(CloudParameterStore{getParameter, putParameter, replacePlaceholders ${awsps:name}, describeParameters}), email(EmailService{sendEmail, sendTemplatedEmail, sendTemplateEmail->EmailResultCollector}, MailContent, TemplateService), database(DatabaseRepository<T,ID>{findById(consistentRead), save, update, saveIfNotExist, query(QuerySpec), batch*, count, delete, export}, annotations @Table/@DynamoDbField/@TTL, EntityId/CompositeKey/QuerySpec), elasticsearch(JestClientBuilder, JestClientRetryHandler).\n- cloud-sdk-aws impls/factories: SqsMessagingClient, SqsMessage, SqsListener (SINGLE-THREADED synchronous poll loop, taskProcessor=BiConsumer<List<v2 Message>, Consumer<Message>>), MessagingClientFactory (createConfiguredClient/createDefaultStringClient/createExtendedSqsClient w/ S3 large-payload), S3StorageClient/S3StorageObject/factories/TransferManager, SnsService/SnsEventPublisher/NotificationClientFactory, SsmCloudParameterStore/ParameterStoreClientFactory, SesEmailServiceImpl(+Handlebars TemplateService, legacy senders)/EmailClientFactory, database: EnhancedDynamoRepository/StandardDynamoRepository/AbstractDynamoRepository/DynamoRepositoryFactory, converters DateEpochSecondAttributeConverter/LongEpochSecondAttributeConverter/OffsetDateTimeTypeConverter/NullifyEmptyStringConverter, DynamoDbAdminCommand/DynamoDbAdminUtil, GsiConfig/SecondaryIndexConfig/TableEncryptionConfig, ReflectionEntityMapper.\n- commons: InttraServer (DW5 Application base), config pkg: ConfigProcessingServerCommand (ChainingConfigTransformer: TrimConfigCommentsTransform.andThen(ParameterStoreConfigTransform(ParameterStoreLookup))), CustomConfigurationFactoryFactory, ApplicationConfiguration, DatabaseAppConfig, MailConfig, ElasticSearchServiceConfig. pom: dropwizard.version=5.0.1, junit.version=4.13.2 (commons itself still JUnit4).\n\nCOMPATIBILITY WINS:\n- appianway shared/task/MetaData.java fields == commons cloud-sdk-api notification/workflow/MetaData.java fields EXACTLY (messageId, workflowId, rootWorkflowId, parentWorkflowId, bucket, fileName, component, exitStatus, timestamp, projections + Builder.putAll/put). Direct adoption; only package changes (shared.task -> cloudsdk.notification.workflow).\n- watermill DateToEpochSecond converter == cloud-sdk DateEpochSecondAttributeConverter; WatermillOffsetDao -> DatabaseRepository; DynamoTableCommand -> DynamoDbAdminCommand/Util. Well covered.\n- ingestor Jest/Elasticsearch -> cloud-sdk JestClientBuilder/JestModule (now in-scope, not 'out of scope').\n\nGAPS to spec in cloud-sdk-api/aws (full technical detail in designs):\nG1 Concurrent listener: cloud-sdk SqsListener is single-threaded synchronous; appianway needs semaphore-bounded AsyncDispatcher (maxNumberOfMessages concurrency, thread pool, Task base). Add concurrent listener/dispatcher OR appianway keeps its AsyncDispatcher wrapping MessagingClient.receiveMessages/deleteMessage. Also SqsListener taskProcessor leaks v2 Message not QueueMessage<T>.\nG2 StorageClient.putObject with user metadata + content-type (dispatcher/distributor set ObjectMetadata). Add putObject(bucket,key,content,Map metadata,contentType).\nG3 S3 event-notification parsing (dispatcher consumes S3->SQS events): add S3 event model/parse util to cloud-sdk (or parse via v2 model).\nG4 DynamoDB optimistic locking / version attribute: transformer ControlNumberSequence uses @DynamoDBVersionAttribute; cloud-sdk-api database/annotation has only @Table/@DynamoDbField/@TTL (no version annotation). Add @DynamoDbVersionAttribute-equivalent + conditional-update-on-version (or confirm EnhancedDynamoRepository propagates v2 @DynamoDbVersionAttribute). Also atomic sequence/counter pattern.\nG5 Email templating: cloud-sdk EmailService uses Handlebars; email-sender uses Thymeleaf. Add Thymeleaf TemplateService impl to cloud-sdk OR migrate templates Handlebars. Plus SES classic->v2.\nG6 Config transform extensibility: commons ConfigProcessingServerCommand hardcodes transform chain (trim+awsps); appianway needs .properties-override + ${PROFILE}/${ENV} env resolution + ValidatingLookup fail-fast. Make commons transform chain composable/pluggable so appianway lookups compose with awsps/SSM.\nG7 Health checks: appianway shared read/write health checks build own v1 clients; need cloud-sdk-client-based health checks (minor).\n\nCONFIG DIFFERENCE detail: appianway runs `java -jar svc.jar run svc.yaml conf/svc.properties ...network.properties ...datadog.properties`; resolves ${placeholder} from CLI .properties (PropertiesLookup) + env (EnvironmentVariableLookup PROFILE/ENV) + ValidatingLookup fail-fast via ProcessedConfigProvider/VariableLookupProvider, BEFORE Hibernate Validator. commons resolves ${awsps:name} via ParameterStoreLookup + trims comments. Option B must COMPOSE: register a ConfigurationSourceProvider chain doing appianway properties/env/validate AND commons awsps/SSM. (=> G6).",
+      "tags": [
+        "aws-sdk-v2",
+        "cloud-sdk",
+        "option-b",
+        "dropwizard5",
+        "junit5",
+        "gaps",
+        "config"
+      ],
+      "references": [
+        ".github/prompts/aws2x-upgrade-plan-and-design.prompt.md",
+        "shared/src/main/java/com/inttra/mercury/shared/task/MetaData.java",
+        "shared/src/main/java/com/inttra/mercury/shared/config/lookup/ProcessedConfigProvider.java"
+      ]
+    },
+    {
+      "id": "801522bec440",
+      "timestamp": "2026-05-31T17:37:58.652732+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Directive revision complete: prompt + all 32 plan/design docs updated to Option B (commons + cloud-sdk on Dropwizard 5), JUnit 5 for new tests, master cloud-sdk gap specs G1-G7, and appianway-vs-mercury-services config composition",
+      "detail": "COMPLETED the directive-driven revision (Option B / Dropwizard 5 / JUnit 5 / cloud-sdk gaps / config composition) across all artifacts:\n\n1. PROMPT updated: .github/prompts/aws2x-upgrade-plan-and-design.prompt.md — added authoritative 'Stakeholder directives' section (DW5, Option B default unless categorical blocker, JUnit 5 new tests, mandatory cloud-sdk gap section, mandatory config-difference section); amended Option B description, PLAN structure (added §7 cloud-sdk gaps, §11 configuration changes; recommendation defaults to B), and DESIGN structure (added §6 cloud-sdk gaps full technical spec; config §5 now requires appianway-vs-mercury-services composition; tests §8 mandate JUnit 5).\n\n2. SHARED MASTER docs rewritten:\n- shared/docs/2026-05-31-shared-aws2x-upgrade-plan-copilot.md: directive banner; headline + §7 recommendation flipped to Option B; comparison-matrix verdict note; NEW §10 master config-composition model (appianway .properties/${PROFILE}/${ENV} + ValidatingLookup composed with commons ParameterStoreConfigTransform/TrimConfigCommentsTransform); NEW §11 MASTER cloud-sdk gaps table G1-G7 + 'coverage already present' note.\n- shared/docs/2026-05-31-shared-aws2x-upgrade-DESIGN.md: chosen option flipped to B; NEW §1A directive design (target component/class diagrams, keep-vs-adopt table, Maven, §1A.5 config composition, §1A.6 FULL TECHNICAL SPEC for G1-G7, §1A.7 JUnit5 tests); §2-§9 retained as Option-A fallback reference.\n\n3. ALL 15 other module doc-pairs (30 files) got a directive banner after H1 flipping to Option B/DW5/JUnit5, linking master §10/§11/§1A.6, with module-specific gap mapping:\n- schema-beans, gen2-parser: no AWS surface.\n- structuralvalidator: no direct AWS (transitive + G6).\n- functional-testing: G1 fake + re-point fakes to cloud-sdk-api + JUnit5; cover G2/G4.\n- event-writer: G1,G2,G6,G7.\n- dispatcher: G1,G2,G3 (S3 event parsing),G6,G7.\n- splitter: G1,G2,G6,G7.\n- transformer: G1,G2,G4 (DynamoDB version attribute/ControlNumberSequence),G6,G7.\n- distributor: G1,G2,G6,G7 (zip stays local).\n- distributor-rest: G1,G2,G6,G7 (REST/OAuth local).\n- ingestor: G1,G6,G7 + Jest/Elasticsearch now IN SCOPE via cloud-sdk JestClientBuilder.\n- error-processor: G1,G2,G6,G7.\n- email-sender: G5 (Thymeleaf vs Handlebars),G1,G6 + SES v2 covered.\n- watermill-publisher: NotificationService/MessagingClient + G6; Dynamo covered.\n- watermill: G6; Dynamo fully covered (DatabaseRepository/DateEpochSecondAttributeConverter/DynamoDbAdminCommand), G1 N/A (gRPC not SQS), dynamo-integration-test.\n\nTotal: 1 prompt + 32 docs updated. No production code/pom edits (markdown + MCP only). Verified via grep that DIRECTIVE UPDATE banner is present in all module docs.",
+      "tags": [
+        "aws-sdk-v2",
+        "cloud-sdk",
+        "option-b",
+        "dropwizard5",
+        "junit5",
+        "gaps",
+        "config",
+        "complete"
+      ],
+      "references": [
+        ".github/prompts/aws2x-upgrade-plan-and-design.prompt.md",
+        "shared/docs/2026-05-31-shared-aws2x-upgrade-plan-copilot.md",
+        "shared/docs/2026-05-31-shared-aws2x-upgrade-DESIGN.md"
+      ]
+    }
+  ]
+}

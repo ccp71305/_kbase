@@ -1,0 +1,38 @@
+{
+  "id": "88b0519137b1480d",
+  "name": "ION-14382 Visibility Audit OffsetDateTime Fix",
+  "description": "Fix AuditAttributeConverter to decouple DynamoDB storage format (Z suffix) from REST API format (+0000) to resolve visibility module crash when reading audit.createdDateUtc from DynamoDB",
+  "project": "mercury-services",
+  "created_at": "2026-05-07T21:04:26.990202+00:00",
+  "updated_at": "2026-05-07T21:04:44.127493+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "visibility",
+    "aws-upgrade",
+    "dynamodb",
+    "date-format",
+    "bug-fix"
+  ],
+  "entries": [
+    {
+      "id": "4224951bcec5",
+      "timestamp": "2026-05-07T21:04:44.127473+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "code_change",
+      "summary": "Decoupled DynamoDB storage format from REST API format in AuditAttributeConverter. DynamoDB now writes Z suffix (matching production), REST API continues writing +0000 (for ETL). All 983 booking tests pass.",
+      "detail": "Root cause: AuditAttributeConverter used a single OBJECT_MAPPER for both DynamoDB writes and reads. This OBJECT_MAPPER respected @JsonFormat(SSSZ) on Audit.java fields, producing \"+0000\" suffix for UTC timestamps in DynamoDB. The visibility module's SDK v1 OffsetDateTimeTypeConverter (from booking:2.1.8.M) cannot parse \"+0000\" — only \"Z\" or \"+00:00\".\n\nFix: Added DYNAMO_OBJECT_MAPPER with a custom OffsetDateTime serializer using DateTimeFormatter.ISO_DATE_TIME. This produces \"Z\" suffix for UTC in DynamoDB (matching production). The existing OBJECT_MAPPER is still used for reads (handles all formats). REST API continues using @JsonFormat(SSSZ) → \"+0000\" for ETL compatibility.\n\nFiles changed:\n1. AuditAttributeConverter.java — Added DYNAMO_OBJECT_MAPPER with custom serializer, transformFrom() now uses it\n2. AuditAttributeConverterTest.java — Updated EtlCompatibility → DynamoStorageFormat, corrected assertions from +0000 to Z\n3. AuditAttributeConverterVisibilityCompatibilityTest.java — NEW: 23 tests covering visibility parsing simulation, DynamoDB format verification, REST API decoupling, round-trip with all historical formats\n\nAll 983 booking tests pass (0 failures).",
+      "tags": [
+        "fix",
+        "audit",
+        "visibility",
+        "dynamodb"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverterTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverterVisibilityCompatibilityTest.java"
+      ]
+    }
+  ]
+}

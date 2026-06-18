@@ -1,0 +1,111 @@
+{
+  "id": "6096647d2705479f",
+  "name": "booking-template-jetty-fix-2026-06-16",
+  "description": "Fix HTTP ERROR 400 Ambiguous URI Path Separator in booking template functionality caused by Jetty 11.x to 12.x upgrade",
+  "project": "mercury-services",
+  "created_at": "2026-06-16T18:13:22.374317+00:00",
+  "updated_at": "2026-06-16T21:03:42.748074+00:00",
+  "status": "completed",
+  "tags": [
+    "booking",
+    "ION-16032",
+    "PDSUPPORT-203319",
+    "jetty-upgrade",
+    "template",
+    "uri-path-separator",
+    "defect-fix"
+  ],
+  "entries": [
+    {
+      "id": "911bd6f27e9b",
+      "timestamp": "2026-06-16T18:20:28.642791+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Jira findings: PDSUPPORT-203319 and ION-16032 - Template names with forward slash (/) cause HTTP 400 Bad Request",
+      "detail": "PDSUPPORT-203319: User saijai.yamsri@dsv.com cannot open booking templates with slash in name.\nSample failing template names:\n- \"Indorama Polyester to MXZLO /HAPAG\"\n- \"TAURUS MANUFACTURING TO AUMEL_MELBOURNE, AUSTRALIA/ANL\"\nError: 400 Bad Request in network console.\n\nION-16032: Engineering ticket for this defect.\n\nRoot cause: TemplateResource uses @Path(\"/{name}\") where template name is a @PathParam.\nWhen template name contains /, the URL-encoded %2F is rejected by Jetty 12's strict UriCompliance (AMBIGUOUS_PATH_SEPARATOR violation).\nJetty version: 12.1.9, Dropwizard version: 5.0.1.\n\nDropwizard 5.0.1's HttpConnectorFactory has getUriCompliance()/setUriCompliance() methods confirmed via javap.\nUriCompliance.Violation.AMBIGUOUS_PATH_SEPARATOR confirmed in Jetty 12.1.9.\nUriCompliance has with() method to create custom compliance from DEFAULT.",
+      "tags": [],
+      "references": [
+        "PDSUPPORT-203319",
+        "ION-16032",
+        "booking/src/main/java/com/inttra/mercury/booking/template/TemplateResource.java"
+      ]
+    },
+    {
+      "id": "42472ef9da4e",
+      "timestamp": "2026-06-16T18:20:28.664308+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "model_info",
+      "summary": "Model info: Claude Opus 4.6 (copilot)",
+      "detail": "Using Claude Opus 4.6 (model ID: claude-opus-4.6) via GitHub Copilot CLI",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "33981ac2d45f",
+      "timestamp": "2026-06-16T18:20:51.406456+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "decision",
+      "summary": "Decision: Fix via UriCompliance config + @Path regex change. Both are needed.",
+      "detail": "Fix approach (2 changes needed):\n1. JETTY CONFIG: Configure UriCompliance via postSetupHook in BookingApplication to allow AMBIGUOUS_PATH_SEPARATOR.\n   Use DefaultServerFactory.getApplicationConnectors() to set UriCompliance on each HttpConnectorFactory.\n   Code: UriCompliance.DEFAULT.with(\"BOOKING_TEMPLATE\", UriCompliance.Violation.AMBIGUOUS_PATH_SEPARATOR)\n\n2. JAX-RS ROUTING: Change @Path(\"/{name}\") to @Path(\"/{name: .+}\") on TemplateResource methods.\n   Reason: When %2F is decoded to / by the servlet API, JAX-RS routing treats / as path separator.\n   {name: .+} regex allows matching across path separators.\n\nSecurity: Only AMBIGUOUS_PATH_SEPARATOR is allowed (not LEGACY/UNSAFE). Path traversal protection remains intact because we're not allowing AMBIGUOUS_PATH_SEGMENT or AMBIGUOUS_PATH_ENCODING.\n\nAPI compatibility: Preserved - same URL structure, same path parameter name. The regex just widens what the path param can match.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java",
+        "booking/src/main/java/com/inttra/mercury/booking/template/TemplateResource.java"
+      ]
+    },
+    {
+      "id": "c8a4d17e8c3b",
+      "timestamp": "2026-06-16T18:56:26.105182+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Task complete: 2 commits on branch, all tests pass (unit + integration)",
+      "detail": "Task complete. Branch defect/ION-16032-booking-template-issue has 2 commits:\n1. 786befc2e8 - Failing test (path annotation regex validation + parameterized tests)\n2. 61355a98e4 - Fix (UriCompliance config + @Path regex change)\n\nAll tests pass: mvn test -pl booking (unit) and mvn verify -pl booking (integration).\n\nChanges:\n- TemplateResource.java: @Path(\"/{name}\") → @Path(\"/{name: .+}\") on GET, PUT, DELETE methods\n- BookingApplication.java: Added configureUriCompliance() postSetupHook setting UriCompliance.DEFAULT.with(AMBIGUOUS_PATH_SEPARATOR) on all HTTP connectors\n- TemplateResourceTest.java: Added @Nested WhenTemplateNameContainsSpecialCharacters with 3 path annotation tests + parameterized tests for special chars",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/template/TemplateResource.java",
+        "booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java",
+        "booking/src/test/java/com/inttra/mercury/booking/template/TemplateResourceTest.java"
+      ]
+    },
+    {
+      "id": "43f0e6fba598",
+      "timestamp": "2026-06-16T19:44:44.839715+00:00",
+      "agent": "claude-opus-4.8",
+      "category": "finding",
+      "summary": "Claude critical review of ION-16032 fix: approach correct, but test coverage does not actually exercise the bug",
+      "detail": "Reviewed branch code + tests. Fix approach (UriCompliance.with(AMBIGUOUS_PATH_SEPARATOR) + @Path {name: .+}) is correct and Option A is the right choice. Goal of no-impact to existing API and non-slash template names is met for runtime behavior.\n\nGAPS:\n1) [HIGH] Tests give false confidence. Parameterized tests call templateResource.getTemplate(...) directly as a Java method - bypasses Jetty/Jersey routing & URI decoding entirely; they pass even with fix reverted (.+ vs [^/]+ is invisible to a direct method call). configureUriCompliance() has ZERO coverage - the Jetty-layer half that actually fixes the 400 is unverified, including the security claim that only AMBIGUOUS_PATH_SEPARATOR is relaxed. The 3 *_pathAnnotation reflection tests ARE a legit guard against the annotation regressing to {name} (fallback [^/]+ fails the match). No DropwizardAppExtension/ResourceExtension/JerseyTest exists anywhere under booking/src/test. Recommend an HTTP-level test: GET /booking/template/<name%2Fslash> -> assert 200 (not 400/404) + negative test that %2e%2e%2f still rejected; plus a unit test on configureUriCompliance.\n2) [MED] UriCompliance relaxation is connector-wide (applied to all application+admin connectors), not template-scoped. Doc says 'no functional impact on existing endpoints' - true for routing (other endpoints keep [^/]+, so encoded slash now 404s at Jersey instead of 400 at Jetty) but understates that the app-wide encoded-slash posture changed. Per-connector is the only option in Jetty so app-wide is acceptable; doc should state the real scope.\n3) [LOW] configureUriCompliance no-ops silently if server factory is not DefaultServerFactory - add LOGGER.warn in else branch.\n4) [NIT] Doc shows with('BOOKING_TEMPLATE') but code uses with('BOOKING') - align.\n\nRouting correctness verified OK: GET /template still hits listTemplates; non-slash names route identically under .+ and [^/]+; path traversal still blocked (Jetty normalizes .., AMBIGUOUS_PATH_SEGMENT/ENCODING still enforced, service lookups are actor-scoped DynamoDB keys).\n\nFindings written to booking/docs/2026-06-16-booking-template-jetty-issue.md under 'Claude Critical Review'.",
+      "tags": [
+        "review",
+        "ION-16032",
+        "test-coverage",
+        "uri-compliance",
+        "jetty12"
+      ],
+      "references": [
+        "booking/docs/2026-06-16-booking-template-jetty-issue.md",
+        "booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java",
+        "booking/src/test/java/com/inttra/mercury/booking/template/TemplateResourceTest.java"
+      ]
+    },
+    {
+      "id": "765f7f3a17b9",
+      "timestamp": "2026-06-16T21:03:42.747975+00:00",
+      "agent": "claude-opus-4.8",
+      "category": "progress",
+      "summary": "Implemented all 4 critical-review recommendations; committed fd8ef97d74. Booking unit suite green (2019 tests, 0 fail).",
+      "detail": "Commit fd8ef97d74 on defect/ION-16032-booking-template-issue (3 files, doc kept untracked per request).\n\nFinding 1 (HIGH) closed without adding dropwizard-testing (no in-memory Jersey harness exists in booking; pom carefully manages Jackson conflicts - too risky). Used only on-classpath libs:\n- NEW BookingApplicationUriComplianceTest: asserts bookingUriCompliance() relaxes EXACTLY AMBIGUOUS_PATH_SEPARATOR on top of DEFAULT, keeps AMBIGUOUS_PATH_SEGMENT/ENCODING/PARAMETER/EMPTY_SEGMENT disallowed, DEFAULT baseline does not allow it, and applyUriCompliance wires it onto every application+admin HttpConnectorFactory.\n- NEW TemplateResourceTest.JaxRsRoutingMatchesDecodedSlashNames: drives decoded literal-slash path through Jersey's real org.glassfish.jersey.uri.UriTemplate using live @Path annotations. Production {name: .+} matches+captures full slash name; pre-fix {name} ([^/]+) does NOT match (reproduces routing bug, fails on regression); non-slash names identical under both.\nThese fail in CI if either half of the fix is reverted - the gap the review flagged.\n\nFinding 2 (MED) closed: doc states relaxation is connector-wide; other endpoints keep [^/]+ so encoded slash -> 404 at Jersey not 400 at Jetty; added Javadoc note.\nFinding 3 (LOW) closed: configureUriCompliance now LOGGER.warn (naming factory class) on non-DefaultServerFactory instead of silent no-op; refactored into bookingUriCompliance()/applyUriCompliance() (behaviour unchanged).\nFinding 4 (NIT) closed: doc label aligned to code with('BOOKING').\n\nVerification: mvn test -pl booking = 2019 tests, 0 failures/0 errors. Targeted run of the two changed classes = 49 tests pass.",
+      "tags": [
+        "ION-16032",
+        "implementation",
+        "tests",
+        "uri-compliance",
+        "review-followup"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java",
+        "booking/src/test/java/com/inttra/mercury/booking/BookingApplicationUriComplianceTest.java",
+        "booking/src/test/java/com/inttra/mercury/booking/template/TemplateResourceTest.java"
+      ]
+    }
+  ]
+}

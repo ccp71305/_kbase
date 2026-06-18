@@ -1,0 +1,145 @@
+{
+  "id": "d9ad65d756e846f8",
+  "name": "Booking Post-Prod Exception Analysis 2026-06-15",
+  "description": "Analysis of two DynamoDB exceptions reported on 2026-06-15 - empty string in carrierReferenceNumber GSI key during putItem on BookingDetail table. Investigating root cause, relation to AWS SDK v2 upgrade, and integration test coverage.",
+  "project": "mercury-services",
+  "created_at": "2026-06-15T14:12:19.574422+00:00",
+  "updated_at": "2026-06-15T17:02:45.456165+00:00",
+  "status": "active",
+  "tags": [
+    "booking",
+    "production",
+    "exception-analysis",
+    "dynamodb",
+    "aws-sdk-v2",
+    "carrierReferenceNumber",
+    "GSI",
+    "empty-string"
+  ],
+  "entries": [
+    {
+      "id": "02a0c95e95be",
+      "timestamp": "2026-06-15T14:16:47.474492+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "finding",
+      "summary": "Root cause identified: AWS SDK v1→v2 empty string handling difference on DynamoDB GSI key attribute carrierReferenceNumber",
+      "detail": "Exception: DynamoDbException - empty string value in GSI sort key carrierReferenceNumber (indexes: carrierId_carrierReferenceNumber, carrierScac_carrierReferenceNumber).\n\nRoot cause: AWS SDK v1 DynamoDBMapper silently omitted empty strings from DynamoDB items. SDK v2 Enhanced Client preserves them as S:\"\". DynamoDB rejects empty strings on key attributes including GSI keys.\n\nFix: Add @DynamoDbConvertedBy(NullifyEmptyStringConverter.class) to getCarrierReferenceNumber() in BookingDetail.java. NullifyEmptyStringConverter already exists in commons cloud-sdk-aws module and is used by registration module.\n\nAll 6 GSI key fields in BookingDetail are missing NullifyEmptyStringConverter: carrierId, carrierReferenceNumber, bookerId, shipmentId, inttraReferenceNumber, carrierScac.\n\nIntegration tests do NOT cover empty string GSI key scenarios.\n\nClient from error: 822415-31610, COMPANY: 822415, timestamp: 2026-06-15 06:51:24.813",
+      "tags": [
+        "root-cause",
+        "empty-string",
+        "GSI",
+        "SDK-v2",
+        "carrierReferenceNumber"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java:259-265",
+        "booking/src/main/java/com/inttra/mercury/booking/service/BookingService.java:276",
+        "booking/src/main/java/com/inttra/mercury/booking/dao/BookingDetailDao.java:66",
+        "C:\\Users\\arijit.kundu\\Downloads\\DynamoDB_Exception.txt"
+      ]
+    },
+    {
+      "id": "3181e49295a3",
+      "timestamp": "2026-06-15T14:18:44.572194+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "progress",
+      "summary": "Analysis document created with full findings, fix recommendations, and action items",
+      "detail": "Created comprehensive analysis document at booking/docs/2026-06-15-booking-post-prod-excp-analysis.md covering root cause (SDK v1→v2 empty string handling), impact assessment, fix recommendation (@DynamoDbConvertedBy(NullifyEmptyStringConverter.class)), integration test gaps, and action items.",
+      "tags": [
+        "documentation",
+        "analysis-complete"
+      ],
+      "references": [
+        "booking/docs/2026-06-15-booking-post-prod-excp-analysis.md",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java"
+      ]
+    },
+    {
+      "id": "9f8085f150a5",
+      "timestamp": "2026-06-15T14:18:44.588210+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "finding",
+      "summary": "Model info: Claude Opus 4.6 with long context",
+      "detail": "Model used: Claude Opus 4.6 (claude-opus-4.6) with 1M context window",
+      "tags": [
+        "model_info"
+      ],
+      "references": []
+    },
+    {
+      "id": "8d6331a6ac33",
+      "timestamp": "2026-06-15T15:04:43.726790+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "finding",
+      "summary": "CloudWatch: 268 failed requests (not 2), S3 error recovery also failing, data loss confirmed",
+      "detail": "CloudWatch investigation reveals 268 unique failed booking requests (not just 2 as initially reported), all from Client 822415-31610, Company 822415 (RestSharp/106.11.7.0 API integration). \n\nAdditionally, S3 error recovery is ALSO failing (269 times) because Booking.getWorkflowId() returns empty string for API requests, making the S3 key just 'dynamo_error/' which is invalid. This means failed booking data is PERMANENTLY LOST.\n\nS3 bucket: s3://inttra2-pr-workspace/dynamo_error/\nRetry config: dynamoExceptionMaxRetryCount=3\nLog group: inttra2-pr-lg-bkapi\nProfile: 642960533737_INTTRA2-QATeam\n\nSeverity upgraded from MEDIUM to HIGH/CRITICAL.",
+      "tags": [
+        "cloudwatch",
+        "s3",
+        "data-loss",
+        "268-failures",
+        "severity-upgrade"
+      ],
+      "references": [
+        "booking/docs/2026-06-15-booking-post-prod-excp-analysis.md",
+        "booking/conf/prod/config.yaml:121",
+        "booking/src/main/java/com/inttra/mercury/booking/model/Booking.java:55,928"
+      ]
+    },
+    {
+      "id": "ebac70e60928",
+      "timestamp": "2026-06-15T16:12:55.708307+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "finding",
+      "summary": "QA succeeded because Rapid Reservation replaced empty carrierReferenceNumber before DynamoDB save",
+      "detail": "QA booking 2010418020 succeeded despite sending carrierReferenceNumber:\"\" because QA's carrier (802435) has Rapid Reservation enabled. The assignRapidReservedCarrierBookingNumber() method at BookingService.java:867 replaced the empty string with \"EDIF1000106046ALL\" BEFORE the DynamoDB save.\n\nProd client 822415's carrier does not have Rapid Reservation (or sends BookingNumber reference that skips it), so carrierReferenceNumber stays as \"\" → DynamoDB rejects it.\n\nCloudWatch confirms: \"Rapid reserved carrier booking number for CarrierId: 802435, BookerId 802442, assigned: EDIF1000106046ALL\"\n\nFix is already applied to BookingDetail.java - all 6 GSI key fields now have @DynamoDbConvertedBy(NullifyEmptyStringConverter.class)",
+      "tags": [
+        "qa-investigation",
+        "rapid-reservation",
+        "carrierReferenceNumber",
+        "root-cause-confirmed"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/service/BookingService.java:758-867",
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java:249,265,282,295,308,325"
+      ]
+    },
+    {
+      "id": "fe22c039aa0b",
+      "timestamp": "2026-06-15T16:42:09.364712+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "progress",
+      "summary": "Code review: Fix certified for push - all GSI fields covered, tests comprehensive, no risks",
+      "detail": "Code review completed for ION-16028 fix commits. Fix is correct and complete. All 6 GSI key fields covered. Tests cover all fields + raw DynamoDB NULL verification. No backward compatibility risks. No query-path interference. Primary keys correctly excluded. Certified for push.",
+      "tags": [
+        "code-review",
+        "certified",
+        "ION-16028"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/BookingDetail.java:249,265,282,295,308,325",
+        "booking/src/test/java/com/inttra/mercury/booking/dao/BookingDetailDaoIT.java:1115-1276"
+      ]
+    },
+    {
+      "id": "35964b46ea4a",
+      "timestamp": "2026-06-15T17:02:45.456146+00:00",
+      "agent": "claude-opus-4.6",
+      "category": "finding",
+      "summary": "Jackson Optional serialization exception: pre-existing bug in error-recovery path, amplified by SDK upgrade",
+      "detail": "Jackson InvalidDefinitionException for Optional<String> in LocationAdditionalInfo.getCountryISO2Code() is a PRE-EXISTING bug (5 occurrences before deployment, June 10-13). It's in the DynamoDB error-recovery path at BookingService.java:334,336 where Json.toJsonString(detail) tries to serialize the BookingDetail. Json.java uses ObjectMapper without Jdk8Module. The SDK upgrade amplified it 269× by causing 268 DynamoDB failures that trigger this path.\n\nPost-deployment EDI booking affected: inttraRef 2107555939, carrier 800388 (CMA CGM), ConditionalCheckFailedException, workflowId de3344e0-5b4b-41be-b2eb-b031202fc0db.\n\nFix: Add @JsonIgnore to getCountryISO2Code() since it's a computed/derived method.",
+      "tags": [
+        "jackson",
+        "optional",
+        "pre-existing",
+        "error-recovery",
+        "LocationAdditionalInfo"
+      ],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/model/INTTRACommon/Artifacts/LocationAdditionalInfo.java:65",
+        "booking/src/main/java/com/inttra/mercury/booking/util/Json.java:23",
+        "booking/src/main/java/com/inttra/mercury/booking/service/BookingService.java:334"
+      ]
+    }
+  ]
+}

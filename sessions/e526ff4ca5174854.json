@@ -1,0 +1,81 @@
+{
+  "id": "e526ff4ca5174854",
+  "name": "Visibility Matcher +0000 Format Issue - 2026-05-15",
+  "description": "QA reported DateTimeParseException in visibility matcher for booking EDIF1000098366ALL / Container CONT2711952. Same root cause as May 6 issue - old booking:2.1.8.M converter can't parse +0000 format. Investigating whether existing data or new writes are the source.",
+  "project": "mercury-services",
+  "created_at": "2026-05-15T19:42:43.116398+00:00",
+  "updated_at": "2026-05-15T21:27:21.964507+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "booking",
+    "dynamodb",
+    "timestamp",
+    "+0000",
+    "matcher",
+    "bug"
+  ],
+  "entries": [
+    {
+      "id": "b57c61604753",
+      "timestamp": "2026-05-15T19:43:15.146401+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Analysis complete: Visibility matcher crashes when reading booking records with +0000 timestamp format. The flow is: SQS → MatchingProcessor → TransactionSearchService → ES search → BookingDao.findBookingByInttraReference() → SDK v1 DynamoDBMapper uses old OffsetDateTimeTypeConverter from booking:2.1.8.M which cannot parse +0000. The fix in booking module only affects new writes (Z format). Old data with +0000 persists in DynamoDB.",
+      "detail": "The matching flow: 1) Container event insert triggers SNS→SQS notification 2) MatchingProcessor reads container event from DynamoDB 3) TransactionSearchService queries Elasticsearch for matching bookings by container refs 4) For each matched booking INTTRA reference, calls bookingService.getBookingByInttraRef() 5) BookingDao uses SDK v1 DynamoDBMapper with BookingDetailVisibility (extends BookingDetail from booking:2.1.8.M) 6) DynamoDBMapper recursively unconverts audit field using old OffsetDateTimeTypeConverter 7) Old converter tries ISO_OFFSET_DATE_TIME (fails for +0000), then LocalDate.parse fallback (fails with 'unparsed text at index 10'). The +0000 data comes from bookings written between 05/05 and fix deployment. Fix only changes write path, not read path in visibility.",
+      "tags": [
+        "matching-flow",
+        "root-cause",
+        "+0000",
+        "old-artifact"
+      ],
+      "references": [
+        "visibility/visibility-matcher/src/main/java/com/inttra/mercury/visibility/matcher/processor/MatchingProcessor.java",
+        "visibility/visibility-matcher/src/main/java/com/inttra/mercury/visibility/matcher/processor/elasticsearch/TransactionSearchService.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDao.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/booking/BookingDetailVisibility.java",
+        "booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java"
+      ]
+    },
+    {
+      "id": "dd77d62d82bd",
+      "timestamp": "2026-05-15T20:27:37.890098+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Root cause traced: ES query matches multiple bookings via shared BOL BM_BK_TT_WEB_07. One matched booking (different IR, created May 12 pre-fix) has +0000 audit timestamp. DynamoDBMapper in visibility crashes reading that old booking.",
+      "detail": "All 7 failing container events share BOL BM_BK_TT_WEB_07. The ES query uses references (CarrierBookingReference, BillOfLadingNumber) as OR-ed should clauses. When ES returns multiple booking hits (from different IRs sharing the same BOL), the code calls bookingService.getBookingByInttraRef() for each matched IR. One of those IRs maps to a booking created on May 12 (before fix deployment on May 13) with audit.createdDateUtc in +0000 format. The booking for IR 2010326020 has correct Z format but another matched booking (same BOL) is the culprit. ES query framed for user to run in Postman against https://search-inttra2-qa-es-bk-search-pp2qouzowny5ofoszywwqmmkkm.us-east-1.es.amazonaws.com/_all/_search",
+      "tags": [
+        "ES-query",
+        "BOL",
+        "cross-match",
+        "root-cause"
+      ],
+      "references": [
+        "visibility/visibility-matcher/src/main/java/com/inttra/mercury/visibility/matcher/processor/elasticsearch/TransactionQueryUtil.java",
+        "visibility/visibility-matcher/src/main/java/com/inttra/mercury/visibility/matcher/processor/elasticsearch/IndexAttributes.java",
+        "visibility/visibility-matcher/conf/qa/config.yaml"
+      ]
+    },
+    {
+      "id": "a242298fe546",
+      "timestamp": "2026-05-15T21:27:21.964482+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "progress",
+      "summary": "Investigation complete: Identified poisoned booking IR 2010312288 as the root cause. 5 poisoned records confirmed (3 with +0000 format, 2 with MM/dd/yyyy format). Created comprehensive analysis document at booking/docs/2026-05-15-visibility-matcher-invalid-audit-old-record.md",
+      "detail": "Full ES query with size=10000 returned 196 hits (136 Booking, 16 SI, 44 BL). Found 3 May-12 bookings with +0000 timestamps and 2 May-5 bookings with MM/dd/yyyy timestamps. All other tested bookings had clean Z format. The crash happens because the matcher iterates ALL ES hits and loads full records from DynamoDB - when it hits a poisoned record, the old OffsetDateTimeTypeConverter in booking:2.1.8.M fails. Documented 4 remediation options: (A) data fix, (B) shadow converter in visibility, (C) upgrade booking artifact, (D) defensive try-catch.",
+      "tags": [
+        "visibility-matcher",
+        "audit-timestamp",
+        "investigation-complete"
+      ],
+      "references": [
+        "booking/docs/2026-05-15-visibility-matcher-invalid-audit-old-record.md",
+        "IR:2010312288",
+        "IR:2010311223",
+        "IR:2010312007",
+        "IR:2010292107",
+        "IR:2010291106"
+      ]
+    }
+  ]
+}
