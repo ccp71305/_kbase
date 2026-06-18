@@ -25,7 +25,36 @@ a structured analysis + implementation plan document that can be fed into the de
 
 ---
 
-## PARAMETERS — Change these for each new issue
+## Invocation — No PARAMETERS editing needed
+
+If invoked via Copilot CLI or Claude Code with a natural language description, extract
+parameters from the user's message. You do not need the PARAMETERS block to be pre-filled.
+
+| What to find | Example |
+|---|---|
+| Module name | `booking`, `visibility`, `oceanschedules` |
+| Jira ticket(s) — optional | `ION-16032` |
+| Support ticket(s) — optional | `PDSUPPORT-203319` |
+| Issue description or analysis goal | "date parsing fails on old records after AWS upgrade" |
+| Notes file — optional, under `<module>/docs/` | `booking/docs/notes.md` |
+
+**Example Copilot invocations:**
+```
+follow issue-analysis-generator — booking module, ION-16032, PDSUPPORT-203319
+
+follow issue-analysis-generator — booking module, no ticket yet,
+visibility reads are failing after AWS upgrade, details in booking/docs/notes.md
+
+follow issue-analysis-generator — analyze booking date serialization across all
+DynamoDB read paths, understand blast radius before the AWS upgrade
+```
+
+If a notes file is referenced, read it first and treat its content as additional context.
+If no Jira ticket is given, skip the Jira fetch step and proceed with the description as source.
+
+---
+
+## PARAMETERS — Change these for each new issue (skip if using natural language invocation)
 
 ```yaml
 # ─── INPUT ────────────────────────────────────────────────────────────────────

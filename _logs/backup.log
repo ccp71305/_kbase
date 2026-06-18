@@ -7163,3 +7163,725 @@ Manifest written → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-wor
 2026-06-18 13:47:27 [INFO   ]     claude-skills                   4 file(s)
 2026-06-18 13:47:27 [INFO   ]     templates                       2 file(s)
 2026-06-18 13:47:27 [INFO   ] =================================================================
+2026-06-18 18:31:18 [INFO   ] Config          : C:\Users\arijit.kundu\projects\_kb-tools\kb_config.json
+2026-06-18 18:31:18 [INFO   ] Source base     : C:/Users/arijit.kundu/projects
+2026-06-18 18:31:18 [INFO   ] Destination base: C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase
+2026-06-18 18:31:18 [INFO   ] 
+2026-06-18 18:31:18 [INFO   ] =================================================================
+2026-06-18 18:31:18 [INFO   ]   PROJECT : mercury-services
+2026-06-18 18:31:18 [INFO   ]   Source  : C:\Users\arijit.kundu\projects\mercury-services
+2026-06-18 18:31:18 [INFO   ]   Dest    : C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\mercury-services
+2026-06-18 18:31:18 [INFO   ] =================================================================
+2026-06-18 18:31:18 [INFO   ] 
+  ── .github  [module=-, loc-cat=github-prompts]
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\copilot-instructions.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): copilot-instructions.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\_base-session-protocol.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): _base-session-protocol.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-booking-email-test-restore.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-booking-email-test-restore.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-booking-email-test-review.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-booking-email-test-review.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-booking-lambda-workaround.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-booking-lambda-workaround.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-booking-runtime-issues.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-booking-runtime-issues.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-network-ov-runtime-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-network-ov-runtime-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-visibility-aws-upgrade-plan.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-visibility-aws-upgrade-plan.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-visibility-curr-state.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-visibility-curr-state.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-02-webbl-connpool-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-02-webbl-connpool-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-17-booking-dataformat-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-17-booking-dataformat-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-21-booking-integration-issues.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-21-booking-integration-issues.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-04-29-booking-watermill-datetimeex.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-29-booking-watermill-datetimeex.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-05-06-booking-visibility-audit-unconvert.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-06-booking-visibility-audit-unconvert.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-05-30-visibility-aws-upgrade-impl.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-30-visibility-aws-upgrade-impl.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-05-31-oceanschedules-aws-upgrade-impl.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-oceanschedules-aws-upgrade-impl.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-06-12-booking-qa-cvt-prod-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-12-booking-qa-cvt-prod-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-06-13-booking-prod-release-checkout.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-13-booking-prod-release-checkout.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\completed\2026-06-16-booking-template-jetty-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-16-booking-template-jetty-issue.prompt.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\analysis\issue-analysis-generator.md
+2026-06-18 18:31:18 [INFO   ]     COPY: issue-analysis-generator.md  →  .../github-prompts/prompts/analysis/issue-analysis-generator.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\_base-confluence-publisher.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): _base-confluence-publisher.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\completed\2026-06-16-booking-template-jetty-design-doc.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-16-booking-template-jetty-design-doc.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\confluence-api-design-generator.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): confluence-api-design-generator.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\confluence-design-doc-generator.md
+2026-06-18 18:31:18 [INFO   ]     COPY: confluence-design-doc-generator.md  →  .../github-prompts/prompts/designdocs/confluence-design-doc-generator.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\confluence-feature-spec-generator.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): confluence-feature-spec-generator.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\confluence-publish-doc.md
+2026-06-18 18:31:18 [INFO   ]     COPY: confluence-publish-doc.md  →  .../github-prompts/prompts/designdocs/confluence-publish-doc.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\confluence-runbook-generator.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): confluence-runbook-generator.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\README.md
+2026-06-18 18:31:18 [INFO   ]     COPY: README.md  →  .../github-prompts/prompts/designdocs/README.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\SETUP-confluence-mcp.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): SETUP-confluence-mcp.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\templates\api-design-template.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): api-design-template.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\templates\architecture-template.md
+2026-06-18 18:31:18 [INFO   ]     COPY: architecture-template.md  →  .../prompts/designdocs/templates/architecture-template.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\templates\feature-spec-template.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): feature-spec-template.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\prompts\designdocs\templates\runbook-template.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): runbook-template.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\aws-dynamo-check.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): aws-dynamo-check.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\enrichedAttributes.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): enrichedAttributes.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_BookingDetail.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_BookingDetail.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_RapidReservation.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_RapidReservation.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SequenceId.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SequenceId.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SpotRatesDetail.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SpotRatesDetail.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_SpotRatesToInttraRefDetail.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_SpotRatesToInttraRefDetail.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_Template.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_Template.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\aws-skills\inttra_int_booking_UniqueId.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): inttra_int_booking_UniqueId.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\build-errors\SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\git-operations\SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\java-refactoring\SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-context.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): pr-context.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-review-comments.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): pr-review-comments.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\pr-reviews\pr-review-responses.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): pr-review-responses.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.github\skills\session-context\SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): SKILL.md
+2026-06-18 18:31:18 [INFO   ] 
+  ── .claude  [module=-, loc-cat=claude-skills]
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\settings.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\settings.local.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): settings.local.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\skills\analyze-issue\SKILL.md
+2026-06-18 18:31:18 [INFO   ]     COPY: SKILL.md  →  .../claude-skills/skills/analyze-issue/SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\skills\design-doc\SKILL.md
+2026-06-18 18:31:18 [INFO   ]     COPY: SKILL.md  →  .../claude-skills/skills/design-doc/SKILL.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.claude\skills\publish-doc\SKILL.md
+2026-06-18 18:31:18 [INFO   ]     COPY: SKILL.md  →  .../claude-skills/skills/publish-doc/SKILL.md
+2026-06-18 18:31:18 [INFO   ] 
+  ── .vscode  [module=-, loc-cat=vscode-settings]
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\launch.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): launch.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\mcp.json
+2026-06-18 18:31:18 [INFO   ]     COPY: mcp.json  →  .../_kbase/mercury-services/vscode-settings/mcp.json
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\.vscode\settings.json
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-06-18 18:31:18 [INFO   ] 
+  ── booking/docs  [module=booking, loc-cat=none]
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-25-runtime-issue-fixes-summary.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-03-25-runtime-issue-fixes-summary.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-27-aws-upgrade-branch-migration-summary.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-03-27-aws-upgrade-branch-migration-summary.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-03-27-booking-dev-log-review.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-03-27-booking-dev-log-review.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-13-rebase-conflict-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-13-rebase-conflict-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-16-owasp-high-vulnerability-origin-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-16-owasp-high-vulnerability-origin-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-17-booking-dataformat-issue-fixes.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-17-booking-dataformat-issue-fixes.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-22-qa-outbound-pipeline-debug-findings.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *findings*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-22-qa-outbound-pipeline-debug-findings.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-cloudsdk-netty-removal-mvn-dep-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-04-23-owasp-netty.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-owasp-netty.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-05-booking-business-rules-copilot.md
+2026-06-18 18:31:18 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-05-booking-business-rules-copilot.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-05-booking-redshift-audit-field-issue.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-05-booking-redshift-audit-field-issue.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-06-visibility-audit-unconvert-issue-claude.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-06-visibility-audit-unconvert-issue-claude.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-06-visibility-audit-unconvert-issue-copilot.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-06-visibility-audit-unconvert-issue-copilot.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-15-visibility-matcher-invalid-audit-old-record.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-15-visibility-matcher-invalid-audit-old-record.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-05-27-dw-jetty-upgrade-issues.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issues*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-05-27-dw-jetty-upgrade-issues.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-01-booking-aws2x-upgrade-desing-impl-review-claude.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-booking-aws2x-upgrade-desing-impl-review-claude.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-08-booking-conf-field-format-diff.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-08-booking-conf-field-format-diff.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-08-booking-req-field-format-diff.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-08-booking-req-field-format-diff.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-12-booking-analysis-queries-scripts.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-12-booking-analysis-queries-scripts.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-12-booking-cvt-qa-prod-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-12-booking-cvt-qa-prod-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-13-booking-prod-release-checkout-scripts.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-13-booking-prod-release-checkout-scripts.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-13-booking-prod-release-checkout.md
+2026-06-18 18:31:18 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-13-booking-prod-release-checkout.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-15-booking-post-prod-excp-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-15-booking-post-prod-excp-analysis.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-16-booking-template-jetty-issue.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-16-booking-template-jetty-issue.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-16-design-doc-ION-16032.md
+2026-06-18 18:31:18 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-16-design-doc-ION-16032.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-17-booking-template-jetty-issue-part2.md
+2026-06-18 18:31:18 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:18 [DEBUG  ]     SKIP (up-to-date): 2026-06-17-booking-template-jetty-issue-part2.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-06-18-design-doc-ION-16028.md
+2026-06-18 18:31:18 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:18 [INFO   ]     COPY: 2026-06-18-design-doc-ION-16028.md  →  .../mercury-services/design/booking/2026-06-18-design-doc-ION-16028.md
+2026-06-18 18:31:18 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-08-08-booking-field-format-diff-impact-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-08-08-booking-field-format-diff-impact-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\2026-08-08-booking-field-format-diff-impact.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-08-08-booking-field-format-diff-impact.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\aws-architecture-diagram.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *architecture*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): aws-architecture-diagram.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\aws-resources.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): aws-resources.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): booking-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-business-rules.md
+2026-06-18 18:31:19 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): booking-business-rules.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\booking-integration-issues-04222027-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='issues' (filename: *issues*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): booking-integration-issues-04222027-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\claude-review-integration-issue-fix.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): claude-review-integration-issue-fix.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\DESIGN-AWS2x.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): DESIGN-AWS2x.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\integration-issues-qa-verification-apr232027.md
+2026-06-18 18:31:19 [DEBUG  ]     category='issues' (filename: *issues*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): integration-issues-qa-verification-apr232027.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking\docs\visibility-integration-issue-04212026.md
+2026-06-18 18:31:19 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): visibility-integration-issue-04212026.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── booking-bridge/docs  [module=booking-bridge, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\05042026-booking-bridge-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 05042026-booking-bridge-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\booking-bridge-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): booking-bridge-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\booking-bridge\docs\DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): DESIGN.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── oceanschedules/docs  [module=oceanschedules, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\05042026-oceanschedules-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 05042026-oceanschedules-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\2026-06-01-os-aws2x-upgrade-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-os-aws2x-upgrade-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\CONFLUENCE-os.md
+2026-06-18 18:31:19 [DEBUG  ]     category='templates' (filename: *confluence*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): CONFLUENCE-os.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\DESIGN-PRE-AWS-upgrade.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): DESIGN-PRE-AWS-upgrade.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\oceanschedules-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): oceanschedules-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\oceanschedules\docs\os-aws2x-plan.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): os-aws2x-plan.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── visibility/docs  [module=visibility, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\visibility\docs\2026-06-01-visibility-aws-upgrade-design-impl-review-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *review*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-visibility-aws-upgrade-design-impl-review-claude.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── watermill-publisher/docs  [module=watermill-publisher, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\watermill-publisher\docs\bk-watermill-dateformat-exception-analysis-04292026.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): bk-watermill-dateformat-exception-analysis-04292026.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\watermill-publisher\docs\DESIGN-watermill-publisher.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): DESIGN-watermill-publisher.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── webbl/docs  [module=webbl, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\05042026-webbl-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='business-rules' (filename: *business-rules*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 05042026-webbl-business-rules-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\2026-03-31-sqs-connection-pool-shutdown-investigation.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *investigation*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-03-31-sqs-connection-pool-shutdown-investigation.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\CONFLUENCE-webbl.md
+2026-06-18 18:31:19 [DEBUG  ]     category='templates' (filename: *confluence*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): CONFLUENCE-webbl.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\webbl-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): webbl-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services\webbl\docs\webbl-aws-upgrade.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (content: '## Current State')
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): webbl-aws-upgrade.md
+2026-06-18 18:31:19 [INFO   ] 
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ]   PROJECT : mercury-services-commons
+2026-06-18 18:31:19 [INFO   ]   Source  : C:\Users\arijit.kundu\projects\mercury-services-commons
+2026-06-18 18:31:19 [INFO   ]   Dest    : C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\mercury-services-commons
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ] 
+  ── .github  [module=-, loc-cat=github-prompts]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\.github\copilot-instructions.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): copilot-instructions.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\.github\prompts\cloudsdk-enhancements-plan-design-implement.prompt.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): cloudsdk-enhancements-plan-design-implement.prompt.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── .vscode  [module=-, loc-cat=vscode-settings]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\.vscode\mcp.json
+2026-06-18 18:31:19 [INFO   ]     COPY: mcp.json  →  .../_kbase/mercury-services-commons/vscode-settings/mcp.json
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\.vscode\settings.json
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-06-18 18:31:19 [INFO   ] 
+  ── commons/docs  [module=commons, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\commons\docs\2026-05-29-ParameterStoreLookup-refactor.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-29-ParameterStoreLookup-refactor.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\commons\docs\commons-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): commons-architecture-design-claude.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── cloud-sdk-api/docs  [module=cloud-sdk-api, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-05-15-commons-rebase.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-15-commons-rebase.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-cloud-sdk-enhancement-progress-summary.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-cloud-sdk-enhancement-progress-summary.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-cloud-sdk-health-checks-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-cloud-sdk-health-checks-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-composable-config-transform-chain-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-composable-config-transform-chain-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-concurrent-sqs-listener-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-concurrent-sqs-listener-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-dynamodb-version-attribute-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-dynamodb-version-attribute-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-s3-event-notification-parsing-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-s3-event-notification-parsing-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-storage-putobject-metadata-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-storage-putobject-metadata-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\2026-06-01-thymeleaf-template-service-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-06-01-thymeleaf-template-service-copilot-design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-api\docs\cloud-sdk-api-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): cloud-sdk-api-architecture-design-claude.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── cloud-sdk-aws/docs  [module=cloud-sdk-aws, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-04-16-owasp-high-vulnerability-analysis-and-fix-plan.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-23-handlebars-owasp-impact-analysis.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (filename: *analysis*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-handlebars-owasp-impact-analysis.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-04-23-netty-removal.md
+2026-06-18 18:31:19 [DEBUG  ]     category='analysis' (content: '## Findings')
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-04-23-netty-removal.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-05-27-aws-java-sdk-core-version-issue.md
+2026-06-18 18:31:19 [DEBUG  ]     category='issues' (filename: *issue*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-27-aws-java-sdk-core-version-issue.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\2026-05-28-netty-critical.md
+2026-06-18 18:31:19 [DEBUG  ]     category='uncategorized' (no match)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-28-netty-critical.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\mercury-services-commons\cloud-sdk-aws\docs\cloud-sdk-aws-architecture-design-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): cloud-sdk-aws-architecture-design-claude.md
+2026-06-18 18:31:19 [INFO   ] 
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ]   PROJECT : appianway
+2026-06-18 18:31:19 [INFO   ]   Source  : C:\Users\arijit.kundu\projects\appianway
+2026-06-18 18:31:19 [INFO   ]   Dest    : C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\appianway
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ] 
+  ── .github  [module=-, loc-cat=github-prompts]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.github\copilot-instructions.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): copilot-instructions.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.github\memory\repo\aws-v1-surface-inventory.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): aws-v1-surface-inventory.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.github\prompts\aws2x-upgrade-implementation.prompt.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): aws2x-upgrade-implementation.prompt.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.github\prompts\aws2x-upgrade-plan-and-design.prompt.md
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): aws2x-upgrade-plan-and-design.prompt.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── .claude  [module=-, loc-cat=claude-skills]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.claude\settings.json
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.claude\settings.local.json
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): settings.local.json
+2026-06-18 18:31:19 [INFO   ] 
+  ── .vscode  [module=-, loc-cat=vscode-settings]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.vscode\mcp.json
+2026-06-18 18:31:19 [INFO   ]     COPY: mcp.json  →  .../_kbase/appianway/vscode-settings/mcp.json
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\.vscode\settings.json
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): settings.json
+2026-06-18 18:31:19 [INFO   ] 
+  ── docs  [module=docs, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\docs\2026-05-24-appianway-overview-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-appianway-overview-claude.design.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── dispatcher/docs  [module=dispatcher, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-24-dispatcher-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-dispatcher-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-24-dispatcher-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-dispatcher-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-31-dispatcher-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-dispatcher-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-31-dispatcher-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-dispatcher-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-31-dispatcher-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-dispatcher-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\dispatcher\docs\2026-05-31-dispatcher-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-dispatcher-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── distributor/docs  [module=distributor, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-24-distributor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-distributor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-24-distributor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-distributor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-31-distributor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-31-distributor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-31-distributor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor\docs\2026-05-31-distributor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── distributor-rest/docs  [module=distributor-rest, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-24-distributor-rest-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-distributor-rest-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-24-distributor-rest-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-distributor-rest-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-31-distributor-rest-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-rest-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-31-distributor-rest-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-rest-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-31-distributor-rest-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-rest-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\distributor-rest\docs\2026-05-31-distributor-rest-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-distributor-rest-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── email-sender/docs  [module=email-sender, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-24-email-sender-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-email-sender-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-24-email-sender-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-email-sender-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-31-email-sender-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-email-sender-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-31-email-sender-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-email-sender-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-31-email-sender-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-email-sender-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\email-sender\docs\2026-05-31-email-sender-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-email-sender-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── error-processor/docs  [module=error-processor, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-24-error-processor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-error-processor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-24-error-processor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-error-processor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-31-error-processor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-error-processor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-31-error-processor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-error-processor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-31-error-processor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-error-processor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\error-processor\docs\2026-05-31-error-processor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-error-processor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── event-writer/docs  [module=event-writer, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-24-event-writer-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-event-writer-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-24-event-writer-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-event-writer-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-31-event-writer-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-event-writer-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-31-event-writer-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-event-writer-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-31-event-writer-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-event-writer-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\event-writer\docs\2026-05-31-event-writer-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-event-writer-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── functional-testing/docs  [module=functional-testing, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-24-functional-testing-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-functional-testing-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-24-functional-testing-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-functional-testing-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-31-functional-testing-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-functional-testing-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-31-functional-testing-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-functional-testing-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-31-functional-testing-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-functional-testing-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\functional-testing\docs\2026-05-31-functional-testing-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-functional-testing-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── ingestor/docs  [module=ingestor, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-24-ingestor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-ingestor-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-24-ingestor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-ingestor-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-31-ingestor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-ingestor-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-31-ingestor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-ingestor-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-31-ingestor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-ingestor-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\ingestor\docs\2026-05-31-ingestor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-ingestor-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── mftdispatcher/docs  [module=mftdispatcher, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\mftdispatcher\docs\2026-05-24-mftdispatcher-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-mftdispatcher-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\mftdispatcher\docs\2026-05-24-mftdispatcher-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-mftdispatcher-copilot.design.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── schema-beans/docs  [module=schema-beans, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-24-schema-beans-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-schema-beans-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-24-schema-beans-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-schema-beans-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-31-schema-beans-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-schema-beans-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-31-schema-beans-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-schema-beans-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-31-schema-beans-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-schema-beans-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\schema-beans\docs\2026-05-31-schema-beans-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-schema-beans-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── splitter/docs  [module=splitter, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-24-splitter-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-splitter-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-24-splitter-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-splitter-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-31-splitter-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-splitter-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-31-splitter-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-splitter-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-31-splitter-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-splitter-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\splitter\docs\2026-05-31-splitter-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-splitter-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── structuralvalidator/docs  [module=structuralvalidator, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-24-structuralvalidator-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-structuralvalidator-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-24-structuralvalidator-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-structuralvalidator-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-31-structuralvalidator-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-structuralvalidator-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-31-structuralvalidator-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-structuralvalidator-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-31-structuralvalidator-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-structuralvalidator-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\structuralvalidator\docs\2026-05-31-structuralvalidator-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-structuralvalidator-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── transformer/docs  [module=transformer, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-24-transformer-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-transformer-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-24-transformer-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-transformer-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-31-transformer-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-transformer-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-31-transformer-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-transformer-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-31-transformer-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-transformer-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\transformer\docs\2026-05-31-transformer-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-transformer-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── validator/docs  [module=validator, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\validator\docs\2026-05-24-validator-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-validator-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\validator\docs\2026-05-24-validator-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-validator-copilot.design.md
+2026-06-18 18:31:19 [INFO   ] 
+  ── watermill/docs  [module=watermill, loc-cat=none]
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-24-watermill-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-watermill-claude.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-24-watermill-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-24-watermill-copilot.design.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-31-watermill-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-watermill-aws2x-upgrade-DESIGN-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-31-watermill-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *design*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-watermill-aws2x-upgrade-DESIGN.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-31-watermill-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-watermill-aws2x-upgrade-plan-claude.md
+2026-06-18 18:31:19 [DEBUG  ]   Processing: C:\Users\arijit.kundu\projects\appianway\watermill\docs\2026-05-31-watermill-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [DEBUG  ]     category='design' (filename: *plan*)
+2026-06-18 18:31:19 [DEBUG  ]     SKIP (up-to-date): 2026-05-31-watermill-aws2x-upgrade-plan-copilot.md
+2026-06-18 18:31:19 [INFO   ] 
+Skipping disabled project: inttra-ai
+2026-06-18 18:31:19 [INFO   ] 
+Skipping disabled project: mft-s3-aqua-appia
+2026-06-18 18:31:19 [INFO   ] 
+Manifest written → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\manifest.json
+2026-06-18 18:31:19 [INFO   ] Index written    → C:\Users\arijit.kundu\OneDrive - WiseTech Global\claude-workspace\_kbase\knowledge-base-index.md
+2026-06-18 18:31:19 [INFO   ] 
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ]   SUMMARY
+2026-06-18 18:31:19 [INFO   ] =================================================================
+2026-06-18 18:31:19 [INFO   ]   Total files scanned : 226
+2026-06-18 18:31:19 [INFO   ]   Copied (new/updated): 12
+2026-06-18 18:31:19 [INFO   ]   Skipped (up-to-date): 214
+2026-06-18 18:31:19 [INFO   ] 
+2026-06-18 18:31:19 [INFO   ]   By category:
+2026-06-18 18:31:19 [INFO   ]     design                        107 file(s)
+2026-06-18 18:31:19 [INFO   ]     github-prompts                 55 file(s)
+2026-06-18 18:31:19 [INFO   ]     analysis                       17 file(s)
+2026-06-18 18:31:19 [INFO   ]     uncategorized                  14 file(s)
+2026-06-18 18:31:19 [INFO   ]     issues                         12 file(s)
+2026-06-18 18:31:19 [INFO   ]     claude-skills                   7 file(s)
+2026-06-18 18:31:19 [INFO   ]     vscode-settings                 7 file(s)
+2026-06-18 18:31:19 [INFO   ]     business-rules                  5 file(s)
+2026-06-18 18:31:19 [INFO   ]     templates                       2 file(s)
+2026-06-18 18:31:19 [INFO   ] =================================================================

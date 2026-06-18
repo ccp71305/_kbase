@@ -2,11 +2,8 @@
     "servers": {
         "mcp-context-server": {
             "type": "stdio",
-            "command": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\aiengg\\mcp\\mcp-summary-server\\.venv\\Scripts\\python.exe",
-            "args": [
-                "-m",
-                "mcp_context_server.main"
-            ],
+            "command": "C:\\Users\\arijit.kundu\\.venvs\\mcp-context-server\\Scripts\\mcp-context-server.exe",
+            "args": [],
             "cwd": "C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\aiengg\\mcp\\mcp-summary-server",
             "env": {
                 "MCP_SESSIONS_DIR": "C:\\Users\\arijit.kundu\\.mcp-context-server\\sessions",

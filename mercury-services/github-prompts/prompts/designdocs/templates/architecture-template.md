@@ -1,14 +1,14 @@
-# Design Document Template — Confluence Format
+# Design Document Template — Architecture / Defect Fix
 
-> This is the standard design document template used for mercury-services engineering design reviews.
-> It mirrors the Confluence wiki template at [BRM space](https://confluence.dev.e2open.com/display/BRM/).
+> Standard design document template for mercury-services engineering design reviews.
+> Matches the BRM Confluence space format at https://confluence.dev.e2open.com/display/BRM/
 > Sections with no applicable content should contain "N/A".
 
 ---
 
 ## Contents
 
-<!-- Auto-generated table of contents -->
+<!-- Auto-generated table of contents — the TOC Confluence macro renders this -->
 
 ---
 
@@ -24,27 +24,29 @@
 
 ### Jira Tickets
 
-<!-- JIRA issue table — populate with relevant tickets -->
-
-| Key | Summary | Type | Assignee |
-|-----|---------|------|----------|
-| | | | |
+| Key | Summary | Type | Priority | Status | Assignee |
+|-----|---------|------|----------|--------|----------|
+| | | | | | |
 
 ### Support Tickets
 
-| Key | Summary | 
-|-----|---------|
-| | |
+| Key | Summary | Priority | Status |
+|-----|---------|----------|--------|
+| | | | |
 
 ### Summary
 
-<!-- High-level summary of what this change achieves -->
+<!-- 2–4 sentences: what was broken, who was affected, what the fix achieves -->
+
+**Status:** <!-- e.g. ✅ Verified working in QA (yyyy-mm-dd) -->
 
 ### Technology Stack
 
 | Component | Technology |
 |-----------|-----------|
 | Framework | |
+| Servlet Container | |
+| JAX-RS / API layer | |
 | Build | |
 | AWS SDK | |
 | Database | |
@@ -64,27 +66,35 @@
 
 ### Architectural Overview
 
-<!-- Module-level or system-level architectural overview. Use Mermaid diagrams when possible. -->
-
-```mermaid
-graph TD
-    A[Component A] --> B[Component B]
-    B --> C[Component C]
+<!-- Module-level or system-level overview showing all layers in the request path
+     and where the fix applies. ASCII box diagrams are preferred over Mermaid for
+     Confluence compatibility (no macro dependency). -->
+```
+┌─────────┐      ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+│  Client  │─────▶│   Layer 1        │─────▶│   Layer 2        │─────▶│   Layer 3        │
+│          │      │                 │      │                 │      │                 │
+└─────────┘      └─────────────────┘      └─────────────────┘      └─────────────────┘
+                   <!-- describe -->         <!-- describe -->         <!-- describe -->
 ```
 
-### Data Flow
+### Data Flow — Before vs After
 
-<!-- Data flow pipeline. Use Mermaid sequence or flowchart diagrams. -->
+<!-- Show exactly what changed at the request/response level.
+     Keep each block concise — annotate each step with → -->
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    participant Database
-    Client->>Server: Request
-    Server->>Database: Query
-    Database-->>Server: Result
-    Server-->>Client: Response
+**Before (broken):**
+```
+Client: <request>
+  → <Layer>: <what happened and why it failed>
+  → <error response e.g. HTTP 400>
+```
+**After (fixed):**
+```
+Client: <request>
+  → <Layer 1>: <what changed — now passes>
+  → <Layer 2>: <next step>
+  → <Handler>: <processes request normally>
+  → <success response e.g. HTTP 200>
 ```
 
 ---
@@ -99,13 +109,13 @@ sequenceDiagram
 
 ### Guice Module Loading Order
 
-<!-- If applicable, describe the Guice module loading order -->
+<!-- Include only if Guice module loading order is relevant to this change -->
 
 N/A
 
 ### AWS Services Used
 
-<!-- If applicable for the change being made -->
+<!-- Include only if AWS service interactions are added or changed -->
 
 | Service | Usage | SDK |
 |---------|-------|-----|
@@ -113,7 +123,7 @@ N/A
 
 ### DynamoDB Changes
 
-<!-- If applicable: annotation mapping, table details, GSI -->
+<!-- Include only if DynamoDB table/annotation/schema changes are made -->
 
 | Table | Partition Key | Sort Key | GSIs | Annotation Class |
 |-------|--------------|----------|------|-----------------|
@@ -121,14 +131,18 @@ N/A
 
 ### Component Interaction Flow
 
-<!-- Use Mermaid sequence diagram for component interactions -->
-
-```mermaid
-sequenceDiagram
-    participant A as Component A
-    participant B as Component B
-    A->>B: method call
-    B-->>A: response
+<!-- ASCII box diagram showing the interaction between components.
+     Label each fix on the connecting arrows or in a row below the boxes. -->
+```
+┌──────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────┐
+│  Component A  │    │  Component B      │    │  Component C      │    │  Component D  │
+├──────────────┤    ├──────────────────┤    ├──────────────────┤    ├──────────────┤
+│ 1. step      │    │ 3. step          │    │ 5. step          │    │ 7. step      │
+│              │    │                  │    │                  │    │              │
+│ 2. step      │    │ 4. step          │    │ 6. step          │    │ 8. step      │
+└──────┬───────┘    └──────┬───────────┘    └──────┬───────────┘    └──────────────┘
+       │ Fix:               │ Fix:                  │ Fix:
+       │ <what changed>     │ <what changed>        │ <what changed>
 ```
 
 ---
@@ -149,6 +163,17 @@ N/A
 
 ### Request/Response Changes
 
+<!-- State explicitly if nothing changed: "No changes to request body, response body,
+     headers, or status codes." -->
+
+N/A
+
+### Implementation Notes
+
+<!-- Optional: explain non-obvious technical details about the fix at the API/routing layer.
+     E.g. regex syntax, path parameter semantics, encoding behaviour.
+     Remove this subsection if there is nothing to explain. -->
+
 N/A
 
 ---
@@ -161,7 +186,12 @@ N/A
 
 ### Stack Level Configuration
 
-N/A
+<!-- If configuration changed, use a Before/After/Scope table.
+     Document whether changes are in YAML or programmatic (postSetupHook etc). -->
+
+| Setting | Before | After | Scope |
+|---------|--------|-------|-------|
+| | | | |
 
 ### Professional Services/System Integrator Configuration
 
@@ -178,8 +208,6 @@ N/A
 | | | | |
 
 ### Event Publishing
-
-<!-- Lifecycle stages, event types published -->
 
 N/A
 
@@ -199,13 +227,29 @@ N/A
 
 ## Impact on Current Application
 
-<!-- Describe runtime impact, performance impact, deployment considerations -->
+### Runtime Behavior
+
+<!-- Describe observable behaviour changes per scenario, e.g.:
+     - "Names with X: now work correctly (previously HTTP 400)"
+     - "Names without X: no change in behaviour"
+     - "Other endpoints: no functional change" -->
+
+### Performance
+
+<!-- Describe any performance impact, or state explicitly there is none and briefly why -->
+
+### Deployment
+
+<!-- Rolling restart? Config change required? Coordinated deploy needed? Data migration?
+     Be explicit — "Standard rolling restart. No data migration, no config changes,
+     no coordinated deployment needed." is a complete answer. -->
 
 ---
 
 ## Resiliency
 
-<!-- Failover, retry, circuit breaker considerations -->
+<!-- Failover, retry, circuit breaker changes.
+     Include any defensive guards added (e.g. WARN log if unexpected server config). -->
 
 N/A
 
@@ -225,7 +269,10 @@ N/A
 
 ## Impact on Other Components
 
-<!-- Cross-module or cross-service impact -->
+<!-- State impact per module/service explicitly:
+     - "<Module name>: <impact>" or "<Module name>: None — <reason>"
+     - "Shared library impact: None. No changes to <library>."
+     - "Other services: None." -->
 
 N/A
 
@@ -233,7 +280,12 @@ N/A
 
 ## Backwards Compatible
 
-<!-- Is this change backwards compatible? If not, describe migration path -->
+<!-- Answer all explicitly:
+     - Is this change backwards compatible?
+     - API contract changes?
+     - Deployable independently without coordinating with other services?
+     - Data migration needed?
+     - Do clients (frontend, API consumers) require changes? -->
 
 ---
 
@@ -245,9 +297,18 @@ N/A
 |---|-----------|-------------|----------|
 | 1 | | | |
 
+### Test Layer Coverage
+
+<!-- Map each fix layer to the test class that validates it and describe how faithfully
+     it reflects the real production path. Remove this table if there is only one fix layer. -->
+
+| Layer | What it protects | Test Class | Faithfulness |
+|-------|-----------------|------------|-------------|
+| | | | |
+
 ### Existing Test Impact
 
-<!-- Were any existing tests modified? -->
+<!-- Were any existing tests modified? If no: "No existing tests were modified." -->
 
 ---
 
@@ -266,7 +327,7 @@ N/A
 | 7 | Does the change interact with external systems? | | |
 | 8 | Does the change introduce new network endpoints? | | |
 | 9 | Does the change modify access control or permissions? | | |
-| 10 | Is the change vulnerable to injection attacks (SQL, LDAP, OS command, etc.)? | | |
+| 10 | Is the change vulnerable to injection attacks (SQL, LDAP, OS command, path traversal)? | | |
 | 11 | Does the change handle file uploads or downloads? | | |
 | 12 | Does the change modify logging? Could it log sensitive data? | | |
 | 13 | Does the change introduce any new dependencies with known CVEs? | | |
@@ -310,10 +371,26 @@ N/A
 
 ---
 
+## Deployment Verification
+
+<!-- Record sign-off after deployment to each environment. Add a subsection per environment.
+     Remove this section entirely if the doc is written before deployment. -->
+
+### &lt;ENV&gt; — ✅ / ⚠️ / ❌ (&lt;yyyy-mm-dd&gt;)
+
+| Test | Method | URL | Result |
+|------|--------|-----|--------|
+| | | | |
+
+<!-- If an environment has a known infrastructure difference that affects results
+     (e.g. upstream proxy, load balancer config), document it here explicitly. -->
+
+---
+
 ## Review
 
 | Stage | Reviewer | Status | Notes |
-|---|----------|------|----------|
+|-------|----------|--------|-------|
 | Design | @Arijit Kundu | Approved | |
 | Product Owner | @Mahendran Pandian | Pending | |
 | Pre Dev Security | @Kamalesh Bhol | Pending | |
@@ -322,4 +399,4 @@ N/A
 | UX | NA | Pending | |
 | Post Dev Security | @Kamalesh Bhol | Pending | |
 | Post Dev Architecture | | Pending | |
-|QA | @Venkat Ganga | Pending | |
+| QA | @Venkat Ganga | Pending | |

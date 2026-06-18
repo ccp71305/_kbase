@@ -31,7 +31,38 @@ for any ticket, module, or parent page.
 
 ---
 
-## PARAMETERS — Change these for each new document
+## Invocation — No PARAMETERS editing needed
+
+If invoked via Copilot CLI or Claude Code with a natural language description, extract
+parameters from the user's message. You do not need the PARAMETERS block to be pre-filled.
+
+| What to find | Example |
+|---|---|
+| Jira ticket(s) | `ION-16032` |
+| Support ticket(s) — optional | `PDSUPPORT-203319` |
+| Module name | `booking` |
+| Confluence page title | `"ION-16032 Booking Template Jetty 12 URI Path Separator Fix"` |
+| Parent page ID (numeric) | `12345678` |
+| Space key — optional, default `BRM` | `BRM` |
+| Analysis file — optional, auto-detect from `<module>/docs/` if not given | `booking/docs/2026-06-18-booking-template-jetty-issue.md` |
+
+**Example Copilot invocations:**
+```
+follow confluence-design-doc-generator — ION-16032, booking, parent: 12345678,
+title: "ION-16032 Booking Template Jetty 12 URI Path Separator Fix"
+
+follow confluence-design-doc-generator — ION-16032 PDSUPPORT-203319 booking,
+title: "Jetty URI Fix", parent: 12345678,
+source: booking/docs/2026-06-18-booking-template-jetty-issue.md
+```
+
+**Auto-detecting the analysis file:** if not specified, search `<MODULE>/docs/` for a markdown
+file whose name contains the first Jira key or matches today's date. Confirm with user if
+multiple candidates are found.
+
+---
+
+## PARAMETERS — Change these for each new document (skip if using natural language invocation)
 
 ```yaml
 # ─── INPUT ────────────────────────────────────────────────────────────
