@@ -1,0 +1,33 @@
+{
+  "id": "87091ed038784f46",
+  "name": "ION-15978 Integration Validation Review 2026-06-22",
+  "description": "Code review of ION-15978 Integration Validation API - comparing implementation with Confluence design doc",
+  "project": "mercury-services",
+  "created_at": "2026-06-22T20:52:02.085115+00:00",
+  "updated_at": "2026-06-22T20:53:31.989136+00:00",
+  "status": "active",
+  "tags": [
+    "ION-15978",
+    "ION-15958",
+    "code-review",
+    "auth",
+    "integration-validation"
+  ],
+  "entries": [
+    {
+      "id": "832d084a2b3c",
+      "timestamp": "2026-06-22T20:53:31.989105+00:00",
+      "agent": "copilot-claude-opus-4.6",
+      "category": "finding",
+      "summary": "Completed code review of ION-15978 Integration Validation API. Found 5 critical and 9 medium issues. Key concerns: unsafe downcasts in validators, mutable list exposure, unrelated watermill changes bundled (including LocalDateTime deserializer regression). Design-to-impl alignment is good except for missing logging and watermill deviation.",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "2026-06-22-ebl-review-ion-15978.md",
+        "ION-15978",
+        "ION-15958",
+        "https://confluence.dev.e2open.com/display/BRM/ION-15978+-++Integration+Validation+API+impl"
+      ]
+    }
+  ]
+}

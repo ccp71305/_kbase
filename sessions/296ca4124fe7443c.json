@@ -1,0 +1,439 @@
+{
+  "id": "296ca4124fe7443c",
+  "name": "visibility-sns-sqs-config-coverage-2026-06-24",
+  "description": "Continuation of ION-12316 visibility AWS SDK 2.x refactor (prior session 90725bbf81424e32). Goals: reuse existing dynamoDbConfig (drop cloudSdkDynamoDbConfig) per booking/network; complete SQS+SNS cloud-sdk migration; exhaustive DAO/converter backward-compat CRUD/GSI/boundary + round-trip ITs; S3 client + lambda injection review; s3-archiver direct-DynamoDbClient gap; logging; close Sonar new-code coverage for 12 listed classes; package + verify INT Dropwizard startup. One unpushed ION-12316 commit.",
+  "project": "mercury-services",
+  "created_at": "2026-06-24T23:08:07.190426+00:00",
+  "updated_at": "2026-06-25T23:09:26.371169+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "ION-12316",
+    "aws-sdk-upgrade",
+    "sns",
+    "sqs",
+    "dynamodb",
+    "test-coverage",
+    "sonar",
+    "backward-compat",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "bec7873909b2",
+      "timestamp": "2026-06-24T23:08:14.158597+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Started ION-12316 visibility SNS/SQS + config + coverage task; continuation of session 90725bbf81424e32. Model: Claude Opus 4.8 (1M context). Backup branch/tag created at tip 35c1414cdd.",
+      "detail": "",
+      "tags": [
+        "model_info",
+        "backup",
+        "continuation"
+      ],
+      "references": [
+        "feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-2026-06-24",
+        "ION-12316-pre-coverage-backup-2026-06-24",
+        "prior-session:90725bbf81424e32",
+        "35c1414cdd"
+      ]
+    },
+    {
+      "id": "1373ea69b9c5",
+      "timestamp": "2026-06-24T23:12:03.820022+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Goal 1 analysis: booking uses ONE field dynamoDbConfig of cloud-sdk type BaseDynamoDbConfig. Visibility kept legacy dynamoDbConfig (type DynamoDbConfig) AND added cloudSdkDynamoDbConfig. Legacy getDynamoDbConfig() is referenced ONLY in a test, not in main code, so realignment is safe: change dynamoDbConfig field type to BaseDynamoDbConfig, drop cloudSdkDynamoDbConfig, update VisibilityDynamoModule + VisibilityInboundDynamoDbAdminCommand to getDynamoDbConfig(), merge yaml blocks.",
+      "detail": "",
+      "tags": [
+        "config",
+        "goal-1",
+        "dynamodb"
+      ],
+      "references": [
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/config/VisibilityApplicationConfig.java",
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingConfig.java",
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java"
+      ]
+    },
+    {
+      "id": "ebdec5434696",
+      "timestamp": "2026-06-24T23:12:03.837930+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Goal 2 feasibility: cloud-sdk 1.0.26 MessagingClient<T> EXPOSES a full consumer API (listMessages(url,count,wait)->List<QueueMessage<T>>, receiveMessages, deleteMessage(url,receipt), sendMessage, getQueueAttributes) and QueueMessage<T> (getMessageId/getReceiptHandle/getPayload/getAttributes/getSentTimestamp), mapping directly onto legacy messaging.sqs.SQSClient used by SqsMessageHandler. NotificationService covers SNS (createTopic/subscribe/publish/unsubscribe + EventPublisher). So the SQS/SNS backbone CAN migrate on the current 1.0.26 WITHOUT the DW5/jakarta commons bump — refines yesterday's 'deferred' note. Scope: ~12 main classes + ~30 tests; SqsMessageHandler task type changes from AWS v1 Message to QueueMessage<String>.",
+      "detail": "",
+      "tags": [
+        "sqs",
+        "sns",
+        "goal-2",
+        "feasibility"
+      ],
+      "references": [
+        "cloud-sdk-api-1.0.26-SNAPSHOT.jar",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/processor/sqs/SqsMessageHandler.java",
+        "visibility/visibility-outbound-poller/src/main/java/com/inttra/mercury/visibility/lambda/HandlerSupport.java"
+      ]
+    },
+    {
+      "id": "5352815da7cc",
+      "timestamp": "2026-06-24T23:20:21.844748+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Goal 1 DONE: realigned to single dynamoDbConfig (BaseDynamoDbConfig) like booking; removed cloudSdkDynamoDbConfig field+getters; updated VisibilityDynamoModule + VisibilityInboundDynamoDbAdminCommand to getDynamoDbConfig(); merged sseEnabled into dynamoDbConfig across all 36 yamls (cloudSdk env == legacy env in every file, table names preserved). Added setter for dynamoDbTableCreationCommandConfig. Rewrote VisibilityApplicationConfigTest + VisibilityInboundDynamoDbAdminCommandTest (AssertJ/Nested, +success path). test-compile + affected unit tests PASS.",
+      "detail": "",
+      "tags": [
+        "goal-1",
+        "config",
+        "done"
+      ],
+      "references": [
+        "VisibilityApplicationConfig.java",
+        "VisibilityDynamoModule.java",
+        "VisibilityInboundDynamoDbAdminCommand.java",
+        "36 visibility config.yaml files"
+      ]
+    },
+    {
+      "id": "d35cd63237ea",
+      "timestamp": "2026-06-24T23:29:43.740268+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Goals 7/10 progress: Reworked ContainerEventDaoIT javadoc (removed 'focus is backward-compat', now states full CRUD+all GSIs+boundaries). Expanded ContainerEventDaoIT: parameterized test over ALL 5 GSIs + empty-GSI + update/findAll CRUD. Added ContainerEventOutboundDaoIT + ContainerEventPendingDaoIT round-trip ITs (DynamoDB Local). Added DAO unit tests (findOne/findAll/queryIndex/GPS branches, outbound findOne, pending delete). All commons unit + IT PASS on DynamoDB Local 2.5.2.",
+      "detail": "",
+      "tags": [
+        "goal-7",
+        "goal-10",
+        "goal-15",
+        "integration-test",
+        "done"
+      ],
+      "references": [
+        "ContainerEventDaoIT.java",
+        "ContainerEventOutboundDaoIT.java",
+        "ContainerEventPendingDaoIT.java",
+        "ContainerEventDaoTest.java",
+        "ContainerEventOutboundDaoTest.java",
+        "ContainerEventPendingDaoTest.java"
+      ]
+    },
+    {
+      "id": "3a9893b27e54",
+      "timestamp": "2026-06-24T23:35:14.969839+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Goal 8 DONE: added exhaustive transformFrom/transformTo unit tests for 7 SDK-2.x AttributeConverters (submission, enriched, subscription, GIS, date-ISO8601, date-epoch-milli, CTE-message-XML) + ConverterTestSupport helper. Each asserts: null->NUL, on-disk byte-identical S/N format vs the converter's own ObjectMapper (legacy-compat), S read, legacy-M read, empty/NUL->null, type()/attributeValueType(), boundary values (parameterized for dates). All PASS.",
+      "detail": "",
+      "tags": [
+        "goal-8",
+        "converters",
+        "done"
+      ],
+      "references": [
+        "ContainerEventSubmissionAttributeConverterTest",
+        "ContainerEventEnrichedPropertiesAttributeConverterTest",
+        "SubscriptionAttributeConverterTest",
+        "GISOutboundDetailsAttributeConverterTest",
+        "DateIso8601AttributeConverterTest",
+        "DateEpochMilliSecondAttributeConverterTest",
+        "ContainerTrackingEventMessageAttributeConverterTest",
+        "ConverterTestSupport"
+      ]
+    },
+    {
+      "id": "ef0184ec734f",
+      "timestamp": "2026-06-24T23:43:30.724057+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Goal 6 DONE: createDefaultS3Client() does NOT honor the legacy 1.x S3 ClientConfiguration (connectionTimeout=1000ms, socketTimeout=5000ms, maxConnections=50); SDK2 defaults are ~2s connect/30s read. Reapplied via custom ApacheHttpClient (apache-client 2.30.24 on classpath) wired through AwsStorageConfig.builder().httpClient(AwsHttpClientWrapper.ofSync(...)).region(...).credentialsProvider(DefaultCredentialsProvider) + StorageClientFactory.createS3Client(config). NOTE: createS3Client(config) REQUIRES explicit credentialsProvider (unlike createDefaultS3Client). cloud-sdk GAP: AwsStorageConfig builder lacks first-class socketTimeout/connectionTimeout/maxConnections knobs - recommend enhancement. Added 4 unit tests + injector StorageClient resolves. PASS.",
+      "detail": "",
+      "tags": [
+        "goal-6",
+        "s3",
+        "cloud-sdk-gap",
+        "done"
+      ],
+      "references": [
+        "VisibilityApplicationInjector.java",
+        "VisibilityApplicationInjectorTest.java",
+        "develop:VisibilityApplicationInjector.bindS3()"
+      ]
+    },
+    {
+      "id": "b6a584694d81",
+      "timestamp": "2026-06-24T23:51:25.985102+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "BUG FOUND & FIXED (Goal 9): CargoVisibilitySubscription.createdOn/modifiedOn are java.util.Date with NO @DynamoDbConvertedBy. AWS SDK 2.x Enhanced Client has no built-in Date converter -> real repository build fails 'Converter not found for EnhancedType(Date)'. Masked because all existing tests mocked the repository (real build path never exercised). 1.x stored these as DynamoDBMapper-default ISO-8601 strings (yyyy-MM-dd'T'HH:mm:ss.SSS'Z'). FIX: new LegacyDynamoDbDateAttributeConverter (S, ISO-8601 UTC, lenient read of N epoch) + explicit getCreatedOn/getModifiedOn getters annotated with it. expiresOn already had DateEpochSecondAttributeConverter. Verified via VisibilityWMDynamoModuleTest (real repo now builds) + 10 converter unit tests.",
+      "detail": "",
+      "tags": [
+        "goal-9",
+        "bug",
+        "dynamodb",
+        "backward-compat",
+        "wm",
+        "fixed"
+      ],
+      "references": [
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/cargo/visibility/model/CargoVisibilitySubscription.java",
+        "develop:CargoVisibilitySubscription.java",
+        "LegacyDynamoDbDateAttributeConverter.java"
+      ]
+    },
+    {
+      "id": "676706849fd6",
+      "timestamp": "2026-06-24T23:56:14.967244+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Goals 9/10/15c/15i progress: Added VisibilityDynamoModuleTest (Guice injector builds ALL real repos - ContainerEvent/TrackingEvent/Outbound/Pending/Booking - confirming table names inttra_int_container_events etc; only CargoVisibilitySubscription was broken). Added VisibilityWMDynamoModuleTest. Added IT infra to wm pom (dynamo-integration-test+failsafe+native-libs+excludedGroups). Added CargoVisibilitySubscriptionDaoIT (5 tests: CRUD, both GSIs, on-disk Date format) - PASS on DynamoDB Local, proving the Date converter fix end-to-end. All GREEN.",
+      "detail": "",
+      "tags": [
+        "goal-9",
+        "goal-10",
+        "goal-15",
+        "integration-test",
+        "wm",
+        "done"
+      ],
+      "references": [
+        "CargoVisibilitySubscriptionDaoIT.java",
+        "VisibilityDynamoModuleTest.java",
+        "VisibilityWMDynamoModuleTest.java",
+        "visibility-wm-inbound-processor/pom.xml"
+      ]
+    },
+    {
+      "id": "b91d9e12ca32",
+      "timestamp": "2026-06-25T00:02:37.613979+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Goal 12 ANSWER: visibility-s3-archiver resolves the raw AWS DynamoDbClient directly because it needs a SCHEMALESS read - it archives whatever attributes exist on the container_events row (Map<String,AttributeValue>), with no @DynamoDbBean. Booking's S3ArchiveHandler does NOT do this: it reads a typed BookingDetail via the cloud-sdk BookingDetailDao (it has a bean) and reads keys from the stream event. So the difference is typed-vs-schemaless. This IS a genuine cloud-sdk GAP: cloud-sdk-api has no low-level 'get raw item by key as Map' API (DatabaseRepository is bean-typed only). RECOMMEND: add RawItemRepository.getItem(table,key)->Optional<Map<String,CloudAttributeValue>> to cloud-sdk. Added VisibilityS3ArchiverIT (3 tests, DynamoDB Local) exercising the raw-read+archive path. Goals 15k/15l: added HandlerSupportTest to both lambdas (8+8 tests).",
+      "detail": "",
+      "tags": [
+        "goal-11",
+        "goal-12",
+        "goal-15",
+        "cloud-sdk-gap",
+        "lambda",
+        "done"
+      ],
+      "references": [
+        "visibility/visibility-s3-archiver/src/main/java/com/inttra/mercury/visibility/lambda/HandlerSupport.java:46",
+        "visibility/visibility-s3-archiver/src/main/java/com/inttra/mercury/visibility/lambda/VisibilityS3Archiver.java:98",
+        "booking/src/main/java/com/inttra/mercury/booking/lambda/S3ArchiveHandler.java",
+        "VisibilityS3ArchiverIT.java"
+      ]
+    },
+    {
+      "id": "18d57e0fc76e",
+      "timestamp": "2026-06-25T00:15:48.741725+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "DONE for this pass: mvn verify -f visibility/pom.xml BUILD SUCCESS (all 12 modules, 0 failures/0 errors, 6 pre-existing skips). Dropwizard `check` OK for inbound/matcher/outbound/pending INT configs (config re-alignment verified). All 11 sub-module jars packaged. Folded into single ION-12316 commit dd46b95a34 (amend), NOT pushed; no .md committed (docs gitignored). Goals 1,3,4,5,6,7,8,9,10,11,12,13,14,15 delivered+verified. Goal 2 (SQS/SNS backbone) DEFERRED with concrete plan in doc §10 (cloud-sdk 1.0.26 consumer API confirmed available; reason: ~12 main + ~30 test files, all-or-nothing, would destabilize green build, needs live SQS/SNS to verify). Session left active for user review before push.",
+      "detail": "",
+      "tags": [
+        "progress",
+        "build-success",
+        "commit",
+        "ready-for-review"
+      ],
+      "references": [
+        "commit dd46b95a34",
+        "visibility/docs/2026-06-24-visibility-refactor-sns-sqs-coverage.md"
+      ]
+    },
+    {
+      "id": "293d700ac832",
+      "timestamp": "2026-06-25T00:24:15.404149+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "PUSHED: single ION-12316 commit dd46b95a34 (full SHA dd46b95a3460f6a171a864b657284476953ffc63) force-with-lease over 35c1414cdd to origin/feature/ION-12316-visibiilty-aws-upgrade-copilot; PR #1066 auto-updated. develop..HEAD == exactly 1 commit; local == remote. Commit = 154 files (35 A / 111 M / 8 D), contains all yesterday+today work. No .md committed (docs gitignored). Commit hash recorded in visibility/docs/2026-06-24-visibility-refactor-sns-sqs-coverage.md.",
+      "detail": "",
+      "tags": [
+        "progress",
+        "push",
+        "commit-hash",
+        "PR-1066"
+      ],
+      "references": [
+        "commit dd46b95a3460f6a171a864b657284476953ffc63",
+        "PR #1066",
+        "origin/feature/ION-12316-visibiilty-aws-upgrade-copilot"
+      ]
+    },
+    {
+      "id": "0a4f691ba7b1",
+      "timestamp": "2026-06-25T01:22:58.375931+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "INT live startup smoke test (Goal 13, full server): ran visibility-itv-gps-processor `server` against INT with real AWS creds (~/.aws). Booted cleanly: VisibilityDynamoModule configured; region us-east-1 + DefaultCredentialsProvider resolved; 'Creating ContainerEvent partition-key repository for table: inttra_int_container_events' (re-aligned dynamoDbConfig -> legacy table name, HIGH-3 confirmed live); 'Creating Visibility S3 StorageClient (connectionTimeout=1000ms, socketTimeout=5000ms, maxConnections=50)' (Goal 6 tuning applied at real startup); Jetty up on 8080/8081. No IllegalStateException for missing config. Server stopped promptly to avoid consuming live INT messages.",
+      "detail": "",
+      "tags": [
+        "goal-13",
+        "goal-1",
+        "goal-6",
+        "int-startup",
+        "verified"
+      ],
+      "references": [
+        "visibility-itv-gps-processor-1.0.jar",
+        "visibility/visibility-itv-gps-processor/conf/int/config.yaml"
+      ]
+    },
+    {
+      "id": "ed544d25c304",
+      "timestamp": "2026-06-25T20:21:47.118094+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Resumed for 2026-06-25 follow-up (new prompt 2026-06-25-visibility-sns-sqs-refactor). Model: Claude Opus 4.8 (1M context). Tip at start dd46b95a34 (1 outgoing commit). Goals today: (1) land SQS/SNS cloud-sdk migration across backbone using booking as template; (2) match booking SQS/SNS test level (no new live ITs); (3) verify booking DynamoAdminCommand + add idempotency IT for VisibilityInboundDynamoDbAdminCommand (skip existing tables/GSIs with logging); (4) fix Jenkins CI failures in visibility-matcher/visibility-pending (stale booking:2.1.8.M dep); (5) document cloud-sdk gaps. Backup branch/tag for today to be created.",
+      "detail": "",
+      "tags": [
+        "model_info",
+        "2026-06-25",
+        "continuation"
+      ],
+      "references": [
+        "dd46b95a34",
+        ".github/prompts/refactor/2026-06-25-visibility-sns-sqs-refactor-prompt.md",
+        "prior-session-entries:296ca4124fe7443c"
+      ]
+    },
+    {
+      "id": "2589c1f3b43c",
+      "timestamp": "2026-06-25T20:34:10.804821+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "ROOT INSIGHT (user-confirmed): visibility must use commons=1.0.26-SNAPSHOT like booking. Booking uses ONE prop mercury.commons.version=1.0.26-SNAPSHOT for commons + cloud-sdk-api + cloud-sdk-aws + dynamo-integration-test. Visibility is split/stale: mercury.commons.version=1.R.01.023 (legacy commons that still ships com.inttra.mercury.messaging.* — 25 classes) + mercury.cloudsdk.version=1.0.26. commons 1.0.26 has 0 messaging.* classes. So bumping visibility commons 1.R.01.023->1.0.26 REMOVES legacy messaging.* and FORCES the SQS/SNS migration to cloud-sdk notification.*/messaging.*. messaging.model.MetaData/Event/EventGenerator/Annotations are field-identical mirrors of cloudsdk.notification.workflow.* (same toJsonString/parseJson) so persistence stays byte-identical (existing converter tests re-verify). Also mercury.dynamodbclient.version=1.R.01.023 (dynamo-client) still present — assess.",
+      "detail": "",
+      "tags": [
+        "sqs",
+        "sns",
+        "commons",
+        "version-alignment",
+        "goal-1",
+        "root-cause"
+      ],
+      "references": [
+        "visibility/pom.xml",
+        "booking/pom.xml",
+        "commons-1.0.26-SNAPSHOT.jar",
+        "commons-1.R.01.023.jar"
+      ]
+    },
+    {
+      "id": "68b442da06db",
+      "timestamp": "2026-06-25T20:40:49.212088+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "SQS/SNS migration DESIGN (booking-aligned): (1) Consolidated visibility to single mercury.commons.version=1.0.26-SNAPSHOT (commons+cloud-sdk-api+cloud-sdk-aws+dynamo-integration-test); dynamo-client stays on legacy mercury.dynamodbclient.version. (2) cloud-sdk-api/aws to be DIRECT deps per module. (3) Model/logging types are field+builder identical mirrors: messaging.model.MetaData/Event/Annotation(s), messaging.logging.EventGenerator/EventLogger/EventPublisher/ErrorHelper, messaging.util.RandomGenerator -> cloudsdk.notification.* (workflow/annotation/util). Scripted FQN import remap (persistence stays byte-identical, verified by existing converter tests). (4) SQS: messaging.sqs.SQSClient(AmazonSQS) -> cloudsdk.messaging.api.MessagingClient<String> (listMessages/sendMessage/deleteMessage); new mutable SqsMessage wrapper over immutable QueueMessage<String> to preserve DO_NOT_DELETE/DLQ control flags (QueueMessage has getters only). (5) SNS: messaging.sns.SNSClient + SNSEventPublisher -> NotificationService via NotificationClientFactory.createDefaultClient(topicArn) (NotificationService extends EventPublisher); EmptyEventPublisher implements cloud-sdk EventPublisher. (6) New VisibilityMessagingModule provides MessagingClient<String> (like BookingMessagingModule); apps drop legacy SQSModule+SNSModule.",
+      "detail": "",
+      "tags": [
+        "sqs",
+        "sns",
+        "design",
+        "goal-1",
+        "goal-2"
+      ],
+      "references": [
+        "SqsMessageHandler.java",
+        "VisibilityApplicationInjector.java",
+        "BookingMessagingModule.java",
+        "MessagingClient",
+        "NotificationClientFactory"
+      ]
+    },
+    {
+      "id": "acdec1061967",
+      "timestamp": "2026-06-25T21:08:26.947024+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "SQS/SNS migration IMPLEMENTED + all visibility main+test compile. Done: (1) single mercury.commons.version=1.0.26-SNAPSHOT; cloud-sdk-api/aws direct deps added to 8 modules (matcher gets cloud-sdk-api with io.searchbox/jest EXCLUSION to preserve its older Jest buildURI() API — cloud-sdk-api transitively pulls a newer io.searchbox that breaks TransactionScrollSearch; cloud-sdk-aws NOT direct on matcher). (2) New SqsMessage wrapper + rewritten SqsMessageHandler (MessagingClient<String>.listMessages, QueueMessage). (3) New VisibilityMessagingModule provides MessagingClient<String>; apps drop SQSModule+SNSModule. (4) Injector SNS path -> NotificationClientFactory.createDefaultClient(topicArn); EmptyEventPublisher implements cloud-sdk EventPublisher. (5) ES forced side-effects: legacy JestModule->cloudsdk.aws.module.JestModule; ESConfiguration/ElasticSearchClientModule -> cloudsdk.config.ElasticSearchServiceConfig (identical iface). (6) ~30 tests migrated to MessagingClient/SqsMessage/QueueMessage; SqsMessageHandlerTest + injector tests rewritten (AssertJ/@Nested). mvn test-compile BUILD SUCCESS.",
+      "detail": "",
+      "tags": [
+        "sqs",
+        "sns",
+        "goal-1",
+        "goal-2",
+        "compile-green",
+        "io.searchbox-gap"
+      ],
+      "references": [
+        "SqsMessageHandler.java",
+        "SqsMessage.java",
+        "VisibilityMessagingModule.java",
+        "VisibilityApplicationInjector.java",
+        "visibility/pom.xml",
+        "visibility-matcher/pom.xml"
+      ]
+    },
+    {
+      "id": "4870c4fa4b19",
+      "timestamp": "2026-06-25T21:33:21.817606+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Goal 3 DONE + LATENT BUG FOUND/FIXED. Booking's BookingDynamoDbAdminCommandIT (BaseDynamoDbIT, TestableCommand overriding createDynamoDbClient->DynamoDB Local, runPublic) has an IdempotentCreation test (run twice). cloud-sdk DynamoDbAdminCommand.createTableWithGsisIfNotExists is idempotent. Wrote VisibilityInboundDynamoDbAdminCommandIT (7 tests: client-config resolution, creates 3 tables + container_events 5 GSIs + composite keys, and second-run idempotency = skip existing/no mutation). It surfaced a REAL bug: ContainerEventPending partition key was LocalDate createDate with @DynamoDbConvertedBy(DateIso8601AttributeConverter); the cloud-sdk admin command's EntityTableMetadata.fromEntityClass resolves key attribute types by reflection/field and does NOT honour @DynamoDbConvertedBy -> threw 'Unsupported attribute type for DynamoDB key: java.time.LocalDate' -> the command would FAIL in production for container_events_pending. FIX: changed createDate to a String field (ISO-8601, attribute createDate, type S) — byte-identical to 1.x (which exposed getHashKey():String) and to the prior converter output; updated DAO save (.toString()) + 4 test builders + DaoIT assertion. Added IT infra (failsafe/native-libs/dynamo-integration-test/log4j 2.23.1) to visibility-inbound pom. All pending unit+IT and the new admin IT green. Documented cloud-sdk gap.",
+      "detail": "",
+      "tags": [
+        "goal-3",
+        "dynamo-admin-command",
+        "bug",
+        "cloud-sdk-gap",
+        "idempotency",
+        "backward-compat",
+        "fixed"
+      ],
+      "references": [
+        "VisibilityInboundDynamoDbAdminCommand.java",
+        "ContainerEventPending.java",
+        "VisibilityInboundDynamoDbAdminCommandIT.java",
+        "BookingDynamoDbAdminCommandIT.java"
+      ]
+    },
+    {
+      "id": "ab4ab5fa0f8f",
+      "timestamp": "2026-06-25T22:27:23.964825+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "2026-06-25 COMPLETE — ready for review, NOT pushed. Rebased onto latest develop; single outgoing commit amended to 61da96c79b (message contains ION-12316; docs/prompts are gitignored so not staged). Delivered: (1) SQS/SNS cloud-sdk migration across the full visibility backbone (MessagingClient<String>/QueueMessage + mutable SqsMessage wrapper; NotificationService SNS; VisibilityMessagingModule replaces SQSModule/SNSModule; messaging.* -> cloudsdk.notification.* byte-identical). (2) Single mercury.commons.version=1.0.26-SNAPSHOT + direct cloud-sdk-api/-aws deps (matcher excludes io.searchbox:jest to keep older Jest API). (3) CI fix: visibility-matcher booking 2.1.8.M->3.0.0.M (fixes matcher+pending). (4) DynamoAdminCommand idempotency IT + fixed latent prod bug (ContainerEventPending LocalDate key -> String/S; cloud-sdk admin command field-reflection ignores @DynamoDbConvertedBy). (5) cloud-sdk gaps documented. mvn -f visibility/pom.xml clean verify = BUILD SUCCESS: 1012 unit + 40 integration tests, 0 failures/errors, 6 pre-existing skips. SQS/SNS tested at booking's level (mocked, no new live ITs). Session left active pending user review/push.",
+      "detail": "",
+      "tags": [
+        "2026-06-25",
+        "complete",
+        "not-pushed",
+        "ION-12316",
+        "sqs",
+        "sns",
+        "dynamo-admin",
+        "ci-fix"
+      ],
+      "references": [
+        "61da96c79b",
+        "visibility/docs/2026-06-25-visibility-sns-sqs-refactor.md (gitignored, local)",
+        "feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-2026-06-25"
+      ]
+    },
+    {
+      "id": "6e5fd720d8d6",
+      "timestamp": "2026-06-25T23:09:26.371145+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Follow-up: REMOVED deprecated dynamo-client entirely (matching booking). It was only used for the obsolete DynamoDbTableCreationCommandConfig (legacy per-table throughput/GSI config, superseded by cloud-sdk DynamoDbAdminCommand deriving from entity annotations + BaseDynamoDbConfig). Removed: the dynamoDbTableCreationCommandConfig field+getTableConfig from VisibilityApplicationConfig (dead in main, test-only); the dynamoDbTableCreationCommandConfig: block from all 20 visibility config.yaml files; the dynamo-client dependency + mercury.dynamodbclient.version property. SIDE-EFFECT found+fixed: dynamo-client had been pinning guava 33.5.0; removing it let mybatis-guice/guice-multibindings drag old guava 18.0 into visibility-error-email -> Guice 7 NoSuchMethodError ImmutableMap.buildOrThrow. Fixed by pinning com.google.guava:guava:33.5.0-jre directly in visibility-error-email. Re-verified: mvn -f visibility/pom.xml clean verify BUILD SUCCESS, 1009 unit + 40 integration tests, 0 failures (1009 = prior 1012 minus 3 removed TableConfigLookup tests). Single outgoing commit re-amended to 0f5fa309fc (ION-12316). Doc updated with the full verification-command list + dynamo-client/guava gaps. NOT pushed.",
+      "detail": "",
+      "tags": [
+        "dynamo-client-removed",
+        "guava-fix",
+        "cleanup",
+        "complete",
+        "not-pushed",
+        "ION-12316"
+      ],
+      "references": [
+        "0f5fa309fc",
+        "VisibilityApplicationConfig.java",
+        "visibility-error-email/pom.xml",
+        "visibility-commons/pom.xml",
+        "20 config.yaml files"
+      ]
+    }
+  ]
+}

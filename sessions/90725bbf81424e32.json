@@ -1,0 +1,210 @@
+{
+  "id": "90725bbf81424e32",
+  "name": "visibility-rebase-refactor-2026-06-23",
+  "description": "Squash the ION-12316 visibility AWS SDK 2.x feature branch into one commit, rebase onto latest develop, address the 2026-06-01 design/impl review comments with backward compatibility to 1.x visibility, keep one unpushed commit. Continuation of completed session 284a7cba1d4244ee.",
+  "project": "mercury-services",
+  "created_at": "2026-06-23T22:03:00.815205+00:00",
+  "updated_at": "2026-06-24T00:16:24.146055+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "ION-12316",
+    "aws-sdk-upgrade",
+    "rebase",
+    "refactor",
+    "backward-compat",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "711eec8d22cc",
+      "timestamp": "2026-06-23T22:03:29.590066+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Starting ION-12316 visibility rebase/refactor task; continuation of completed session 284a7cba1d4244ee",
+      "detail": "Model: Claude Opus 4.8 with 1M context window. Task: squash 6 outgoing commits on feature/ION-12316-visibiilty-aws-upgrade-copilot into one, rebase onto latest develop, apply 2026-06-01 design/impl review comments (HIGH-1/2/3, MEDIUM-4/5/6; LOW-9 accepted as-is; table prefix aligned with booking/network; backward-compat with 1.x visibility), one unpushed commit with ION-12316. Prior session 284a7cba1d4244ee completed Phases 5-10 (commits 2a593bf407, a38e675661, 6d4d421fb5, 3bb89dc2e3, 69d9344e13, 6e6b2042e3). Note: existing commit messages use ION_12316 (underscore); final amended commit must use ION-12316 (hyphen).",
+      "tags": [
+        "start",
+        "model_info",
+        "continuation"
+      ],
+      "references": [
+        "284a7cba1d4244ee",
+        "feature/ION-12316-visibiilty-aws-upgrade-copilot",
+        "visibility/docs/2026-06-01-visibility-aws-upgrade-design-impl-review-claude.md"
+      ]
+    },
+    {
+      "id": "9e4501726408",
+      "timestamp": "2026-06-23T22:03:51.986331+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Step 1 done: backup branch + tag created at tip 6e6b2042e3",
+      "detail": "Original tip SHA: 6e6b2042e34b21d07846adfe5521b376c6e94ab3. Backup branch: feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-2026-06-23. Backup tag: ION-12316-pre-rebase-backup-2026-06-23. 6 outgoing commits vs develop. Restore with: git reset --hard feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-2026-06-23",
+      "tags": [
+        "backup",
+        "git"
+      ],
+      "references": [
+        "feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-2026-06-23",
+        "ION-12316-pre-rebase-backup-2026-06-23"
+      ]
+    },
+    {
+      "id": "8f7f7a1097f0",
+      "timestamp": "2026-06-23T22:06:09.137131+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Rebase complete: 1 conflict (visibility/pom.xml) resolved combining develop .023 versions + cloudsdk property",
+      "detail": "Squashed 6 commits -> single commit 78b00daa39, then rebased onto develop (tip 52ab249b93). Only conflict: visibility/pom.xml. Develop (ION-15892 security update) bumped mercury.commons.version & mercury.dynamodbclient.version to 1.R.01.023; branch had .021 + added mercury.cloudsdk.version=1.0.26-SNAPSHOT. Resolved by KEEPING develop's newer .023 versions AND re-adding the cloudsdk.version property (combine functional + upgrade per constraint #5). visibility-commons/pom.xml auto-merged cleanly. Rebase result: single commit 24cb5ee56f. Develop had 2 visibility commits since merge-base: ION-16054 (provider name in wm conf yamls), ION-15892 (AbstractMatcher security update) - need post-rebase compile check.",
+      "tags": [
+        "rebase",
+        "conflict-resolution",
+        "git"
+      ],
+      "references": [
+        "visibility/pom.xml",
+        "24cb5ee56f"
+      ]
+    },
+    {
+      "id": "e937acd18502",
+      "timestamp": "2026-06-23T22:20:05.769004+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Applied code changes for HIGH-1/MEDIUM-5, MEDIUM-4, MEDIUM-6; compiles",
+      "detail": "HIGH-1/MEDIUM-5: Rewrote MetaDataAttributeConverter to write S via MetaData.toJsonString() and read S via MetaData.parseJson() (lenient M fallback re-serializes map->json then parseJson). Removed MetaDataDynamoDbMixIn + bespoke configured ObjectMapper; attributeValueType()=S (was M). Deleted now-unused FlexibleLocalDateTimeDeserializer.java. MEDIUM-4: Reverted ContainerEventSubmissionAttributeConverter & ContainerEventEnrichedPropertiesAttributeConverter to bare new ObjectMapper() (epoch-millis Date encoding matching legacy v1 ContainerEventSubmissionConverter), kept FAIL_ON_UNKNOWN_PROPERTIES=false for tolerant reads (no write-format impact); removed JavaTimeModule + WRITE_DATES_AS_TIMESTAMPS=false. MEDIUM-6: Narrowed ContainerEventDao.findById retry to DynamoDbErrorHandler.isRetryableError(e) (cloud-sdk transient/throttling), non-transient rethrown immediately; added Thread.currentThread().interrupt() restore. visibility-commons test-compile BUILD SUCCESS.",
+      "tags": [
+        "code_change",
+        "converters",
+        "backward-compat"
+      ],
+      "references": [
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/model/containerEvent/converters/MetaDataAttributeConverter.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/persistence/ContainerEventDao.java"
+      ]
+    },
+    {
+      "id": "e114e9dbfc0d",
+      "timestamp": "2026-06-23T22:24:54.137481+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "HIGH-2/HIGH-3 config added to 36 yamls (env mirrors legacy, prefix preserved); converter+retry tests pass",
+      "detail": "HIGH-3: Confirmed cloud-sdk getTablePrefix() = environment + \"_\" (bytecode makeConcatWithConstants on environment field; booking uses environment=inttra_int_booking -> inttra_int_booking_). Visibility @Table names: container_events, booking_BookingDetail; legacy physical tables = <env>_ + name (e.g. inttra_int_container_events, inttra_int_booking_BookingDetail). HIGH-2: Added cloudSdkDynamoDbConfig block (environment mirroring each file's own legacy dynamoDbConfig.environment + sseEnabled:false, sibling-aligned shape) to all 36 visibility config yamls across conf/, visibility-inbound, -itv-gps-processor, -matcher, -outbound, -pending, -wm-inbound-processor (incl. inttra2_cv outlier for cvt subscription). All app config classes extend VisibilityApplicationConfig which holds the field, so no unknown-property risk. Kept legacy dynamoDbConfig (still used by table-creation command + ES) -> documented dual-config retained. Added MetaDataAttributeConverterTest (5 tests) + 2 DAO retry tests; 18 unit tests pass.",
+      "tags": [
+        "code_change",
+        "config",
+        "table-prefix",
+        "HIGH-2",
+        "HIGH-3"
+      ],
+      "references": [
+        "visibility/conf/int/config.yaml",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/config/VisibilityDynamoModule.java"
+      ]
+    },
+    {
+      "id": "ab97a3db68f8",
+      "timestamp": "2026-06-23T23:10:29.847035+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "ContainerEventDaoIT (10 tests) passes on DynamoDB Local; failsafe+deps wired; 190 unit + 10 IT green",
+      "detail": "Added exhaustive DynamoDB integration test ContainerEventDaoIT (extends BaseDynamoDbIT from dynamo-integration-test, @Tag(\"integration\"), mirrors booking *DaoIT). 10 IT tests pass against DynamoDB Local: StorageFormat(4): metaData stored as S == MetaData.toJsonString() (HIGH-1), submission/enriched stored as S not M, submission JSON byte-identical to legacy bare-ObjectMapper (MEDIUM-4), expiresOn N + createdDate/lastModifiedDateUtc S; LegacyReads(3): reads legacy S metaData, legacy M metaData, legacy M submission; RoundTrip(2); GsiQueries(1) bookingNumber GSI. Added failsafe + maven-dependency-plugin(copy native-libs) to visibility-commons pom. Resolved 2 dependency conflicts for DynamoDB Local: pinned log4j-api 2.23.1 (compile, used by main) + log4j-core 2.23.1 (test); pinned aws-java-sdk-dynamodb & aws-java-sdk-core 1.12.721 (compile - has both v1 datamodeling for legacy converters AND OnDemandThroughput for DynamoDBLocal 2.5.2). 190 unit + 10 IT pass. BUILD SUCCESS.",
+      "tags": [
+        "test_result",
+        "integration-test",
+        "dynamodb",
+        "backward-compat"
+      ],
+      "references": [
+        "visibility/visibility-commons/src/test/java/com/inttra/mercury/visibility/common/persistence/ContainerEventDaoIT.java",
+        "visibility/visibility-commons/pom.xml"
+      ]
+    },
+    {
+      "id": "f86dd832bb7e",
+      "timestamp": "2026-06-23T23:28:57.942078+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Mapped legacy messaging.* -> cloud-sdk notification.*/messaging.*; starting commons 1.0.26 migration",
+      "detail": "User directed: bump commons to 1.0.26-SNAPSHOT (DW 5.x), make cloud-sdk-api/aws/commons/dynamo-integration-test direct deps pinned to it, remove all 1.x AWS deps except DynamoDBLocal(test) + lambda runtime events. Investigation: commons 1.0.26 REMOVED com.inttra.mercury.messaging.* (65 visibility files use it). These classes were refactored into cloud-sdk-api/aws under cloudsdk.notification.* and cloudsdk.messaging.*: MetaData/Event/EventLogger/EventPublisher/EventGenerator->notification.workflow; Annotation/Annotations/ErrorHelper->notification.annotation; RandomGenerator->notification.util; SNSEventPublisher->notification.workflow.SnsEventPublisher; SQSClient->messaging.api.MessagingClient (new API); SNSClient->notification.api.NotificationService/impl.SnsService (new API). cloud-sdk MetaData has identical Builder(7-arg)/Projection/parseJson/toJsonString API. Plan: (1) mechanical import remap for 1:1 classes, (2) migrate SQS/SNS client usages to new API, (3) remove legacy v1 dynamo converters + dynamo-client, (4) keep lambda runtime events + DynamoDBLocal test deps, (5) dependencyManagement pinning like booking.",
+      "tags": [
+        "decision",
+        "commons-1.0.26",
+        "messaging-migration"
+      ],
+      "references": [
+        "visibility/pom.xml",
+        "C:/Users/arijit.kundu/projects/mercury-services-commons/cloud-sdk-api"
+      ]
+    },
+    {
+      "id": "e9e4b3bb4f13",
+      "timestamp": "2026-06-23T23:53:00.583934+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "SQS/SNS upgrade was partial (only 2 lambda pollers); 12 core classes still legacy. Restored green branch (commons 1.R.x).",
+      "detail": "User asked whether the squashed upgrade already migrated SQS/SNS to cloud-sdk MessagingClient (VisibilityMessagingModule). FINDING: No VisibilityMessagingModule class exists - the name appears ONLY in design docs (visibility-aws2x-plan.md, CONFLUENCE-visibility.md), i.e. planned not implemented. SQS migration is PARTIAL: cloud-sdk MessagingClient is used in only 4 main classes (visibility-outbound-poller + visibility-pending-start lambdas via MessagingClientFactory). The core SQS/SNS backbone = 12 main classes (visibility-commons SqsMessageHandler + VisibilityApplicationInjector SNS; inbound CargoVisibilityService/InboundEdiProcessor/ReprocessService; matcher MatchingProcessor/AbstractMatcher; outbound Outbound*Processor/OutboundGenerator; pending PendingSqsProcessor; itv-gps GPSEventProcessor; wm WMEventProcessor) STILL use legacy messaging.sqs.SQSClient/messaging.sns.SNSClient from commons 1.R.x. So SQS/SNS upgrade was NOT complete (DynamoDB/S3/SSM were). This legacy messaging.* dependency blocks the commons 1.0.26 bump (1.0.26 dropped that package). DECISION: reverted the partial 1.0.26 migration (commons->1.R.01.023, inverse-remapped 47 files, reverted app poms) to restore green; full reactor verify BUILD SUCCESS (all 12 modules + ContainerEventDaoIT). The commons-1.0.26 move requires completing the SQS/SNS backbone migration as a dedicated follow-up.",
+      "tags": [
+        "finding",
+        "sqs-sns",
+        "commons-1.0.26",
+        "restore-green"
+      ],
+      "references": [
+        "visibility/docs/visibility-aws2x-plan.md"
+      ]
+    },
+    {
+      "id": "4d1d3ce1958a",
+      "timestamp": "2026-06-23T23:58:10.011190+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Done: single green ION-12316 commit (rebase+review fixes+ITs), not pushed; commons1.0.26/SQS-SNS deferred & documented",
+      "detail": "FINAL: Single outgoing commit 9a678c919c \"ION-12316: Visibility (Track and Trace) AWS SDK 2.x cloud-sdk upgrade\", rebased on current develop tip 52ab249b93, NOT pushed. Contains: rebase + HIGH-1/MEDIUM-5 (MetaData S converter), MEDIUM-4 (legacy date encoding), MEDIUM-6 (narrowed retry), HIGH-2/HIGH-3 (cloudSdkDynamoDbConfig in 36 yamls, table prefix = legacy env), + exhaustive ContainerEventDaoIT (10 IT) + converter/retry unit tests + failsafe/native-libs/log4j/aws-sdk-1.12.721 test wiring. Full mvn verify -f visibility/pom.xml BUILD SUCCESS (190 unit + 10 IT, all 12 modules). Docs are gitignored (**/docs/) per repo convention - not committed; rebase-refactor doc at visibility/docs/2026-06-23-visibility-rebase-refactor.md (local). DEFERRED to separate effort (per user): commons 1.0.26-SNAPSHOT (DW5.x) upgrade + completing the SQS/SNS backbone migration (12 main classes still on legacy messaging.sqs.SQSClient/sns.SNSClient -> cloudsdk.messaging.MessagingClient / cloudsdk.notification.NotificationService) + removing legacy v1 dynamo converters/dynamo-client. Full mapping + step-by-step plan documented in section 6 of the rebase-refactor doc.",
+      "tags": [
+        "progress",
+        "complete",
+        "single-commit"
+      ],
+      "references": [
+        "9a678c919c",
+        "visibility/docs/2026-06-23-visibility-rebase-refactor.md"
+      ]
+    },
+    {
+      "id": "67f5ace73bb7",
+      "timestamp": "2026-06-24T00:06:41.639686+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pushed single ION-12316 commit to remote with upstream tracking (first push)",
+      "detail": "Per user instruction, pushed the single commit 9a678c919c (ION-12316) to origin for the first time. Branch feature/ION-12316-visibiilty-aws-upgrade-copilot created on remote (origin = https://git.dev.e2open.com/scm/int/mercury-services.git) with upstream tracking set. Remote tip == local tip == 9a678c919c; exactly one commit vs develop. Future workflow confirmed: amend/rebase locally keeping one outgoing commit, then git push --force-with-lease.",
+      "tags": [
+        "progress",
+        "push",
+        "remote"
+      ],
+      "references": [
+        "9a678c919c",
+        "origin/feature/ION-12316-visibiilty-aws-upgrade-copilot"
+      ]
+    },
+    {
+      "id": "78e9ca3a35dd",
+      "timestamp": "2026-06-24T00:16:24.146026+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Removed 9 tracked docs from commit+remote via amend+force-push-with-lease; PR #1065 auto-updated; files kept locally",
+      "detail": "User reported 9 visibility/docs/*.md were committed+pushed (they were tracked in prior feature commits, gitignore only affects untracked, so squash carried them in). Undo: git rm -r --cached visibility/docs (untracked the 9 md, files kept on disk, **/docs/ ignore keeps them out), git commit --amend --no-edit (9a678c919c -> 35c1414cdd, single ION-12316 commit), git push --force-with-lease (remote updated, existing PR #1065 auto-updated). Verified: remote tip 35c1414cdd == local, no docs tracked under visibility/docs on remote, one commit vs develop. PR #1065 did NOT need deletion - force-push updated it.",
+      "tags": [
+        "progress",
+        "docs-removal",
+        "force-push"
+      ],
+      "references": [
+        "35c1414cdd",
+        "PR-1065"
+      ]
+    }
+  ]
+}

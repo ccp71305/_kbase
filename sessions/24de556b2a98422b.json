@@ -1,0 +1,17 @@
+{
+  "id": "24de556b2a98422b",
+  "name": "ION-15978 Integration Validation API Review",
+  "description": "Critical code review of Integration Validation API implementation on branch ION-15958-Integration-Validation-Service-Impl",
+  "project": "mercury-services",
+  "created_at": "2026-06-22T20:49:44.026279+00:00",
+  "updated_at": "2026-06-22T20:49:44.026485+00:00",
+  "status": "active",
+  "tags": [
+    "ION-15978",
+    "ION-15958",
+    "integration-validation",
+    "code-review",
+    "booking"
+  ],
+  "entries": []
+}
