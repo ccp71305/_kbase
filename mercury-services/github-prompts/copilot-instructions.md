@@ -95,12 +95,14 @@ At the **START** of every conversation involving multi-step work:
 - Call `session_add_context` after every significant action: decisions made, files changed, errors found, tests run, blockers hit
 - Use appropriate categories: `decision`, `finding`, `blocker`, `progress`, `code_change`, `test_result`
 - Include file paths, Jira keys, and error snippets in `references` and `detail`
+- **Record token usage telemetry.** After each expensive model turn (and at minimum once at the end of the conversation), call `session_record_usage` with the values from the model response's usage block so the session captures token spend and cost. Pass the provider's usage fields directly: `input_tokens` (uncached prompt tokens only), `output_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`, and `model` (e.g. `claude-opus-4-8`). This populates the `session_usage_report` / `telemetry_report` views; without it those reports show `record_count = 0` and `$0.00`.
 
 At the **END** of a conversation:
 - Add a final summary entry with category `progress`
 - If work is complete, call `session_update_status` to mark it `completed`
 - If work continues later, leave status as `active`
 - try to log the LLM model that the agent is using in the session context for traceability. This can be done by calling `session_add_context` with category `model_info` and including the model name in the detail or references.
+- **Record final token usage** with `session_record_usage` (see the DURING section) so the session's total token spend and cost are captured for the `telemetry_report` portfolio view.
 
 - If context window capacity crosses 85% and you still have a lot of TODOs left, persist all important details in session context and create a new session and start a new chat. Make sure to link the new session to the old one by adding a reference to the old session in the new session's context and vice versa.
 
