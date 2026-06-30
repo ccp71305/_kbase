@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "./copilot_telemetry_hook.sh",
+        "powershell": "./copilot_telemetry_hook.ps1",
+        "cwd": ".github/hooks",
+        "timeoutSec": 20
+      }
+    ]
+  }
+}

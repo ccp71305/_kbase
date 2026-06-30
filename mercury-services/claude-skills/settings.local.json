@@ -48,7 +48,10 @@
       "Bash(mkdir -p \"C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase/ai-learning/claudeopus/awscert\" && echo \"ready\")",
       "Bash(mkdir -p \"C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase/ai-learning/claudeopus/awscert\" && echo \"dir ready\")",
       "Bash(cp \"C:/Users/arijit.kundu/AppData/Local/Temp/claude/C--Users-arijit-kundu-projects-mercury-services/d235b9c4-e253-4ee7-9a70-5ff1ddcd5e89/scratchpad/01-python-foundations-for-ai.md\" \"C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase/ai-learning/claudeopus/aipython/01-python-foundations-for-ai.md\" && wc -l \"C:/Users/arijit.kundu/OneDrive - WiseTech Global/claude-workspace/_kbase/ai-learning/claudeopus/aipython/01-python-foundations-for-ai.md\")",
-      "Bash(PYTHONIOENCODING=utf-8 python verify_opus.py)"
+      "Bash(PYTHONIOENCODING=utf-8 python verify_opus.py)",
+      "WebSearch",
+      "WebFetch(domain:www.anthropic.com)",
+      "Bash(ls -d ailearning ../ailearning ~/ailearning 2>/dev/null; echo \"---done---\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\arijit.kundu\\projects\\mercury-services\\watermill-publisher",

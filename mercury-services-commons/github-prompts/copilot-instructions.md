@@ -187,3 +187,18 @@ For all AWS upgrade related changes, create a document in the docs folder of the
 
 
 ---
+
+## Session Telemetry (mcp-context-server)
+
+If the `mcp-context-server` MCP tools are available in this workspace, record token usage:
+
+- After an expensive model turn (and at minimum once at the end of the conversation), call
+  `session_record_usage` with the values from the model response's `usage` block:
+  `input_tokens` (uncached prompt tokens only), `output_tokens`, `cache_read_input_tokens`,
+  `cache_creation_input_tokens`, and `model` (e.g. `claude-opus-4-8`). Pass the cache fields
+  separately — do not fold them into `input_tokens`.
+- Do not fabricate numbers. If you cannot see your own token counts, skip recording rather
+  than guessing (estimates belong only in `session_estimate_tokens`, labelled
+  `source: "estimated"`).
+- Use `session_usage_report` (per session) and `telemetry_report` (across sessions) to
+  review cost, cache-hit ratio, and context-window utilization.

@@ -102,7 +102,7 @@ At the **END** of a conversation:
 - If work is complete, call `session_update_status` to mark it `completed`
 - If work continues later, leave status as `active`
 - try to log the LLM model that the agent is using in the session context for traceability. This can be done by calling `session_add_context` with category `model_info` and including the model name in the detail or references.
-- **Record final token usage** with `session_record_usage` (see the DURING section) so the session's total token spend and cost are captured for the `telemetry_report` portfolio view.
+1- **Record final token usage** with `session_record_usage` (see the DURING section) so the session's total token spend and cost are captured for the `telemetry_report` portfolio view.
 
 - If context window capacity crosses 85% and you still have a lot of TODOs left, persist all important details in session context and create a new session and start a new chat. Make sure to link the new session to the old one by adding a reference to the old session in the new session's context and vice versa.
 
