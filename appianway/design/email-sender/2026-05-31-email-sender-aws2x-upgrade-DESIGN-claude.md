@@ -78,7 +78,7 @@ flowchart LR
       AWS[cloud-sdk-aws SesEmailServiceImpl, EmailClientFactory]
     end
     ES --> API
-    API <|.. AWS
+    AWS -.->|implements| API
     note[Thymeleaf NOT in cloud-sdk - stays in email-sender only]
 ```
 

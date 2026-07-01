@@ -177,14 +177,14 @@ flowchart TB
     FDS --> OFP
     FAP --> FDA
     HND --> HI
-    HI <|.. ZC
-    TR <|.. DTR
-    TR <|.. GDTR
-    TR <|.. GDTNMR
-    TR <|.. RSR
-    TR <|.. FTR
-    TR <|.. IPTR
-    TR <|.. MDTR
+    ZC -.->|implements| HI
+    DTR -.->|implements| TR
+    GDTR -.->|implements| TR
+    GDTNMR -.->|implements| TR
+    RSR -.->|implements| TR
+    FTR -.->|implements| TR
+    IPTR -.->|implements| TR
+    MDTR -.->|implements| TR
     TP --> TR
     DEH --> ANFE
     DEH --> MPE

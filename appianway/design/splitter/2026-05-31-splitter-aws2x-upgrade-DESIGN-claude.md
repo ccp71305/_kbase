@@ -100,7 +100,7 @@ flowchart LR
     EH --> SQSc
     EH --> EL
     WS & SQSc & EL --> API
-    API <|.. AWS
+    AWS -.->|implements| API
     AWS --> AWSCloud
     ESM -->|factory-built binds| WS & SQSc & EL & LIS
 ```
