@@ -1,0 +1,48 @@
+{
+  "id": "de57be86117046cb",
+  "name": "visibility-token-storage-demo-2026-06-29",
+  "description": "Token-storage / telemetry demo session. Reviews the latest visibility doc (2026-06-29-visibility-sdklib-pending.md) and records token usage. Linked from completed session e859886228eb482d.",
+  "project": "mercury-services",
+  "created_at": "2026-06-29T23:42:39.282546+00:00",
+  "updated_at": "2026-06-29T23:42:59.626609+00:00",
+  "status": "active",
+  "tags": [
+    "telemetry",
+    "tokens",
+    "visibility",
+    "ION-12316",
+    "demo"
+  ],
+  "entries": [
+    {
+      "id": "dffa55d8173a",
+      "timestamp": "2026-06-29T23:42:48.163733+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Linked to predecessor e859886228eb482d; reviewed latest doc 2026-06-29-visibility-sdklib-pending.md",
+      "detail": "New session created for token-storage/telemetry purposes, linked to completed predecessor session e859886228eb482d (visibility-sdklib-pending-summary-2026-06-29). Reviewed the latest document visibility/docs/2026-06-29-visibility-sdklib-pending.md: it consolidates (A) pending visibility code changes F1-F8 + SES wrapper + A.4 operational config discrepancies, and (B) seven cloud-sdk library enhancements B-1..B-7, plus suggested sequencing (C). The doc now includes the F1 immediate-vs-planned callout: immediate fix = module-local B2 (override VisibilityInboundDynamoDbAdminCommand with corrected EntityTableMetadata for ContainerEvent) + C1 (IT attribute-name assertions), visibility-inbound only, zero cross-module retest; planned = library fix B-1 (EntityTableMetadata honor @DynamoDbAttribute) which carries the all-modules retest cost. ION-12316 migration functionally complete, PR #1066 open to develop.",
+      "tags": [],
+      "references": [
+        "visibility/docs/2026-06-29-visibility-sdklib-pending.md",
+        "session:e859886228eb482d",
+        "ION-12316",
+        "PR-1066"
+      ]
+    }
+  ],
+  "usage": [
+    {
+      "id": "aff4a57916ca",
+      "timestamp": "2026-06-29T23:42:59.626592+00:00",
+      "agent": "claude-opus-4-8",
+      "model": "claude-opus-4-8",
+      "input_tokens": 9000,
+      "output_tokens": 3500,
+      "cache_read_input_tokens": 48000,
+      "cache_creation_input_tokens": 12000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "DEMO/ESTIMATED usage — not from a real provider usage block (Copilot surface does not expose per-turn token counts to the agent). Recorded at user request to exercise token storage / telemetry. Treat as approximate, not measured."
+    }
+  ]
+}

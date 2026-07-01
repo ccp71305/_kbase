@@ -1,0 +1,47 @@
+{
+  "id": "534740afb8b84d1c",
+  "name": "aws-sdk-upgrade-refactor-prompt-generator-2026-06-30",
+  "description": "Created a generalized AWS-SDK-2.x refactor prompt generator and verified the mcp-context-server token-usage telemetry capability.",
+  "project": "mercury-services",
+  "created_at": "2026-06-30T15:03:15.945744+00:00",
+  "updated_at": "2026-06-30T16:35:52.753154+00:00",
+  "status": "active",
+  "tags": [
+    "prompts",
+    "generator",
+    "aws-sdk-upgrade",
+    "telemetry",
+    "tooling"
+  ],
+  "entries": [
+    {
+      "id": "093d04c21e02",
+      "timestamp": "2026-06-30T15:03:35.963314+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "progress",
+      "summary": "Verified token-usage telemetry is working; created generalized refactor prompt generator",
+      "detail": "Verified the mcp-context-server token-usage telemetry (built 2026-06-29, session d7152d26d4374941). Tools: session_record_usage, session_usage_report, session_estimate_tokens, telemetry_report, session_context_health. Harness hooks installed for BOTH: Copilot CLI agentStop (.github/hooks/telemetry.json -> scripts/copilot_telemetry_hook.py) and Claude Code Stop (.claude/settings.json -> scripts/claude_telemetry_hook.py). Live data confirms it works: telemetry_report = 577 records, $171.45, 68 sessions; copilot-cli session 5a8f0c36 = 4 records / 1.066M prompt tokens / $2.74. KEY CONSTRAINT: the model cannot see its own usage block (goes to harness, not model) -> agent must NOT fabricate session_record_usage; hooks capture automatically; agent only reviews via session_usage_report at end.\n\nCreated .github/prompts/aws-sdk-upgrade-refactor-generator.md — a GENERATOR prompt that, from inputs (mandatory: module, doc, goals; optional: branch, references, jira, confluence), writes a new self-contained specific prompt to .github/prompts/refactor/<yyyymmdd>-<module>-<brief-summary>.md WITHOUT editing the generator. Generated prompt keeps: constraints, session+telemetry protocol, Step 0 orient/backup, Step 1 rebase (develop functional changes win on conflict then re-apply AWS upgrade, single outgoing commit, mvn clean verify before commit), implementation step, tests+coverage step (local JaCoCo full coverage on new code, all DynamoDB DAO/service integration-tested, SQS/SNS mirror booking+network, SES mirror booking+auth), cloud-sdk gaps step, verify/commit/document/handoff, and a command-logging requirement (log every search/grep/git/analysis command with descriptive comments).",
+      "tags": [],
+      "references": [
+        ".github/prompts/aws-sdk-upgrade-refactor-generator.md",
+        ".github/prompts/refactor/2026-06-25-visibility-sns-sqs-refactor-prompt.md",
+        ".github/prompts/_base-session-protocol.md",
+        ".github/hooks/telemetry.json",
+        "scripts/copilot_telemetry_hook.py"
+      ]
+    },
+    {
+      "id": "55b178cc60a6",
+      "timestamp": "2026-06-30T16:35:52.753060+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "code_change",
+      "summary": "Generalized generator: branch+jira mandatory, multi-file refs, S3 mirror booking, kb tooling, test-command/count logging",
+      "detail": "Edits to .github/prompts/aws-sdk-upgrade-refactor-generator.md: (1) branch now MANDATORY — generated prompt: if branch exists -> checkout + rebase onto latest develop keeping single outgoing commit; if not -> git checkout develop && pull --ff-only, then git checkout -b <branch> develop. Step 0 reworked into 'Orient, Resolve Branch & Back Up'; Step 1 notes a freshly-created branch is already current. (2) jira now MANDATORY (work-id = jira; commit hook needs valid key); removed all {{#NO_BRANCH}}/{{#NO_JIRA}}/{{#JIRA}} conditionals. (3) references may be one or MORE files. (4) S3 added to Constraint 7 reference modules (mirror booking) and to Step 3 test level + Definition of Done. (5) New Constraint 13 USE THE KNOWLEDGE BASE — kb_grep/kb_find_files verified working over this repo + mercury-services-commons; semantic kb_search may be empty, fall back. (6) New Constraint 14 LOG PASSING TEST COMMANDS + TEST COUNTS — Step 3 now requires logging every passing unit/integration test command and an accurate per-runner (JUnit/TestNG) test-count summary, with surefire/failsafe report-tally commands. Verified kb tooling live: kb_grep returned 37KB, kb_find_files found 7 MessagingClient files under mercury-services-commons; semantic kb_search returned 0.",
+      "tags": [],
+      "references": [
+        ".github/prompts/aws-sdk-upgrade-refactor-generator.md"
+      ]
+    }
+  ],
+  "usage": []
+}

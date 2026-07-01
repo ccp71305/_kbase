@@ -1,0 +1,42 @@
+{
+  "id": "3f95451f-63fa-4e2f-ace5-e77187894b50",
+  "name": "claude-code 3f95451f",
+  "description": "Auto-tracked token usage from the Claude Code Stop hook.",
+  "project": "",
+  "created_at": "2026-06-30T14:23:50.290546+00:00",
+  "updated_at": "2026-06-30T14:23:50.290912+00:00",
+  "status": "active",
+  "tags": [
+    "claude-code",
+    "auto-telemetry"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "fdff2e9c289e",
+      "timestamp": "2026-06-30T14:23:50.290876+00:00",
+      "agent": "claude-code",
+      "model": "claude-opus-4-8",
+      "input_tokens": 6303,
+      "output_tokens": 482,
+      "cache_read_input_tokens": 29291,
+      "cache_creation_input_tokens": 3643,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_013oN9qeDsz9dFTGmCp4Kqv4"
+    },
+    {
+      "id": "dcd47ad18ef3",
+      "timestamp": "2026-06-30T14:23:50.290905+00:00",
+      "agent": "claude-code",
+      "model": "claude-opus-4-8",
+      "input_tokens": 6303,
+      "output_tokens": 482,
+      "cache_read_input_tokens": 29291,
+      "cache_creation_input_tokens": 3643,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_013oN9qeDsz9dFTGmCp4Kqv4"
+    }
+  ]
+}

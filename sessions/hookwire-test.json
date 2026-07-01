@@ -1,0 +1,42 @@
+{
+  "id": "hookwire-test",
+  "name": "claude-code hookwire",
+  "description": "Auto-tracked token usage from the Claude Code Stop hook.",
+  "project": "",
+  "created_at": "2026-06-30T00:09:39.456157+00:00",
+  "updated_at": "2026-06-30T00:09:39.456239+00:00",
+  "status": "active",
+  "tags": [
+    "claude-code",
+    "auto-telemetry"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "d51eaaf771e9",
+      "timestamp": "2026-06-30T00:09:39.456200+00:00",
+      "agent": "claude-code",
+      "model": "claude-opus-4-8",
+      "input_tokens": 5000,
+      "output_tokens": 800,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 30000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_001"
+    },
+    {
+      "id": "e6ffa5b26ad3",
+      "timestamp": "2026-06-30T00:09:39.456231+00:00",
+      "agent": "claude-code",
+      "model": "claude-opus-4-8",
+      "input_tokens": 1200,
+      "output_tokens": 2500,
+      "cache_read_input_tokens": 80000,
+      "cache_creation_input_tokens": 1500,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_002"
+    }
+  ]
+}

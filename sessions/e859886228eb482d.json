@@ -1,0 +1,73 @@
+{
+  "id": "e859886228eb482d",
+  "name": "visibility-sdklib-pending-summary-2026-06-29",
+  "description": "Review all docs under visibility/docs and produce a summary document (2026-06-29-visibility-sdklib-pending.md) outlining pending changes in visibility and needed cloud-sdk library enhancements.",
+  "project": "mercury-services",
+  "created_at": "2026-06-29T23:29:57.150904+00:00",
+  "updated_at": "2026-06-29T23:41:02.093736+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "aws-sdk-upgrade",
+    "cloud-sdk",
+    "documentation",
+    "summary",
+    "ION-12316"
+  ],
+  "entries": [
+    {
+      "id": "003cdf339f21",
+      "timestamp": "2026-06-29T23:31:48.355181+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Reviewed all visibility/docs; consolidated pending visibility changes + cloud-sdk library gaps",
+      "detail": "Reviewed 06-23 (rebase/refactor), 06-24 (sns-sqs-coverage), 06-25 (sns-sqs-refactor complete), 06-26 (AWS resource inventory), 06-27 (correctness review) docs + 06-01 summary. ION-12316 SQS/SNS/DynamoDB/S3/SES/SSM migration is functionally complete and PR #1066 is open to develop. Pending visibility code items: F1 HIGH-latent (fresh-create attribute-name mismatch, fix B2+C), F8 MEDIUM (outbound TTL would be enabled), F2 MEDIUM (s3-archiver socket 300s->30s, maxConn 100->50), F3 LOW-MED (new 30s apiCallTimeout), F4 LOW (N attrs archived as quoted strings), F5 LOW (streams not managed - deferred/agreed), F6 LOW (SNS payload byte-identical contract test), F7 LOW (OffsetDateTimeTypeConverter null throws), plus SES EmailService wrapper adoption opportunity. cloud-sdk library enhancements needed: (1) EntityTableMetadata ignores @DynamoDbAttribute for key/GSI names; (2) EntityTableMetadata ignores @DynamoDbConvertedBy on key types; (3) no raw/schemaless getItem (RawItemRepository); (4) AwsStorageConfig.Builder lacks socket/connection-timeout/maxConnections + default-cred fallback; (5) cloud-sdk-aws pulls newer io.searchbox:jest breaking consumers; (6) Guava version mgmt in commons/BOM; (7) OffsetDateTimeTypeConverter null defensiveness.",
+      "tags": [],
+      "references": [
+        "visibility/docs/2026-06-27-claude-review-aws-services-upgrade.md",
+        "visibility/docs/2026-06-25-visibility-sns-sqs-refactor.md",
+        "visibility/docs/2026-06-24-visibility-refactor-sns-sqs-coverage.md",
+        "visibility/docs/2026-06-26-aws-service-resource-details.md",
+        "ION-12316",
+        "PR-1066"
+      ]
+    },
+    {
+      "id": "6a0fd8cad0db",
+      "timestamp": "2026-06-29T23:33:36.094897+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Authored 2026-06-29-visibility-sdklib-pending.md summary document",
+      "detail": "Created visibility/docs/2026-06-29-visibility-sdklib-pending.md consolidating: (A) pending visibility code changes F1-F8 + SES wrapper + A.4 operational config discrepancies, and (B) seven cloud-sdk library enhancements B-1..B-7, plus a suggested sequencing (C). Document links all 7 source docs reviewed. ION-12316 migration is functionally complete, PR #1066 open to develop, build green (1009 unit + 40 IT).",
+      "tags": [],
+      "references": [
+        "visibility/docs/2026-06-29-visibility-sdklib-pending.md",
+        "ION-12316",
+        "PR-1066"
+      ]
+    },
+    {
+      "id": "ac0a4a00f0c4",
+      "timestamp": "2026-06-29T23:41:02.053322+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Added explicit session_record_usage token-telemetry instructions to copilot-instructions.md",
+      "detail": "User believed copilot-instructions.md already required session token-usage recording; it did not. Verified: only an existing 'model_info' logging line at line 103, no session_record_usage instruction. Added explicit token-usage telemetry instructions to the Session Context Protocol: a DURING-conversation bullet to call session_record_usage after expensive turns (pass input_tokens uncached, output_tokens, cache_read/creation, model) and an END-conversation bullet to record final usage, noting that without it telemetry_report/session_usage_report show record_count=0 and $0.00.",
+      "tags": [],
+      "references": [
+        ".github/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "f70e42ba3729",
+      "timestamp": "2026-06-29T23:41:02.093717+00:00",
+      "agent": "claude-opus-4-8",
+      "category": "model_info",
+      "summary": "LLM model: Claude Opus 4.8",
+      "detail": "Agent model for this session: Claude Opus 4.8 (GitHub Copilot).",
+      "tags": [],
+      "references": []
+    }
+  ],
+  "usage": []
+}

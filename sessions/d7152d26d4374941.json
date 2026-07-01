@@ -1,0 +1,143 @@
+{
+  "id": "d7152d26d4374941",
+  "name": "mcp-summary-server session telemetry feature 2026-06-29",
+  "description": "Designed and implemented session token-usage telemetry for mcp-context-server; set up local git; diagnosed SSO/install issues. Work done with Claude Code (Opus 4.8).",
+  "project": "mcp-context-server",
+  "created_at": "2026-06-29T22:35:27.518356+00:00",
+  "updated_at": "2026-06-30T00:30:29.339864+00:00",
+  "status": "active",
+  "tags": [
+    "telemetry",
+    "tokens",
+    "design",
+    "git",
+    "sso"
+  ],
+  "entries": [
+    {
+      "id": "bace163cee08",
+      "timestamp": "2026-06-29T22:35:38.107264+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "code_change",
+      "summary": "Implemented session telemetry feature on branch feature/session-telemetry",
+      "detail": "Added mcp_context_server/telemetry.py (estimator, MODEL_PRICING, MODEL_CONTEXT_WINDOWS, record_cost_usd, summarize_usage); UsageRecord model + Session.usage/add_usage/usage_summary/stored_context_tokens in sessions.py; 3 config settings (MCP_ENABLE_TOKEN_ESTIMATION, MCP_TOKEN_CHARS_PER_TOKEN, MCP_MODEL_PRICING); 3 tools in main.py (session_record_usage, session_usage_report, session_estimate_tokens); tests/test_telemetry.py (19 tests). All additive/backward-compatible; field names mirror OpenTelemetry GenAI conventions + Anthropic usage block. 36/36 tests pass; all 92 existing session files load under new model; zero new deps.",
+      "tags": [
+        "telemetry",
+        "feature"
+      ],
+      "references": [
+        "mcp_context_server/telemetry.py",
+        "mcp_context_server/sessions.py",
+        "mcp_context_server/main.py",
+        "tests/test_telemetry.py",
+        "docs/2026-06-29-mcp-summary-server-improvement.md"
+      ]
+    },
+    {
+      "id": "e4d941ebaf2d",
+      "timestamp": "2026-06-29T22:35:41.232893+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "decision",
+      "summary": "Local git initialized; doc on main, implementation on feature branch",
+      "detail": "git init (local only, no remote pushed per user). main = baseline + design doc (docs/2026-06-29-mcp-summary-server-improvement.md); feature/session-telemetry = implementation + README/copilot-instructions updates. Initially added .mcp-context-server/ to .gitignore to protect private session data, but user asked to revert it — reverted; doc §8 warns that git add -A will stage private sessions.",
+      "tags": [
+        "git",
+        "branch"
+      ],
+      "references": []
+    },
+    {
+      "id": "f35404960c0c",
+      "timestamp": "2026-06-29T22:35:50.447113+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "finding",
+      "summary": "SSO 401 root cause: server caches cookies at startup; needs restart after sso_login.py",
+      "detail": "jira_search/confluence_search returned 401 from the live MCP tools, but the cookie file was fresh/valid (10 cookies, ~8h left) and a fresh SSOCookieAuth() instance returned live Jira+Confluence data. Cause: SSOCookieAuth loads cookies once at startup and caches them (sso_auth.py _ensure_loaded); no runtime reload tool. Fix: reload the VS Code window / restart the MCP server. Future improvement candidate: auth_reload tool or re-read on 401.",
+      "tags": [
+        "sso",
+        "jira",
+        "confluence",
+        "gotcha"
+      ],
+      "references": [
+        "mcp_context_server/sso_auth.py"
+      ]
+    },
+    {
+      "id": "37fe473c235e",
+      "timestamp": "2026-06-29T22:35:54.099857+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "progress",
+      "summary": "Installed branch into local venv; recovered from WinError 32 half-uninstall",
+      "detail": "pip --force-reinstall failed with WinError 32 (running servers lock mcp-context-server.exe), leaving the package renamed-aside to ~cp_context_server* and removed from importable state. Recovered by deleting the ~cp_context_server* markers and extracting the prebuilt wheel into site-packages (exe was intact). Verified: imports from venv (not OneDrive), pip show clean, 34 tools register incl. the 3 new ones, Jira+Confluence return live data from the installed package. Remaining user action: reload VS Code MCP server in each window to activate new tools + refresh SSO cookies.",
+      "tags": [
+        "install",
+        "windows",
+        "recovery"
+      ],
+      "references": []
+    },
+    {
+      "id": "2af560df443a",
+      "timestamp": "2026-06-29T23:02:12.034250+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "code_change",
+      "summary": "Implemented improvements #1-5 on feature/session-telemetry; verified, no existing functionality broken",
+      "detail": "#1 SSO self-heal (_send reloads cookies + retries on 401; auth_reload tool; reset_client). #2 telemetry_report tool + telemetry.aggregate_sessions + SessionStore.load_all (cost/tokens by project & agent). #3 telemetry.count_tokens with optional Anthropic count_tokens (MCP_TOKENIZER). #4 session_context_health tool (flags bloated sessions). #5 CI workflow (.github/workflows/ci.yml, pytest+ruff py3.11/3.12) + cleared all 27 pre-existing ruff errors. Verified on branch source: 41/41 tests pass, ruff clean, 37 tools register, 93/93 real sessions load, Jira+Confluence reads return HTTP 200 via refactored _send. Tool count 31->37. Caught and removed an accidental git add -A staging of 36 private session files (gitignore lacks the pattern per user). Docs: doc §11 + README Improvements (2026-06-29). Pending: user reload+reinstall, then fast-forward merge feature->main.",
+      "tags": [
+        "telemetry",
+        "sso",
+        "ci",
+        "improvements"
+      ],
+      "references": [
+        "mcp_context_server/telemetry.py",
+        "mcp_context_server/jira_client.py",
+        "mcp_context_server/confluence_client.py",
+        "mcp_context_server/main.py",
+        ".github/workflows/ci.yml",
+        "docs/2026-06-29-mcp-summary-server-improvement.md"
+      ]
+    },
+    {
+      "id": "ebce3015e16b",
+      "timestamp": "2026-06-30T00:08:04.088390+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "finding",
+      "summary": "Clarified model-vs-harness token-usage constraint; built + verified Claude Code Stop hook for real telemetry",
+      "detail": "Key constraint: the LLM API returns usage{} to the HARNESS (Claude Code/Copilot), not to the model; the MCP server only sees tool-call args. So the agent cannot reliably self-report its own token usage and should skip rather than fabricate. Reliable capture must be done by the harness. Copilot custom agents: plain custom chat-modes/instructions CANNOT log usage (model can't see it); only a Copilot Extension/backend that makes the model calls itself (and receives usage) CAN. Built scripts/claude_telemetry_hook.py — a Claude Code Stop hook that parses the transcript's assistant usage blocks, dedups by message id (note=cc:<message_id>), and appends UsageRecords to a session keyed by the Claude session id. Verified: 2 records written from a synthetic transcript, second run deduped to 0, report computed real cost/cache/utilization. Next: wire via .claude/settings.json hooks.Stop; then replicate for Copilot (needs a harness-level mechanism, not just instructions).",
+      "tags": [
+        "telemetry",
+        "hook",
+        "claude-code",
+        "copilot",
+        "architecture"
+      ],
+      "references": [
+        "scripts/claude_telemetry_hook.py",
+        "docs/2026-06-29-mcp-summary-server-improvement.md",
+        ".github/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "a8c3e83f56ed",
+      "timestamp": "2026-06-30T00:30:29.339844+00:00",
+      "agent": "claude-code-opus-4-8",
+      "category": "code_change",
+      "summary": "Built Copilot CLI agentStop telemetry hook (discovery + best-effort); documented in new doc",
+      "detail": "Copilot CLI (v1.0.65) hook: .github/hooks/telemetry.json registers an agentStop command hook -> .sh/.ps1 wrappers -> venv python -> scripts/copilot_telemetry_hook.py. agentStop payload has sessionId/transcriptPath/stopReason but NO usage object; Copilot session-state and logs do not persist token usage, so transcript format is unknown -> hook runs in discovery mode (dumps payload+transcript to ~/.mcp-context-server/copilot-hook-debug.log) + best-effort extracts usage (Anthropic usage{}, OpenAI prompt/completion_tokens, flat fields), deduped by message id, agent=copilot-cli. Verified with synthetic transcript: records 2, dedups to 0, report aggregates (21200 prompt tokens, $0.036). Fixed a double-count bug (was recursing into the usage block). NEXT: run a real Copilot CLI turn in this repo, inspect copilot-hook-debug.log to confirm/tighten the transcript parser; if transcript lacks usage, fall back to OTel (Plan B). VS Code Copilot Chat plan = OTel export (gen_ai.usage.* via github.copilot.chat.otel.enabled -> local OTLP receiver), documented for later. Doc: docs/2026-06-29-copilot-telemetry-hooks.md. All hooks exit 0 (no functionality breaks).",
+      "tags": [
+        "copilot-cli",
+        "hook",
+        "telemetry",
+        "discovery"
+      ],
+      "references": [
+        ".github/hooks/telemetry.json",
+        "scripts/copilot_telemetry_hook.py",
+        "docs/2026-06-29-copilot-telemetry-hooks.md"
+      ]
+    }
+  ],
+  "usage": []
+}

@@ -1,0 +1,42 @@
+{
+  "id": "ef218f9b70674503",
+  "name": "telemetry-live-demo-2026-06-29",
+  "description": "Live end-to-end demo of session_record_usage + session_usage_report via the newly installed MCP tools.",
+  "project": "mcp-context-server",
+  "created_at": "2026-06-29T23:48:49.765891+00:00",
+  "updated_at": "2026-06-29T23:48:59.493305+00:00",
+  "status": "active",
+  "tags": [
+    "telemetry",
+    "demo"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "17995bf01b7e",
+      "timestamp": "2026-06-29T23:48:57.714332+00:00",
+      "agent": "claude-code-opus-4-8",
+      "model": "claude-opus-4-8",
+      "input_tokens": 8200,
+      "output_tokens": 1400,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 46000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "ILLUSTRATIVE SAMPLE — agent cannot self-introspect its own live token counts; numbers represent a typical first turn that fills the prompt cache."
+    },
+    {
+      "id": "4c7370684401",
+      "timestamp": "2026-06-29T23:48:59.493290+00:00",
+      "agent": "claude-code-opus-4-8",
+      "model": "claude-opus-4-8",
+      "input_tokens": 1500,
+      "output_tokens": 3200,
+      "cache_read_input_tokens": 120000,
+      "cache_creation_input_tokens": 2000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "ILLUSTRATIVE SAMPLE — a later turn served mostly from cache."
+    }
+  ]
+}

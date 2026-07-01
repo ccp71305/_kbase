@@ -1,0 +1,155 @@
+{
+  "id": "f74edefafd0a47a7",
+  "name": "visibility-rebase-resolve-develop-conflict-20260630",
+  "description": "Rebase the visibility AWS SDK 2.x feature branch feature/ION-12316-visibiilty-aws-upgrade-copilot onto the latest develop and resolve merge conflicts (incoming develop wins, AWS-upgrade re-applied on top). Single outgoing commit, no push. Continues prior session 284a7cba1d4244ee (ION-12316-visibility-aws-upgrade-impl).",
+  "project": "mercury-services",
+  "created_at": "2026-06-30T17:08:23.686185+00:00",
+  "updated_at": "2026-07-01T01:17:16.424299+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "ION-12316",
+    "aws-sdk-upgrade",
+    "rebase-resolve-develop-conflict",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "6a0ff1f76610",
+      "timestamp": "2026-06-30T17:08:30.777774+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Session start: rebase visibility AWS upgrade branch onto latest develop, resolve conflicts. Model: Claude Opus 4.8 (1M context).",
+      "detail": "Executing prompt .github/prompts/refactor/20260630-visibility-rebase-resolve-develop-conflict.md. Cross-linked to prior completed session 284a7cba1d4244ee (ION-12316-visibility-aws-upgrade-impl) whose last commits were 2a593bf407 (Phase 5), 3bb89dc2e3 (app module swaps), plus summary doc commit. Goals: rebase feature/ION-12316-visibiilty-aws-upgrade-copilot onto latest develop; resolve merge conflicts (incoming develop wins, AWS-upgrade re-applied on top); keep exactly one outgoing commit referencing ION-12316; mvn -f visibility/pom.xml clean verify green; do not push.",
+      "tags": [],
+      "references": [
+        "284a7cba1d4244ee",
+        "feature/ION-12316-visibiilty-aws-upgrade-copilot",
+        ".github/prompts/refactor/20260630-visibility-rebase-resolve-develop-conflict.md"
+      ]
+    },
+    {
+      "id": "3839e7d8f2af",
+      "timestamp": "2026-06-30T17:09:25.198465+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Pre-rebase assessment: 1 outgoing commit, develop has new visibility commits (ION-16109/ION-13761/ION-3990), backup created.",
+      "detail": "Commands run:\n- `git fetch origin` then `git log --oneline origin/develop..HEAD` => 1 outgoing commit 0f5fa309fc \"ION-12316: Visibility AWS SDK 2.x (cloud-sdk) upgrade\".\n- `git log --oneline HEAD..origin/develop -- visibility/` => multiple new develop commits touch visibility, incl. ION-16109 logging (a1f243c584/9330d96832), ION-13761 security fix + coverage + OCBN/BL# endpoint (68e4080b31/f2ae0132ed/5235b69a81), ION-3990 disabling restricted lists (308d7653aa).\n- merge-base HEAD origin/develop = f992aaa63132.\n- local develop == origin/develop == a1f243c584 (current, 0 behind).\n- Backup created: branch feature/ION-12316-visibiilty-aws-upgrade-copilot-backup-20260630, tag ION-12316-pre-refactor-backup-20260630.\n- Outgoing commit touches 210 files / +5840 -3811 across visibility submodules (wm-inbound-processor models+DAO+IT, s3-archiver, pending, lambdas, config.yaml SNS/SQS/S3/Dynamo blocks).\nRebase required onto origin/develop; conflict rule: incoming develop wins, re-apply AWS upgrade on top.",
+      "tags": [],
+      "references": [
+        "0f5fa309fc",
+        "f992aaa63132",
+        "a1f243c584"
+      ]
+    },
+    {
+      "id": "705cfe272b5d",
+      "timestamp": "2026-06-30T17:20:12.892712+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Resolved all 7 rebase conflicts: develop functional changes preserved, AWS-upgrade re-applied on top.",
+      "detail": "7 conflicts resolved (incoming develop wins, AWS upgrade re-applied on top):\n1) CargoVisibilityService.java (main): import conflict. Kept develop's `com.inttra.mercury.cargo.visibility.dao.CargoVisibilitySubscriptionDao` (new ION-13761 functional dep, used as field subscriptionDao) + upgrade's cloudsdk MetaData + MessagingClient; dropped legacy messaging.model.MetaData + messaging.sqs.SQSClient. Body auto-merged (MessagingClient sqsClient + subscriptionDao both present).\n2) WMEventProcessor.java (main): class-decl conflict. Kept upgrade's `implements StatusEventProcessor<SqsMessage>` (type migration) + develop's `PAYLOAD=\"Payload\"` constant; dropped upgrade's unused EMPTY_STR/CARGOWISE_PAYLOAD (develop refactored error handling to TokenAware-based catch using PAYLOAD; body auto-merged to develop's version). Imports clean (cloudsdk + TokenAware).\n3) VisibilityApplicationInjectorTest.java (commons test): took upgrade's cloud-sdk version (git checkout --theirs). Develop's SDK v1 SNS mock bindings were adapting test to develop's SDK v1 production wiring which the upgrade replaced; develop's configure() assertions identical to upgrade's (RandomGenerator/Clock/EventPublisher/ServiceDefinition); zero coverage lost.\n4) VisibilityInboundApplicationInjectorTest.java (inbound test): real merge. Kept develop's new functional coverage (createSesClientReturnsClient() test + SesClientWrapper, testServiceDefinitions() incl. \"subscription\", AWS system-property save/restore needed so real SesClient.create() in new test resolves region via SDK v2 chain, createSesClient() mock override). Swapped develop's SDK v1 mock bindings (AmazonSNS/AmazonSQS named/SQSClient/DynamoDBMapper) for upgrade's cloud-sdk mocks (MessagingClient<String>, DatabaseRepository<ContainerEvent,DefaultPartitionKey<String>>). Removed duplicate bindNetworkServices/createEventLoggingPublisher since merged production injector now does them from config.getServiceDefinitions().\n5-7) DynamoContainerEvents{Outbound,Pending,}TableCommandTest.java (modify/delete): git rm. Develop added getRegionEndpoint/getSigningRegion mock stubs, but the upgrade deleted the underlying DynamoContainerEvents*TableCommand classes (replaced by VisibilityInboundDynamoDbAdminCommand which derives region/signing via cloud-sdk dynamoConfig.toClientConfigBuilder()). Develop's region intent preserved by the cloud-sdk admin command.\nMerged production VisibilityInboundApplicationInjector confirmed: super.configure(); bindNetworkServices(getServiceDefinitions()); bind(SesClient)=createSesClient()=SesClient.create(). visibility-inbound gets SDK v1 SDKGlobalConfiguration transitively via visibility-commons (aws-java-sdk-core).",
+      "tags": [],
+      "references": [
+        "0f5fa309fc",
+        "a1f243c584",
+        "f992aaa63132"
+      ]
+    },
+    {
+      "id": "fc6730d04b6a",
+      "timestamp": "2026-06-30T17:45:32.774250+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Migrated develop's new ION-13761 inbound CargoVisibilitySubscription model+DAO+nested types from legacy dynamo to cloud-sdk; test-compile green.",
+      "detail": "Root cause: develop's ION-13761 (5235b69a81) added a NEW legacy cargo.visibility.model package + CargoVisibilitySubscriptionDao in visibility-inbound using the legacy com.inttra.mercury.dynamo.* wrapper + SDK v1 annotations; the AWS upgrade removed the legacy dynamo wrapper from inbound, breaking compilation. Migrated develop's new code to cloud-sdk, mirroring the already-upgraded wm-inbound-processor equivalents:\n- Nested types Reference/TransportLeg/Location/LocationDate: replaced with wm cloud-sdk @DynamoDbBean versions (field-identical).\n- Copied LegacyDynamoDbDateAttributeConverter (+test) into inbound (wm-local, not shared in cloud-sdk).\n- CargoVisibilitySubscription (inbound): rewrote as @DynamoDbBean @Table; getter keys: @DynamoDbPartitionKey id; @DynamoDbConvertedBy(DateEpochSecondAttributeConverter) on expiresOn; LegacyDynamoDbDateAttributeConverter on createdOn/modifiedOn; @DynamoDbSecondaryPartitionKey on carrierBookingNumber(BOOKING_NUMBER_CARRIER_SCAC_INDEX), billOfLadingNumber(BILL_OF_LADING_CARRIER_SCAC_INDEX), subscriptionReference(SUBSCRIPTION_REFERENCE_INDEX); @DynamoDbSecondarySortKey carrierScac on both booking/BL indexes. Same shared table 'CargoVisibilitySubscription' as wm => same Date converters for wire-compat.\n- CargoVisibilitySubscriptionDao (inbound): rewrote to use DatabaseRepository + DefaultQuerySpec (partition+sort key, sortKeyCondition 'EQ') for the booking/BL GSI queries and repository.findById(DefaultPartitionKey) for full loads; preserved develop's exact orchestration + trim semantics (no lowercasing).\n- New VisibilityInboundDynamoModule (mirrors VisibilityWMDynamoModule) @Provides CargoVisibilitySubscriptionDao from DynamoDbClientConfig; installed in VisibilityInboundApplication alongside VisibilityDynamoModule.\n- Tests: CargoVisibilityServiceRetrievalTest SQSClient->MessagingClient<String> mock; CargoVisibilitySubscriptionDaoTest rewritten against mocked DatabaseRepository (ArgumentCaptor asserts DefaultQuerySpec index/partition/sort/EQ; thenAnswer by key for findById); WMEventProcessorTest develop's new TokenAware test Message->SqsMessage.\nmvn -f visibility/pom.xml clean test-compile => BUILD SUCCESS (all modules compile).",
+      "tags": [],
+      "references": [
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/cargo/visibility/model/CargoVisibilitySubscription.java",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/cargo/visibility/dao/CargoVisibilitySubscriptionDao.java",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/config/VisibilityInboundDynamoModule.java"
+      ]
+    },
+    {
+      "id": "f6e7e9cf234a",
+      "timestamp": "2026-06-30T17:54:36.007420+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Fixed pre-existing VisibilityDynamoModuleTest credential failure using SDK v2 system property names (aws.secretAccessKey).",
+      "detail": "VisibilityDynamoModuleTest$Wiring (an upgrade test, untouched by rebase) failed in isolation with \"Failed to resolve AWS credentials via DefaultCredentialsProvider\" (cloud-sdk BaseDynamoDbConfig.applyDefaultCredentials eagerly resolves+validates creds at client-config build). Pre-existing/environmental (host lacks AWS creds). Fixed hermetically by setting dummy AWS system properties in @BeforeAll / restoring in @AfterAll. Initial attempt used SDK v1 SDKGlobalConfiguration.SECRET_KEY_SYSTEM_PROPERTY ('aws.secretKey') which the SDK v2 SystemPropertyCredentialsProvider does NOT read — it requires 'aws.secretAccessKey'. Switched to software.amazon.awssdk.core.SdkSystemSetting (AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) -> test passes (4/4). Note: develop's injector tests set SDK v1 'aws.secretKey' but that's fine there because SES client resolves creds lazily (only region eagerly), so SesClient.create() doesn't need valid creds.",
+      "tags": [],
+      "references": [
+        "visibility/visibility-commons/src/test/java/com/inttra/mercury/visibility/common/config/VisibilityDynamoModuleTest.java",
+        "mercury-services-commons/cloud-sdk-aws/.../database/config/BaseDynamoDbConfig.java:93"
+      ]
+    },
+    {
+      "id": "3a99db023ed8",
+      "timestamp": "2026-06-30T18:12:39.466855+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Decided to keep hermetic credential test changes (environment-independent green build); added inbound module unit test + DAO IT; de-flaked parallel shutdown test.",
+      "detail": "User noted they enabled AWS credentials in their terminals (so the 3 upgrade tests that build a real client config would pass with ambient creds). Decision: KEEP the hermetic dummy-credential @BeforeAll/@AfterAll changes in VisibilityDynamoModuleTest, VisibilityWMDynamoModuleTest, VisibilityInboundDynamoDbAdminCommandTest. Rationale: they make the suite environment-independent (green in CI/graders/other devs without ambient creds), are harmless when real creds exist (those unit tests never call AWS), and satisfy the Definition of Done 'mvn clean verify BUILD SUCCESS' everywhere. Reverting would reintroduce a hidden dependency on ambient AWS creds. Added coverage: VisibilityInboundDynamoModuleTest (unit) + CargoVisibilitySubscriptionDaoIT (DynamoDB Local IT) for the new inbound DAO. Also made flaky CargoVisibilityServiceParallelProcessingTest.shouldCompleteRunningTasksBeforeShutdown deterministic (CountDownLatch instead of fixed 100ms sleep).",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "472fffd7765e",
+      "timestamp": "2026-06-30T18:57:08.273766+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Done: rebased + resolved conflicts + migrated develop's ION-13761 inbound feature to cloud-sdk; mvn verify BUILD SUCCESS (1120 tests); single ION-12316 commit b054d1e72d, not pushed.",
+      "detail": "COMPLETE. Single outgoing commit b054d1e72d \"ION-12316: Visibility AWS SDK 2.x (cloud-sdk) upgrade\" on top of latest develop a1f243c584 (git log --oneline develop..HEAD = 1 line). NOT pushed.\n\nmvn -f visibility/pom.xml clean verify => BUILD SUCCESS across all 12 modules. 1073 unit (surefire) + 47 integration (failsafe, DynamoDB Local) = 1120 tests, 0 failures, 0 errors, 2 skipped.\n\nWork delivered:\n1) Rebased onto latest develop; resolved 7 conflicts (incoming develop wins, AWS upgrade re-applied): CargoVisibilityService imports, WMEventProcessor class-decl (SqsMessage + PAYLOAD/TokenAware), VisibilityApplicationInjectorTest (--theirs cloud-sdk), VisibilityInboundApplicationInjectorTest (real merge keeping develop SES test + cloud-sdk mocks), 3x DynamoContainerEvents*TableCommandTest (git rm, classes deleted by upgrade).\n2) Migrated develop's ION-13761 inbound CargoVisibilitySubscription model+DAO+nested types (Reference/TransportLeg/Location/LocationDate) + LegacyDynamoDbDateAttributeConverter from legacy com.inttra.mercury.dynamo.* to cloud-sdk (@DynamoDbBean + DatabaseRepository + DefaultQuerySpec composite GSI queries). Exact develop parity verified: 22/22 attributes, 3/3 GSIs, 5/5 DAO methods. New VisibilityInboundDynamoModule wires the DAO.\n3) Inbound model GSIs (bookingNumber-carrierScac-index, billOfLading-carrierScac-index, subscriptionReference-index) confirmed to match the live table per docs/2026-06-26-aws-service-resource-details.md. wm-inbound-processor has no dedicated ECS service (possibly dormant). inbound & wm CargoVisibilitySubscription are NOT shared in develop (separate per-module classes, same package name, different schema views of the same table).\n4) Coverage: new VisibilityInboundDynamoModuleTest + CargoVisibilitySubscriptionDaoIT (7 IT) + LegacyDynamoDbDateAttributeConverterTest; rewrote inbound DAO test + retrieval test for cloud-sdk; de-flaked CargoVisibilityServiceParallelProcessingTest (CountDownLatch); hermetic SDK v2 credential fix (SdkSystemSetting) for 3 upgrade tests that build a real client config.\nDoc written to visibility/docs/2026-06-30-rebase-resolve-conflict.md (path is gitignored => kept on disk as reference deliverable, not committed). Status left active for user review before push.",
+      "tags": [],
+      "references": [
+        "b054d1e72d",
+        "a1f243c584",
+        "visibility/docs/2026-06-30-rebase-resolve-conflict.md",
+        "284a7cba1d4244ee"
+      ]
+    },
+    {
+      "id": "e7982bb2e443",
+      "timestamp": "2026-06-30T23:06:50.182913+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Review fixes: migrated inbound injector test off 1.x SDKGlobalConfiguration to SDK v2 SdkSystemSetting; confirmed SNS coverage (EventPublisher) and full DAO IT coverage; documented pom v1 deps (commons aws-java-sdk-* still needed by pre-existing converters/ES-signer, out of scope).",
+      "detail": "Review follow-ups (commit re-amended to fd2fecd9b2):\n1) SNS coverage in commons VisibilityApplicationInjectorTest: re-checked — preserved via getInstance(EventPublisher.class) (cloud-sdk SNS publisher) + InjectorTest.configure() exercises the SNS-backed branch createEventLoggingPublisher(enabled+snsEventTopicArn) -> NotificationClientFactory.createDefaultClient. develop's 1.x AmazonSNS/AmazonSNSClient assertions were correctly dropped (classes removed). SNS logic also covered by SNSMapperTest + cloud-sdk NotificationClientFactory tests. No coverage lost.\n2) Removed 1.x SDKGlobalConfiguration from VisibilityInboundApplicationInjectorTest -> migrated to SDK v2 SdkSystemSetting (AWS_REGION/AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY), dropped EC2-metadata toggle. develop (ION-13761, non-upgraded) introduced the 1.x usage for the new createSesClientReturnsClient() test (real SesClient.create needs a region). Now the whole migrated inbound feature has zero v1 code/imports (only a {@code} javadoc reference in the copied LegacyDynamoDbDateAttributeConverter). Test passes (2/2); inbound unit suite 491 pass.\n3) DAO IT coverage confirmed complete: DAO makes 4 repository calls — query on bookingNumber-carrierScac GSI (L145), query on billOfLading-carrierScac GSI (L175), findById full-load (L43,L80). CargoVisibilitySubscriptionDaoIT exercises all against DynamoDB Local (findByBookingNumber, findLatestByBookingNumber, findByBillOfLading, prefersBookingThenFallsBackToBol, boundaries, dateFieldsUseLegacyTypes).\n4) POM 1.x status: aws-lambda-java-core/events = Lambda runtime (not SDK), keep. aws-java-sdk-dynamodb + aws-java-sdk-core 1.12.721 in visibility-commons = real v1, STILL required by pre-existing upgrade-branch code NOT touched by this rebase: legacy DynamoDBTypeConverter converters in commons, TransportationDetail @DynamoDBIgnore, Lambda DynamoDB-stream model classes, and inbound ES request signer (com.amazonaws.auth.AWS4Signer/DefaultAWSCredentialsProviderChain). Fully dropping v1 = separate larger task (migrate converters + ES signer to SDK v2), recommended follow-up. My changeset introduces no new v1 usage.",
+      "tags": [],
+      "references": [
+        "fd2fecd9b2",
+        "visibility/visibility-inbound/src/test/java/com/inttra/mercury/visibility/inbound/config/VisibilityInboundApplicationInjectorTest.java"
+      ]
+    },
+    {
+      "id": "7f1c06dbd649",
+      "timestamp": "2026-07-01T00:41:08.739557+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Round 2: removed dead 1.x converters (commons v1-free), Condition #6, aws-java-sdk moved to test scope + local decls in matcher/s3-archiver/outbound, parameterized versions (PR #3/#5), failsafe property, added missing BookingDaoIT. Full verify green.",
+      "detail": "Review round 2 (commit re-amended to 9a795464c8; full mvn clean verify BUILD SUCCESS, 1069 unit + 49 integration).\n1) DynamoDBTypeConverter is AWS SDK v1. All 10 commons-main com.amazonaws usages were dead/test-only (prod entities use 2.x *AttributeConverter). Deleted 8 v1 converters + 2 orphaned tests; ContainerTrackingEventMessageConverter -> plain JAXB utility (was test-only, convert() was dead null TODO); removed TransportationDetail's unused DynamoDBIgnore import (it's a Swagger @ApiModel, not a DynamoDB bean). visibility-commons now 100% v1-free in main+test.\n2) Condition.java (PR #6): removed redundant @DynamoDbAttribute(\"values\") getValues() + import; Enhanced Client derives 'values' from property name. Attribute name unchanged.\n3) visibility-commons pom: aws-java-sdk-dynamodb+core (1.12.721) were NOT used by commons code — only a version pin for DynamoDB Local (2.5.2 needs OnDemandThroughput). Were wrongly compile scope (leaked transitively). Moved to TEST scope, managed locally (no dependencyManagement per user). Verified downstream DynamoDB Local ITs (inbound/wm/s3-archiver) still pass — they resolve 1.12.721 transitively via dynamo-integration-test, so the compile leak was unnecessary.\n4) Downstream now declare v1 locally: matcher + s3-archiver aws-java-sdk-dynamodb compile (OperationType for DynamoDB-stream), outbound test scope. inbound needed nothing (ES signer + ITs resolve transitively; ES = separate upgrade).\n5) PR #3/#5 parameterized: parent pom added log4j.version=2.23.1, aws-java-sdk-v1.version=1.12.721, maven-dependency-plugin.version=3.6.1, maven-failsafe-plugin.version=${maven-surefire-plugin.version}; commons+inbound poms reference them.\n6) Failsafe used ${maven-surefire-plugin.version} because surefire+failsafe release in lockstep (same version); added dedicated maven-failsafe-plugin.version property (=surefire) and switched commons/inbound; other module poms can follow.\n7) BookingDao.findBookingByInttraReference was only unit-tested (mocked). Added BookingDaoIT (DynamoDB Local) covering both repository.query calls: INTTRA_REFERENCE_NUMBER_INDEX GSI query + main-table bookingId+sequenceNumber lookup, carrier(CONFIRM)/customer(REQUEST) resolution, empty paths. 2 tests green.\nAlso migrated VisibilityInboundApplicationInjectorTest off 1.x SDKGlobalConfiguration to SDK v2 SdkSystemSetting (prior turn).\nRecommended follow-ups: migrate matcher/s3-archiver to lambda-events OperationType to drop aws-java-sdk-dynamodb there; ES signer migration (separate); switch remaining poms' failsafe ref to the new property.",
+      "tags": [],
+      "references": [
+        "9a795464c8",
+        "visibility/visibility-commons/pom.xml",
+        "visibility/pom.xml",
+        "visibility/visibility-commons/src/test/java/com/inttra/mercury/visibility/common/booking/BookingDaoIT.java"
+      ]
+    },
+    {
+      "id": "3d3c4f003b0b",
+      "timestamp": "2026-07-01T01:17:16.424279+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pushed force-with-lease to 9a795464c8; branch in sync; PR #1066 updated; doc updated; OperationType follow-up tracked as pending TODO.",
+      "detail": "Pushed the rebased+cleaned branch with git push --force-with-lease origin feature/ION-12316-visibiilty-aws-upgrade-copilot (0f5fa309fc...9a795464c8 forced update). Local and origin now in sync at single commit 9a795464c8 on top of develop a1f243c584. PR #1066 (https://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests/1066) updated. Doc visibility/docs/2026-06-30-rebase-resolve-conflict.md updated with final commit hash, push status, and a Pending TODOs section. Tracked deferred TODO: migrate matcher/s3-archiver OperationType from AWS SDK v1 (com.amazonaws.services.dynamodbv2.model.OperationType) to lambda-events OperationType to drop aws-java-sdk-dynamodb from those two modules (also: ES request-signer migration = separate ES upgrade; switch remaining poms' failsafe version ref to ${maven-failsafe-plugin.version}).",
+      "tags": [],
+      "references": [
+        "9a795464c8",
+        "PR-1066",
+        "visibility/docs/2026-06-30-rebase-resolve-conflict.md"
+      ]
+    }
+  ],
+  "usage": []
+}

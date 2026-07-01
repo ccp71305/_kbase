@@ -1,0 +1,80 @@
+{
+  "id": "41361fa2781b43e4",
+  "name": "current-state-design-docs-6-modules-2026-06-30",
+  "description": "Author current-state design documents for bill-of-lading, booking-downstream-processor, booking-update-trigger, partner-integrator, rates, value-added-service and their sub-modules, including AWS SDK 1.x usage and a 2.x/cloud-sdk upgrade plan.",
+  "project": "mercury-services",
+  "created_at": "2026-06-30T22:12:09.782005+00:00",
+  "updated_at": "2026-06-30T23:16:54.560488+00:00",
+  "status": "completed",
+  "tags": [
+    "design-doc",
+    "current-state",
+    "aws-sdk-upgrade",
+    "bill-of-lading",
+    "booking-downstream-processor",
+    "booking-update-trigger",
+    "partner-integrator",
+    "rates",
+    "value-added-service",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "0503405b8519",
+      "timestamp": "2026-06-30T22:25:18.154726+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "finding",
+      "summary": "Gathered current-state details for all 6 modules + sub-modules via exploration",
+      "detail": "Module layouts: bill-of-lading (single jar, commons/dynamo-client 1.R.01.021, AWS v1 S3 + DynamoDB ORM, ES disabled). booking-downstream-processor (parent pom + booking-cargoscreen jar; commons 1.R.01.023; SQS/SNS already on commons AWS v2, S3 still AWS v1, lambda-java-events v1). booking-update-trigger (cfn-only, no java; DynamoDB stream->python SendLambda->SNS->SQS->ES/S3 java8 lambdas from booking-1.0.jar). partner-integrator (parent pom, 8 submodules: pi-commons, pi-bl-es-lambda, pi-bl-in-processor, pi-booking-processor, pi-lambda-streamToSns, pi-si-in-processor, pi-si-out-processor, pi-statusevents-out-processor; AWS v1 dynamodb 1.12.715, sns; IBM MQ; Oracle; ES8/Jest; commons 1.R.01.023). rates (single jar, aws-java-sdk-dynamodb 1.12.655, Maersk/TM external, MapStruct/Swagger). value-added-service (single jar, aws-java-sdk-dynamodb 1.12.652, AmazonSNS v1, CMA/Hapag carriers).</detail>\n<references>[\"bill-of-lading\", \"booking-downstream-processor\", \"booking-update-trigger\", \"partner-integrator\", \"rates\", \"value-added-service\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "d207fe92f24a",
+      "timestamp": "2026-06-30T22:35:55.586259+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "progress",
+      "summary": "Completed all 15 current-state design documents",
+      "detail": "Created 15 current-state DESIGN docs (each with business rules, design + mermaid component diagram, data flow + mermaid sequence diagrams, key classes, maven deps, config, deployment, a CALL-OUT section for AWS 1.x services/SDK usage, and a high-level AWS 2.x/cloud-sdk upgrade plan referencing booking/visibility/network/auth):\n1 bill-of-lading/docs/...\n2 booking-downstream-processor/docs/... (parent)\n3 booking-downstream-processor/booking-cargoscreen/docs/...\n4 booking-update-trigger/docs/... (cfn-only)\n5 partner-integrator/docs/... (parent overview)\n6-13 partner-integrator/{pi-commons,pi-bl-in-processor,pi-bl-es-lambda,pi-booking-processor,pi-lambda-streamToSns,pi-si-in-processor,pi-si-out-processor,pi-statusevents-out-processor}/docs/...\n14 rates/docs/...\n15 value-added-service/docs/...\nNaming: 2026-06-30-<module-submodule>-current-state-DESIGN.md. Key AWS-1.x findings: bill-of-lading (S3 v1 + DynamoDB v1 ORM), cargoscreen (SQS/SNS already v2 via commons, S3+lambda-events v1), booking-update-trigger (cfn infra, java8/python3.6 lambdas from booking jar), rates (DynamoDB v1 only, aws-java-sdk-dynamodb 1.12.655), value-added-service (DynamoDB v1 1.12.652 + AmazonSNS v1), partner-integrator (pi-commons central v1 DynamoDB/S3/SNS/SQS 1.12.715 + IBM MQ + Oracle + ES8/Jest; lambdas use v1 event POJOs; version pins booking 2.1.7.M/2.1.8.M, visibility 1.4.M, shipping-instruction 1.0.M to reconcile).",
+      "tags": [],
+      "references": [
+        "bill-of-lading/docs/2026-06-30-bill-of-lading-current-state-DESIGN.md",
+        "partner-integrator/docs/2026-06-30-partner-integrator-current-state-DESIGN.md",
+        "rates/docs/2026-06-30-rates-current-state-DESIGN.md",
+        "value-added-service/docs/2026-06-30-value-added-service-current-state-DESIGN.md",
+        "booking-update-trigger/docs/2026-06-30-booking-update-trigger-current-state-DESIGN.md"
+      ]
+    },
+    {
+      "id": "96c93ad7ae67",
+      "timestamp": "2026-06-30T23:00:33.499818+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "progress",
+      "summary": "Completed all 15 AWS-2.x cloud-sdk upgrade design documents",
+      "detail": "Created 15 AWS-2.x/cloud-sdk upgrade design docs (named 2026-06-30-<module-submodule>-aws2x-DESIGN-copilot.md, in same docs/ folders, gitignored via **/docs/). Grounded in real cloud-sdk patterns extracted from booking/network/visibility + mercury-services-commons cloud-sdk-api/cloud-sdk-aws (saved to /memories/repo/cloud-sdk-upgrade-patterns.md). Each doc: change overview, before/after Maven deps, before/after config.yaml, per-AWS-service spec (entity/DAO/converter/client before-after), Guice wiring delta, target component + sequence mermaid diagrams, key classes changed, testing strategy (DynamoDB-Local IT + mocked SQS/SNS + JaCoCo), risks/call-outs. Target stack: mercury.commons.version=1.0.26-SNAPSHOT, add cloud-sdk-api+cloud-sdk-aws+dynamo-integration-test(test)+aws-java-sdk-dynamodb(test), remove dynamo-client+aws-java-sdk-* prod; DatabaseRepository/DynamoRepositoryFactory + @DynamoDbBean enhanced annotations + AttributeConverter; MessagingClient/MessagingClientFactory (SQS); NotificationService/NotificationClientFactory (SNS); StorageClient/StorageClientFactory (S3); EmailService/SesClient (SES). Gaps noted: S3 timeout/pool/credential-chain not exposed by StorageClientFactory; Jackson BOM pin ~2.21.0; Netty removed (Apache HTTP); java8->java21 lambda runtimes. Partner-integrator parent = shared playbook; pi-commons upgrade first (blast radius). Version pins to reconcile: booking 2.1.7.M/2.1.8.M, visibility 1.4.M, shipping-instruction 1.0.M.",
+      "tags": [],
+      "references": [
+        "/memories/repo/cloud-sdk-upgrade-patterns.md",
+        "partner-integrator/docs/2026-06-30-partner-integrator-aws2x-DESIGN-copilot.md",
+        "bill-of-lading/docs/2026-06-30-bill-of-lading-aws2x-DESIGN-copilot.md",
+        "rates/docs/2026-06-30-rates-aws2x-DESIGN-copilot.md",
+        "value-added-service/docs/2026-06-30-value-added-service-aws2x-DESIGN-copilot.md"
+      ]
+    },
+    {
+      "id": "342ffde4db24",
+      "timestamp": "2026-06-30T23:16:54.560471+00:00",
+      "agent": "copilot-claude-opus-4-8",
+      "category": "finding",
+      "summary": "Cross-checked aws2x docs vs real cloud-sdk source; corrected SNS interface (EventPublisher), 4-arg repo factory, S3 String content",
+      "detail": "Cross-checked aws2x docs against the real visibility branch + commons cloud-sdk. CONFIRMED correct: DatabaseRepository<T,K> (cloudsdk.database.api), DefaultPartitionKey/DefaultCompositeKey (.api.id), MessagingClient<String> + MessagingClientFactory.createDefaultStringClient() (.messaging), DynamoRepositoryFactory (.database.factory), BaseDynamoDbConfig/DynamoDbClientConfig/DynamoRepositoryConfig (.database.config), DefaultQuerySpec (.database.impl), CloudAttributeValue.ofString (.database.model), @DynamoDbBean/enhanced annotations + @Table (cloudsdk.database.annotation.Table), AttributeConverter, StorageClient/StorageClientFactory (.storage.api/.storage.config AwsStorageConfig), NotificationClientFactory.createDefaultClient(topicArn) (.notification.factory). \n\nCORRECTED 3 inaccuracies across docs: (1) SNS interface was wrongly named NotificationService -> real type is EventPublisher (cloudsdk.notification.workflow.EventPublisher; EmptyEventPublisher when disabled; workflow audit via EventLogHandler->EventLogger.logCloseRunEvent + EventGenerator/MetaData). Fixed all 79 refs via sed (NotificationService->EventPublisher); NotificationClientFactory.createDefaultClient was already correct. (2) createEnhancedRepository is 4-arg (clientConfig, tableName, Class<T>, repoConfig) with tableName = clientConfig.getTablePrefix() + @Table.name() — fixed bill-of-lading/rates/value-added-service/parent-playbook (were 3-arg). (3) StorageClient.putObject(bucket,key,String) and getObject->String content (not byte[]); both createDefaultS3Client() and createS3Client(AwsStorageConfig) exist; softened the S3-tuning gap note (credential/transport ARE configurable via AwsStorageConfig). SES in visibility = direct AWS v2 SesClient via createSesClient() (none of the 6 target modules use SES). Updated /memories/repo/cloud-sdk-upgrade-patterns.md with verified facts.",
+      "tags": [],
+      "references": [
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/config/VisibilityApplicationInjector.java",
+        "visibility/visibility-wm-inbound-processor/src/main/java/com/inttra/mercury/visibility/wm/config/VisibilityWMDynamoModule.java",
+        "/memories/repo/cloud-sdk-upgrade-patterns.md"
+      ]
+    }
+  ],
+  "usage": []
+}

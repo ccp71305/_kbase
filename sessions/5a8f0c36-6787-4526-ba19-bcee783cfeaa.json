@@ -1,0 +1,68 @@
+{
+  "id": "5a8f0c36-6787-4526-ba19-bcee783cfeaa",
+  "name": "copilot-cli 5a8f0c36",
+  "description": "Auto-tracked token usage from the Copilot CLI agentStop hook.",
+  "project": "",
+  "created_at": "2026-06-30T01:05:47.298962+00:00",
+  "updated_at": "2026-06-30T01:05:47.299102+00:00",
+  "status": "active",
+  "tags": [
+    "copilot-cli",
+    "auto-telemetry"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "c03eb8b46f73",
+      "timestamp": "2026-06-30T01:05:47.299022+00:00",
+      "agent": "copilot-cli",
+      "model": "claude-opus-4-8",
+      "input_tokens": 14500,
+      "output_tokens": 9800,
+      "cache_read_input_tokens": 210000,
+      "cache_creation_input_tokens": 42000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l226.2"
+    },
+    {
+      "id": "71750ada8d32",
+      "timestamp": "2026-06-30T01:05:47.299060+00:00",
+      "agent": "copilot-cli",
+      "model": "claude-opus-4-8",
+      "input_tokens": 14500,
+      "output_tokens": 9800,
+      "cache_read_input_tokens": 210000,
+      "cache_creation_input_tokens": 42000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l229"
+    },
+    {
+      "id": "443db2d89d66",
+      "timestamp": "2026-06-30T01:05:47.299082+00:00",
+      "agent": "copilot-cli",
+      "model": "claude-opus-4-8",
+      "input_tokens": 14500,
+      "output_tokens": 9800,
+      "cache_read_input_tokens": 210000,
+      "cache_creation_input_tokens": 42000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l230"
+    },
+    {
+      "id": "0b4e79ca9041",
+      "timestamp": "2026-06-30T01:05:47.299098+00:00",
+      "agent": "copilot-cli",
+      "model": "claude-opus-4-8",
+      "input_tokens": 14500,
+      "output_tokens": 9800,
+      "cache_read_input_tokens": 210000,
+      "cache_creation_input_tokens": 42000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l230"
+    }
+  ]
+}
