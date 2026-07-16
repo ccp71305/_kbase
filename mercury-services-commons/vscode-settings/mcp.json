@@ -9,7 +9,12 @@
                 "MCP_SESSIONS_DIR": "C:\\Users\\arijit.kundu\\.mcp-context-server\\sessions",
                 "MCP_KB_ROOTS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\",\"C:\\\\Users\\\\arijit.kundu\\\\OneDrive - WiseTech Global\\\\aiengg\",\"C:\\\\Users\\\\arijit.kundu\\\\OneDrive - WiseTech Global\\\\claude-workspace\\\\_kbase\"]",
                 "MCP_GIT_DEFAULT_REPOS": "[\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services-commons\",\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\mercury-services\",\"C:\\\\Users\\\\arijit.kundu\\\\projects\\\\appianway\"]",
-                "MCP_LOG_LEVEL": "INFO"
+                "MCP_LOG_LEVEL": "INFO",
+                "MCP_JIRA_BASE_URL": "https://jira.dev.e2open.com/jira",
+                "MCP_JIRA_EMAIL": "akundu",
+                "MCP_CONFLUENCE_BASE_URL": "https://confluence.dev.e2open.com",
+                "MCP_CONFLUENCE_EMAIL": "akundu",
+                "USERPROFILE": "C:\\Users\\arijit.kundu"
             }
         }
     }

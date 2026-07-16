@@ -51,7 +51,8 @@
       "Bash(PYTHONIOENCODING=utf-8 python verify_opus.py)",
       "WebSearch",
       "WebFetch(domain:www.anthropic.com)",
-      "Bash(ls -d ailearning ../ailearning ~/ailearning 2>/dev/null; echo \"---done---\")"
+      "Bash(ls -d ailearning ../ailearning ~/ailearning 2>/dev/null; echo \"---done---\")",
+      "Bash(mkdir -p \"/c/Users/arijit.kundu/AppData/Local/Temp/claude/C--Users-arijit-kundu-projects-mercury-services/484543ac-403b-4fa1-a76a-0a8fe26ea380/scratchpad\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\arijit.kundu\\projects\\mercury-services\\watermill-publisher",
