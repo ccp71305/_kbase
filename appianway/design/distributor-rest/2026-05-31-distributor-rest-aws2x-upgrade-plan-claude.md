@@ -1,5 +1,9 @@
 # `distributor-rest` — AWS SDK v2 (cloud-sdk) Upgrade PLAN (claude)
 
+> **⚠️ SUPERSEDED (2026-07-22).** The program has since locked a "no longer using `shared`" decision and a `1.0.27-SNAPSHOT` target (`commons`+`cloud-sdk-api`+`cloud-sdk-aws`+slim `appianway-commons`, DW5/Jetty12/Java17 baseline now DONE via ION-16098). The authoritative, current doc for this module is
+> [`2026-07-22-distributor-rest-awsupgrade-claude.md`](2026-07-22-distributor-rest-awsupgrade-claude.md), built on the program foundation
+> [`2026-07-22-appianway-awsupgrade-foundation-claude.md`](../../2026-07-22-appianway-awsupgrade-foundation-claude.md). This doc is retained for historical context (the `1.0.26-SNAPSHOT`/`shared`-migration framing below is out of date — read the 2026-07-22 doc instead).
+>
 > Module: `distributor-rest` (REST/HTTP egress: consumes SQS, reads the payload from S3, POSTs it to subscriber endpoints with an OAuth bearer token) · Date: 2026-05-31 · Author: Claude (Opus 4.8)
 > Status: **Planning / design only — no production code or `pom.xml` changes made.**
 > cloud-sdk / commons line: **`1.0.26-SNAPSHOT`** (Dropwizard 5.0.1, AWS SDK v2 BOM 2.30.24, Jackson 2.21, Guice 7). Target = **Option B**.

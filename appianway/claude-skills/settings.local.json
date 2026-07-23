@@ -5,7 +5,13 @@
       "Bash(ls c:/Users/arijit.kundu/projects/appianway/shared/src/main/java 2>nul && echo --- && ls c:/Users/arijit.kundu/projects/appianway/schema-beans)",
       "Bash(mkdir -p c:/Users/arijit.kundu/projects/appianway/dispatcher/docs && ls c:/Users/arijit.kundu/projects/appianway/dispatcher/docs)",
       "Bash(ls -d /c/Users/arijit.kundu/projects/mercury-services 2>/dev/null && echo \"MS-EXISTS\" || echo \"MS-ABSENT\")",
-      "Read(//c/Users/arijit.kundu/projects/mercury-services/**)"
+      "Read(//c/Users/arijit.kundu/projects/mercury-services/**)",
+      "Bash(cat \"/c/Users/arijit.kundu/AppData/Local/Temp/claude/c--Users-arijit-kundu-projects-appianway/a7b07ad5-6f21-48c2-aeda-7673b0a73445/tasks/bjk2ggogo.output\")",
+      "Read(//c/Users/arijit.kundu/AppData/Local/Temp/claude/c--Users-arijit-kundu-projects-appianway/a7b07ad5-6f21-48c2-aeda-7673b0a73445/tasks/**)",
+      "Bash(sleep 5)",
+      "Bash(echo \"BOTH DONE\")",
+      "Bash(echo \"---\")",
+      "Bash(jps -l)"
     ],
     "additionalDirectories": [
       "C:\\Users\\arijit.kundu\\projects\\appianway",

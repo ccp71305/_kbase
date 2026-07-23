@@ -51,6 +51,59 @@ the relevant generator's `INPUT_ANALYSIS_FILE`.
 
 ---
 
+## Walkthrough — generate + publish a design doc with Claude Code
+
+This is the practical end-to-end recipe (validated 2026-07-22 publishing ION-16098). You can just
+ask Claude in natural language — no PARAMETERS editing needed.
+
+### 0. Prerequisites (one-time / when it breaks)
+
+The publish step uses the `mcp-context-server` `confluence_*` tools. Before publishing:
+
+- **MCP configured** — `MCP_CONFLUENCE_BASE_URL` / `_EMAIL` in `.mcp.json` (see `SETUP-confluence-mcp.md` Action 1).
+- **SSO valid** — if any tool returns `401`, refresh cookies (`SETUP-confluence-mcp.md` Action 2):
+  ```bash
+  # Git Bash: forward slashes! ('.\\.venv\\...' collapses to junk in bash)
+  cd "/c/Users/<you>/OneDrive - WiseTech Global/aiengg/mcp/mcp-summary-server"
+  ./.venv/Scripts/python.exe sso_login.py
+  ```
+- **Quick check** — ask Claude to call any read tool (e.g. `jira_get_issue ION-xxxxx`). Data back = ready;
+  `"not configured"` → Action 1+3; `401` → Action 2.
+
+### 1. What to tell Claude
+
+Give it: the **source file(s)** (analysis / OWASP report / notes), the **Confluence parent** (paste the
+page URL — Claude derives the space key + parent page ID from it), and a **title** (or let it propose one).
+Example prompt:
+
+> Create a design doc from `<path/to/source.md>` (and `<path/to/second.md>`) and publish it under
+> `https://confluence.dev.e2open.com/display/BRM/<Parent+Page>`. Title: "ION-xxxxx <short title>".
+
+Multiple related source files → say so; Claude merges them into one doc (e.g. remediation + verification).
+
+### 2. What Claude does (so you know what to expect)
+
+1. Reads the source(s) + `templates/architecture-template.md`; fetches the Jira ticket(s).
+2. Writes the doc markdown to `<repo>/docs/<yyyy-mm-dd>-design-doc-<ticket>.md` and **shows it to you for review**.
+   → Edit the markdown directly if you want changes, then tell it to publish.
+3. Converts MD → Confluence storage XHTML and calls `confluence_create_page` under your parent.
+4. Reads the page back to verify, and gives you the URL.
+
+### 3. Known converter gotchas (Claude handles these; good to know)
+
+`convert_design_doc.py` (repo root) is the reference converter, but has sharp edges:
+
+- **CVE ids get mangled** — its Jira-key regex also matches `CVE-2026-xxxx` and turns them into broken Jira
+  macros. For CVE-heavy docs Claude runs a patched scratchpad copy (`(?!CVE-)`).
+- **`<...>` inside code blocks** (e.g. an ASCII diagram with `<yaml>`) breaks the Confluence code macro and
+  leaks a stray `]]>` into the page — no error, just a corrupt render. Use `(yaml)` not `<yaml>` in diagrams.
+- **No bullet-list handling** — `- ` lines render as literal "- " paragraphs unless converted to `<ul>`.
+- **Always read the page back** after publishing — the render bug above produces no 400.
+
+See `reference_confluence_mcp_publish` in Claude's memory for the full list.
+
+---
+
 ## Prompt files (canonical source of truth — skills and Copilot both read these)
 
 | File | Purpose |

@@ -387,3 +387,228 @@ a jest exclusion) — this is **independent of ION-16159**, which correctly hard
   to reconfirm — the results above were produced with a locally-installed pinned `commons` and then reverted.
 - Reinstating ION-16159's **HttpComponents** hardening is independent of its DW-5.0.2 / Jackson-2.21.4 bump;
   either can be applied on its own.
+
+---
+
+## 13. UPDATE 2026-07-17 (afternoon) — OWASP/Jackson reinstated on `develop`; rebase EXECUTED
+
+> This section supersedes the "🔴 CRITICAL" premise of §3. When §1–§12 were written, the OWASP/Jackson
+> pins were **reverted** on `develop`. They have since been **re-applied on `develop`** and the rebase was
+> **performed** onto the new `develop` HEAD. The four library modules are unaffected and now additionally
+> inherit the OWASP/Jackson hardening.
+
+### 13.1 New branch state
+
+| Ref | Commit | Notes |
+|-----|--------|-------|
+| Feature HEAD (pre-rebase) | `841fdf5` | `ION-12310: fix Netty + Jetty CRITICAL CVEs…, 1.0.26-SNAPSHOT` |
+| `origin/develop` HEAD | `0c797f4` | `PR #44: ION-16052 WTG IDP Framework Endpoint fix` |
+| Merge base | `0aa4a06` | unchanged (PR #40, ION-15755) |
+| Backup (pre-rebase) | `backup/feature-ION-12310-pre-rebase-3` | created before rebase |
+| Feature HEAD (post-rebase) | `5e8f7be` (+ version/README/doc commit) | 39 commits replayed |
+
+- Incoming commits: **11** (was 8). New since the analysis: `1625bd0`/`e9bce53` (**ION-16159 OWASP fixes,
+  now present**) plus `8c9be10`, `94d237c`, `0c797f4` (**ION-16052 endpoint fix**, PR #44).
+- **The OWASP/Jackson regression is resolved on `develop`.** Verified on `origin/develop:pom.xml`:
+  `dropwizard.version=5.0.2`, `jackson-datatype-*=2.21.4`, `jknack.handlebars.version=4.5.3`,
+  `httpcore5.version=5.4.3`, `httpcomponents4.core=4.4.16`, `httpcomponents4.client=4.5.14`,
+  `dependency.version=1.R.01.025`; and `origin/develop:commons/pom.xml` carries the httpcore/httpclient
+  `<dependencyManagement>` pins + exclude-then-re-declare blocks (the ION-16159 pattern from §11).
+
+### 13.2 Conflicts encountered & how they were resolved (3 files, 3 stop points)
+
+The rebase replayed **39** feature commits; conflicts surfaced on the commits that first touch each file:
+
+| Stop | Commit (feature) | File | Conflict | Resolution |
+|------|------------------|------|----------|------------|
+| 1/39 | `2d35e4d` (remove AWS deps from commons) | `commons/pom.xml` | develop added the httpcomponents `<dependencyManagement>` pins; feature added `<properties>`/`commons-lang3.version` at the same location | **UNION** — kept develop's `<dependencyManagement>` pin block **and** feature's `<properties>`. Develop's exclude-then-re-declare blocks (dropwizard-client / jest / aws-signing) auto-merged cleanly into the `<dependencies>` section. |
+| 3/39 | `2f6b3d7` (pom changes) | `pom.xml` | `dependency.version` — develop `1.R.01.025` vs feature SNAPSHOT scheme | Kept the **feature SNAPSHOT scheme** (`1.0.x-SNAPSHOT`); later feature commits set the final value, then bumped to `1.0.27` (§13.4). |
+| 16/39 | `8961e29` (dynamo-integration-test module) | `pom.xml` `<modules>` | develop added `libs/wtg-federation`; feature added `cloud-sdk-aws`, `cloud-sdk-api`, `dynamo-integration-test` | **UNION** — kept all four modules. |
+
+- `README.md` **auto-merged** (no manual resolution) — develop's WTG-Federation/S2ST section and header
+  (`v1.R.01.025`) combined with the feature branch's `Commons v1.0.x-SNAPSHOT` changelog.
+- All resolutions validated as well-formed XML; **zero** conflict markers remain in any tracked file.
+
+### 13.3 Post-rebase verification of the four library modules
+
+Final rebased root `pom.xml` carries **both** dependency lines:
+- **From develop (OWASP/Jackson):** DW `5.0.2`, Jackson `2.21.4` (csv/joda/jdk8/jsr310), handlebars `4.5.3`,
+  httpcore5 `5.4.3`, httpcomponents4 `4.4.16`/`4.5.14`, `libs.dependency.version=1.R.01.002`, module
+  `libs/wtg-federation`.
+- **From feature (cloud-sdk):** AWS 1.x removed from dependencyManagement, `aws.java.sdk.version=1.12.730`,
+  `assertj.core.version=3.27.2`, modules `cloud-sdk-aws`/`cloud-sdk-api`/`dynamo-integration-test`.
+
+`commons/pom.xml` carries **both** the feature's Jetty/Netty consumer-build CVE fixes **and** develop's
+httpcomponents pins/exclusions. **No source change** reached `commons`, `cloud-sdk-api`, `cloud-sdk-aws`,
+or `dynamo-integration-test` — the incoming develop delta is still only the isolated `libs/wtg-federation`
+module + root-pom/README/deploy-script edits (§4–§6 unchanged). Net effect on the four modules: unchanged
+behavior **plus** they now inherit the OWASP/Jackson-hardened managed versions.
+
+### 13.4 Version bump & README
+
+- Bumped `dependency.version` → **`1.0.27-SNAPSHOT`** (root `pom.xml`); all modules inherit via
+  `${dependency.version}` (no hardcoded `1.0.26` references remain outside the README changelog history).
+- `README.md`: stripped the descriptive paragraph from the `Commons v1.0.26-SNAPSHOT` entry (kept its two
+  numbered CVE points) and added a new `Commons v1.0.27-SNAPSHOT` entry (branch description + "Rebase onto
+  develop (owasp/jackson changes)").
+
+### 13.5 Validation gate
+
+`mvn verify` on the four modules (`commons`, `cloud-sdk-api`, `cloud-sdk-aws`, `dynamo-integration-test`),
+including DynamoDB Local integration tests — see the session context log for the recorded result. Backup
+retained at `backup/feature-ION-12310-pre-rebase-3` for rollback.
+
+---
+
+## 14. Command reference — every command used for this rebase (with why)
+
+> Reproducible playbook. Runs on Windows PowerShell; `$mb` = merge-base commit. Replace refs as needed.
+> Grouped by phase so the same sequence can be re-run for future `develop`→feature rebases.
+
+### 14.1 State & branch inspection
+
+```powershell
+git rev-parse --abbrev-ref HEAD                 # which branch am I on
+git status --short                              # working-tree / untracked state
+git branch -a --list "*develop*" "*ION-12310*"  # locate relevant local/remote branches
+git fetch origin --prune                        # refresh remotes, drop stale ones
+git --no-pager log --oneline -10 origin/develop # see what advanced on develop
+```
+
+### 14.2 Compare feature vs develop (scope the rebase)
+
+```powershell
+$mb = git merge-base HEAD origin/develop         # common ancestor (rebase base)
+git rev-list --count HEAD..origin/develop        # # commits incoming FROM develop
+git rev-list --count origin/develop..HEAD        # # feature commits to REPLAY
+git --no-pager log --oneline $mb..origin/develop # list the incoming commits
+git --no-pager diff --stat $mb origin/develop    # net incoming change (files/LOC)
+```
+
+### 14.3 Predict conflicts (files changed on BOTH sides of the base)
+
+```powershell
+$dev  = git diff --name-only $mb origin/develop  # files develop changed
+$feat = git diff --name-only $mb HEAD            # files feature changed
+Compare-Object $dev $feat -IncludeEqual -ExcludeDifferent | % { $_.InputObject }
+#   ^ the intersection = the ONLY possible content-conflict candidates
+```
+
+### 14.4 Verify the incoming content is what we expect (OWASP/Jackson pins)
+
+```powershell
+git show origin/develop:pom.xml | Select-String `
+  "dropwizard.version|jackson.*version|handlebars.version|httpcore5.version|httpcomponents4|<dependency.version>"
+git show origin/develop:commons/pom.xml | Select-String "httpcore|httpclient"  # pins/exclusions present?
+```
+
+### 14.5 Rebase execution
+
+```powershell
+git branch backup/feature-ION-12310-pre-rebase-3 HEAD   # ALWAYS back up before rebasing
+git rebase origin/develop                               # replay feature commits onto develop
+# --- on each stop: inspect, resolve, validate, continue ---
+git --no-pager diff --name-only --diff-filter=U         # which files are conflicted
+Select-String -Path <file> -Pattern "^<<<<<<<|^=======|^>>>>>>>"  # locate conflict hunks
+#   (edit the file: resolve each hunk as a UNION unless semantics dictate otherwise)
+[xml](Get-Content <file> -Raw) | Out-Null               # assert the POM is still well-formed XML
+git add <file>                                          # mark resolved
+git -c core.editor=true rebase --continue               # continue (core.editor=true = accept msg, no prompt)
+# git rebase --abort   # escape hatch → restores pre-rebase state
+```
+
+### 14.6 Post-rebase verification
+
+```powershell
+git --no-pager grep -n -E "^(<<<<<<<|=======$|>>>>>>>)" -- '*.xml' '*.md' '*.java'  # 0 hits = fully resolved
+git show HEAD:pom.xml | Select-String "<module>|<dependency.version>|dropwizard.version|httpcore5.version"
+git --no-pager grep -n "1.0.26-SNAPSHOT" -- '*.xml' '*.md'   # find hardcoded versions to bump
+```
+
+### 14.7 Build & test gate (the four key modules + their reactor deps)
+
+```powershell
+mvn -q -pl commons,cloud-sdk-api,cloud-sdk-aws,dynamo-integration-test -am verify
+#   -pl = only these modules · -am = also build the upstream modules they depend on
+#   verify = runs failsafe integration tests (DynamoDB Local ITs) too
+# roll up results straight from the reports (independent of console verbosity):
+#   parse target/surefire-reports/TEST-*.xml + target/failsafe-reports/TEST-*.xml
+#   summing testsuite @tests/@failures/@errors/@skipped per module.
+```
+
+### 14.8 Version bump, commit (no push)
+
+```powershell
+# edit root pom.xml: <dependency.version> 1.0.26-SNAPSHOT -> 1.0.27-SNAPSHOT
+git add README.md pom.xml
+git commit -m "ION-12310: <summary>" -m "<body>" -m "Co-authored-by: Copilot <...>"
+git --no-pager show <sha> -- README.md pom.xml     # present diff for review
+# push is intentionally withheld until review; rebase rewrote history ->
+git push --force-with-lease origin feature/ION-12310-commons-cloudsdk-refactoring
+#   ^ --force-with-lease (NOT --force): refuses if the remote moved since last fetch
+```
+
+---
+
+## 15. Repeatable conventions (I will follow these automatically)
+
+### 15.1 README changelog rollover convention — "descriptive text belongs only to the newest version"
+
+**Trigger:** any change on this feature branch that warrants a version bump (`dependency.version`
+`1.0.N-SNAPSHOT` → `1.0.N+1-SNAPSHOT`).
+
+**Invariant:** the standard branch-description paragraph —
+
+> This is the latest snapshot version of the commons module from the feature branch
+> 'feature/ION-12310-commons-cloudsdk-refactoring'
+> This branch is not yet merged to the main branch.
+> This branch is used for the cloud sdk refactoring and to integrate the Inttra Applications with the
+> latest cloudsdk libraries.
+> Once all the applications are migrated to the cloudsdk libraries, this branch will be merged to the
+> main branch.
+
+— must sit under **exactly one** heading: the **newest** `### Commons v1.0.N-SNAPSHOT`. It is a "this is
+the tip" marker, not per-release notes.
+
+**Mechanical steps on every bump (old newest = `vX`, new = `vY`):**
+1. **Demote `vX`:** delete the 5-line descriptive paragraph from the `### Commons vX-SNAPSHOT` heading,
+   leaving a blank line then its numbered change notes (its own commit's brief description).
+2. **Create `vY`:** add a new `### Commons vY-SNAPSHOT` heading immediately **below** `vX`'s notes, then
+   paste the descriptive paragraph, a blank line, and a **numbered brief description of vY's commit(s)**.
+3. Bump `<dependency.version>` in root `pom.xml` to `vY` in the same commit.
+4. Result shape:
+   ```
+   ### Commons vX-SNAPSHOT
+
+   1. <vX change one>
+   2. <vX change two>
+
+   ### Commons vY-SNAPSHOT
+   This is the latest snapshot version of the commons module from the feature branch '…'
+   … (full 5-line paragraph) …
+
+   1. <vY brief description>
+   ```
+
+**How to instruct me quickly (any of these is enough):**
+- "Bump commons and roll the README to `vY` — changes: `<one-line summary per point>`."
+- Or just: "New commons version for `<change>`" — I will infer the next `1.0.N+1-SNAPSHOT`, move the
+  paragraph, and write the numbered note from the change/commit summary.
+- If you want specific wording under the new heading, give me the numbered lines; otherwise I derive them
+  from the commit's brief description.
+
+I will apply this convention **without being reminded** on any commons change that bumps the version.
+
+### 15.2 Rebase hygiene conventions (also automatic)
+
+- **Always** create `backup/feature-…-pre-rebase-N` before a rebase; keep it until the push is confirmed good.
+- Resolve `pom.xml` / `commons/pom.xml` conflicts as a **UNION** of both sides unless semantics say
+  otherwise (module lists, property blocks, dependencyManagement pins all merge additively); keep the
+  feature branch's SNAPSHOT versioning scheme over develop's `1.R.01.xxx` numbering.
+- After resolving, **validate POMs are well-formed XML** and assert **zero** conflict markers remain before
+  continuing.
+- Gate every rebase on `mvn verify` for the four key modules (`commons`, `cloud-sdk-api`, `cloud-sdk-aws`,
+  `dynamo-integration-test`) including DynamoDB Local ITs; roll test totals from the surefire/failsafe XML.
+- **Never push a rewritten branch without explicit review approval**; when approved, use
+  `git push --force-with-lease` (never a bare `--force`) because this branch feeds ~80% of mercury-services apps.
+- Every commit touching this branch carries **`ION-12310`** in the message.

@@ -1,5 +1,9 @@
 # `distributor-rest` — AWS SDK v2 (cloud-sdk) Upgrade DESIGN (claude)
 
+> **⚠️ SUPERSEDED (2026-07-22).** The program has since locked a "no longer using `shared`" decision and a `1.0.27-SNAPSHOT` target (`commons`+`cloud-sdk-api`+`cloud-sdk-aws`+slim `appianway-commons`, DW5/Jetty12/Java17 baseline now DONE via ION-16098). The authoritative, current doc for this module is
+> [`2026-07-22-distributor-rest-awsupgrade-claude.md`](2026-07-22-distributor-rest-awsupgrade-claude.md), built on the program foundation
+> [`2026-07-22-appianway-awsupgrade-foundation-claude.md`](../../2026-07-22-appianway-awsupgrade-foundation-claude.md). This doc is retained for historical context (the `1.0.26-SNAPSHOT`/`shared`-migration framing below is out of date — read the 2026-07-22 doc instead).
+>
 > Module: `distributor-rest` · Date: 2026-05-31 · Author: Claude (Opus 4.8) · **Chosen option: B**
 > Companion: [distributor-rest PLAN](2026-05-31-distributor-rest-aws2x-upgrade-plan-claude.md). Foundation (do not duplicate): [shared DESIGN](../../shared/docs/2026-05-31-shared-aws2x-upgrade-DESIGN-claude.md) §5/§6, [shared PLAN](../../shared/docs/2026-05-31-shared-aws2x-upgrade-plan-claude.md) §10/§11.
 
