@@ -134,34 +134,47 @@ analysis file and note it.)
 
 Write the markdown to: `<MODULE>/docs/<yyyy-mm-dd>-design-doc-<first-jira-ticket>.md`
 
-Map content from the analysis file onto each template section. Guidance:
+Map content from the analysis file onto each template section. The template mirrors the corporate
+template — **do not rename, reorder, or drop official sections**; subsections marked `(ext)` are
+mercury-services additions and may be omitted when they would be empty. Guidance:
 
-- **Requirements** — Jira table (Step 1d), support-ticket table if any, a 2–4 sentence summary
-  (what was broken, who was affected, what the fix achieves), and a technology-stack table.
-- **Assumptions and Open Issues** — assumptions made and any open questions, with status.
-- **High Level Design** — architectural overview + before/after behavior. Use Mermaid diagrams
-  (`graph` / `sequenceDiagram`) where they clarify request flow and where the fix applies.
-- **Low Level Design** — Key Components table (component, location, purpose, key changes);
-  include Guice load order / AWS services / DynamoDB subsections only if relevant; a component
-  interaction Mermaid sequence diagram.
-- **UI** — `N/A` unless there is UI impact.
-- **API Architecture** — affected endpoints (method, path, description, change) and any
-  request/response contract changes.
-- **Configuration** — model-level (YAML/properties), stack-level (Jetty/JVM/container), and
-  professional-services/SI config.
-- **Auditing/Logging** — new log statements, event-publishing/lifecycle changes.
+- **Contributors** — author, reviewer, product owner.
+- **Summary** — 2–4 sentences: what was broken or being added, who is affected, what this achieves.
+- **Requirements** — fill the metadata table (Epic, Story ID, Target Release, Scope, Fix Version,
+  Customer/Client, Related Documents); then Functional Requirements, Non-Functional Requirements,
+  and Acceptance Criteria. `(ext)`: Jira table (Step 1d), support-ticket table, technology stack.
+- **Assumptions and Open Issues** — assumptions and open questions, with status.
+- **High Level Design** — interface changes affecting other groups, design trades needing a group
+  decision, how the feature is configured. `(ext)`: architectural overview, options considered,
+  before/after data flow. ASCII box diagrams preferred over Mermaid.
+- **Low Level Design → Server** — entities, APIs, DB schema, class/sequence diagrams. `(ext)`: key
+  components table, Guice load order, AWS services, DynamoDB changes, component interaction flow.
+- **Low Level Design → UI** — `N/A` unless there is UI impact.
+- **Low Level Design → API Architecture** — fill the official security table (Use Case, API, Body,
+  Method, Query Parameter, Access Privilege, Authorization, Authentication, Remarks).
+  `(ext)`: endpoints affected, request/response changes, implementation notes.
+- **Configuration** — component-level, model-level, stack-level, and PS/SI config. For each,
+  name the files/properties **and the primary actor** who changes them. If none, say `None.`
+- **Auditing/Logging** — auditing approach plus new log statements / event publishing.
 - **Metrics / Installer / Temporary cleanup / Impact on Tools** — `N/A` unless applicable.
-- **Impact on Current Application** — runtime behavior, performance, deployment (rolling restart?
-  config change? coordinated deploy?).
-- **Resiliency** — failover / error-handling changes.
+- **Impact on Current Application** — fill the migration table (DB schema, property migration,
+  other file migration, UI). `(ext)`: runtime behavior, performance, deployment.
+- **Resiliency** — failover / retry / error-handling changes and defensive guards.
 - **Impact on Other Components** — cross-module, shared-library, other-service impact.
-- **Backwards Compatible** — breaking change? deployable independently? data migration?
-- **Unit Test Plan** — table of new test classes/methods with coverage; note modified tests.
-- **Pre-Dev Security** — fill the checklist honestly; pay attention to input validation, path
-  traversal, and injection.
-- **Required Documentation Changes** — answer the user/API/ops questions.
+- **Backwards Compatible** — Yes/No plus breaking changes, independent deployability, data
+  migration, and whether clients need changes.
+- **New/Upgraded Third party Applications/Jars** — every new or version-bumped dependency with
+  reason and CVEs addressed. **Mandatory for OWASP / SDK-upgrade docs.** If none, say `None.`
+- **Unit Test Plan** — JUnit and manual tests. `(ext)`: new tests, test layer coverage,
+  existing test impact.
+- **Risks** — key risks as a red `panel`; **Dependencies** — major dependencies as a blue `panel`.
+- **Pre-Dev Security** — the official 10 topics with ids `1,2,3,4,5,6,120,124,125,126`
+  (never renumber). Answer Y/N honestly and explain each Y in Comments.
+- **REQUIRED: Documentation Changes** — answer the four official questions.
 - **Blocking Issues** — leave empty or note known blockers.
-- **Review** — Author = Approved; reviewers = Pending.
+- **Deployment Verification** `(ext)` — omit entirely if the doc predates deployment.
+- **Design Document Review and Approval Matrix** — all 9 official stages with the Ownership
+  column; status blank (or `NA` for Browser/UX when not applicable).
 
 ---
 

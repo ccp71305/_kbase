@@ -1,0 +1,212 @@
+{
+  "id": "0177e780785546df",
+  "name": "rates-owasp-aws-sdk-upgrade-20260728",
+  "description": "OWASP dependency-check (pre+post) + AWS SDK 2.x (cloud-sdk) upgrade for the rates module. Upgrade commons to 1.0.28-SNAPSHOT, migrate AWS interactions to cloud-sdk mirroring booking/network/auth/visibility, VS Code run configs, develop boot-check before implementing, full unit+integration coverage, live DynamoDB schema parity + ECS verification. Branch feature/ION-16110-rates-owasp-aws-upgrade. Do not push.",
+  "project": "mercury-services",
+  "created_at": "2026-07-28T15:17:16.009019+00:00",
+  "updated_at": "2026-07-28T18:39:16.678093+00:00",
+  "status": "active",
+  "tags": [
+    "rates",
+    "ION-16110",
+    "aws-sdk-upgrade",
+    "owasp-aws-sdk-upgrade",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "7e725036e393",
+      "timestamp": "2026-07-28T15:17:29.589002+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Session started for rates OWASP + AWS SDK 2.x upgrade (ION-16110). Model + branch plan logged.",
+      "detail": "Model: Claude Opus 4.8 (model ID claude-opus-4.8), 1M context window. Executing generated prompt .github/prompts/refactor/20260728-rates-owasp-aws-sdk-upgrade.prompt.md. Cross-linked related session value-added-service-owasp-aws-sdk-upgrade-20260724 (id 078302148c5345a0), same ION-16110, for the DynamoSupport-port pattern, offline client-construction coverage technique, and command-name/CI $task analysis. Current git: on develop, behind origin/develop by 21 commits before fetch/pull. Feature branch feature/ION-16110-rates-owasp-aws-upgrade to be created from latest develop after develop boot-check passes.",
+      "tags": [
+        "rates",
+        "ION-16110",
+        "model_info",
+        "kickoff"
+      ],
+      "references": [
+        ".github/prompts/refactor/20260728-rates-owasp-aws-sdk-upgrade.prompt.md",
+        "rates/docs/2026-06-30-rates-aws2x-DESIGN-claude.md",
+        "078302148c5345a0"
+      ]
+    },
+    {
+      "id": "4a902d4fe759",
+      "timestamp": "2026-07-28T15:18:12.381183+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Reference design digested: rates AWS upgrade is DynamoDB-only, mirror booking's SpotRatesDetail twin; no table-admin command so no CI $task change expected.",
+      "detail": "Reference design 2026-06-30-rates-aws2x-DESIGN-claude.md summary: ONLY DynamoDB in scope (no S3/SQS/SNS/SES/Kinesis). Booking already migrated a byte-for-byte twin at com.inttra.mercury.booking.carrierspotrates.model.canonical.SpotRatesDetail (same table SpotRatesDetail, hash key spotRateKey, GSI SPOT_RATE_ID_INDEX on spotRateId, @TTL expiresOn epoch-seconds, SpotRates/Audit). Plan: pom (remove dynamo-client + prod aws-java-sdk-dynamodb; add cloud-sdk-api/cloud-sdk-aws + dynamo-integration-test + test-scoped aws-java-sdk-dynamodb; pin Jackson); SpotRateConfig.dynamoDbConfig DynamoDbConfig->BaseDynamoDbConfig; SpotRatesModule drop AmazonDynamoDB/DynamoDBMapper bindings -> DynamoDbClientConfig + SpotRatesDao providers via DynamoRepositoryFactory.createEnhancedRepository; delete DynamoSupport; SpotRatesDetail v1 ORM -> @DynamoDbBean/@Table + enhanced annotations + converters (SpotRatesAttributeConverter, DateEpochSecondAttributeConverter, AuditAttributeConverter - verify byte-identity to booking); SpotRatesDao extends DynamoDBCrudRepository -> injected DatabaseRepository<...,DefaultPartitionKey<String>> with DefaultQuerySpec, preserve GSI->hash-key two-step; drop stray v1 @DynamoDBDocument/@DynamoDBTypeConvertedEnum on networkservices ContainerType. NOTE: no table-bootstrap/CreateTables command in rates (externally provisioned) => Step 3B command-name/CI $task likely NO change. Backward-compat: shared *_booking namespace, wire shape must match booking exactly. CVT prefix inttra2_test_booking; PROD sseEnabled true. Goal: commons 1.0.28-SNAPSHOT (design doc said 1.0.26, goal overrides to 1.0.28).",
+      "tags": [
+        "rates",
+        "design",
+        "dynamodb",
+        "scope"
+      ],
+      "references": [
+        "rates/docs/2026-06-30-rates-aws2x-DESIGN-claude.md"
+      ]
+    },
+    {
+      "id": "f78ddcf9005b",
+      "timestamp": "2026-07-28T15:23:46.732078+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Analyzed current rates code + booking twin template. Implementation plan finalized incl API preservation and byte-compat notes.",
+      "detail": "Booking twin fully migrated - use as exact template: SpotRatesDetail (@Table/@DynamoDbBean, @DynamoDbPartitionKey spotRateKey, @GsiConfig+@DynamoDbSecondaryPartitionKey SPOT_RATE_ID_INDEX KEYS_ONLY, @TTL+@DynamoDbConvertedBy(DateEpochSecondAttributeConverter) expiresOn, @DynamoDbConvertedBy(SpotRatesAttributeConverter/AuditAttributeConverter)); SpotRatesAttributeConverter (S, <fqcn>:<json> or <len>|<fqcn>:<b64gzip> >300KB, FAIL_ON_UNKNOWN_PROPERTIES=false + SORT_PROPERTIES_ALPHABETICALLY=true; transformTo IGNORES stored fqcn -> readValue into own SpotRates.class = robust cross-module read); AuditAttributeConverter (M map via LegacyMapConverter + DYNAMO_OBJECT_MAPPER writing ISO_DATE_TIME 'Z', tolerant OffsetDateTimeTypeConverter read incl +0000 and ISO_DATE fallback); LegacyMapConverter (empty String -> NUL, null -> NUL); DAO uses DefaultQuerySpec partitionKeyValue+consistentRead(true) for findByOfferKey (returns List), GSI query for findBySpotRateId then findByOfferKey. Guice: BookingDynamoModule provides DynamoDbClientConfig via BaseDynamoDbConfig.toClientConfigBuilder().consistentRead(false), createEnhancedRepository(clientConfig, tablePrefix+@Table.name, domain, DynamoRepositoryConfig). RATES SPECIFICS: keep rates.SpotRates FQCN; DO NOT register BookingStateConverter (rates has no BookingState - v1 had it commented out); use rates.common.GZip (byte-compatible standard GZIP); preserve rates DAO API: findBySpotRateId(String) [SpotRatesService], saveSpotRates(String,Audit,String,SpotRates) 4-arg [MaerskSpotRatesClient uses spotRates.getSpotRateId()], findByOfferKey(String). Port OffsetDateTimeTypeConverter (booking's tolerant v2 non-DynamoDBTypeConverter version). Tests to rewrite: SpotRatesDaoTest, SpotRatesConverterTest, DateToEpochSecondTest, SpotRatesModuleTest; DELETE DynamoSupportTest (class removed). Add SpotRatesDaoIT (mirror booking SpotRatesDaoIT). Drop v1 annotations on networkservices ContainerType.</detail>\n<parameter name=\"references\">[\"booking/src/main/java/com/inttra/mercury/booking/carrierspotrates/model/canonical/SpotRatesDetail.java\", \"booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/SpotRatesAttributeConverter.java\", \"booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/AuditAttributeConverter.java\", \"booking/src/main/java/com/inttra/mercury/booking/dynamodb/converter/LegacyMapConverter.java\", \"booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java\", \"booking/src/main/java/com/inttra/mercury/booking/carrierspotrates/dao/SpotRatesDao.java\"]",
+      "tags": [
+        "rates",
+        "booking-twin",
+        "implementation-plan"
+      ],
+      "references": []
+    },
+    {
+      "id": "ab0742f11429",
+      "timestamp": "2026-07-28T15:29:04.089294+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Baseline OWASP scan on develop: 6 HIGH CVEs (jackson-databind x2, httpcore5/httpcore5-h2 x4). Reports saved to baseline folder.",
+      "detail": "Command (rates dir): mvn package -pl rates -DskipTests -am => BUILD SUCCESS, produced target/rates-1.0.jar (72.9MB shaded). Then: dependency-check --project rates --scan .\\target\\rates-1.0.jar --out <tmp> --format HTML --format JSON --suppression .\\suppressions.xml --nvdApiKey $env:NVD_API_KEY. Baseline totals: 63 vulns (6 HIGH, 49 MEDIUM, 8 low). 6 HIGH CVEs: jackson-databind 2.21.0 -> CVE-2026-54512, CVE-2026-54513 (8.1); httpcore5-h2 5.3.4 -> CVE-2026-54399, CVE-2026-54428 (7.5); httpcore5 5.4 -> CVE-2026-54399, CVE-2026-54428 (7.5). Reports copied to C:\\temp\\latest-dep-chk-reports\\rates\\baseline\\ (html+json). NOTE current develop rates pom still on commons 1.R.01.023 yet shaded jar already carries jackson 2.21.0 / jetty 12.1.9 / httpcore5 5.4 (versions likely from parent pom depMgmt). OWASP fix goal: bump commons->1.0.28-SNAPSHOT (+ pins as needed) to clear the 6 HIGH.</detail>\n<parameter name=\"references\">[\"C:\\\\temp\\\\latest-dep-chk-reports\\\\rates\\\\baseline\\\\dependency-check-report.json\"]",
+      "tags": [
+        "rates",
+        "owasp",
+        "baseline",
+        "cve"
+      ],
+      "references": []
+    },
+    {
+      "id": "80aad9351464",
+      "timestamp": "2026-07-28T15:31:39.109533+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "blocker",
+      "summary": "Develop boot-check FLAGGED: app compiles + Dropwizard starts, but full boot blocked by external INT auth-gateway HTTP 502 (environmental, out of scope). Decision: proceed with clear flag; defer runtime boot to deployed INT.",
+      "detail": "DEVELOP BOOT-CHECK (FLAGGED): `java -jar target/rates-1.0.jar server conf/int/config.yaml` on latest develop. Result: develop COMPILES (BUILD SUCCESS) and Dropwizard initializes (DefaultServerFactory registers jersey handler '/' and admin handler '/admin'), but full boot fails during Guice provisioning because ContainerTypeClient eagerly loads a container-type cache at construction -> NetworkClient -> AuthClient.newToken() -> external INT auth token endpoint returns HTTP 502 Bad Gateway (3 retries), throwing WebApplicationException 'Could not retrieve a new token' -> Guice ProvisionException. Reproduced twice, deterministic. Direct probe of https://api-test.inttra.com/auth/validate returns HTTP 400 (endpoint reachable), so this is an environmental limitation of the local machine reaching the INT OAuth token gateway, NOT a develop code defect and NOT related to the DynamoDB/AWS-upgrade scope (which does not touch auth/network/containertype client code). DECISION: The boot-check's purpose is to confirm develop is not broken before building on it; develop is sound (compiles + starts Dropwizard). The sole boot blocker is an external auth-gateway 502 that is identical pre/post my change and outside scope. Per autonomy guidance (user unavailable, 'make good decisions'), PROCEEDING with implementation while prominently flagging this. Full runtime boot verification deferred to the deployed INT environment (Step 3B ECS/log verification); local correctness gate = mvn clean verify incl. DynamoDB-Local integration tests.</detail>\n<parameter name=\"references\">[\"rates/src/main/java/com/inttra/mercury/rates/networkservices/containertype/ContainerTypeClient.java\", \"rates/src/main/java/com/inttra/mercury/rates/networkservices/auth/AuthClient.java\", \"$env:TEMP/rates-boot-develop.log\"]",
+      "tags": [
+        "rates",
+        "boot-check",
+        "blocker",
+        "environmental",
+        "decision"
+      ],
+      "references": []
+    },
+    {
+      "id": "44876e4d5590",
+      "timestamp": "2026-07-28T15:42:15.067234+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "OWASP commit 7ae0f4eadc done: commons 1.0.28 + jackson 2.21.4 pin clears all 6 HIGH CVEs; 385 tests pass.",
+      "detail": "COMMIT 1 (OWASP) = 7ae0f4eadc on feature/ION-16110-rates-owasp-aws-upgrade. rates/pom.xml: mercury.commons.version 1.R.01.023 -> 1.0.28-SNAPSHOT; added <jackson.version>2.21.4</jackson.version> + dependencyManagement import of jackson-bom 2.21.4. Verified: mvn -f rates/pom.xml clean test => 385 tests, 0 failures. Rebuilt shaded jar + dependency-check rescan => 0 HIGH/CRITICAL (was 6 HIGH: jackson-databind CVE-2026-54512/54513, httpcore5/httpcore5-h2 CVE-2026-54399/54428), MEDIUM 49->42, low 8. NOTE: earlier 'mvn clean test' hit a flaky Lombok '@Builder bad class file / NoSuchFileException' testCompile glitch due to stale target from the -DskipTests baseline package; re-running clean test passed. commons brings lombok 1.18.32 (compile) while processor pinned 1.18.30 (parent) - not a real blocker, clean rebuild resolves.</detail>\n<parameter name=\"references\">[\"rates/pom.xml\", \"C:\\\\temp\\\\latest-dep-chk-reports\\\\rates\\\\baseline\\\\dependency-check-report.json\"]",
+      "tags": [
+        "rates",
+        "owasp",
+        "commit",
+        "cve-cleared"
+      ],
+      "references": []
+    },
+    {
+      "id": "e9cbfd9e2a90",
+      "timestamp": "2026-07-28T16:07:12.246694+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "AWS SDK 2.x migration complete: 395 unit + 9 DynamoDB-Local IT all green. Fixed lombok/guava classpath issues + latent GZip truncation bug.",
+      "detail": "mvn -f rates/pom.xml clean verify => BUILD SUCCESS. Surefire (unit): 395 tests, 0 failures/errors. Failsafe (integration, DynamoDB Local): 9 tests in SpotRatesDaoIT, 0 failures/errors. AWS migration code complete: pom (removed dynamo-client + prod aws-java-sdk-dynamodb; added cloud-sdk-api/cloud-sdk-aws + dynamo-integration-test + test-scoped aws-java-sdk-dynamodb 1.12.721; jackson-bom 2.21.4 + guava 33.5.0-jre depMgmt pins; lombok 1.18.32 align; maven-dependency-plugin copy-native-libs + failsafe integration exec). New/changed: SpotRatesDetail (@DynamoDbBean/@Table enhanced annotations), SpotRatesAttributeConverter, AuditAttributeConverter + LegacyMapConverter, OffsetDateTimeTypeConverter (v2 tolerant), SpotRatesDao (DatabaseRepository), SpotRatesModule (cloud-sdk providers), SpotRateConfig (BaseDynamoDbConfig), Audit + ContainerType (dropped v1 annotations); deleted DynamoSupport/DateToEpochSecond/SpotRatesConverter (+ their tests). New tests: SpotRatesDaoTest, SpotRatesAttributeConverterTest, AuditAttributeConverterTest, OffsetDateTimeTypeConverterTest, SpotRatesModuleTest (offline dummy-creds technique), SpotRatesDaoIT (round-trip, GSI two-step, TTL epoch-seconds, gzip>300KB, null-attr omission). ISSUES FOUND+FIXED: (1) lombok 1.18.30 processor vs commons-transitive 1.18.32 caused flaky testCompile 'bad class file'/'package does not exist' -> pinned lombok.version 1.18.32 (deterministic). (2) guava fell to 27.0.1-android (old swagger nearest-wins) breaking Guice (buildOrThrow NoSuchMethod) -> pinned guava 33.5.0-jre (matches booking). (3) LATENT BUG in rates.common.GZip.compress: returned obj.toByteArray() INSIDE try-with-resources before GZIPOutputStream close -> truncated gzip (>300KB spotRates were corrupt/unreadable). Fixed to close before toByteArray; reproduced by SpotRatesAttributeConverterTest.compressedRoundTrip + SpotRatesDaoIT gzip test.</detail>\n<parameter name=\"references\">[\"rates/pom.xml\", \"rates/src/main/java/com/inttra/mercury/rates/common/GZip.java\", \"rates/src/test/java/com/inttra/mercury/rates/spot/dynamodb/SpotRatesDaoIT.java\"]",
+      "tags": [
+        "rates",
+        "aws-upgrade",
+        "tests-pass",
+        "bugfix",
+        "dynamodb-it"
+      ],
+      "references": []
+    },
+    {
+      "id": "5a6c9e30a355",
+      "timestamp": "2026-07-28T16:23:55.694285+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Step 3B: DynamoDB schema parity confirmed across all envs; no TTL/stream divergence; no CI $task change; INT ECS develop deploy not staying up (env issue, out of scope). OWASP 6 HIGH->0.",
+      "detail": "STEP 3B live AWS verification. DynamoDB schema parity (SpotRatesDetail) across INT/QA/CVT/PROD - ALL consistent and MATCH the v2 entity annotations: HASH key spotRateKey (S) [=@DynamoDbPartitionKey], GSI SPOT_RATE_ID_INDEX HASH spotRateId (S) Projection KEYS_ONLY [=@GsiConfig KEYS_ONLY + @DynamoDbSecondaryPartitionKey], TTL ENABLED on expiresOn [=@TTL], Stream DISABLED (null) everywhere [no @Stream - correct]. Table prefixes: INT inttra_int_booking_, QA inttra2_qa_booking_, CVT inttra2_test_booking_ (NOT inttra2_cvt - trap), PROD inttra2_prod_booking_. SSE: INT disabled, QA/CVT/PROD ENABLED (matches per-env config.yaml sseEnabled; rates has NO table-admin command so it never creates/alters tables and never overrides SSE/TTL/stream). NO TTL/stream divergence between environments. ECS INT service Rates-dev (cluster ANEINWEBSVC-001, taskDef Rates-latest-dev-Task:7): status ACTIVE, rollout COMPLETED, but running=0 with event 'unable to consistently start tasks successfully' - the DEPLOYED DEVELOP artifact is not staying up in INT (corroborates local boot-check external-auth-gateway failure); unrelated to this change (feature branch not deployed) and outside scope. Command-name/CI: current rates module has NO Dropwizard table-admin command (no ConfiguredCommand/AbstractDynamoCommand/CreateTables/dynamo-create); DynamoTableCommand.java in history belongs to a long-removed rates-api/rates-batch structure, not the current single-module rates. run.sh deploys 'java -jar rates-1.0.jar server ./config.yaml'. => NO CI $task change needed; SpotRatesDetail is externally provisioned. OWASP post-fix delta: baseline 6 HIGH/49 MED/8 low -> post 0 HIGH/42 MED/8 low; all 4 distinct HIGH CVEs cleared. Reports in C:\\temp\\latest-dep-chk-reports\\rates\\{baseline,post}. Commits: 7ae0f4eadc (OWASP), 59f453d309 (AWS). 421 unit + 9 IT green.</detail>\n<parameter name=\"references\">[\"C:\\\\temp\\\\latest-dep-chk-reports\\\\rates\\\\post\\\\dependency-check-report.json\"]",
+      "tags": [
+        "rates",
+        "aws-verification",
+        "dynamodb-parity",
+        "ecs",
+        "owasp-delta"
+      ],
+      "references": []
+    },
+    {
+      "id": "6b112fa19343",
+      "timestamp": "2026-07-28T16:28:47.940107+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Task complete: OWASP (6 HIGH->0) + AWS SDK 2.x migration on rates, 2 commits, 421 unit + 9 IT green, full AWS verification, doc written. Ready for review, not pushed.",
+      "detail": "FINAL SUMMARY - rates ION-16110 complete, ready for review, NOT pushed. Branch feature/ION-16110-rates-owasp-aws-upgrade on latest develop (8dad1d555c). Two commits: 7ae0f4eadc (OWASP: commons 1.0.28-SNAPSHOT + jackson-bom 2.21.4 pin -> 6 HIGH CVEs cleared to 0) and ffaa38442a (AWS SDK 2.x cloud-sdk DynamoDB migration mirroring booking twin + guava 33.5.0-jre/lombok 1.18.32 pins + failsafe/native-libs wiring + GZip truncation bugfix). mvn -f rates/pom.xml clean verify => BUILD SUCCESS, 421 unit + 9 DynamoDB-Local IT, 0 failures. JaCoCo: new business classes 96-100% (SpotRatesDao/LegacyMapConverter/AuditAttributeConverter 100%; residual = unreachable defensive guards). OWASP reports in C:\\temp\\latest-dep-chk-reports\\rates\\{baseline,post}. Live AWS: DynamoDB schema parity across INT/QA/CVT/PROD matches v2 annotations (spotRateKey HASH, SPOT_RATE_ID_INDEX KEYS_ONLY, TTL expiresOn ENABLED, stream disabled everywhere - no divergence); no table-admin command so no CI $task change; INT ECS Rates-dev develop deploy not staying up (env/external-auth, out of scope, flagged). Develop boot-check FLAGGED: local full boot blocked by external INT auth gateway HTTP 502 (environmental, not a code defect); deferred to deployed env. Doc: rates/docs/2026-07-24-rates-owasp-aws-upgrade.md (rates/docs is gitignored per repo convention - local deliverable). VS Code run configs added to .vscode/launch.json (gitignored). Status left active for user review before push. Cross-linked VAS session 078302148c5345a0.</detail>\n<parameter name=\"references\">[\"rates/docs/2026-07-24-rates-owasp-aws-upgrade.md\", \"rates/pom.xml\"]",
+      "tags": [
+        "rates",
+        "ION-16110",
+        "complete",
+        "handoff"
+      ],
+      "references": []
+    },
+    {
+      "id": "14f55aca766a",
+      "timestamp": "2026-07-28T16:43:09.577720+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "INT deployed develop fails identically to local boot (auth 502 in eager ContainerTypeClient load) => INT env infra issue, not code. QA runs fine (steady state).",
+      "detail": "INT ECS root-cause confirmed via CloudWatch (log group inttra-int-lg-rates, stream Rates-latest-dev-Task/Rates-dev-Container/<taskId>). The DEPLOYED DEVELOP artifact Rates-26.06.003.jar exits code 1 with the IDENTICAL failure as the local boot-check: startup registers jersey/admin handlers, 'DynamoSupport: Created mapper with environment prefix inttra_int_booking_' (old v1 DynamoDB inits fine), then AuthClient.newToken (AuthClient.java:56) -> HTTP 502 Bad Gateway, called from ContainerTypeClient$3.load (ContainerTypeClient.java:96/90) via Guava LocalCache load -> NetworkClient.get. stoppedReason 'Essential container in task exited', stopCode EssentialContainerExited, exitCode 1. So the INT boot failure is an INT-environment infrastructure issue (INT auth/OAuth gateway returning 502), reproduced by BOTH the deployed develop build and my local boot-check - NOT a code defect and orthogonal to the DynamoDB migration. QA in contrast: ECS Rates-qa desired=1 running=1 rollout COMPLETED 'reached a steady state' - the rates app IS running fine in QA (QA auth gateway healthy). Eager load mechanism: ISOContainerToTmContainer (@Singleton, contract/service) constructor calls getIsoContainerCodesFromMap -> for each ISO code in contract-rates/ISOContainerToTMContainerMap.csv calls ContainerTypeClient.getContainerGroupType -> Guava ServiceCache load -> networkClient.get(containertype service) -> AuthClient token -> external network/auth call at STARTUP (Guice/Dropwizard init), before server binds. If auth/network unreachable, startup aborts.</detail>\n<parameter name=\"references\">[\"rates/src/main/java/com/inttra/mercury/rates/contract/service/ISOContainerToTmContainer.java\", \"rates/src/main/java/com/inttra/mercury/rates/networkservices/containertype/ContainerTypeClient.java\", \"rates/src/main/java/com/inttra/mercury/rates/networkservices/auth/AuthClient.java\"]",
+      "tags": [
+        "rates",
+        "boot-check",
+        "int-ecs",
+        "qa-ecs",
+        "root-cause"
+      ],
+      "references": []
+    },
+    {
+      "id": "d0a45c92ce61",
+      "timestamp": "2026-07-28T16:54:44.246733+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Deep dive: INT api-alpha gateway fully 502 (down). booking shares same gateway but boots (lazy auth); rates crashes because ISOContainerToTmContainer eagerly warms cache at startup. QA=same code, healthy api-beta, running.",
+      "detail": "DEEP ROOT-CAUSE of INT boot failure (user asked why rates fails but booking/network don't). Verified: (1) INT gateway api-alpha.inttra.com is FULLY DOWN - HTTP 502 on /auth, /auth/validate AND /network/containertype (not auth-specific, whole gateway 502). QA api-beta returns 400/401 (up), CVT api-test 400 (up), PROD api 400 (up). (2) Per-env auth/gateway URLs differ: INT=api-alpha, QA=api-beta, CVT=api-test, PROD=api. (3) booking INT uses the SAME api-alpha gateway (securityResources.oauthTokenValidationUri + outbound auth both api-alpha) - so it is NOT a different/broken endpoint unique to rates; the gateway is shared. (4) The real difference is TIMING: rates ISOContainerToTmContainer (@Singleton, contract/service) constructor EAGERLY warms the container-type cache at startup (getIsoContainerCodesFromMap -> ContainerTypeClient.getContainerGroupType per ISO code -> NetworkClient -> AuthClient GET api-alpha) so an api-alpha 502 throws during Guice provisioning -> essential container exits(1) -> ECS task dies. booking/network authenticate LAZILY (commons securityResources inbound validation per-request; their Guava ServiceCache/CacheLoader caches load on first get, not at boot) so the same outage does NOT crash their boot - they stay ECS-running and only fail requests needing the down gateway. rates' own ServiceCache is itself a lazy Guava LoadingCache; boot-fragility is solely the eager warm-up in ISOContainerToTmContainer's constructor (eager-cache-warm anti-pattern). (5) QA calls the IDENTICAL code steps as INT (same eager path) but against healthy api-beta => QA ECS Rates-qa running=1 steady state. CONCLUSION: proceeding past the failing boot-check was correct (user endorsed); INT failure = api-alpha platform outage affecting deployed develop too, orthogonal to the DynamoDB change. Documented in rates/docs/2026-07-24-rates-owasp-aws-upgrade.md sections 6 and 9(c).</detail>\n<parameter name=\"references\">[\"rates/src/main/java/com/inttra/mercury/rates/contract/service/ISOContainerToTmContainer.java\", \"rates/src/main/java/com/inttra/mercury/rates/common/ServiceCache.java\", \"booking/conf/int/config.yaml\", \"rates/conf/int/config.yaml\", \"rates/conf/qa/config.yaml\"]",
+      "tags": [
+        "rates",
+        "int-outage",
+        "api-alpha",
+        "eager-cache",
+        "root-cause",
+        "doc-updated"
+      ],
+      "references": []
+    },
+    {
+      "id": "9c94590b85c5",
+      "timestamp": "2026-07-28T18:39:16.677987+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "PR #1126 review fixes folded into 2 commits + force-pushed. jackson-xml BOM-managed, self-contained provider, lombok pin removed. Q1 ContainerType not persisted; Q2 Audit persisted via converter. 421+9 green.",
+      "detail": "PR #1126 review fixes applied and folded into the two commits, then pushed with --force-with-lease (user chose Option B). Final commits: 1ee54add12 (OWASP) + 598e382de2 (AWS). Fixes: (1) jackson-dataformat-xml: dropped hard-coded <version>2.19.2</version> so it is BOM-managed to 2.21.4 (reviewer: explicit version overrode the jackson-bom, leaving vulnerable/mismatched module). Verified dependency:tree=2.21.4, no 2.19.x remains, OWASP rescan still 0 HIGH. Folded into OWASP commit. (2) SpotRatesModule.provideDynamoDbClientConfig() no longer injects RatesConfig (reviewer importance 8: module never binds RatesConfig; only worked because RatesModule binds it) - now uses the ratesConfig constructor field; SpotRatesModuleTest builds injector from SpotRatesModule alone (no external RatesConfig binding). Folded into AWS commit. (3) Removed the temporary <lombok.version>1.18.32</lombok.version> pin - 3x clean test-compile + 2x clean verify green without it; parent processor 1.18.30 works against commons classpath 1.18.32 (same as booking); earlier failures were stale-target flakiness. Folded into AWS commit. Review Q1 (ContainerType): it is a non-persisted network REST DTO (deserialized from network/containertype API via Jackson), never written to DynamoDB; the @DynamoDBDocument/@DynamoDBTypeConvertedEnum were dead v1 annotations - correctly dropped, no persistence involved. Review Q2 (Audit): IS persisted, but as a nested DynamoDB Map via @DynamoDbConvertedBy(AuditAttributeConverter.class) on SpotRatesDetail.getAudit() - the enhanced client needs no @DynamoDbBean/annotation on Audit itself (matches booking's Audit). Final: mvn -f rates/pom.xml clean verify BUILD SUCCESS, 421 unit + 9 IT. Backup branch rates-review-backup-20260728 kept locally. Remote 598e382de2.</detail>\n<parameter name=\"references\">[\"rates/pom.xml\", \"rates/src/main/java/com/inttra/mercury/rates/spot/module/SpotRatesModule.java\", \"rates/docs/2026-07-24-rates-owasp-aws-upgrade.md\"]",
+      "tags": [
+        "rates",
+        "pr-review",
+        "jackson-xml",
+        "guice",
+        "lombok",
+        "pushed"
+      ],
+      "references": []
+    }
+  ],
+  "usage": []
+}

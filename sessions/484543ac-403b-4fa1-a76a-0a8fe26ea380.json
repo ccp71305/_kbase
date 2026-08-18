@@ -1,0 +1,94 @@
+{
+  "id": "484543ac-403b-4fa1-a76a-0a8fe26ea380",
+  "name": "claude-code 484543ac",
+  "description": "Auto-tracked token usage from the Claude Code Stop hook.",
+  "project": "",
+  "created_at": "2026-07-01T18:36:25.752464+00:00",
+  "updated_at": "2026-07-01T18:36:25.752565+00:00",
+  "status": "active",
+  "tags": [
+    "claude-code",
+    "auto-telemetry"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "ad7345a1189a",
+      "timestamp": "2026-07-01T18:36:25.752505+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 6469,
+      "output_tokens": 1307,
+      "cache_read_input_tokens": 36506,
+      "cache_creation_input_tokens": 7086,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_011WRN8fPSPtpnafbcn9FXFY"
+    },
+    {
+      "id": "a3aef56cb4e7",
+      "timestamp": "2026-07-01T18:36:25.752529+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 6469,
+      "output_tokens": 1307,
+      "cache_read_input_tokens": 36506,
+      "cache_creation_input_tokens": 7086,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_011WRN8fPSPtpnafbcn9FXFY"
+    },
+    {
+      "id": "4b6ceb0f1003",
+      "timestamp": "2026-07-01T18:36:25.752541+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 6469,
+      "output_tokens": 1307,
+      "cache_read_input_tokens": 36506,
+      "cache_creation_input_tokens": 7086,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_011WRN8fPSPtpnafbcn9FXFY"
+    },
+    {
+      "id": "264b668f85aa",
+      "timestamp": "2026-07-01T18:36:25.752550+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 4067,
+      "cache_read_input_tokens": 43592,
+      "cache_creation_input_tokens": 7788,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_019yrS2LEdJQpjmccusYMySw"
+    },
+    {
+      "id": "ef1b7563f4f4",
+      "timestamp": "2026-07-01T18:36:25.752557+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 4067,
+      "cache_read_input_tokens": 43592,
+      "cache_creation_input_tokens": 7788,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_019yrS2LEdJQpjmccusYMySw"
+    },
+    {
+      "id": "f320ae23ef6d",
+      "timestamp": "2026-07-01T18:36:25.752563+00:00",
+      "agent": "claude-code",
+      "model": "claude-sonnet-5",
+      "input_tokens": 984,
+      "output_tokens": 797,
+      "cache_read_input_tokens": 51380,
+      "cache_creation_input_tokens": 4189,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:msg_019NHkGZLjYnohy2ziz6ZztC"
+    }
+  ]
+}

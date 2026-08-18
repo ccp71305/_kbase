@@ -1,0 +1,47 @@
+{
+  "id": "23d7de02dcac4173",
+  "name": "vas-owasp-aws-sdk-upgrade-prompt-gen-20260724",
+  "description": "Generation of the module-specific AWS SDK 2.x refactor prompt for value-added-service (ION-16110) from the aws-sdk-upgrade-refactor-generator.",
+  "project": "mercury-services",
+  "created_at": "2026-07-24T20:02:22.777448+00:00",
+  "updated_at": "2026-07-24T22:05:33.159586+00:00",
+  "status": "active",
+  "tags": [
+    "value-added-service",
+    "ION-16110",
+    "aws-sdk-upgrade",
+    "prompt-generator",
+    "owasp-aws-sdk-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "e99871abd0d0",
+      "timestamp": "2026-07-24T20:02:38.704125+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Generated value-added-service AWS SDK 2.x refactor prompt from generator",
+      "detail": "",
+      "tags": [],
+      "references": [
+        ".github/prompts/refactor/20260724-value-added-service-owasp-aws-sdk-upgrade.md",
+        ".github/prompts/aws-sdk-upgrade-refactor-generator.md"
+      ]
+    },
+    {
+      "id": "3ec81bfb62f8",
+      "timestamp": "2026-07-24T22:05:33.159351+00:00",
+      "agent": "unknown",
+      "category": "blocker",
+      "summary": "STOPPED at boot-check gate — develop baseline build too slow (likely AV + -am upstream compile); resume later",
+      "detail": "",
+      "tags": [],
+      "references": [
+        ".github/prompts/refactor/20260724-value-added-service-owasp-aws-sdk-upgrade.md",
+        "value-added-service/docs/2026-06-30-value-added-service-aws2x-DESIGN-claude.md",
+        "value-added-service/src/main/java/com/inttra/mercury/vas/config/ValueAddedServiceModule.java",
+        "value-added-service/src/main/java/com/inttra/mercury/vas/dynamodb/ValueAddedServiceDao.java"
+      ]
+    }
+  ],
+  "usage": []
+}

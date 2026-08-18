@@ -60,22 +60,39 @@ Fill these in before running. **Mandatory** inputs must be present; if any is mi
 ```yaml
 # ── MANDATORY ──────────────────────────────────────────────────────────────
 module:   "visibility"          # the module the issue lives in (in one of the four workspaces above)
-doc:      "visibility/docs/2026-07-16-<issue>-inbound-ses-startup-issue.md"   # output documentation file path the
+doc:      "visibility/docs/2026-07-30-lambda-credprovider-missing-issue.md"   # output documentation file path the
                                 #   GENERATED prompt's agent must write (analysis + root cause + fix + command log)
 goals: |                        # one big free-form block — the issue description + everything to accomplish.
                                 #   May be multi-line or a paragraph. Paste Jenkins/stack traces, symptoms,
                                 #   acceptance criteria, and any concrete fix directives here.
-  - Visibility-dev-container startup issue. fails to startup. see log stack from aws service events below.
-  - Checking the visibility-inbound module found that the AWS SES service is used directly without using the cloud-sdk-api wrappers. This is wrong. The aws upgrade refactor have missed this since it was already using AWS 2.x SES clients. 
-  Please check booking module, auth module, network module which sends email using AWS SES service but through cloud-sdk-api and cloud-sdk-aws implementations. 
-  Once this is addressed in visibility, it is my understanding that the issue should get addressed. Do check and corroborate. 
-  - the changes done in commit 2c467791676 and pull request https://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests/1089/overview is not correct and can be overwritten 
-  - From the visibility service event logs >> 
-  int 256m total 138768 -rw-------. 1 eoadmin eoadmin 6006 Jul 15 05:06 config.yaml -rw-------. 1 eoadmin eoadmin 6038 Jul 15 05:06 config.yaml_cvt_conf -rw-------. 1 eoadmin eoadmin 5963 Jul 15 05:06 config.yaml_prod_conf -rw-------. 1 eoadmin eoadmin 6102 Jul 15 05:06 config.yaml_qa_conf -rwx------. 1 eoadmin eoadmin 337 Jul 15 05:06 run.sh -rw-------. 1 eoadmin eoadmin 414 Jul 15 05:06 suppressions.xml -rw-------. 1 eoadmin eoadmin 142051911 Jul 15 05:06 Visibility-26.07.004.jar 21:57:34.066 [main] INFO c.i.m.v.i.VisibilityInboundApplication - Starting visibility application ... 21:57:34.078 [main] INFO c.i.m.v.i.c.VisibilityInboundDynamoDbAdminCommand - VisibilityInboundDynamoDbAdminCommand initialized with 3 entity classes 2026-07-15T21:57:34.364727633Z main ERROR Log4j2 could not find a logging implementation. Please add log4j-core to the classpath. Using SimpleLogger to log to the console... java.lang.NullPointerException: Cannot invoke "java.nio.file.Path.getFileSystem()" because "<parameter1>" is null at java.base/java.nio.file.Files.provider(Unknown Source) at java.base/java.nio.file.Files.newInputStream(Unknown Source) at software.amazon.awssdk.profiles.ProfileFile$BuilderImpl.lambda$build$0(ProfileFile.java:314) at software.amazon.awssdk.utils.FunctionalUtils.lambda$safeSupplier$4(FunctionalUtils.java:108) at software.amazon.awssdk.utils.FunctionalUtils.invokeSafely(FunctionalUtils.java:136) at software.amazon.awssdk.profiles.ProfileFile$BuilderImpl.build(ProfileFile.java:314) at software.amazon.awssdk.profiles.ProfileFileSupplier.lambda$defaultSupplier$2(ProfileFileSupplier.java:58) at software.amazon.awssdk.core.client.builder.SdkDefaultClientBuilder.lambda$mergeGlobalDefaults$3(SdkDefaultClientBuilder.java:289) at software.amazon.awssdk.utils.AttributeMap$DerivedValue.primeCache(AttributeMap.java:604) at software.amazon.awssdk.utils.AttributeMap$DerivedValue.get(AttributeMap.java:593) at software.amazon.awssdk.utils.AttributeMap$Builder.resolveValue(AttributeMap.java:400) at java.base/java.util.ArrayList.forEach(Unknown Source) at software.amazon.awssdk.utils.AttributeMap$Builder.build(AttributeMap.java:362) at software.amazon.awssdk.core.client.config.SdkClientConfiguration$Builder.build(SdkClientConfiguration.java:224) at software.amazon.awssdk.core.client.config.SdkClientConfiguration.merge(SdkClientConfiguration.java:98) at software.amazon.awssdk.core.client.builder.SdkDefaultClientBuilder.mergeGlobalDefaults(SdkDefaultClientBuilder.java:285) at software.amazon.awssdk.core.client.builder.SdkDefaultClientBuilder.syncClientConfiguration(SdkDefaultClientBuilder.java:201) at software.amazon.awssdk.services.ssm.DefaultSsmClientBuilder.buildClient(DefaultSsmClientBuilder.java:36) at software.amazon.awssdk.services.ssm.DefaultSsmClientBuilder.buildClient(DefaultSsmClientBuilder.java:25) at software.amazon.awssdk.core.client.builder.SdkDefaultClientBuilder.build(SdkDefaultClientBuilder.java:171) at com.inttra.mercury.cloudsdk.paramstore.factory.ParameterStoreClientFactory.createParameterStore(ParameterStoreClientFactory.java:30) at com.inttra.mercury.config.ParameterStoreLookup.<init>(ParameterStoreLookup.java:35) at com.inttra.mercury.config.ConfigProcessingServerCommand.getConfigTransformer(ConfigProcessingServerCommand.java:27) at com.inttra.mercury.config.ConfigProcessingServerCommand.run(ConfigProcessingServerCommand.java:21) at io.dropwizard.core.cli.Cli.run(Cli.java:78) at io.dropwizard.core.Application.run(Application.java:94) at com.inttra.mercury.visibility.inbound.VisibilityInboundApplication.main(VisibilityInboundApplication.java:92)
-branch:   "feature/ION-12316-inbound-ses-issue"   # feature branch to work on. If it already EXISTS, the agent
+- visibility-outbound-poller, visibility-pending-start, visibility-error-email, visibility-s3-archiver have issues. 
+
+Logs: 
+
+CredentialsProvider must not be null: java.lang.IllegalArgumentException
+java.lang.IllegalArgumentException: CredentialsProvider must not be null
+  at com.inttra.mercury.cloudsdk.aws.config.BaseAwsConfig$ConfigurationValidator.validateNotNull(BaseAwsConfig.java:126)
+  at com.inttra.mercury.cloudsdk.aws.config.BaseAwsConfig$BaseAwsConfigBuilder.validateBaseConfig(BaseAwsConfig.java:105)
+  at com.inttra.mercury.cloudsdk.paramstore.config.AwsParameterStoreConfig$Builder.build(AwsParameterStoreConfig.java:71)
+  at com.inttra.mercury.visibility.lambda.HandlerSupport.getParameterStore(HandlerSupport.java:54)
+  at com.inttra.mercury.visibility.lambda.HandlerSupport.resolveSsmPath(HandlerSupport.java:62)
+  at com.inttra.mercury.visibility.lambda.VisibilityOutboundPoller.<init>(VisibilityOutboundPoller.java:63)
+  at com.inttra.mercury.visibility.lambda.VisibilityOutboundPoller.<init>(VisibilityOutboundPoller.java:43)
+  at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+  at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(Unknown Source)
+  at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(Unknown Source)
+  at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Unknown Source)
+  at java.base/java.lang.reflect.Constructor.newInstance(Unknown Source)
+
+- please check logs and verify and confirm root cause
+- the fix has been provided in bugfix/ION-16387, please checkout this branch and review the changes. 
+- will the fix work. please verify after checking with the lambda deployments in the aws 
+- the Jenkins build failed on SONAR gate check of lack of coverage. The coverage on HandlerSupport in visibility-s3-archiver is less than 80% target. Please add test case to ensure coverage. 
+- Do not push submit all changes for review and document your findings in the output document 
+branch:   "bugfix/ION-16387"   # feature branch to work on. If it already EXISTS, the agent
                                 #   checks it out and rebases onto the latest develop (single outgoing commit).
                                 #   If it does NOT exist, the agent pulls the latest develop and creates it from develop.
-jira:     "ION-12316"           # Jira ticket key — required (the commit-message hook needs a valid key)
+jira:     "ION-16387"           # Jira ticket key — required (the commit-message hook needs a valid key)
 aws_profile: "081020446316_INTTRA-Dev-Engg"   # named AWS CLI profile the agent uses for READ-ONLY log/diagnostic queries
 
 # ── OPTIONAL (use only if provided; otherwise omit the related sections) ─────

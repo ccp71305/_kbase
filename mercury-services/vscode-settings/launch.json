@@ -3,6 +3,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Run Watermill Booking Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.watermill.booking.WatermillBKApplication",
+            "projectName": "watermill-booking",
+            "args": "server ${workspaceFolder}/watermill-publisher/watermill-booking/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/watermill-publisher/watermill-booking",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Watermill Booking Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.watermill.booking.WatermillBKApplication",
+            "projectName": "watermill-booking",
+            "args": "server ${workspaceFolder}/watermill-publisher/watermill-booking/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/watermill-publisher/watermill-booking",
+            "console": "integratedTerminal",
+            "vmArgs": "-Xmx2g -Xms512m"
+        },
+        {
+            "type": "java",
             "name": "Run Booking Service",
             "request": "launch",
             "mainClass": "com.inttra.mercury.booking.BookingApplication",
@@ -19,6 +40,69 @@
             "projectName": "booking",
             "args": "server ${workspaceFolder}/booking/conf/int/config.yaml",
             "cwd": "${workspaceFolder}/booking",
+            "console": "integratedTerminal",
+            "vmArgs": "-Xmx2g -Xms512m"
+        },
+        {
+            "type": "java",
+            "name": "Run Value Added Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.vas.ValueAddedServiceApp",
+            "projectName": "value-added-service",
+            "args": "server ${workspaceFolder}/value-added-service/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/value-added-service",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Value Added Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.vas.ValueAddedServiceApp",
+            "projectName": "value-added-service",
+            "args": "server ${workspaceFolder}/value-added-service/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/value-added-service",
+            "console": "integratedTerminal",
+            "vmArgs": "-Xmx2g -Xms512m"
+        },
+        {
+            "type": "java",
+            "name": "Run Rates Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.rates.RatesApplication",
+            "projectName": "rates",
+            "args": "server ${workspaceFolder}/rates/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/rates",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Rates Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.rates.RatesApplication",
+            "projectName": "rates",
+            "args": "server ${workspaceFolder}/rates/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/rates",
+            "console": "integratedTerminal",
+            "vmArgs": "-Xmx2g -Xms512m"
+        },
+        {
+            "type": "java",
+            "name": "Run Booking CargoScreen Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.booking.cargoscreen.BookingCargoScreenApplication",
+            "projectName": "booking-cargoscreen",
+            "args": "server ${workspaceFolder}/booking-downstream-processor/booking-cargoscreen/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/booking-downstream-processor/booking-cargoscreen",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "java",
+            "name": "Debug Booking CargoScreen Service",
+            "request": "launch",
+            "mainClass": "com.inttra.mercury.booking.cargoscreen.BookingCargoScreenApplication",
+            "projectName": "booking-cargoscreen",
+            "args": "server ${workspaceFolder}/booking-downstream-processor/booking-cargoscreen/conf/int/config.yaml",
+            "cwd": "${workspaceFolder}/booking-downstream-processor/booking-cargoscreen",
             "console": "integratedTerminal",
             "vmArgs": "-Xmx2g -Xms512m"
         }

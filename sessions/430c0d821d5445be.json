@@ -1,0 +1,95 @@
+{
+  "id": "430c0d821d5445be",
+  "name": "ION-16397-bk-cargoscreen-aws-upgrade-20260730",
+  "description": "AWS SDK v1 -> 2.x (cloud-sdk) upgrade of booking-downstream-processor/booking-cargoscreen on branch feature/ION-16397-bk-cargoscreen-aws-upgrade (from origin/develop b86d536f). Design complete at booking-downstream-processor/booking-cargoscreen/docs/2026-0730-bk-cargoscreen-aws-upgrade-design.md; implementation NOT started. Target commons 1.0.28-SNAPSHOT. Single outgoing commit containing ION-16397; DO NOT PUSH before user review.",
+  "project": "mercury-services",
+  "created_at": "2026-07-31T00:54:25.832648+00:00",
+  "updated_at": "2026-07-31T00:55:30.247210+00:00",
+  "status": "active",
+  "tags": [
+    "ION-16397",
+    "booking-cargoscreen",
+    "aws-sdk-v2",
+    "cloud-sdk",
+    "design-complete",
+    "implementation-pending"
+  ],
+  "entries": [
+    {
+      "id": "7b4dcfa9cb06",
+      "timestamp": "2026-07-31T00:54:48.577255+00:00",
+      "agent": "claude-opus-5",
+      "category": "finding",
+      "summary": "commons 1.0.28-SNAPSHOT DELETES com.inttra.mercury.messaging.* — invalidates the 2026-06-30 initial design; 13 files change, not 4",
+      "detail": "Verified by diffing jars in ~/.m2: commons-1.R.01.023.jar contains com/inttra/mercury/messaging/{sqs,sns,logging,model,config,util}; commons-1.0.28-SNAPSHOT.jar contains ZERO entries under com/inttra/mercury/messaging/. The 2026-06-30 initial design assumed commons would keep that API and just re-back it with v2 (\"bump commons and verify\") — that is WRONG.\n\nBlast radius: 13 of 41 java files (7 main + 6 test). 4 files import v1 com.amazonaws.*; 11 files import the removed commons messaging.*.\n\nVerified replacement mapping (all present in cloud-sdk-api/cloud-sdk-aws 1.0.28-SNAPSHOT):\n  messaging.sqs.SQSClient (x5)        -> cloudsdk.messaging.api.MessagingClient<String>  (receiveMessages(url,max,wait) default method matches old receiveMessage arg-for-arg)\n  messaging.sns.SNSClient (x2)        -> cloudsdk.notification.api.NotificationService\n  messaging.logging.SNSEventPublisher -> cloudsdk.notification.workflow.SnsEventPublisher  (NOTE casing SNS->Sns)\n  messaging.logging.EventPublisher    -> cloudsdk.notification.workflow.EventPublisher\n  messaging.logging.EventLogger       -> cloudsdk.notification.workflow.EventLogger\n  messaging.logging.EventGenerator    -> cloudsdk.notification.workflow.EventGenerator\n  messaging.logging.ErrorHelper       -> cloudsdk.notification.annotation.ErrorHelper   (package moves)\n  messaging.model.Annotations         -> cloudsdk.notification.annotation.Annotations\n  messaging.model.MetaData (x3)       -> cloudsdk.notification.workflow.MetaData\n  messaging.model.Event (x2)          -> cloudsdk.notification.workflow.Event\n  messaging.util.RandomGenerator (x3) -> cloudsdk.notification.util.RandomGenerator\n  messaging.config.SQSModule/SNSModule-> NO REPLACEMENT: become local @Provides in BookingCargoScreenApplicationInjector\n  messaging.config.AwsRetryCondition  -> NO REPLACEMENT: folded into a v2 RetryStrategy predicate\n\nSame problem ION-16380 solved for watermill-publisher, so the pattern is proven rather than novel.",
+      "tags": [
+        "commons-1.0.28",
+        "breaking-change",
+        "messaging-removed",
+        "blast-radius"
+      ],
+      "references": [
+        "ION-16397",
+        "booking-downstream-processor/booking-cargoscreen/docs/2026-0730-bk-cargoscreen-aws-upgrade-design.md",
+        "booking-downstream-processor/docs/2026-06-30-booking-downstream-processor-aws2x-DESIGN-claude.md"
+      ]
+    },
+    {
+      "id": "332c9199d396",
+      "timestamp": "2026-07-31T00:54:57.638003+00:00",
+      "agent": "claude-opus-5",
+      "category": "blocker",
+      "summary": "HIGH RISK: cloud-sdk QueueMessage is immutable but SqsMessageHandler mutates attributes for DO_NOT_DELETE / DO_NO_SEND_TO_DLQ — naive retype fails SILENTLY",
+      "detail": "javap confirms cloud-sdk QueueMessage<T> is read-only: getMessageId(), getReceiptHandle(), getPayload(), getAttributes(), getSentTimestamp(). There is NO setAttributes, and getAttributes() may return an immutable map.\n\nSqsMessageHandler implements two control flags by MUTATING the v1 Message's attribute map:\n  setDoNotDelete(m)      -> attributes.put(DO_NOT_DELETE_KEY, \"true\");  m.setAttributes(attributes)\n  setDoNoSendToDlqKey(m) -> attributes.put(DO_NO_SEND_TO_DLQ_KEY,\"true\"); m.setAttributes(attributes)\nthen reads them back in taskExceptionHandler (skip DLQ) and taskFinallyHandler (skip delete).\n\nA mechanical Message -> QueueMessage<String> retype COMPILES CLEANLY and then silently drops the flags, so a message that should be left on the queue gets DELETED. This is the single most dangerous item in the ticket.\n\nRESOLUTION (design decision 2): add a module-local mutable adapter\n  processor/sqs/CargoScreenQueueMessage implements QueueMessage<String>\n    - delegates getMessageId/getReceiptHandle/getPayload/getSentTimestamp\n    - holds a MUTABLE copy of attributes seeded from the delegate\n    - exposes putAttribute(k,v)\nSqsMessageHandler.getMessages() wraps each received message. Mirrors the SqsQueueMessage adapter ION-16380 added to watermill-commons.\n\nMANDATORY TEST: assert end-to-end that DO_NOT_DELETE suppresses deleteMessage and DO_NO_SEND_TO_DLQ suppresses the DLQ send, through the adapter. Without it this parity rots invisibly.",
+      "tags": [
+        "high-risk",
+        "silent-failure",
+        "queuemessage",
+        "adapter",
+        "must-test"
+      ],
+      "references": [
+        "ION-16397",
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/processor/sqs/SqsMessageHandler.java"
+      ]
+    },
+    {
+      "id": "762a7932a488",
+      "timestamp": "2026-07-31T00:55:14.793999+00:00",
+      "agent": "claude-opus-5",
+      "category": "decision",
+      "summary": "S3 tuning preserved exactly (user-confirmed); AwsRetryCondition decompiled = retry-everything, NOT a throttle/5xx predicate — v2 standard strategy would be a silent behaviour change",
+      "detail": "USER DECISION: preserve the v1 S3 client tuning exactly rather than using createDefaultS3Client().\n\nv1 (BookingCargoScreenApplicationInjector.bindS3):\n  RetryPolicy(new AwsRetryCondition(), new PredefinedBackoffStrategies.FullJitterBackoffStrategy(500,5000), 3, false)\n  ClientConfiguration.withMaxErrorRetry(3).withRetryPolicy(rp).withConnectionTimeout(1000).withSocketTimeout(5000).withMaxConnections(50)\n  (withClientExecutionTimeout is COMMENTED OUT in source — leave unset)\n\nCAPABILITY VERIFIED via javap on the real 1.0.28-SNAPSHOT jars:\n  StorageClientFactory.createS3Client(AwsStorageConfig)                                  EXISTS\n  BaseAwsConfig.BaseAwsConfigBuilder: retryStrategy(RetryStrategy), httpClient(AwsHttpClientWrapper),\n      region(AwsRegionWrapper), credentialsProvider(AwsCredentialsProviderWrapper),\n      clientExecutionTimeout(Duration), threadPoolSize(int)\n  AwsHttpClientWrapper.ofSync(Object) accepts a pre-built v2 ApacheHttpClient (where the 3 timeouts + pool live)\n  RetryStrategy.Builder: retryOnException(Predicate<Throwable>), maxAttempts(int), backoffStrategy(BackoffStrategy)\n  BackoffStrategy.exponentialDelay(base,max) is the FULL-JITTER variant (halfJitter / withoutJitter are the others)\n\nKEY FINDING — AwsRetryCondition decompiled from commons-1.R.01.023.jar:\n  public boolean shouldRetry(req, ex, attempt) { log.warn(\"Failed calling %s, attempt #%s\", ...); return true; }\n  Bytecode ends iconst_1 / ireturn => RETRIES EVERYTHING UNCONDITIONALLY.\nThis INVERTS the earlier assumption. It is not an approximation of the standard throttle/5xx predicate, so falling\nback to v2's standard predicate would silently STOP retrying 404 NoSuchKey / 403 that are retried 3x today.\n\nFAITHFUL v2 EQUIVALENT (implement this):\n  StandardRetryStrategy.builder()\n      .maxAttempts(4)                                                            // 1 initial + 3 retries == withMaxErrorRetry(3)\n      .backoffStrategy(BackoffStrategy.exponentialDelay(Duration.ofMillis(500), Duration.ofMillis(5000)))\n      .retryOnException(t -> { log.warn(\"Failed calling S3, retrying\", t); return true; })   // == AwsRetryCondition\n      .build()\n  + AwsHttpClientWrapper.ofSync(ApacheHttpClient.builder()\n       .connectionTimeout(Duration.ofMillis(1000)).socketTimeout(Duration.ofMillis(5000)).maxConnections(50).build())\n\nMANDATORY TEST: assert maxAttempts, backoff type, the 3 timeouts / pool size, and that the predicate returns true for a\nNON-retryable exception. Unasserted tuning silently reverts to defaults.",
+      "tags": [
+        "user-decision",
+        "s3-tuning",
+        "retry-strategy",
+        "awsretrycondition",
+        "behaviour-parity"
+      ],
+      "references": [
+        "ION-16397",
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/config/BookingCargoScreenApplicationInjector.java"
+      ]
+    },
+    {
+      "id": "ca6fdbbc5412",
+      "timestamp": "2026-07-31T00:55:30.247180+00:00",
+      "agent": "claude-opus-5",
+      "category": "progress",
+      "summary": "STATE: design complete, implementation NOT started. Branch feature/ION-16397-bk-cargoscreen-aws-upgrade at origin/develop b86d536f, 0 outgoing commits, no upstream set.",
+      "detail": "Model: Claude Opus 5. Stopped deliberately before implementation at the user's instruction (\"I do not want you to start implementing on an exhausted session context\").\n\nDONE:\n - Branch feature/ION-16397-bk-cargoscreen-aws-upgrade created from origin/develop (b86d536f); upstream tracking\n   explicitly UNSET (checkout -b <name> origin/develop had set it to track origin/develop, which would have made a\n   bare `git push` target develop). Verified: only `develop` itself tracks origin/develop, which is correct.\n - Design doc written and self-consistent.\n - All open API questions resolved by javap against real jars (no assumptions left).\n\nNOT DONE — next actions, in order (see design doc section 7):\n 1. Baseline OWASP scan -> C:\\temp\\latest-dep-chk-reports\\booking-cargoscreen\\baseline\\ (HTML+JSON, --nvdApiKey $env:NVD_API_KEY)\n 2. Baseline test run + boot-check to make regressions attributable\n 3. pom: commons 1.R.01.023 -> 1.0.28-SNAPSHOT; DROP dynamo-client (dead: zero dynamo refs in src/main) + its version\n    property; ADD cloud-sdk-api + cloud-sdk-aws; KEEP aws-lambda-java-events 2.2.9\n 4. mvn test-compile to enumerate the AUTHORITATIVE compile-error set (design from the compiler, not assumption)\n 5. Implement in order: S3WorkspaceService -> injector -> CargoScreenQueueMessage adapter -> handler/processor ->\n    EventLogHandler/EmptyEventPublisher -> BookingCargoScreenApplication (drop SQSModule/SNSModule generators)\n 6. mvn -pl booking-downstream-processor/booking-cargoscreen -am clean verify (ALL tests green, none weakened/@Disabled)\n 7. Boot-check: java -jar .../booking-cargoscreen-*.jar server .../conf/int/config.yaml\n    Apply continue-on-INT-like-boot-failure rule: verify any INT-endpoint-outage claim with evidence before\n    flag-and-continue; fix genuine defects introduced by this change.\n 8. Post OWASP -> ...\\post\\ ; summarize HIGH/CRITICAL delta\n 9. VS Code Run/Debug for com.inttra.mercury.booking.cargoscreen.BookingCargoScreenApplication (.vscode is git-ignored)\n10. ONE commit, message contains ION-16397, verify rev-list --count origin/develop..HEAD == 1, DO NOT PUSH\n\nCONSTRAINTS: single outgoing commit; commit message must contain ION-16397 (Bitbucket git-control-freak hook);\ndo not push before user review; no test may be weakened or disabled to go green.\n\nNO DynamoDB in this module => no DynamoDB-Local ITs needed.\naws-lambda-java-events stays on v1 deliberately (S3EventNotification/SNSEvent/S3Event are wire-JSON POJOs, not SDK\nclients), so ONE com.amazonaws artifact legitimately remains on the classpath. Do not \"finish\" the migration by\nremoving it.",
+      "tags": [
+        "state",
+        "handoff",
+        "next-actions",
+        "implementation-pending"
+      ],
+      "references": [
+        "ION-16397",
+        "booking-downstream-processor/booking-cargoscreen/docs/2026-0730-bk-cargoscreen-aws-upgrade-design.md"
+      ]
+    }
+  ],
+  "usage": []
+}

@@ -1,0 +1,197 @@
+{
+  "id": "35cb592127df48b2",
+  "name": "ION-12310 cloud-sdk Gap Impl (appianway AWS upgrade)",
+  "description": "Implement the strictly-additive cloud-sdk-api/cloud-sdk-aws/commons gaps required by the appianway AWS v1->v2 (cloud-sdk) migration, per design doc cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md. Gaps: S-G2 (StorageClient metadata/content-type put+copy), W-G9.1 (Event.Builder annotations round-trip), W-G9.2 (6 MetaData.Projection + 9 Event.Token constants), X-G7 (MailContent/SES reply-to), X-G10 (EmailService raw-MIME attachment support), C-G6 + config-substitution (widen getConfigTransformer + PropertiesSubstitutionConfigProvider), X-G11 (null-safe SSM profile-file supplier). Decisions: single version bump 1.0.28-SNAPSHOT for the five+config; X-G11 as a SEPARATE bump 1.0.29-SNAPSHOT (boot-path modification, land last, independently revertible). Per-gap branches feature/ION-12310-<gap> cut from current feature-branch tip, squash-merged back (~6 commits). Commit messages ION-12310 only. Backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 pushed to origin BEFORE any work. Consumer zero-impact gate: mvn -pl network,auth,registration,self-service-reports,tx-tracking,booking,visibility,webbl,booking-bridge,db-migration -am verify (no reactor). Review findings F1-F9 incorporated.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-07-24T02:13:13.723702+00:00",
+  "updated_at": "2026-07-24T17:21:58.527192+00:00",
+  "status": "completed",
+  "tags": [
+    "ION-12310",
+    "cloud-sdk",
+    "aws-upgrade",
+    "appianway",
+    "java",
+    "additive"
+  ],
+  "entries": [
+    {
+      "id": "b9cdf1c549c6",
+      "timestamp": "2026-07-24T02:14:37.320845+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Scope, gap set, and delivery decisions for the cloud-sdk gap implementation (design approved, not yet started)",
+      "detail": "Design doc: cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md (fully reviewed/approved; incorporates review findings F1-F9).\\n\\nGAPS (all strictly additive to cloud-sdk-api/cloud-sdk-aws/commons; consumers on 1.0.27 unaffected):\\n- S-G2: StorageClient 3 default overloads (put bytes+meta+ct, put stream+meta+ct, copy REPLACE) + S3StorageClient overrides (+MetadataDirective import).\\n- W-G9.1: Event.Builder annotations field + setAnnotations + copy in Builder(Event) + assign in Event(Builder) ctor (restores shared round-trip; parseJson currently drops annotations).\\n- W-G9.2: add 6 MetaData.Projection (REPROCESS, SUBSCRIPTION_ID, DISTRIBUTOR_REST, ORIGINAL_IB_WORKSPACE_FILE, SPLITTER_FILE_SIZE, EVENT_PROVIDER) + 9 Event.Token (ORIGINAL_FILE_SIZE + 8 FTP_*) constants; exact values in design doc S5.1.\\n- X-G7: MailContent.getReplyTo() default + MailContentImpl.replyTo + SesEmailServiceImpl .replyToAddresses at L120 non-templated site (preserve try/catch, F6/F7).\\n- X-G10: EmailMimeUtils.createMimeMessage(from,to,cc,bcc,MailContent) new overload (multipart/mixed+attachments) + SesEmailServiceImpl.sendEmail branch to raw MIME when getAttachments() non-empty; simple path unchanged.\\n- C-G6 + config-substitution: widen ConfigProcessingServerCommand.getConfigTransformer private->protected; lift appianway VariableLookupProvider+ProcessedConfigProvider into commons as PropertiesSubstitutionConfigProvider.\\n- X-G11: SafeProfileFile helper + ParameterStoreClientFactory.defaultProfileFileSupplier ONLY (NO defaultProfileName - F1); credentials/region unchanged. Boot-path modification (F2).\\n- X-G8: NO CHANGE (ingestor keeps vc.inreach v1 signer). DynamoDB: NO SDK change (adopt existing DynamoDbAdminCommand appianway-side).\\n\\nVERSIONING (decided 2026-07-23): TWO bumps. 1.0.28-SNAPSHOT = S-G2, W-G9, X-G7, X-G10, C-G6+config (single bump, README v1.0.28 heading). X-G11 = SEPARATE bump 1.0.29-SNAPSHOT (own commit, own README heading; boot-path change isolated & independently revertible).\\n\\nWORKFLOW: backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 created AND pushed to origin BEFORE any work. Per-gap branches feature/ION-12310-<gap> cut from current feature/ION-12310-commons-cloudsdk-refactoring tip; multi-commit dev OK; squash-merge back as one commit per gap (~6 commits). Commit messages ION-12310 ONLY. No rebase, no force-push (ordinary push). Consumer zero-impact gate (no reactor): mvn -pl network,auth,registration,self-service-reports,tx-tracking,booking,visibility,webbl,booking-bridge,db-migration -am verify (before+after). Library build: mvn -pl commons,cloud-sdk-api,cloud-sdk-aws,dynamo-integration-test verify incl DynamoDB Local ITs. WorkflowWireCompatTest must use REAL shared-produced JSON fixtures (F3) and assert inner annotations list non-empty (F4).",
+      "tags": [
+        "decision",
+        "scope",
+        "versioning",
+        "workflow"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310",
+        "ION-12317",
+        "ION-12316"
+      ]
+    },
+    {
+      "id": "f44bb12c7d64",
+      "timestamp": "2026-07-24T02:18:44.902415+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "X-G11 deferred: land 1.0.28 set (5 gaps + config) and roll to appianway first; X-G11 separately as 1.0.29 later",
+      "detail": "Sequencing decision (2026-07-23): X-G11 (SafeProfileFile null-safe SSM profile-file supplier) is NOT merged with the 1.0.28-SNAPSHOT set. Land the 1.0.28 set first = S-G2, W-G9.1, W-G9.2, X-G7, X-G10, C-G6+config-substitution (~5 squash commits on feature/ION-12310-commons-cloudsdk-refactoring, single bump 1.0.27->1.0.28-SNAPSHOT, README v1.0.28 heading with 5 notes). Roll the 1.0.28 set out to appianway. THEN, separately and later, do X-G11 on its own feature/ION-12310-xg11 branch as its own commit + own bump 1.0.28->1.0.29-SNAPSHOT (demote v1.0.28 paragraph, add v1.0.29 heading). Rationale: X-G11 modifies the boot-time createParameterStore path every app runs (F2), so it must be isolated from the inert 1.0.28 set and must not block/ride the 1.0.28 rollout. Design doc header now records MCP session id 35cb592127df48b2.",
+      "tags": [
+        "decision",
+        "sequencing",
+        "X-G11",
+        "versioning"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "919191805619",
+      "timestamp": "2026-07-24T02:27:16.186262+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Work started on 1.0.28 gap set; local backup branch created (no push)",
+      "detail": "Resumed ION-12310 cloud-sdk gap implementation. Verified starting state: on feature/ION-12310-commons-cloudsdk-refactoring, clean tree, version 1.0.27-SNAPSHOT, backup branch did not exist yet. User unavailable -> proceeding autonomously. Decisions for this run: (1) create LOCAL backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 as safety net but do NOT push to origin (pushing left to user review); (2) implement full 1.0.28 set (S-G2, W-G9.1, W-G9.2, X-G7, X-G10, C-G6+config-substitution) with full test coverage; X-G11 stays deferred to 1.0.29; (3) bump dependency.version 1.0.27->1.0.28-SNAPSHOT and roll README per design 13.5; (4) verify build within mercury-services-commons only (commons, cloud-sdk-api, cloud-sdk-aws, dynamo-integration-test) - the mercury-services consumer repo is not open in this workspace so the cross-repo consumer gate cannot be run here. Confirmed commons-text 1.10.0 already a compile dep in commons/pom.xml (enables config-substitution provider). Verified all target source shapes match Appendix B of design doc.",
+      "tags": [
+        "progress",
+        "start",
+        "backup",
+        "autonomous"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "803e0a0802fa",
+      "timestamp": "2026-07-24T03:02:06.157276+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "1.0.28 gap set implemented with full test coverage; version bumped + README rolled; email blank-content-type bug fixed",
+      "detail": "Implemented full 1.0.28 gap set (strictly additive) on feature/ION-12310-commons-cloudsdk-refactoring. FILES CHANGED (main): (S-G2) cloud-sdk-api StorageClient.java +3 default overloads (put bytes+meta+ct, put stream+meta+ct, copy REPLACE) + Map import; cloud-sdk-aws S3StorageClient.java +3 overrides + MetadataDirective/Map imports, reusing existing validateInput/handleS3Exception/handleSdkException/handleUnexpectedException error pattern. (W-G9.1) cloud-sdk-api Event.java: Builder gains annotations field + setAnnotations + copy in Builder(Event) + assign in Event(Builder) ctor. (W-G9.2) Event.java +9 Token constants (ORIGINAL_FILE_SIZE + 8 FTP_*), MetaData.java +6 Projection constants (REPROCESS, SUBSCRIPTION_ID, DISTRIBUTOR_REST, ORIGINAL_IB_WORKSPACE_FILE, SPLITTER_FILE_SIZE, EVENT_PROVIDER). (X-G7) cloud-sdk-api MailContent.getReplyTo() default emptyList; cloud-sdk-aws MailContentImpl +replyTo @Builder.Default + addAttachment builder helper; SesEmailServiceImpl sendEmail(from,to,cc,bcc,content) applies replyToAddresses when non-empty (preserving existing try/catch). (X-G10) SesEmailServiceImpl branches to buildRawEmailContent (raw MIME) when getAttachments() non-empty, simple path unchanged; EmailMimeUtils new overload createMimeMessage(from,to,cc,bcc,MailContent) building multipart/mixed>alternative(text,html)+attachments-directly-under-mixed, To/Cc/Bcc headers, reply-to, null/blank content-type -> application/octet-stream. (C-G6) commons ConfigProcessingServerCommand.getConfigTransformer widened private->protected. (config-subst) commons new PropertiesSubstitutionConfigProvider (ConfigurationSourceProvider) resolving ${key}/${key:-default} env-first-then-properties, recursive chains, fail-fast on unresolved, leaves ${awsps:...} for downstream ParameterStoreConfigTransform; loadClasspathProperties helper; package-private env-injection ctor for tests. VERSION: root pom.xml dependency.version 1.0.27->1.0.28-SNAPSHOT; README rollover per 13.5 (demoted v1.0.27 paragraph, new ### Commons v1.0.28-SNAPSHOT heading with 5 notes). TESTS ADDED: S3StorageClientMetadataTest (put/copy meta, null/blank handling, interface-default fallback stub), EventBuilderAnnotationsTest (serialize, parse retains inner list non-empty & equal F4, byte-stable with/without, copy-ctor), WorkflowConstantsParityTest (15 value asserts + key round-trip), WorkflowWireCompatTest (external shared-format fixtures under src/test/resources/wire F3: cross-lib parity, byte-stable trees, timestamp pattern, annotations wrapper shape, new projection/token keys), SesEmailReplyToAndAttachmentTest (reply-to default/populated/interface-default, attachment->raw, no-attachment->simple, multi, octet-stream fallback, attachment+replyto, F8 recipient-source agreement), EmailMimeUtilsMailContentTest (mixed layout, attachment under mixed, octet fallback, reply-to), MailContentImplTest +3 (replyTo default/populated, addAttachment helper), PropertiesSubstitutionConfigProviderTest (10: property/chain resolution, env precedence, defaults, unresolved throws, awsps passthrough + ParameterStore integration, classpath load). BUG FOUND+FIXED during build: EmailMimeUtils used Strings.isNullOrEmpty which let whitespace-only content-type through -> javax.mail ParseException; changed to null-or-isBlank check (matches design null/blank->octet-stream). X-G11 NOT touched (deferred to 1.0.29). No git commit/push done yet (left for user review); local backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 exists.",
+      "tags": [
+        "code_change",
+        "S-G2",
+        "W-G9",
+        "X-G7",
+        "X-G10",
+        "C-G6",
+        "config-substitution",
+        "tests"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/notification/workflow/Event.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/email/impl/SesEmailServiceImpl.java",
+        "commons/src/main/java/com/inttra/mercury/config/PropertiesSubstitutionConfigProvider.java"
+      ]
+    },
+    {
+      "id": "91aa945671fe",
+      "timestamp": "2026-07-24T13:52:35.917121+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Library gate green at 1.0.28-SNAPSHOT (all 4 modules incl. ITs); work uncommitted, git+consumer-gate left for user",
+      "detail": "Final consolidated library gate PASSED: `mvn -pl commons,cloud-sdk-api,cloud-sdk-aws,dynamo-integration-test verify` -> BUILD SUCCESS at 1.0.28-SNAPSHOT. Reactor: cloud-sdk-api SUCCESS (22.8s), dynamo-integration-test SUCCESS (24.8s, DynamoDB Local ITs), cloud-sdk-aws SUCCESS (4:18 min incl. failsafe ITs), commons SUCCESS (40.5s, 931 unit tests). commons-1.0.28-SNAPSHOT.jar built (confirms version bump). Earlier targeted runs: cloud-sdk-api 29 new workflow/wire tests PASS (byte-stable round-trips, cross-lib wire parity, F4 inner-list asserts); cloud-sdk-aws 901 unit tests PASS (incl. S3StorageClientMetadataTest 8, SesEmailReplyToAndAttachmentTest, EmailMimeUtilsMailContentTest 4, MailContentImplTest 11); commons PropertiesSubstitutionConfigProviderTest 10 PASS. No consumer-repo (mercury-services) gate run here since that workspace is not open. NOTE: work is UNCOMMITTED on feature/ION-12310-commons-cloudsdk-refactoring (git left to user per autonomy decision); local backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 present (not pushed). Pending user actions: (1) per-gap squash-commit workflow (design 13.3/13.4) or a single commit, all messaged ION-12310 only; (2) push backup + feature branch to origin; (3) run cross-repo consumer zero-impact gate in mercury-services; (4) later X-G11 as separate 1.0.29. X-G11 remains deferred/not started.",
+      "tags": [
+        "test_result",
+        "verify",
+        "green",
+        "1.0.28",
+        "model_info"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "70ca22656e60",
+      "timestamp": "2026-07-24T14:06:27.652653+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Backup branch pushed to origin; design doc updated with completed-actions log + commands runbook; clarified 0 commits exist (email gaps interleaved -> 4-commit plan)",
+      "detail": "User follow-up (2026-07-24): (1) pushed local backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 to origin at cc4a76d (verified via git ls-remote) - now off-machine safe. (2) Appended two sections to design doc cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md: '## 14. Implementation Log — Completed Actions (2026-07-24)' (status table, files-changed table, F1-F9 findings addressed, the whitespace-content-type bug fix, verification results, git delivery state) and '## Appendix C — Commands Used & Reusable Runbook' (C.1 orientation, C.2 backup+push, C.3 install, C.4 targeted tests, C.5 failure diagnosis grep/sed, C.6 full verify gate, C.7 consumer gate template, C.8 commit templates Option A 4-commit / Option B squash-merge, C.9 push template, C.10 rollback levers). ANSWERED user questions: backup was NOT previously pushed -> now pushed; feature branch does NOT have 5 commits -> 0 commits, all work uncommitted, HEAD still cc4a76d. Documented WHY 5 perfectly-separate compiling commits isn't achievable: X-G7 and X-G10 are interleaved in the same methods/files (SesEmailServiceImpl.sendEmail, MailContentImpl, MailContentImplTest) so they can't split into two compiling commits; recommend 4 logical commits (S-G2 / W-G9 / X-G7+X-G10 email / C-G6+config) with pom+README in commit 1. Commits NOT yet created (awaiting user direction); feature-branch push still pending explicit approval.",
+      "tags": [
+        "progress",
+        "backup-push",
+        "documentation",
+        "git-state"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "75904f1669e7",
+      "timestamp": "2026-07-24T16:42:39.213686+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Post-review fixes: reply-to single-source (dup header fix) + null-safety + javadoc notes; all tests green; doc 14.7 added",
+      "detail": "Post-review hardening round (2026-07-24), still within 1.0.28 set (no version change). FIX 1 (behavior, should-fix): duplicate Reply-To header on attachment path. SesEmailServiceImpl.sendEmail now applies requestBuilder.replyToAddresses(...) ONLY when !hasAttachments; raw path carries reply-to solely inside MIME (EmailMimeUtils) => single source, no duplicate Reply-To. Rewrote SesEmailReplyToAndAttachmentTest.attachmentAndReplyToComposeTogether to assert request.hasReplyToAddresses()==false AND parse raw MIME Reply-To header == reply@example.com. FIX 2 (minor): added Lombok-coupling javadoc note on MailContentImpl.MailContentImplBuilder.addAttachment (attachments$value/$set tied to @Builder.Default). FIX 4 (minor): javadoc on PropertiesSubstitutionConfigProvider.buildLookup documenting literal env-key lookup (dotted ${db.host} won't resolve from env; normalize if shared does). FIX 5 (nit): javadoc edge-case note on validateNoUnresolvedPlaceholders (literal ${...} in resolved value false-positives). Items 3 (fixtures) and 6 (Session.getDefaultInstance) = no action per user. IDE NPE/null-conversion warnings fixed via null-safety: WorkflowWireCompatTest.fixture uses Objects.requireNonNull on getResourceAsStream; SesEmailReplyToAndAttachmentTest adds rawBytes(request) requireNonNull helper + captureRequest returns requireNonNull(getValue()); EventBuilderAnnotationsTest uses requireNonNull on toJsonString and getAnnotations locals. Re-verified GREEN: cloud-sdk-aws email tests 44, cloud-sdk-api workflow 29, commons config 10. Build ordering note discovered: commons compile-depends on cloud-sdk-aws:1.0.28, so refreshing artifacts requires installing all four modules (order cloud-sdk-api -> dynamo-integration-test -> cloud-sdk-aws -> commons) before per-module test runs. Design doc updated with section 14.7 Post-review hardening. Work still uncommitted; user chose Option A (4 direct commits) but commits not yet created.",
+      "tags": [
+        "code_change",
+        "review-fix",
+        "reply-to",
+        "null-safety",
+        "X-G7",
+        "X-G10"
+      ],
+      "references": [
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/email/impl/SesEmailServiceImpl.java",
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "ION-12310"
+      ]
+    },
+    {
+      "id": "6b6bf69b9a69",
+      "timestamp": "2026-07-24T17:18:20.729320+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "1.0.28 set committed (4 commits, Option A) and pushed to origin; full verify green; local==origin==1293c50; review documented (§15)",
+      "detail": "ION-12310 1.0.28 gap set COMMITTED and PUSHED to origin (2026-07-24). Documented user-review round in design doc as new section '## 15. User Review & Resolutions' (15.1 functional items 1-6, 15.2 IDE null-safety warnings table, 15.3 detailed capture#3-of ? / Java(976) explanation + varargs contains resolution). NOTE: design doc is under cloud-sdk-api/docs/ which is gitignored (.gitignore line 17 'docs/'), so ALL design/implementation docs are LOCAL-ONLY and intentionally NOT version-controlled. Used Option A: 4 gap commits (ION-12310 only messages), staging ONLY gap code/test/config files (stray untracked artifacts .claude/.mcp.json/effective-pom.xml/2x dynamodb-local-metadata.json deliberately excluded): b25ae16 S-G2 StorageClient metadata/content-type + bump 1.0.28-SNAPSHOT (+pom+README); 116fb02 W-G9 Event.Builder annotations + Projection/Token parity (+wire fixtures); bfb03bd X-G7 replyTo + X-G10 raw-MIME attachments (email); 1293c50 C-G6 protected getConfigTransformer + PropertiesSubstitutionConfigProvider. Pre-push full gate GREEN: mvn -pl commons,cloud-sdk-api,cloud-sdk-aws,dynamo-integration-test verify => BUILD SUCCESS at 1.0.28-SNAPSHOT (cloud-sdk-api, dynamo-integration-test, cloud-sdk-aws 5:07 incl failsafe ITs, commons 931). Push: cc4a76d..1293c50 fast-forward (no force). Verified local HEAD == origin HEAD == 1293c50; 4 commits on origin/feature/ION-12310-commons-cloudsdk-refactoring; branch in sync. Backup branch backup/feature-ION-12310-pre-sdk-gaps-2026-07-23 on origin at cc4a76d (pre-work baseline). PR #29 (feature -> develop) exists on remote. X-G11 remains deferred to separate 1.0.29. Remaining pending (owned by user/team): roll 1.0.28 out to appianway + upgraded mercury-services consumers; run consumer zero-impact gate in mercury-services workspace; then X-G11.",
+      "tags": [
+        "progress",
+        "commit",
+        "push",
+        "1.0.28",
+        "complete",
+        "review"
+      ],
+      "references": [
+        "ION-12310",
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md"
+      ]
+    },
+    {
+      "id": "b3ad387bac64",
+      "timestamp": "2026-07-24T17:21:58.527176+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Delivered: 4 commits pushed (1293c50), full verify green at 1.0.28, doc §16 final status added; session completed",
+      "detail": "FINAL — ION-12310 1.0.28 gap set DELIVERED, committed, pushed, and verified green. Design doc updated: §14.6 delivery-state changed from UNCOMMITTED to COMMITTED+PUSHED; added §16 Final Status (16.1 commit map, 16.2 verification, 16.3 scope delivered vs deferred, 16.4 remaining actions). Commits on feature/ION-12310-commons-cloudsdk-refactoring (on cc4a76d): b25ae16 S-G2 (+bump 1.0.28-SNAPSHOT, pom, README); 116fb02 W-G9.1/9.2 (+wire fixtures); bfb03bd X-G7/X-G10 email; 1293c50 C-G6+config. Pushed cc4a76d..1293c50 fast-forward (no force); local HEAD == origin == 1293c50. Full library verify BUILD SUCCESS at 1.0.28 (commons 931 + cloud-sdk-aws incl ITs 5min + api + dynamo-it). Design doc is gitignored (docs/) => local-only, not committed. X-G11 deferred to 1.0.29. Remaining (user/team, other workspaces): roll 1.0.28 to appianway + mercury-services consumers; run consumer zero-impact gate in mercury-services; then X-G11. Marking session status = completed.",
+      "tags": [
+        "progress",
+        "final",
+        "delivered",
+        "session-complete"
+      ],
+      "references": [
+        "ION-12310",
+        "cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md"
+      ]
+    }
+  ],
+  "usage": []
+}

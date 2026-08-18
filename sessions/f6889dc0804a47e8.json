@@ -1,0 +1,353 @@
+{
+  "id": "f6889dc0804a47e8",
+  "name": "ION-12310 Rebase develop OWASP Jackson into cloud-sdk feature branch",
+  "description": "Analyze (dry-run, no rebase yet) the rebase of origin/develop (OWASP/Jackson vulnerability fixes) into feature/ION-12310-commons-cloudsdk-refactoring (v1.0.26-SNAPSHOT). Document incoming changes, conflicts, concerns in cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md. Confirm no breakage for cloud-sdk-api, cloud-sdk-aws, commons, dynamo-integration-test and for consuming mercury-services apps (auth, network, registration, tx-tracking, booking, visibility, booking-bridge, webbl).",
+  "project": "mercury-services-commons",
+  "created_at": "2026-07-16T20:21:15.248718+00:00",
+  "updated_at": "2026-07-17T20:17:14.544516+00:00",
+  "status": "completed",
+  "tags": [
+    "rebase",
+    "cloud-sdk",
+    "owasp",
+    "jackson",
+    "ION-12310",
+    "analysis"
+  ],
+  "entries": [
+    {
+      "id": "b590cc0d2c4f",
+      "timestamp": "2026-07-16T20:23:00.848093+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Initial state + prior-rebase history. Feature HEAD 841fdf5 (1.0.26-SNAPSHOT, 2026-05-28), merge-base with origin/develop = 0aa4a06 (PR#40 ION-15755). 8 incoming commits, 39 to replay.",
+      "detail": "Branch: feature/ION-12310-commons-cloudsdk-refactoring. origin/develop HEAD = 2745d3a (2026-07-15, ION-16052 S2ST). Local develop is 8 behind origin/develop.\nPrior rebase session 54e1c00694b346f1 (Rebase #2, 2026-05-27, Opus 4.6): rebased onto 0aa4a06, version 1.0.24-SNAPSHOT, ca99f8d, backup backup/feature-ION-12310-pre-rebase-2. Key resolution rule: KEEP feature-branch REMOVAL of AWS 1.x deps (aws-java-sdk-core/ssm/s3/sqs/sns) since cloud-sdk uses AWS 2.x; .gitignore needs '/docs/' or '!cloud-sdk-api/docs/' exception. Prior rebase doc: cloud-sdk-api/docs/2026-05-15-commons-rebase.md.\n8 incoming commits by PR: PR#41 ION-15897 (3 commits, README only, 2026-06-02); PR#43 ION-16159 'Commons upgrade, dropwizard minor version and Vulnerability Fixes' (e9bce53,1625bd0, 2026-07-15) = the OWASP/Jackson fix; PR#42 ION-16052 'S2ST Framework' (fac9edb,6db8b14,2745d3a, 2026-07-15).</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "rebase",
+        "state-assessment",
+        "ION-16159",
+        "ION-16052"
+      ],
+      "references": [
+        "feature/ION-12310-commons-cloudsdk-refactoring",
+        "0aa4a06",
+        "2745d3a",
+        "841fdf5",
+        "54e1c00694b346f1",
+        "cloud-sdk-api/docs/2026-05-15-commons-rebase.md"
+      ]
+    },
+    {
+      "id": "43358beac5fd",
+      "timestamp": "2026-07-16T20:28:22.199676+00:00",
+      "agent": "unknown",
+      "category": "blocker",
+      "summary": "CRITICAL: ION-16159 OWASP/Jackson fixes were REVERTED on develop by the S2ST merge (PR#42). develop HEAD does NOT contain them; rebase will NOT bring the vuln fixes.",
+      "detail": "Verified via git DAG: S2ST merge commit 2745d3a (PR#42, ION-16052) first-parent=1625bd0 (ION-16159 PR#43 merge). diff 2745d3a^1..2745d3a removes 113 lines from commons/pom.xml (all httpcore5/httpcomponents4 OWASP pins) and reverts root pom (dropwizard 5.0.2->5.0.1, jackson-dataformat-csv/jdk8/jsr310/joda 2.21.4->2.21.0, handlebars 4.5.3->4.3.1, dependency.version 1.R.01.024->1.R.01.023). Confirmed origin/develop:pom.xml has dropwizard 5.0.1, jackson 2.21.0, handlebars 4.3.1 and origin/develop:commons/pom.xml has NO httpcore pins. Feature branch also lacks these (dropwizard 5.0.1, jackson 2.21.0, no pins). => Rebasing feature onto develop HEAD will NOT deliver the OWASP/Jackson fixes; they must be re-applied (re-cherry-pick e9bce53 pom/commons changes or reopen ION-16159 against develop). This contradicts the task premise that the incoming develop changes address the OWASP vuln.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "owasp",
+        "regression",
+        "ION-16159",
+        "ION-16052",
+        "jackson",
+        "httpcore"
+      ],
+      "references": [
+        "2745d3a",
+        "1625bd0",
+        "e9bce53",
+        "PR#42",
+        "PR#43",
+        "ION-16159",
+        "ION-16052",
+        "commons/pom.xml",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "6d630a4f66d4",
+      "timestamp": "2026-07-16T20:28:22.215667+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Net incoming = S2ST module only (self-contained). Conflicts limited to README.md + pom.xml. No source change to the 4 modules; consuming apps unaffected.",
+      "detail": "NET incoming (0aa4a06..origin/develop) = 82 files, +5526/-4: entirely the new self-contained module libs/wtg-federation (S2ST framework, ION-16052) + build_libs_deploy.sh + root pom (+module entry, +libs.dependency.version=1.R.01.001) + README.md. ZERO source changes under commons/, cloud-sdk-api/, cloud-sdk-aws/, dynamo-integration-test/. Files changed on BOTH sides (rebase conflict candidates) = README.md and pom.xml ONLY; other 80 develop files apply clean. wtg-federation is self-contained: defines own nimbus.jose.jwt.version=10.9.1 / nimbus.oauth2.oidc.sdk.version=11.37.2 / surefireArgLine; needs root props junit5.jupiter.version(=5.12.2 on develop, MISSING on feature) and libs.dependency.version(MISSING on feature) -> pom.xml conflict MUST be resolved as UNION to keep these + feature's dynamo-integration-test module + 1.0.26-SNAPSHOT. Consuming apps: mercury.commons.version/mercury.cloudsdk.version=1.0.26-SNAPSHOT; cloud-sdk-api(22), cloud-sdk-aws(21), dynamo-integration-test(16) refs; wtg-federation NOT consumed. Since 4 modules unchanged, apps behaviorally unaffected (version re-publish only).</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "conflict-analysis",
+        "wtg-federation",
+        "impact-analysis"
+      ],
+      "references": [
+        "libs/wtg-federation/pom.xml",
+        "pom.xml",
+        "README.md",
+        "build_libs_deploy.sh"
+      ]
+    },
+    {
+      "id": "93e52b6b51d5",
+      "timestamp": "2026-07-16T20:30:32.448479+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Analysis COMPLETE (no rebase done). Findings documented; awaiting user review. Rebase is low-risk for the 4 modules + apps but does NOT deliver the OWASP fixes (reverted on develop).",
+      "detail": "Delivered analysis doc: cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md (on disk; gitignored by .gitignore:17 'docs/', same as all prior rebase docs — untracked by convention). NO rebase performed (per instruction). Key conclusions: (1) 4 modules cloud-sdk-api/aws/commons/dynamo-integration-test have ZERO incoming source changes -> no functional break, gated on mvn clean install + DDB integration tests and the pom.xml UNION resolution; (2) consuming apps (auth,network,registration,tx-tracking,booking,visibility,booking-bridge,webbl) at 1.0.26-SNAPSHOT unaffected (behaviorally identical artifacts; wtg-federation not consumed) -> version re-publish only; (3) CRITICAL: OWASP/Jackson (ION-16159) fixes were reverted on develop by S2ST merge PR#42, so rebase does NOT remediate the vuln — flagged as separate action. Conflicts limited to README.md + pom.xml. Recommended next steps + backup branch naming documented in doc §8.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "complete",
+        "analysis",
+        "awaiting-review"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md"
+      ]
+    },
+    {
+      "id": "b3bb414812cd",
+      "timestamp": "2026-07-16T20:30:32.461561+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.8 (copilot-claude-opus-4.8)",
+      "detail": "Agent model: Claude Opus 4.8 (model ID: claude-opus-4.8) via GitHub Copilot CLI. Task: dry-run rebase analysis of feature/ION-12310-commons-cloudsdk-refactoring vs origin/develop.",
+      "tags": [
+        "model_info"
+      ],
+      "references": []
+    },
+    {
+      "id": "cdfcc03089d2",
+      "timestamp": "2026-07-16T20:59:23.346905+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Root cause = stale-pom overwrite in S2ST commit fac9edb. ION-16159 pin/exclusion compatibility PROVEN via dependency:tree (BUILD SUCCESS): jest 5.3.3 & aws-signing 0.0.22 work with 4.4.16/4.5.14/5.4.3.",
+      "detail": "Root cause of the OWASP revert: commit fac9edb 'ION-16052 - S2ST Framework changes' (Sandeep Gonthkar, 2026-07-15) has parent 1625bd0 (ION-16159 PR#43 merge). Its parent's commons/pom.xml (blob 91686b9) CONTAINS the httpcomponents pins, but fac9edb's diff reverts commons/pom.xml back to blob a096fa1 (the exact pre-ION-16159 content) and reverts pom.xml (41 lines). i.e. the S2ST feature commit committed STALE copies of pom.xml and commons/pom.xml from before it pulled ION-16159, silently wiping the vuln fix. PR#42 (2745d3a) then merged this to develop -> develop HEAD is unpinned/vulnerable.\n\nCompatibility PROVEN via isolated worktree at e9bce53, `mvn -pl commons dependency:tree`: BUILD SUCCESS, resolves httpcore5 5.4.3, httpcore5-h2 5.4.3, jest 5.3.3 (retains jest-common + httpasyncclient 4.1.3), httpcore 4.4.16, httpcore-nio 4.4.16, httpclient 4.5.14; aws-signing 0.0.22 retained. Baseline (feature, no pins) was httpcore5 5.4/h2 5.3.4, jest->httpcore-nio 4.4.6/httpclient 4.5.3, aws-signing->httpcore 4.4.1. Pins are latest patches of the SAME minor lines jest/aws-signing already use -> API-compatible, nothing dropped. CVEs: httpcore5<=5.4.2 CVE-2026-54399 (header DoS, fixed 5.4.3); httpclient5 5.4.0-5.4.2 CVE-2025-27820 (PSL/cookie, fixed 5.4.3, httpclient5 already 5.4.4); httpclient<4.5.13 CVE-2020-13956.\nApps: booking declares own jest 6.3.0 (+local-elasticsearch, elasticsearch); tx-tracking uses org.elasticsearch:elasticsearch; visibility uses elasticsearch-rest-high-level-client (+jest in visibility-matcher). All rely on HttpComponents 4.4.x/4.5.x -> compatible with pinned 4.4.16/4.5.14 (upward within same minor). Residual: httpasyncclient 4.1.3 not pinned by ION-16159 (latest 4.1.5) - minor.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "root-cause",
+        "compatibility-proven",
+        "jest",
+        "aws-signing",
+        "cve"
+      ],
+      "references": [
+        "fac9edb",
+        "1625bd0",
+        "e9bce53",
+        "commons/pom.xml",
+        "pom.xml",
+        "CVE-2026-54399",
+        "CVE-2025-27820",
+        "CVE-2020-13956"
+      ]
+    },
+    {
+      "id": "439906304a59",
+      "timestamp": "2026-07-16T21:02:17.948420+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Doc updated with revert mechanism (§3.1), ION-16159 deep-dive (§11), and jest/aws-signing compatibility proof (§12). Compatibility confirmed safe; docs kept untracked.",
+      "detail": "Updated cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md (on disk only; .gitignore:17 docs/, not committed - per user instruction). Added: §3.1 exact revert mechanism (stale-pom overwrite in S2ST commit fac9edb, blob 91686b9->a096fa1, parent=1625bd0 ION-16159 merge); §11 ION-16159 explained (root pom props 5.4.3/4.4.16/4.5.14; module-level dependencyManagement rationale re flattenDependencyMode=all vs DW BOM; exclude-then-re-declare table; CVE-2026-54399/CVE-2025-27820/CVE-2020-13956); §12 jest 5.3.3 & aws-signing 0.0.22 compatibility PROVEN via worktree dependency:tree BUILD SUCCESS (all deps retained, upward patch within same minor line, nothing dropped), plus §12.1 app impact (booking jest 6.3.0, tx-tracking elasticsearch, visibility RHLC+jest all compatible, no downgrade risk) and §12.2 residual (httpasyncclient 4.1.3 unpinned). Corrected earlier notes that implied docs should be tracked. Temporary worktree created+removed cleanly; feature branch untouched, working tree clean.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "complete",
+        "documentation",
+        "compatibility-proven"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md"
+      ]
+    },
+    {
+      "id": "d8cef06eb375",
+      "timestamp": "2026-07-16T21:21:24.996846+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "EMPIRICAL app-level proof: pinned commons re-resolved in booking/webbl/tx-tracking/visibility. jest 5.3.3/6.3.1 + aws-signing 0.0.22 work everywhere; commons-routed fully remediated; own-jest visibility modules keep httpcore-nio 4.4.6 (app-side residual).",
+      "detail": "Empirically installed pinned commons (ION-16159 httpcomponents changes applied to feature commons/pom.xml + 3 root props) via `mvn -pl commons install`, re-resolved apps, then reverted + reinstalled pristine commons (working tree clean, .m2 restored).\nPOST-PIN results:\n- booking/webbl/tx-tracking/visibility-commons (jest 5.3.3 via commons): httpcore 4.4.16, httpcore-nio 4.4.16, httpclient 4.5.14, httpcore5 5.4.3, httpcore5-h2 5.4.3; jest 5.3.3 + jest-common + aws-signing 0.0.22 retained. BUILD SUCCESS. Fully remediated.\n- visibility modules declaring OWN jest 6.3.1 directly (visibility-inbound, -wm-inbound-processor, -outbound, -pending, -s3-archiver, -pending-start): httpcore 4.4.16 / httpclient 4.5.14 / httpcore5 5.4.3 / h2 5.4.3 all WIN from commons, BUT httpcore-nio stays 4.4.6 (jest 6.3.1's transitive at same depth -> Maven nearest-wins tie keeps 4.4.6). visibility-matcher keeps httpcore-nio 4.4.15 (RHLC).\nFUNCTIONAL verdict: jest 5.3.3 AND 6.3.1 + aws-signing 0.0.22 resolve and work in every app/module; all httpcore-nio values (4.4.6/4.4.15/4.4.16) are same 4.4.x line -> pins cannot break legacy jest/aws-signing. SECURITY: commons-routed usage fully fixed; own-jest visibility modules keep httpcore-nio 4.4.6 -> app-side pin needed if that artifact must be raised (independent of ION-16159; those modules resolve 4.4.6 today already).</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "compatibility-proven",
+        "app-level",
+        "jest",
+        "aws-signing",
+        "nearest-wins",
+        "visibility"
+      ],
+      "references": [
+        "booking/pom.xml",
+        "webbl",
+        "tx-tracking",
+        "visibility/visibility-inbound",
+        "visibility/visibility-commons",
+        "visibility/visibility-matcher"
+      ]
+    },
+    {
+      "id": "44000e3ed4b9",
+      "timestamp": "2026-07-17T19:06:56.015048+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Migrated mercury-services-commons to .mcp.json (CLI dropped .vscode/mcp.json support). Banner persists while .vscode/mcp.json exists; awaiting user decision to remove it.",
+      "detail": "Copilot CLI removed support for .vscode/mcp.json (see gh.io/copilotcli-mcpmigrate -> migrate to .mcp.json or .github/mcp.json). CLI runs in mercury-services-commons which had ONLY .vscode/mcp.json -> hence the recurring banner. Yesterday's edit to .vscode/mcp.json content could not help because CLI no longer reads that file. MCP tools still work via global ~/.copilot/mcp-config.json.\nAction: created C:\\Users\\arijit.kundu\\projects\\mercury-services-commons\\.mcp.json (mcpServers schema, full env incl Jira/Confluence, mirrors mercury-services root .mcp.json). Validated JSON OK. Convention: .mcp.json is untracked/not-committed (mercury-services .mcp.json is also untracked, not gitignored); .vscode/mcp.json is gitignored. Banner is triggered by presence of .vscode/mcp.json and will persist (harmless) until that file is removed/renamed; but .vscode/mcp.json is still used by VS Code built-in MCP. Pending user decision on whether to remove .vscode/mcp.json in both repos.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "mcp-config",
+        "cli-migration",
+        "vscode-mcp-json"
+      ],
+      "references": [
+        "mercury-services-commons/.mcp.json",
+        "mercury-services-commons/.vscode/mcp.json",
+        "mercury-services/.mcp.json",
+        "~/.copilot/mcp-config.json"
+      ]
+    },
+    {
+      "id": "816ff3e10253",
+      "timestamp": "2026-07-17T19:08:25.263177+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "RESOLVED: commons migrated to .mcp.json; user keeps .vscode/mcp.json for VS Code. CLI banner is harmless and expected.",
+      "detail": "User chose to LEAVE .vscode/mcp.json in both repos as-is (uses VS Code built-in MCP too). Net state: mercury-services-commons now has .mcp.json (CLI-supported, created today) + .vscode/mcp.json (VS Code). mercury-services already had .mcp.json + .vscode/mcp.json. The CLI migration banner about .vscode/mcp.json is expected/harmless and will continue to show; MCP loads fine from .mcp.json (workspace) and ~/.copilot/mcp-config.json (global). No files removed. .mcp.json is untracked/not committed.</detail>\n<parameter name=\"agent\">copilot-claude-opus-4.8",
+      "tags": [
+        "mcp-config",
+        "resolved"
+      ],
+      "references": []
+    },
+    {
+      "id": "fa888a15419c",
+      "timestamp": "2026-07-17T19:28:08.987639+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "RESUMED: develop advanced to 0c797f4 (PR#44 ION-16052 endpoint fix). OWASP/Jackson pins are now REINSTATED on develop HEAD (DW 5.0.2, Jackson 2.21.4, handlebars 4.5.3, httpcore5 5.4.3, httpcomponents4 4.4.16/4.5.14, commons exclusions, dependency.version 1.R.01.025). The earlier blocker (fixes reverted) is now resolved on develop.",
+      "detail": "",
+      "tags": [
+        "rebase",
+        "owasp",
+        "develop",
+        "resume"
+      ],
+      "references": [
+        "origin/develop@0c797f4",
+        "pom.xml",
+        "commons/pom.xml"
+      ]
+    },
+    {
+      "id": "4d2968990699",
+      "timestamp": "2026-07-17T19:33:48.797169+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "REBASE EXECUTED onto origin/develop@0c797f4. 39 feature commits replayed. 3 conflicts resolved: commons/pom.xml (UNION httpcomponents dependencyManagement pins + commons-lang3 properties), pom.xml dependency.version (kept feature SNAPSHOT scheme), pom.xml modules (UNION libs/wtg-federation + cloud-sdk modules). README auto-merged. Bumped version to 1.0.27-SNAPSHOT. Updated README v1.0.26/v1.0.27 sections + analysis doc §13. Backup at backup/feature-ION-12310-pre-rebase-3.",
+      "detail": "",
+      "tags": [
+        "rebase",
+        "resolved",
+        "1.0.27-SNAPSHOT"
+      ],
+      "references": [
+        "commons/pom.xml",
+        "pom.xml",
+        "README.md",
+        "cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md",
+        "backup/feature-ION-12310-pre-rebase-3"
+      ]
+    },
+    {
+      "id": "fe10a6cd9327",
+      "timestamp": "2026-07-17T19:41:33.832877+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "mvn verify PASSED on all 4 key modules post-rebase (exit 0, 0 [ERROR] markers). Totals: commons 926, cloud-sdk-api 25, cloud-sdk-aws 1043, dynamo-integration-test 6 = 2000 tests, 0 failures, 0 errors. DynamoDB Local integration tests (EnhancedDynamoRepositoryIT, StandardDynamoRepositoryIT, RepositoryQueryIT, NumericKeyRepositoryIT) and SSM ParameterStoreLookupSsmIT executed via failsafe and passed.",
+      "detail": "",
+      "tags": [
+        "mvn-verify",
+        "green",
+        "integration-tests"
+      ],
+      "references": [
+        "commons",
+        "cloud-sdk-api",
+        "cloud-sdk-aws",
+        "dynamo-integration-test"
+      ]
+    },
+    {
+      "id": "114b3ea5edf6",
+      "timestamp": "2026-07-17T19:42:30.216652+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "COMPLETE (pending push). Rebase clean & green. Committed cc4a76d (README + pom version bump to 1.0.27-SNAPSHOT) with ION-12310 message; commons/pom.xml union already in replayed rebase commits. Analysis doc updated with §13 (executed rebase, conflicts, resolutions, verification). NOT PUSHED — awaiting user review of documentation per instruction. Backup: backup/feature-ION-12310-pre-rebase-3.",
+      "detail": "",
+      "tags": [
+        "complete",
+        "awaiting-review",
+        "no-push"
+      ],
+      "references": [
+        "cc4a76d",
+        "README.md",
+        "pom.xml",
+        "cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md"
+      ]
+    },
+    {
+      "id": "6e0412b838ed",
+      "timestamp": "2026-07-17T19:42:30.231231+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.8 (copilot-claude-opus-4.8) — executed the rebase session.",
+      "detail": "",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "18971e1d88f5",
+      "timestamp": "2026-07-17T19:50:41.325019+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Appended §14 (full command reference: state/compare/conflict-prediction/rebase/verify/version-bump commands with descriptions) and §15 (repeatable conventions) to the analysis doc. §15.1 codifies the README changelog rollover rule (descriptive paragraph lives only under the newest ### Commons vN-SNAPSHOT heading; prior version demoted to numbered commit notes). §15.2 codifies rebase hygiene (backup branch, UNION pom resolution, XML+marker validation, mvn verify gate on 4 modules, push --force-with-lease only after review, ION-12310 in every commit). Stored README convention as a user memory.",
+      "detail": "",
+      "tags": [
+        "documentation",
+        "convention",
+        "playbook"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md"
+      ]
+    },
+    {
+      "id": "03ade96ec22f",
+      "timestamp": "2026-07-17T20:08:03.383680+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "TASK COMPLETE. User approved; pushed rebased branch with git push --force-with-lease (841fdf5...cc4a76d forced update). Local and remote HEAD both cc4a76d — in sync. Existing PR #29 (feature -> develop). Rebase onto develop OWASP/Jackson done, 1.0.27-SNAPSHOT, mvn verify green (2000 tests), README + doc §13/§14/§15 updated, backup at backup/feature-ION-12310-pre-rebase-3.",
+      "detail": "",
+      "tags": [
+        "pushed",
+        "complete",
+        "force-with-lease"
+      ],
+      "references": [
+        "cc4a76d",
+        "origin/feature/ION-12310-commons-cloudsdk-refactoring"
+      ]
+    },
+    {
+      "id": "dc7cd0e33ca1",
+      "timestamp": "2026-07-17T20:17:14.544498+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "mvn install BUILD SUCCESS (4:55) on all 4 modules at 1.0.27-SNAPSHOT: cloud-sdk-api, dynamo-integration-test, cloud-sdk-aws, commons all SUCCESS. Artifacts (jars + flattened POMs) installed to local .m2 at com/inttra/mercury/<module>/1.0.27-SNAPSHOT/. Tests green (commons 921 unit). Ready for mercury-services apps to consume 1.0.27-SNAPSHOT locally.",
+      "detail": "",
+      "tags": [
+        "mvn-install",
+        "1.0.27-SNAPSHOT",
+        "green"
+      ],
+      "references": [
+        "commons",
+        "cloud-sdk-api",
+        "cloud-sdk-aws",
+        "dynamo-integration-test",
+        "~/.m2/repository/com/inttra/mercury"
+      ]
+    }
+  ],
+  "usage": []
+}

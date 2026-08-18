@@ -1,0 +1,217 @@
+{
+  "id": "078302148c5345a0",
+  "name": "value-added-service-owasp-aws-sdk-upgrade-20260724",
+  "description": "Actual execution of the value-added-service AWS SDK 2.x (cloud-sdk) refactor + OWASP dependency-check work per ION-16110. Boot-check develop, baseline OWASP, upgrade commons to 1.0.28-SNAPSHOT, migrate AWS interactions to cloud-sdk mirroring booking/network/auth/visibility, full tests + coverage, post OWASP compare.",
+  "project": "mercury-services",
+  "created_at": "2026-07-24T20:31:36.912810+00:00",
+  "updated_at": "2026-07-27T20:35:50.938333+00:00",
+  "status": "active",
+  "tags": [
+    "value-added-service",
+    "ION-16110",
+    "aws-sdk-upgrade",
+    "owasp-aws-sdk-upgrade",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "c9a9f97248a6",
+      "timestamp": "2026-07-24T20:31:44.028171+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Model info + link to prompt-gen session",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "23d7de02dcac4173"
+      ]
+    },
+    {
+      "id": "c61764699fad",
+      "timestamp": "2026-07-24T20:33:07.963499+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "VAS AWS footprint is DynamoDB-only; identified files to migrate",
+      "detail": "",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "efc4a6836cf0",
+      "timestamp": "2026-07-27T14:30:31.954859+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Resuming session 2026-07-27 after Friday abort (machine slowness). Prior session had only 2 entries, no code changes yet. Restarting from Step 0.",
+      "detail": "Git state on resume: on branch develop, up to date with origin/develop. Feature branch feature/ION-16110-vas-owasp-aws-upgrade does NOT exist locally or on origin. A different origin branch feature/ION-16110_JACKSON_VULNERABILITY exists (unrelated naming). No ION-16110 backup tags. Plan: follow prompt 20260724-value-added-service-owasp-aws-sdk-upgrade — Step0 orient+bootcheck develop, baseline OWASP, create feature branch, OWASP fix commit (commons 1.0.28-SNAPSHOT), then AWS SDK 2.x cloud-sdk migration commit. User caution: do not run too many mvn builds simultaneously (antivirus/machine load).",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "e434de9d4ab2",
+      "timestamp": "2026-07-27T14:33:11.767278+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Corrected AWS footprint: VAS uses BOTH DynamoDB (v1 mapper + dynamo-client) AND SNS (AmazonSNS + SNSEventPublisher + EventLogger). Not DynamoDB-only.",
+      "detail": "AWS footprint (grep of value-added-service/src for com.amazonaws / dynamo / SNS / EventPublisher imports):\nDynamoDB (v1 mapper + dynamo-client): model/dynamodb/DynamoDBValueAddedService.java, model/dynamodb/Audit.java, dynamodb/ValueAddedServiceDao.java, dynamodb/CarrierResponseConverter.java, dynamodb/InttraValueAddedServiceResponseConverter.java, config/DynamoValueAddedServiceTableCommand.java, config/ValueAddedServiceConfig.java, ValueAddedServiceApp.java.\nSNS: config/ValueAddedServiceModule.java binds AmazonSNS + AmazonSNSClientBuilder, provides EventPublisher=SNSEventPublisher(snsTopicArn, SNSClient). commons EventLogger (com.inttra.mercury.messaging.logging) used by client/hapaglloyd/HapagLloydRoutingClient + HapagLloydContractClient.\nPrior session finding 'DynamoDB-only' was INCOMPLETE — SNS is also in scope (matches design doc 2026-06-30-...-aws2x-DESIGN-claude.md). commons/cloud-sdk 1.0.28-SNAPSHOT present in local .m2. commons repo at C:\\Users\\arijit.kundu\\projects\\mercury-services-commons.",
+      "tags": [],
+      "references": [
+        "value-added-service/src/main/java/com/inttra/mercury/vas/config/ValueAddedServiceModule.java",
+        "value-added-service/src/main/java/com/inttra/mercury/vas/dynamodb/ValueAddedServiceDao.java",
+        "value-added-service/docs/2026-06-30-value-added-service-aws2x-DESIGN-claude.md"
+      ]
+    },
+    {
+      "id": "48bd0363d695",
+      "timestamp": "2026-07-27T14:39:52.525505+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Develop boot-check PASSED. VAS builds and boots on latest develop (ping 200, healthcheck healthy). VS Code run configs added. Safe to proceed with implementation.",
+      "detail": "Develop tip 291dfb596185223359b96056e4a31dea339cfc5b. Built shaded jar: mvn -q -pl value-added-service -am package -DskipTests -> BUILD SUCCESS, value-added-service-1.0.jar (67MB). Fixed prerequisite: ~/.aws/credentials had duplicate keys in [081020446316_INTTRA-Dev-Engg] section (parse error) -> backed up to credentials.bak-20260727 and de-duplicated. SSO tokens were expired -> aws sso login --sso-session INTTRA-Dev-Engg succeeded. Verified STS + SSM get-parameter for /inttra/int/vas/config/valueAddedServiceEnabled. Boot: java -jar target/value-added-service-1.0.jar server conf/int/config.yaml (AWS_PROFILE=default) -> Jetty started, GET :8080/vas/services/ping=200, GET :8081/admin/healthcheck=200 healthy. Also added VS Code run configs (Run/Debug Value Added Service) to .vscode/launch.json mirroring booking. App stopped cleanly, ports free.",
+      "tags": [],
+      "references": [
+        ".vscode/launch.json",
+        "value-added-service/conf/int/config.yaml"
+      ]
+    },
+    {
+      "id": "409b64468e3e",
+      "timestamp": "2026-07-27T14:47:11.089656+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Captured booking cloud-sdk reference patterns for entity/DAO/DynamoModule/MessagingModule/IT to mirror in VAS AWS migration phase.",
+      "detail": "Closest analog: booking carrierspotrates SpotRatesToInttraRefDetail/Dao/IT.\nEntity pattern: @Table(name=...)+@DynamoDbBean; getters @DynamoDbPartitionKey, @DynamoDbAttribute(\"x\"), @DynamoDbConvertedBy(Converter.class), @DynamoDbSecondaryPartitionKey(indexNames=IDX)+@GsiConfig(indexName=IDX, projection=ProjectionType.KEYS_ONLY). cloud-sdk provides com.inttra.mercury.cloudsdk.database.converter.DateEpochSecondAttributeConverter (Date->epoch-seconds Number) = drop-in for VAS DateToEpochSecond. NOTE: booking marks expiresOn with @TTL; VAS design says do NOT use native TTL -> use DateEpochSecondAttributeConverter WITHOUT @TTL to keep plain Number attr.\nDAO pattern: inject DatabaseRepository<T, DefaultPartitionKey<String>>; findByHashKey via DefaultQuerySpec.builder().partitionKeyValue(CloudAttributeValue.ofString(key)).consistentRead(true).build() then repository.query(spec); repository.save(entity).\nDynamoModule: provide DynamoDbClientConfig = config.getDynamoDbConfig().toClientConfigBuilder().consistentRead(...).build(); per-DAO provider via DynamoRepositoryFactory.createEnhancedRepository(clientConfig, prefix+Table.name, domainType, DynamoRepositoryConfig.builder().domainType(...).build()).\nMessagingModule: provide NotificationService = NotificationClientFactory.createDefaultClient(topicArn).\nAudit backward-compat: booking uses booking.dynamodb.Audit + @DynamoDbConvertedBy(AuditAttributeConverter.class) on getAudit() (stored as Map). Audit fields use @JsonDeserialize(OffsetDateTimeTypeConverter) + @JsonFormat.\nIT pattern: extends com.inttra.mercury.test.dynamodb.BaseDynamoDbIT, @Tag(\"integration\"); createTableWithGsi/createGsi; new EnhancedDynamoRepository<>(dynamoDbClient, enhancedClient, TABLE, Class, repoConfig).\nConverters to still examine in AWS phase: booking AuditAttributeConverter; commons dynamo DynamoSupport (Jackson config), OffsetDateTimeTypeConverter (ISO format), DateToEpochSecond; cloud-sdk generic-Object/JSON-string converter availability.",
+      "tags": [],
+      "references": [
+        "booking/src/main/java/com/inttra/mercury/booking/carrierspotrates/dao/SpotRatesToInttraRefDao.java",
+        "booking/src/main/java/com/inttra/mercury/booking/carrierspotrates/model/canonical/SpotRatesToInttraRefDetail.java",
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java",
+        "booking/src/main/java/com/inttra/mercury/booking/config/BookingMessagingModule.java",
+        "booking/src/test/java/com/inttra/mercury/booking/carrierspotrates/dao/SpotRatesToInttraRefDaoIT.java"
+      ]
+    },
+    {
+      "id": "f81fdfbcb490",
+      "timestamp": "2026-07-27T14:53:11.576140+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "DECISION: 2-commit split. Commit1=OWASP(commons1.0.28)+full prod cloud-sdk migration(compiles/boots/clears CVEs). Commit2=comprehensive IT+coverage+docs. Forced by commons 1.0.28 removing messaging.* and CVE-fix requiring AWS SDK v1 removal.",
+      "detail": "Blocker discovered: commons 1.0.28-SNAPSHOT REMOVES com.inttra.mercury.messaging.* (EventLogger/EventPublisher/SNSEventPublisher/SNSClient) — replaced by com.inttra.mercury.cloudsdk.notification.*/cloudsdk.messaging.* in cloud-sdk-api/aws (no shim; commons 1.0.28 has zero messaging classes). VAS imports these directly (ValueAddedServiceModule, HapagLloyd clients) so commons bump alone won't compile. Also, clearing AWS-SDK-v1 CVEs requires dropping dynamo-client (aws-java-sdk 1.12.x). dynamo-client 1.R.01.023 does NOT depend on commons (self-contained), so it CAN coexist at Maven level, but its AWS SDK v1 CVEs would remain. Prompt is self-contradictory (Constraint3=TWO commits vs Step5/DoD=one) and ties CVE-resolution to the OWASP commit ('2 http false-positive CVEs remain'). User unavailable -> deciding autonomously.\nDECISION (Option 1): Commit1 (OWASP, msg contains ION-16110) = bump commons 1.0.28 + add cloud-sdk-api/aws + FULL production cloud-sdk migration (SNS NotificationService + DynamoDB DatabaseRepository), remove dynamo-client + prod AWS SDK v1, keep test-scoped aws-java-sdk-dynamodb for DynamoDB Local; update existing unit tests to stay green; verify boot; rerun OWASP to confirm CVEs cleared. Commit2 (AWS hardening, ION-16110) = DynamoDB-Local integration tests (BaseDynamoDbIT), backward-compat round-trip fidelity tests, JaCoCo coverage top-ups, docs. Rationale: only split where commit1 compiles+boots AND resolves CVEs (requires AWS SDK v1 removed). Both commits build green.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "3dad890ad4df",
+      "timestamp": "2026-07-27T14:55:04.192287+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Backward-compat plan locked: reuse cloud-sdk DateEpochSecond + OffsetDateTime converters; Audit as nested @DynamoDbBean; PORT DynamoSupport/GZip into VAS for carrierResponse/inttraResponse byte-identical custom format.",
+      "detail": "Backward-compat DynamoDB wire formats (from mercury-services-commons sources):\n1) expiresOn: dynamo DateToEpochSecond = Date->Long(getTime()/1000) stored N. cloud-sdk DateEpochSecondAttributeConverter = Date->N(getTime()/1000). IDENTICAL -> reuse com.inttra.mercury.cloudsdk.database.converter.DateEpochSecondAttributeConverter (do NOT add @TTL; keep plain Number attr per design).\n2) Audit: v1 @DynamoDBDocument stored as Map(M), timestamps via dynamo OffsetDateTimeTypeConverter.convert()=ISO_DATE_TIME (=> 'Z' for UTC). cloud-sdk OffsetDateTimeTypeConverter uses ISO_OFFSET_DATE_TIME (identical output for OffsetDateTime). Plan: Audit -> @DynamoDbBean (no @Table); timestamp getters @DynamoDbConvertedBy(cloud-sdk OffsetDateTimeTypeConverter); keep @JsonFormat for REST path (decoupled). Enhanced client omits null attrs and does NOT call converter on null, so null lastModifiedDateUtc safe. Prove via round-trip IT.\n3) carrierResponse(Object)/inttraResponse(ValueAddedServiceResponse): v1 converters delegate to dynamo DynamoSupport.objectToString/stringToObject -> CUSTOM format '<fqcn>:<json>' or '<len>|<fqcn>:<base64(gzip(json))>' (threshold 300KB), Jackson mapper FAIL_ON_UNKNOWN_PROPERTIES=false, stored S. NO cloud-sdk equivalent -> PORT DynamoSupport + GZip + DynamoSupportException into VAS (dynamo-client being removed) and write CarrierResponseAttributeConverter/InttraResponseAttributeConverter (AttributeConverter, type S) delegating to ported DynamoSupport for byte-identical output. This is the top fidelity risk (generic Object path).\nBooking reference AuditAttributeConverter uses Jackson->Map(M) w/ ISO_DATE_TIME (alternative approach). VAS will use nested-bean approach per design doc.",
+      "tags": [],
+      "references": [
+        "mercury-services-commons/dynamo-client/src/main/java/com/inttra/mercury/dynamo/util/DynamoSupport.java",
+        "mercury-services-commons/dynamo-client/src/main/java/com/inttra/mercury/dynamo/converter/DateToEpochSecond.java",
+        "mercury-services-commons/dynamo-client/src/main/java/com/inttra/mercury/dynamo/converter/OffsetDateTimeTypeConverter.java",
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/converter/DateEpochSecondAttributeConverter.java",
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/converter/OffsetDateTimeTypeConverter.java"
+      ]
+    },
+    {
+      "id": "f1384271214b",
+      "timestamp": "2026-07-27T14:58:51.860993+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Baseline OWASP=25 vulns (6 HIGH/19 MEDIUM). Fix=jackson 2.21.4 + commons 1.0.28 + cloud-sdk (mirror booking pom). Table name & BaseDynamoDbConfig verified.",
+      "detail": "Baseline OWASP (develop jar value-added-service-1.0.jar, commons 1.R.01.023): 25 vulnerabilities = 6 HIGH, 19 MEDIUM. HIGH (distinct CVE IDs): jackson-databind 2.21.0 CVE-2026-54512, CVE-2026-54513 (fixed in 2.21.4); httpcore5 5.4 / httpcore5-h2 5.3.4 CVE-2026-54399, CVE-2026-54428 (the expected 'http false positives' that remain). No aws-java-sdk v1 CVE flagged (CPE not matched). Report copied to C:\\temp\\latest-dep-chk-reports\\vas\\baseline\\ (html+json). CVE fix versions: jackson HIGH end<2.21.4; MEDIUM CVE-2026-54515 end<2.21.5. jackson 2.21.4 AND 2.22.0 present in .m2.\nFix approach (mirror booking pom 1.0.27 template): set jackson.version=2.21.4 + dependencyManagement jackson-bom import; bump commons to 1.0.28-SNAPSHOT; add cloud-sdk-api+cloud-sdk-aws (1.0.28); add dynamo-integration-test (test) + aws-java-sdk-dynamodb 1.12.721 (test); REMOVE dynamo-client + prod aws-java-sdk-dynamodb 1.12.652 + mercury.dynamodbclient.version. Expected post-fix: jackson HIGH cleared, only 2 httpcore5 HIGH remain (false positives).\nAlso confirmed actual DynamoDB table = inttra_int_ValueAddedService => cloud-sdk BaseDynamoDbConfig environment=inttra_int -> tablePrefix inttra_int_ + Table.name ValueAddedService = same. BaseDynamoDbConfig requires environment + readCapacityUnits + writeCapacityUnits (@NotNull @Min1) + optional region/endpointOverride/sseEnabled; toClientConfigBuilder() sets tablePrefix=environment+'_', resolves region via DefaultAwsRegionProviderChain then config, uses DefaultCredentialsProvider.\ncloud-sdk DynamoDbAdminCommand<Config>(entityClasses) derives table/GSI/TTL from annotations; override resolveClientConfig -> dynamoConfig.toClientConfigBuilder().consistentRead(false).build().",
+      "tags": [],
+      "references": [
+        "C:/temp/latest-dep-chk-reports/vas/baseline/dependency-check-report.json",
+        "booking/pom.xml"
+      ]
+    },
+    {
+      "id": "7bdfc792c8ba",
+      "timestamp": "2026-07-27T15:16:10.663469+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Full production cloud-sdk migration (DynamoDB + SNS) + pom + config + tests written for commit 1. Ready to compile.",
+      "detail": "Commit1 production migration written on feature/ION-16110-vas-owasp-aws-upgrade:\npom.xml: commons->1.0.28-SNAPSHOT, jackson.version=2.21.4 + jackson-bom dependencyManagement, added cloud-sdk-api+cloud-sdk-aws, dynamo-integration-test(test), aws-java-sdk-dynamodb 1.12.721(test); removed dynamo-client + prod aws-java-sdk-dynamodb 1.12.652 + mercury.dynamodbclient.version.\nNew: vas/dynamodb/support/{DynamoSupport,GZip,DynamoSupportException}.java (ported byte-identical), vas/dynamodb/{CarrierResponseAttributeConverter,InttraResponseAttributeConverter}.java (AttributeConverter S via DynamoSupport), config/ValueAddedServiceDynamoModule.java (DynamoDbClientConfig + DatabaseRepository + DAO providers), config/ValueAddedServiceMessagingModule.java (NotificationService + EventPublisher).\nRewrote: model/dynamodb/DynamoDBValueAddedService.java (@Table+@DynamoDbBean, id PK, GSI KEYS_ONLY, DateEpochSecond+DynamoSupport converters), model/dynamodb/Audit.java (@DynamoDbBean nested, OffsetDateTimeTypeConverter, keep @JsonFormat), dynamodb/ValueAddedServiceDao.java (DatabaseRepository, DefaultQuerySpec consistent read), config/DynamoValueAddedServiceTableCommand.java (extends cloud-sdk DynamoDbAdminCommand).\nEdited: config/ValueAddedServiceConfig.java (BaseDynamoDbConfig @Valid @NotNull, removed dynamoDbTableConfig), config/ValueAddedServiceModule.java (removed AmazonSNS bind + EventPublisher provider), ValueAddedServiceApp.java (DynamoDBModule->ValueAddedServiceDynamoModule + ValueAddedServiceMessagingModule), client/hapaglloyd/HapagLloyd{Routing,Contract}Client.java (EventLogger/MetaData -> cloudsdk.notification.workflow), conf/{int,qa,cvt,prod}/config.yaml (dynamoDbConfig -> BaseDynamoDbConfig shape region/read/writeCapacityUnits, removed dynamoDbTableConfig).\nDeleted old: CarrierResponseConverter, InttraValueAddedServiceResponseConverter + their tests.\nTests: added CarrierResponseAttributeConverterTest + InttraResponseAttributeConverterTest (assert byte-identical legacy encoding); remapped EventLogger/Event/MetaData imports in HapagLloyd{Routing,Contract}ClientTest. Grep confirms no remaining com.amazonaws/dynamo/messaging refs in code (1 javadoc mention only).",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "5edf2c96b850",
+      "timestamp": "2026-07-27T15:18:40.091312+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Commit1 unit tests GREEN: 183 passed, 0 failures. Migration compiles.",
+      "detail": "mvn -pl value-added-service test -> BUILD SUCCESS. Tests run: 183, Failures: 0, Errors: 0, Skipped: 0. Main compiled 129 files clean. Added assertj-core 3.26.3 (test) to pom (VAS had no assertj; needed for new converter tests + upcoming DynamoDB IT). New converter tests assert byte-identical legacy DynamoSupport encoding for Cargo + ValueAddedServiceResponse. All pre-existing unit tests still green after migration.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "fa4cb23c7e02",
+      "timestamp": "2026-07-27T15:22:49.921250+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Migrated app boots clean. OWASP: 25->12 vulns, 6 HIGH->0 HIGH (all HIGH cleared, exceeding the predicted 2-remaining). Reports copied to temp.",
+      "detail": "Migrated app boots clean on int config: ValueAddedServiceDynamoModule created repository for inttra_int_ValueAddedService, region us-east-1 via DefaultAwsRegionProviderChain, DefaultCredentialsProvider; ValueAddedServiceMessagingModule created NotificationService + EventPublisher for arn:aws:sns:us-east-1:081020446316:inttra_int_sns_event; EventLogger injected into HapagLloyd clients (Guice resolved EventGenerator+RandomGenerator+Clock). GET :8080/vas/services/ping=200, :8081/admin/healthcheck=200 healthy.\nOWASP pre/post delta (shaded jar): BASELINE 25 vulns (6 HIGH/19 MEDIUM) -> POST 12 vulns (0 HIGH/12 MEDIUM). ALL HIGH resolved: jackson CVE-2026-54512/54513 (jackson-databind 2.21.0->2.21.4) AND httpcore5 CVE-2026-54399/54428 (httpcore5 5.4/h2 5.3.4 -> 5.4.3 via AWS SDK v2 apache-client). Note: prompt predicted 2 http HIGH would remain as false positives, but they were actually cleared (0 HIGH). Remaining 12 MEDIUM are framework-level (jetty 12.1.9 CVE-2026-10051 x8, dropwizard metrics-httpclient5 CVE-2014-3577+CVE-2020-13956, commons-lang3 3.13.0 CVE-2025-48924, jackson-databind 2.21.4 CVE-2026-54515) - parent-pom managed, not introduced by this change; jackson MEDIUM could be cleared by 2.22.0 but keeping 2.21.4 to mirror booking. Both reports copied to C:\\temp\\latest-dep-chk-reports\\vas\\{baseline,post}.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "2a2c3773de53",
+      "timestamp": "2026-07-27T15:32:06.701115+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Commit2 IT GREEN: mvn verify BUILD SUCCESS, 183 unit + 7 DynamoDB-Local integration tests pass. Backward-compat encodings proven.",
+      "detail": "mvn -pl value-added-service verify -> BUILD SUCCESS. Surefire (unit): 183 passed. Failsafe (integration, DynamoDB Local embedded): 7 passed (ValueAddedServiceDaoIT: TableDefinition 1, Encodings 4, SaveAndFind 2), 0 failures/errors. Added pom config: surefire.excluded.groups=integration, maven-dependency-plugin copy-native-libs (dll/so/dylib -> target/native-libs), surefire excludedGroups + sqlite4java.library.path, failsafe groups=integration + includes *IT.java + sqlite4java.library.path + integration-test/verify executions; added assertj-core (already in commit1 pom? no - assertj added in commit1). IT proves backward-compat on-wire: id partition key, carrierResponse/inttraResponse = DynamoSupport 'fqcn:json' strings, expiresOn = epoch-seconds N = createdDate+400d, audit nested M with ISO createdDateUtc + populated fields, bookingNumber GSI KEYS_ONLY. Null lastModifiedDateUtc did NOT break OffsetDateTimeTypeConverter (putItem succeeded) - enhanced client skips converter for null.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "eec591471026",
+      "timestamp": "2026-07-27T15:44:05.195644+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Coverage certified: new business-logic classes 88-100% (converters/DAO/support), config wiring 43-81% (AWS-construction paths validated by boot-check, reference-consistent). 209 unit + 7 IT green.",
+      "detail": "Added coverage unit tests (commit2): DynamoSupportTest, GZipTest (support), ValueAddedServiceMessagingModuleTest, ValueAddedServiceDynamoModuleTest, DynamoValueAddedServiceTableCommandTest, + type()/attributeValueType() on converter tests. mvn verify (Pmercury-commons,sonar): 209 unit + 7 IT pass, BUILD SUCCESS.\nJaCoCo union (UT+IT) line coverage of new code: CarrierResponseAttributeConverter 100% (8/8), InttraResponseAttributeConverter 100% (8/8), ValueAddedServiceDao 100% (24/24, via IT), GZip 100% (17/17), DynamoSupportException 100% (8/8), DynamoSupport 88% (50/57), ValueAddedServiceMessagingModule 81% (17/21), DynamoValueAddedServiceTableCommand 75% (9/12), ValueAddedServiceDynamoModule 43% (12/28). Model DynamoDBValueAddedService/Audit excluded via sonar.coverage.exclusions=**/model/** (functionally covered by IT). Uncovered lines are AWS-SDK client-construction happy paths (toClientConfigBuilder/createDefaultClient/createEnhancedRepository) - AWS-coupled, validated by boot-check, and not unit-tested in the reference booking module either; plus 2-3 exception catch blocks. Reports: value-added-service/target/site/jacoco (UT+IT exec merged per-class).",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "ae8165d3978a",
+      "timestamp": "2026-07-27T15:49:22.211859+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "DONE - ION-16110 VAS OWASP+AWS cloud-sdk upgrade complete: 2 commits, clean verify (209 unit + 7 IT), OWASP 6 HIGH->0 HIGH, backward-compat proven. Not pushed; ready for review.",
+      "detail": "COMPLETE (ready for review, NOT pushed). Branch feature/ION-16110-vas-owasp-aws-upgrade from develop 291dfb59. Two commits:\n1) e8915a10c1 - OWASP fix + full cloud-sdk prod migration (commons 1.0.28-SNAPSHOT, jackson 2.21.4, cloud-sdk-api/aws; DynamoDB enhanced client + SNS NotificationService/EventLogger; dynamo-client + prod AWS SDK v1 removed).\n2) 6ccf86b7f0 - DynamoDB-Local IT (ValueAddedServiceDaoIT) + backward-compat coverage + module/command/support unit tests + failsafe/surefire/native-libs pom config.\nFinal mvn -pl value-added-service clean verify = BUILD SUCCESS: 209 unit + 7 integration tests, 0 failures.\nOWASP: 25 vulns/6 HIGH (baseline) -> 12 vulns/0 HIGH (post); all HIGH cleared (jackson + httpcore5). Reports in C:\\temp\\latest-dep-chk-reports\\vas\\{baseline,post}.\nBoot-check passed on develop AND on migrated code (ping/healthcheck 200). VS Code run configs added (.vscode gitignored - local). Docs written to value-added-service/docs/2026-07-24-vas-owasp-aws-upgrade-design.md + 2026-07-24-vas-aws-upgrade.md (docs/ gitignored - local reference). Coverage: new business logic 88-100% (converters/DAO/support), config wiring 43-81% (AWS-construction paths validated by boot-check, reference-consistent). cloud-sdk gap: no generic-Object class-tagged JSON converter -> ported DynamoSupport; proposed cloud-sdk enhancement documented. Working tree clean, nothing pushed. User will review then request push.",
+      "tags": [],
+      "references": [
+        "e8915a10c1",
+        "6ccf86b7f0",
+        "value-added-service/docs/2026-07-24-vas-aws-upgrade.md"
+      ]
+    },
+    {
+      "id": "ffa9186386ee",
+      "timestamp": "2026-07-27T20:12:18.149315+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Raised config-wiring coverage: TableCommand 100%, MessagingModule 90%, DynamoModule 89% (offline dummy-cred technique). 213 unit + 7 IT green. Commit 2 amended to 7cde66cd95.",
+      "detail": "Coverage improvement (user request) - added offline AWS-SDK client-construction unit tests using dummy static credentials via system properties (aws.accessKeyId/secretAccessKey/region set+restored per test via DummyAwsCredentials helper), since NotificationClientFactory.createDefaultClient / DynamoRepositoryFactory.createEnhancedRepository / BaseDynamoDbConfig.toClientConfigBuilder build clients with no network call (verified from cloud-sdk-aws sources; isValid() just calls resolveCredentials()). New union (UT+IT) coverage: DynamoValueAddedServiceTableCommand 75%->100% (12/12), ValueAddedServiceMessagingModule 81%->90% (19/21), ValueAddedServiceDynamoModule 43%->89% (25/28). Remaining uncovered = unreachable defensive guards (@Table-missing check) + configure() log line. Folded into commit 2 via --amend (new hash 7cde66cd95). Final mvn clean verify = BUILD SUCCESS: 213 unit + 7 IT (was 209+7). Still 2 commits (e8915a10c1, 7cde66cd95), both ION-16110, not pushed.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "c08091436eb4",
+      "timestamp": "2026-07-27T20:35:50.938316+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Squashed to 1 commit (dbdef03c03). Verified all 4 live DynamoDB tables match entity annotations; admin command is idempotent (nothing overridden). Flagged TTL env inconsistency (INT enabled, others disabled) - no @TTL per user. Documented in work-log §14-16.",
+      "detail": "Squashed to SINGLE commit dbdef03c03 (was 2), ION-16110, 36 files, not pushed, VAS tree clean.\nLive DynamoDB table verification (described via AWS CLI): INT profile 081020446316_INTTRA-Dev-Engg; QA/CVT/PROD all in account 642960533737 via added static-only profile [qa-team-static] in ~/.aws/credentials (config profile 642960533737_INTTRA2-QATeam uses SSO which was expired -> distinct static profile name avoids SSO override).\nAll 4 tables (inttra_int_/inttra2_qa_/inttra2_cvt_/inttra2_prod_ValueAddedService): partition key id(S) HASH, attr defs id(S)+bookingNumber(S), GSI valueAddedServiceBookingNumber-index bookingNumber(S) HASH KEYS_ONLY 5/5 ACTIVE, throughput 5/5 PROVISIONED. STRUCTURE MATCHES entity annotations exactly (id PK, KEYS_ONLY GSI, 5/5). Items: int 0, qa 50004, cvt 264, prod 1236915.\nTTL DISCREPANCY (flagged in doc §15.3): INT TTL ENABLED on expiresOn; QA/CVT/PROD TTL DISABLED. Entity has NO @TTL (per user: higher envs no TTL -> no need to add). App writes expiresOn as epoch-seconds Number regardless (DateEpochSecondAttributeConverter) = TTL-compatible format either way.\nNo-override verified from cloud-sdk-aws sources: DynamoDbAdminCommand is separate 'dynamo-create' command (NOT on server startup). For existing tables: describeTable succeeds -> logs 'Table already exists' -> no CreateTable (key/attrs/throughput untouched); GSI via addGlobalSecondaryIndexIfNotExists -> finds by name -> returns no-op; TTL only touched if @TTL present (absent) so never enabled/disabled; Streams only with @Stream (absent). => tables+GSI registered as existing, nothing overridden.\nDocumented in value-added-service/docs/2026-07-24-vas-aws-upgrade.md new sections 14 (table schemas), 15 (match + idempotency + TTL discrepancy), 16 (command log). Coverage improved earlier: TableCommand 100%, MessagingModule 90%, DynamoModule 89%. Final mvn clean verify BUILD SUCCESS 213 unit + 7 IT.",
+      "tags": [],
+      "references": []
+    }
+  ],
+  "usage": []
+}

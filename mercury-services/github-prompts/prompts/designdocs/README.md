@@ -91,14 +91,39 @@ Multiple related source files → say so; Claude merges them into one doc (e.g. 
 
 ### 3. Known converter gotchas (Claude handles these; good to know)
 
-`convert_design_doc.py` (repo root) is the reference converter, but has sharp edges:
+`convert_design_doc.py` (repo root) is the reference converter — **rebuilt 2026-07-29**, and the sharp
+edges below are now fixed *in it*:
 
-- **CVE ids get mangled** — its Jira-key regex also matches `CVE-2026-xxxx` and turns them into broken Jira
-  macros. For CVE-heavy docs Claude runs a patched scratchpad copy (`(?!CVE-)`).
-- **`<...>` inside code blocks** (e.g. an ASCII diagram with `<yaml>`) breaks the Confluence code macro and
-  leaks a stray `]]>` into the page — no error, just a corrupt render. Use `(yaml)` not `<yaml>` in diagrams.
-- **No bullet-list handling** — `- ` lines render as literal "- " paragraphs unless converted to `<ul>`.
-- **Always read the page back** after publishing — the render bug above produces no 400.
+```bash
+python convert_design_doc.py <input.md> <output.xhtml>
+```
+
+A **non-zero exit means the self-check failed — do not publish.** The self-check covers XML
+well-formedness, per-table column counts, byte-equality of every CDATA block against its markdown
+fence, `(ext)` leakage, and CVE-as-Jira-macro. It reproduces the published ION-16110 VAS and rates
+bodies byte-identically.
+
+Also fixed in the rebuild: **pipes inside inline-code spans** no longer corrupt table rows (a cell
+holding `` `size|className:...` `` used to spill an extra column — this really happened on the rates
+doc); bullet and ordered lists are converted; `(ext)` markers are stripped; and the official
+panel / note / info+toc / `ac:task-list` macros are emitted.
+
+The remaining notes explain *why* the converter behaves as it does:
+
+- **CVE ids used to get mangled** — the old Jira-key regex `[A-Z]+-\d+` also matched `CVE-2026-xxxx`.
+  Now only `ION-\d+` matches, and never inside inline code, links or URLs. No scratchpad copy needed.
+- **`<...>` inside code blocks is FINE** — corrected 2026-07-29. ASCII diagrams containing `<env>` or
+  `DefaultPartitionKey<String>>` round-trip byte-identically inside `<![CDATA[…]]>`. The earlier claim that
+  this "breaks the code macro and leaks `]]>`" was a **misreading of `body_text`** (see next point).
+  The only real CDATA hazard is a literal `]]>` in the content.
+- **`ac:plain-text-body` requires CDATA** — entity-escaping the content instead makes Confluence silently
+  rewrite it to `ac:rich-text-body`, reflowing the diagram. This is a real corruption; CDATA is not optional.
+- **Never diagnose corruption from `body_text`** — it is a lossy extraction that omits CDATA content and
+  prints macro parameter values as bare text, so a healthy page can look mangled. Verify with
+  `?expand=body.storage` and byte-compare the CDATA blocks against the markdown.
+- **Bullet lists** — `- ` lines used to render as literal "- " paragraphs; now converted to `<ul>`/`<ol>`
+  (including wrapped continuation lines). Only relevant if you hand-roll a converter instead of using this one.
+- **Always read the page back** after publishing — but read `body.storage`, not `body_text`.
 
 See `reference_confluence_mcp_publish` in Claude's memory for the full list.
 
@@ -132,10 +157,16 @@ See `reference_confluence_mcp_publish` in Claude's memory for the full list.
 
 | Template | Doc type |
 |---|---|
-| `templates/architecture-template.md` | Architecture / defect-fix design docs (matches BRM Confluence format) |
+| `templates/architecture-template.md` | Architecture / defect-fix design docs — **mirrors the corporate template** ([~akundu/Design Doc Template](https://confluence.dev.e2open.com/display/~akundu/Design+Doc+Template), page id `672934513`, synced 2026-07-29) |
 | `templates/api-design-template.md` | API design docs |
 | `templates/feature-spec-template.md` | Feature specs |
 | `templates/runbook-template.md` | Runbooks |
+
+**Template contract:** `architecture-template.md` is kept in sync with the corporate Confluence
+template. Official section names, order, the Pre-Dev Security topic ids (`1,2,3,4,5,6,120,124,125,126`)
+and the 9-stage Approval Matrix must not be renamed, reordered, or dropped. Subsections marked
+`(ext)` are mercury-services engineering additions — keep them when they carry real content, omit
+them when empty. To re-sync, fetch page `672934513` and diff.
 
 ---
 

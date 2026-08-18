@@ -1,0 +1,406 @@
+{
+  "id": "572121471d0a43a3",
+  "name": "ION-16098 DW5/Jetty CVE Remediation (appianway)",
+  "description": "Upgrade appianway to Dropwizard 5.0.2 / Jetty 12.1.9 / Jackson 2.21.4 + Netty & httpcore pins to close OWASP HIGH/CRITICAL CVEs, mirroring mercury-services-commons feature/ION-12310. Branch feature/ION-16098-jetty-cve pushed; tests still to be fixed.",
+  "project": "appianway",
+  "created_at": "2026-07-20T23:56:54.439687+00:00",
+  "updated_at": "2026-07-22T03:09:55.963474+00:00",
+  "status": "completed",
+  "tags": [
+    "ION-16098",
+    "owasp",
+    "dropwizard",
+    "jetty",
+    "jackson",
+    "netty",
+    "cve"
+  ],
+  "entries": [
+    {
+      "id": "378571cfc30d",
+      "timestamp": "2026-07-20T23:57:06.690797+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "decision",
+      "summary": "Goal + target versions: sync appianway platform libs with mercury-services-commons to close OWASP CVEs",
+      "detail": "Task: close HIGH/CRITICAL OWASP dependency-check findings across 14 appianway modules by mirroring mercury-services-commons feature/ION-12310. User explicitly chose FULL Dropwizard 5.0 upgrade (not a Jetty-11 pin).\n\nTarget versions:\n- Dropwizard 4.0.16 -> 5.0.2 (Jakarta EE10, brings Jetty 12)\n- dropwizard-testing-junit4 -> 5.0.0 (io.dropwizard.modules; independently versioned; NO 5.0.1/5.0.2 exists)\n- Jetty -> 12.1.9 via jetty-bom + jetty-ee10-bom\n- Jackson -> 2.21.4 via jackson-bom\n- httpcore5 -> 5.4.3; httpcomponents4 core 4.4.16 / client 4.5.14 (ION-16159 pins)\n- Netty (ingestor only) 4.2.7.Final -> 4.2.15.Final\n\nappianway does NOT consume mercury-services-commons artifacts - independent version mirroring, not a dep bump.",
+      "tags": [
+        "ION-16098",
+        "decision",
+        "versions"
+      ],
+      "references": [
+        "2026-07-20-appway-owasp-report.md",
+        "mercury-services-commons/cloud-sdk-api/docs/2026-07-17-rebase-with-develop-owasp-jackson.md",
+        "ION-16098",
+        "ION-12310",
+        "ION-16159"
+      ]
+    },
+    {
+      "id": "f49ece70d0b3",
+      "timestamp": "2026-07-20T23:57:25.912188+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "code_change",
+      "summary": "Changes made: 6 poms committed on feature/ION-16098-jetty-cve (a40bcd3f), pushed, upstream tracked",
+      "detail": "Branch feature/ION-16098-jetty-cve off develop, commit a40bcd3f, pushed to origin with -u (upstream set). NO production Java changed.\n\n6 poms:\n- pom.xml (root): DW 4.0.16->5.0.2; testing-junit4 4.0.16->5.0.0; new props (jetty 12.1.9, jackson.bom.version 2.21.4, httpcore5 5.4.3, httpcomponents4.core 4.4.16, httpcomponents4.client 4.5.14); NEW <dependencyManagement> importing jetty-bom + jetty-ee10-bom + jackson-bom + httpcore pins BEFORE dropwizard-dependencies BOM (first-declared wins).\n- ingestor/pom.xml: io.netty.version 4.2.7.Final->4.2.15.Final.\n- watermill/pom.xml: io.dropwizard.version 4.0.16->5.0.2 + mirrored the same props + <dependencyManagement> (watermill has NO parent).\n- watermill/booking-inbound-consumer/pom.xml + watermill/itv-gps-consumer/pom.xml: jackson-datatype-jsr310 2.19.2 -> ${jackson.bom.version}.\n- watermill/visibility-inbound-consumer/pom.xml: jackson-datatype-jsr310.version 2.20.1 -> 2.21.4.\n\nStaging was deliberate: only the 6 poms; NO *.md and NO owasp reports staged (they remain untracked/local).",
+      "tags": [
+        "ION-16098",
+        "code_change",
+        "committed",
+        "pushed"
+      ],
+      "references": [
+        "pom.xml",
+        "ingestor/pom.xml",
+        "watermill/pom.xml",
+        "watermill/booking-inbound-consumer/pom.xml",
+        "watermill/itv-gps-consumer/pom.xml",
+        "watermill/visibility-inbound-consumer/pom.xml"
+      ]
+    },
+    {
+      "id": "ea486c21be51",
+      "timestamp": "2026-07-20T23:57:39.047232+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "finding",
+      "summary": "Non-obvious gotchas discovered during the upgrade",
+      "detail": "1. io.dropwizard.modules:dropwizard-testing-junit4 is versioned INDEPENDENTLY of core DW; latest on 5.x line is 5.0.0 (5.0.1/5.0.2 do NOT exist). A .m2 5.0.2 dir existed but was an empty/failed stub.\n2. watermill/pom.xml has NO <parent> - it is a standalone aggregator, so the appian-way root <dependencyManagement>/properties never reach the 4 watermill consumers. Had to duplicate the management block + props into watermill/pom.xml. Without it, consumers kept DW5's transitive httpcore5 5.4.2 (still vulnerable) and their directly-pinned old jackson.\n3. maven-shade-plugin 2.3 leaves STALE fat jars when running `package` without `clean` (esp. on modules skipped by an earlier failed reactor run). dependency:tree was correct (jetty 12) but the packaged jar still had jetty 11. Fix: always `mvn clean package` here.\n4. DW 4->5 / Jetty 11->12 / EE9->EE10 needed NO production Java changes; only TEST sources break (EE10-changed Jetty internals). Build jars with -Dmaven.test.skip=true.\n5. `mvn -o -q dependency:tree` (offline+quiet together) produces EMPTY output - don't combine those flags.\n6. Consumers (booking/itv-gps) hardcoded jackson-datatype-jsr310:2.19.2 as a DIRECT dep, which defeats the BOM; cargoscreen didn't declare it (stayed clean at 2.21.4). visibility used a local 2.20.1 property.",
+      "tags": [
+        "ION-16098",
+        "finding",
+        "gotchas"
+      ],
+      "references": [
+        "watermill/pom.xml",
+        "ingestor/pom.xml"
+      ]
+    },
+    {
+      "id": "70fdad374240",
+      "timestamp": "2026-07-20T23:57:54.848469+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "test_result",
+      "summary": "OWASP results: all CRITICAL 19->0, all real HIGH resolved; residual 2 HIGH/module is a false positive",
+      "detail": "Build: mvn clean package -Dmaven.test.skip=true across all 14 modules -am -> BUILD SUCCESS. Verified inside fat jars (META-INF/maven/.../pom.properties): Jetty 12.1.9, jackson-databind 2.21.4, httpcore5 5.4.3, Netty 4.2.15.Final.\n\nCVE resolution (deduped per CVE, per module):\n- Every CRITICAL gone: 19 -> 0 (ingestor was 6 CRIT, other 13 modules 1 each).\n- ingestor: 6C/28H -> 0C/2H (all Netty CVEs cleared).\n- All other modules: 1C/5H -> 0C/2H (watermill-publisher 1C/6H -> 0C/3H).\nResolved: CVE-2026-2332 + CVE-2026-5795 (Jetty->12.1.9), CVE-2026-54512/54513 (jackson->2.21.4), 28 Netty CVEs (->4.2.15), CVE-2026-54399/54428 on httpcore5 (5.x->5.4.3).\n\nRESIDUAL 2 HIGH per module = CVE-2026-54399/54428 mapping ONLY to legacy httpcore:4.4.16 / httpcore-nio:4.4.16 (final 4.x release; CVE is really about httpcore5 5.x which is now 5.4.3-safe). CONFIRMED FALSE POSITIVE. Recommend suppression scoped to org.apache.httpcomponents/httpcore*@4.* per module suppressions.xml for a clean 0/0.\nOut of scope: watermill-publisher CVE-2025-67030 (plexus-utils 4.0.0).\n\nReports: baseline C:\\temp\\appianway\\<module>\\ ; after C:\\temp\\appianway-dw5\\<module>\\ (HTML+JSON).\nWhere ingestor gets Netty: Elasticsearch transport client 7.17.10 - ingestor excludes ES's netty and re-declares io.netty:* directly at io.netty.version.",
+      "tags": [
+        "ION-16098",
+        "test_result",
+        "owasp",
+        "cve"
+      ],
+      "references": [
+        "C:/temp/appianway",
+        "C:/temp/appianway-dw5",
+        "CVE-2026-54399",
+        "CVE-2026-54428",
+        "CVE-2026-2332",
+        "CVE-2025-67030"
+      ]
+    },
+    {
+      "id": "6d89b9e28ef6",
+      "timestamp": "2026-07-20T23:58:09.502216+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "progress",
+      "summary": "NEXT (resume tomorrow): fix EE10 test sources first, then suppressions + PR",
+      "detail": "Branch pushed & upstream-tracked; in sync with origin/develop (commit sits directly on develop HEAD). User will resume tomorrow.\n\nTODO in order:\n1. Fix TEST sources so the suite compiles without -Dmaven.test.skip (EE10/Jetty-12 test-internal API changes):\n   - distributor/src/test/java/functional/DistributorFuncTest.java (error: cannot access Duration, line ~36)\n   - shared/src/test/.../healthcheck/HealthCheckRegistrarTest.java (MutableServletContextHandler / ServletEnvironment moved under ee10)\n   - watermill/itv-gps-consumer/src/test/.../grpc/ResponseConsumerObserverTest.java (org.eclipse.jetty.server.Server API)\n2. (Optional) Add suppressions for CVE-2026-54399/54428 scoped to httpcore*@4.* in each module suppressions.xml -> clean 0/0. Policy call, left for user review; NOT yet applied.\n3. Open PR (Bitbucket link returned on push): https://git.dev.e2open.com/projects/INT/repos/appianway/pull-requests?create&sourceBranch=refs/heads/feature/ION-16098-jetty-cve\n\nNote: Bitbucket control-freak requires ION-16098 in every commit message on this branch. Full write-up + command reference (dependency:tree invocations, grep searches) in 2026-07-20-appway-owasp-report.md sections 7-9 (untracked/local, not committed).",
+      "tags": [
+        "ION-16098",
+        "progress",
+        "next-steps",
+        "tests"
+      ],
+      "references": [
+        "distributor/src/test/java/functional/DistributorFuncTest.java",
+        "shared/src/test/java/com/inttra/mercury/shared/healthcheck/HealthCheckRegistrarTest.java",
+        "watermill/itv-gps-consumer/src/test/java/com/inttra/watermill/gps/consumer/grpc/ResponseConsumerObserverTest.java",
+        "2026-07-20-appway-owasp-report.md"
+      ]
+    },
+    {
+      "id": "09bf3ef9de7e",
+      "timestamp": "2026-07-21T21:27:12.521765+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "finding",
+      "summary": "Netty in ingestor: ES transport client is DEAD CODE — never referenced; only Jest REST client used. Provenance found.",
+      "detail": "Investigation (read-only) of ingestor for item 3 of today's goals:\n\nES CLIENT USAGE: The Elasticsearch TRANSPORT client (org.elasticsearch.client:transport:7.17.10, the Netty-based binary-protocol client) is NEVER referenced anywhere in ingestor/src (main or test). Zero matches for TransportClient/PreBuiltTransportClient/org.elasticsearch.transport.*/TransportAddress. The ONLY ES client actually used is Jest (io.searchbox.*, a REST/HTTP client): JestModule.java:10-12 builds JestClientFactory/JestClient; JestModule.java:15-16,55 wires vc.inreach.aws AWSSigner + AWSSigningRequestInterceptor for AWS-signed ES. Consumed by ElasticSearchEventRepository, IndexESService, CreateMappingTemplate, IngestorModule:35, model/Version.java (@JestVersion), tests (FakeJestClientImpl, ElasticSearchEventStorePersistTest). NETTY is never referenced directly in ingestor code either — purely transitive to the (functionally unused) transport dep.\n\nPROVENANCE (git):\n- ecc4345ad1e855c2731d73e308ef85bfe5bdb2b8 (anandns <anand.ns@e2open.com>, 2023-06-19, \"Appianway: Vulnerability fixes\"; body \"dropwizard upgraded to 4.0.1 / aws sdk upgraded to 1.12.500\") introduced the WHOLE pattern in one commit: io.netty.version property (originally 4.1.94.Final), the 7 <exclusions> of io.netty:* from org.elasticsearch.client:transport, AND the 7 direct netty-* re-declarations. NO Jira ref in that commit.\n- 057d8bf2649c6f9e862a4154793e9eaa9d60d0b8 (Anand N S, 2025-11-26, \"ION-13985: Appianway Dropwizard upgrade to 4.0.16\") bumped pin to 4.2.7.Final. Jira: ION-13985.\n- a40bcd3f (Arijit Kundu, 2026-07-20, ION-16098) bumped 4.2.7.Final -> 4.2.15.Final.\nPin history: 4.1.94 -> 4.1.109 -> 4.2.7.Final (ION-13985) -> 4.2.15.Final (ION-16098).\n\nIMPLICATION / cleaner remediation option: because the transport client is dead code, the entire elasticsearch:transport dep + netty exclusions + 7 netty re-declarations could be REMOVED outright, eliminating all 28 Netty CVEs at the root rather than patching the version. Decision point to raise with user; for today's PR the safe proven path is the 4.2.15.Final bump (already done, CVE-clean per yesterday's scan). Removal is a strong follow-up needing a full build+test to confirm nothing else needs those classes.",
+      "tags": [
+        "ION-16098",
+        "finding",
+        "netty",
+        "ingestor",
+        "elasticsearch",
+        "jest",
+        "dead-code"
+      ],
+      "references": [
+        "ingestor/pom.xml",
+        "ingestor/src/main/java/com/inttra/mercury/ingestor/modules/JestModule.java",
+        "ecc4345",
+        "057d8bf",
+        "ION-13985"
+      ]
+    },
+    {
+      "id": "733b5c1d9330",
+      "timestamp": "2026-07-21T21:27:43.541014+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "finding",
+      "summary": "plexus-utils CVE-2025-67030 fix plan (fixed in 4.0.3) + httpcore 4.x FP is platform-wide via AWS SDK 1.x (cannot isolate to ingestor)",
+      "detail": "ITEM 2 — plexus-utils CVE-2025-67030 (watermill-publisher, HIGH 8.8):\n- Fixed versions: 3.6.1 (3.x line) and 4.0.3 (4.x line). Current bundled = 4.0.0. (GHSA-6fmv-xxpf-w3cw; fix commit 6d780b3378829318ba5c2d29547e0012d5b29642.)\n- SOURCE: dragged in by an ERRONEOUS compile-scope <dependency> on org.codehaus.mojo:jaxb2-maven-plugin (version 3.2.0) at watermill-publisher/pom.xml lines 177-181. jaxb2-maven-plugin is a BUILD PLUGIN — it is also (correctly) declared as a <plugin> at lines 293-313. The stray compile-scope dependency puts the plugin + its transitive plexus-utils on the runtime classpath / fat jar.\n- FIX PLAN (not yet applied): (a) add plexus-utils 4.0.3 pin to ROOT <dependencyManagement> (guaranteed-safe, low-risk, reaches watermill-publisher via parent), AND (b) remove the bogus <dependency> on jaxb2-maven-plugin at watermill-publisher/pom.xml:177-181 (removes dead weight entirely; JAXB codegen still runs via the <plugin>). Belt-and-suspenders. Verify with build+test.\n\nITEM 1/5 — httpcore 4.x false positive scope:\n- CONFIRMED (partial, agent killed before full per-module table): AWS SDK 1.x (aws-java-sdk.version=1.12.720) is declared in `shared` (mercury-shared) AND each app pom. AWS SDK 1.x -> httpclient 4.5.x -> httpcore 4.4.x. This is PLATFORM-WIDE (SQS/SNS/S3 used everywhere), so the httpcore 4.x hit CANNOT be isolated to ingestor only. The user requires AWS signing/legacy (all ES must be AWS-signed) so removing AWS SDK 1.x is out of scope.\n- Still TODO: run ONE targeted `mvn dependency:tree -Dincludes=org.apache.httpcomponents:*,...core5:*,...client5:*` per representative module to capture the exact chain + confirm which 4.x artifacts (httpcore, httpcore-nio, httpclient) are platform-wide vs ingestor-only (httpcore-nio likely ingestor-only via jest/elasticsearch). Do this ONE mvn at a time (see blocker entry).\n- FP rationale for Infosec: CVE-2026-54399/54428 describe Apache HttpComponents Core 5.x (<=5.4.2); httpcore5 is now pinned 5.4.3 (safe). Dependency-Check also maps the 5.x CVE CPE onto legacy org.apache.httpcomponents:httpcore 4.4.16 (the FINAL 4.x release — no higher version exists). The 4.x line is a separate codebase not in scope of these 5.x advisories. Suppression scoped to pkg:maven/org.apache.httpcomponents/httpcore*@4.* justified; apply only after Infosec buy-in.",
+      "tags": [
+        "ION-16098",
+        "finding",
+        "plexus-utils",
+        "httpcore",
+        "false-positive",
+        "aws-sdk",
+        "suppression"
+      ],
+      "references": [
+        "watermill-publisher/pom.xml",
+        "pom.xml",
+        "CVE-2025-67030",
+        "CVE-2026-54399",
+        "CVE-2026-54428",
+        "GHSA-6fmv-xxpf-w3cw"
+      ]
+    },
+    {
+      "id": "0ee01d94a4c4",
+      "timestamp": "2026-07-21T21:28:14.865733+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "blocker",
+      "summary": "ENV BLOCKER: machine thrashed from concurrent Maven runs; test build never produced errors yet. User restarting machine. Run ONE mvn at a time.",
+      "detail": "Root cause: launched a full-reactor `mvn clean test-compile` AT THE SAME TIME as a background investigation agent that fanned out ~14 per-module `mvn dependency:tree` invocations. 5+ concurrent Maven JVMs saturated CPU/disk; every subsequent command (even `jps`, `wc`, `taskkill`) timed out at 45-120s from paging thrash. Resolved by `taskkill //F //IM java.exe` (killed leftover IDE java servers; the maven classworlds JVMs had already been reaped by slow PowerShell Stop-Process). After kill, shell/git/fs responsive again (git rev-parse 5.5s, ls 2s — sluggish but working). USER IS RESTARTING THE MACHINE to fully recover.\n\nLESSON / RULE for resume: run Maven strictly ONE invocation at a time. Do NOT run a reactor build concurrently with dependency:tree agents. Prefer OFFLINE builds (`mvn -o`) since git.dev.e2open.com (and likely the artifact repo) network is currently unreachable — .m2 was populated by yesterday's successful build so -o should resolve.\n\nSTATE OF TEST INVESTIGATION: NOT YET DONE. No actual compiler errors captured — builds were killed before compilation. Known suspect test files (from yesterday's notes, still unverified):\n- shared/src/test/.../healthcheck/HealthCheckRegistrarTest.java — imports io.dropwizard.jetty.setup.ServletEnvironment, jakarta.servlet.*; mocks ServletEnvironment. Production HealthCheckRegistrar.java + OpsHealthCheckServlet.java use only STABLE DW/jakarta APIs (verified by reading) — should compile on DW5.\n- watermill/itv-gps-consumer/src/test/.../grpc/ResponseConsumerObserverTest.java — imports io.dropwizard.jetty.MutableServletContextHandler + org.eclipse.jetty.server.Server; mocks both. Production ResponseConsumerObserver.java:145 calls environment.getApplicationContext().getServer().stop(). Need to check DW5 return type of Environment.getApplicationContext() (may have moved out of io.dropwizard.jetty or changed type under EE10/Jetty12).\n- distributor/src/test/java/functional/DistributorFuncTest.java — \"cannot access Duration\" error originates upstream in functional-testing shared harness (DW test support referencing changed Jetty-12 types), not in this file (all its tests are @Ignore'd anyway).\n\nNEXT ON RESUME: 1 offline `mvn -o -B --fail-at-end clean test-compile` (single run) to capture real errors -> fix test sources -> then `mvn -o test` to confirm PASS.",
+      "tags": [
+        "ION-16098",
+        "blocker",
+        "environment",
+        "maven",
+        "tests",
+        "resume"
+      ],
+      "references": [
+        "shared/src/test/java/com/inttra/mercury/shared/healthcheck/HealthCheckRegistrarTest.java",
+        "watermill/itv-gps-consumer/src/test/java/com/inttra/watermill/gps/consumer/grpc/ResponseConsumerObserverTest.java",
+        "distributor/src/test/java/functional/DistributorFuncTest.java"
+      ]
+    },
+    {
+      "id": "bdb7259ff6aa",
+      "timestamp": "2026-07-21T21:28:40.296099+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "progress",
+      "summary": "Resume checkpoint: git state + prioritized TODO for the ION-16098 PR (due today: CVE Critical/High-free)",
+      "detail": "GIT STATE: branch feature/ION-16098-jetty-cve, single commit a40bcd3f (6 poms), pushed & upstream-tracked. `git fetch origin` FAILS — git.dev.e2open.com:443 unreachable (VPN/network down). vs cached origin/develop: 0 behind / 1 ahead (commit sits directly on develop HEAD). Cannot verify develop is truly latest or push until network returns. Untracked (must NOT be staged): all *.md docs, all */docs/, .claude/ .github/ .vscode/, *.code-workspace, target/owasp/**.\n\nTODO (priority order for today's PR — must be CVE Critical & High free; justified HIGH may get exemption):\n1. [env] After machine restart, confirm responsive. Run Maven ONE at a time, prefer -o offline.\n2. [plexus-utils] Apply fix: pin plexus-utils 4.0.3 in root <dependencyManagement> + remove bogus jaxb2-maven-plugin <dependency> at watermill-publisher/pom.xml:177-181.\n3. [tests] ONE offline `mvn -o -B --fail-at-end clean test-compile` -> capture real EE10/Jetty12 errors -> fix test sources (HealthCheckRegistrarTest, ResponseConsumerObserverTest, functional-testing harness/DistributorFuncTest) -> `mvn -o test` until all 14 modules' tests PASS.\n4. [httpcore] ONE dependency:tree per representative module to finalize the 4.x FP table + write Infosec suppression justification (do NOT apply suppression until Infosec approves).\n5. [docs] Update 2026-07-20-appway-owasp-report.md: Section 3.1 (Netty provenance + ES-transport-unused), Section 4 (replace 'Recommended order of work' with 'Actions taken'; keep the remediation table), Section 8.3 (elaborate FP + final post-scan state), add plexus-utils resolution.\n6. [owasp] Re-run OWASP dependency-check on rebuilt fat jars; republish clean reports for ALL 14 modules (baseline C:/temp/appianway, after C:/temp/appianway-dw5).\n7. [git] When network back: verify/rebase onto origin/develop; AMEND into the single a40bcd3f commit (keep 'ION-16098' in message for Bitbucket control-freak); include plexus-utils pom changes; keep it ONE outgoing commit; `git push --force-with-lease`. NO docs/owasp staged.\n8. [mcp] Keep session updated.\n\nDECISION TO RAISE with user: whether to REMOVE the dead elasticsearch:transport+netty block from ingestor (root-cause fix, removes all 28 Netty CVEs) vs keep the proven 4.2.15.Final bump for today's PR (lower risk). Recommendation: keep bump for this PR, do removal as ION-16098 follow-up.",
+      "tags": [
+        "ION-16098",
+        "progress",
+        "resume",
+        "next-steps",
+        "git",
+        "pr"
+      ],
+      "references": [
+        "feature/ION-16098-jetty-cve",
+        "a40bcd3f",
+        "2026-07-20-appway-owasp-report.md"
+      ]
+    },
+    {
+      "id": "5c8d8957e403",
+      "timestamp": "2026-07-21T22:03:38.539582+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "progress",
+      "summary": "RESUME 2026-07-21 after machine restart: env responsive; network to git.dev.e2open.com:443 STILL DOWN (TCP timeout). Deferring rebase/push. Starting local work.",
+      "detail": "Machine restarted, shell/git-local/fs responsive. Confirmed git.dev.e2open.com:443 unreachable via raw TCP test (rc=124 timeout) and git fetch/ls-remote both hang 2min. Branch feature/ION-16098-jetty-cve at a40bcd3f intact.\\n\\nUser directives for today's session (NEW - supersede yesterday's 'keep the bump' recommendation):\\n1. Netty in ingestor: LOG the commit provenance in doc, then REMOVE netty + the unused ES transport client outright (clean root-cause fix). User explicitly chose the clean approach.\\n2. plexus-utils in watermill-publisher: if removing the stray dep won't impact functionality, remove it (clean approach preferred).\\n3. Answer specifically: is httpcore 4.x from AWS SDK 1.x, Elasticsearch(vcreach), or AWS signing libs?\\n4. All tests compile+pass, all modules cleanly build, all CVEs clean + republished to temp folder.\\n5. Rebase onto develop if new develop changes; ONE outgoing commit; push.\\n6. Log ALL today's commands in 2026-07-20-appway-owasp-report.md in a separate section.\\n7. Keep MCP session updated; document all work in the doc (for later Confluence design-doc update).\\n8. SAFETY: do not run too many commands/builds in parallel - ONE mvn at a time.",
+      "tags": [
+        "ION-16098",
+        "resume",
+        "network-down",
+        "directives"
+      ],
+      "references": []
+    },
+    {
+      "id": "b52f7c1aba87",
+      "timestamp": "2026-07-21T23:11:25.006225+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "finding",
+      "summary": "Test-compile root-caused: only 3 modules fail (distributor/error-processor/email-sender) on org.awaitility.Duration removed in awaitility 4.x. All my pom edits validated green. Fix = converge awaitility on 4.3.0 + migrate harness to java.time.Duration.",
+      "detail": "FIRST full offline `mvn -o -B --fail-at-end clean test-compile` (single run, no concurrency) result: 19/22 SUCCESS, MVN_EXIT=1, 3 FAILURES.\\n\\nFailures (all identical): distributor, error-processor, email-sender -> testCompile: 'class file for org.awaitility.Duration not found' at waitAtMost(DEFAULT_TIMEOUT). Root cause: functional-testing/src/main/.../IntegrationTestRule.java declares `public static final org.awaitility.Duration DEFAULT_TIMEOUT = new Duration(30, SECONDS)`. org.awaitility.Duration was REMOVED in Awaitility 4.x. DW5's dropwizard-testing pulls awaitility 4.3.0; leaving awaitility unmanaged caused a version-mediation split - most modules resolved 3.0.0 transitively (via functional-testing's direct 3.0.0 -> Duration present -> compiled OK) while distributor/error-processor/email-sender resolved 4.x (-> Duration absent -> failed).\\n\\nVALIDATED GREEN by this build (cleared prior unknowns):\\n- ingestor test-compile SUCCESS -> my ES-transport+Netty REMOVAL is good.\\n- watermill-publisher SUCCESS -> my plexus-utils stray-dep removal is good.\\n- shared HealthCheckRegistrarTest SUCCESS (DW5 fine - prior suspicion wrong).\\n- itv-gps-consumer ResponseConsumerObserverTest SUCCESS (MutableServletContextHandler/jetty Server still resolve on DW5 - prior suspicion wrong).\\n\\nFIX APPLIED (3 edits, clean+deterministic):\\n1. root pom.xml: add <awaitility.version>4.3.0</awaitility.version> + DM pin org.awaitility:awaitility:4.3.0 (forces uniform 4.3.0 across all inheriting modules; DM wins over transitive mediation). 4.3.0 is the only 4.x in .m2 (offline).\\n2. functional-testing/pom.xml (NO parent): awaitility.version 3.0.0 -> 4.3.0.\\n3. IntegrationTestRule.java: import java.time.Duration (was org.awaitility.Duration); DEFAULT_TIMEOUT = Duration.ofSeconds(30) (was new Duration(30,SECONDS)); removed TimeUnit import. Awaitility.setDefaultTimeout(java.time.Duration) exists in 4.3.0.\\n\\nWHY the root DM pin is required (not just the harness edit): migrating DEFAULT_TIMEOUT to java.time.Duration would break the currently-passing 3.0.0 modules (no waitAtMost(java.time.Duration) in 3.0.0). Forcing 4.3.0 everywhere makes waitAtMost(java.time.Duration) resolve uniformly. Only IntegrationTestRule used org.awaitility.Duration (grep-confirmed); all other tests use static waitAtMost/await (stable 3->4).\\n\\nNOTE: full clean reactor test-compile took 47 min due to residual disk sluggishness; running targeted -pl subset next (no clean) for fast verify.",
+      "tags": [
+        "ION-16098",
+        "tests",
+        "awaitility",
+        "duration",
+        "root-cause",
+        "fix"
+      ],
+      "references": [
+        "functional-testing/src/main/java/com/inttra/mercury/test/IntegrationTestRule.java",
+        "functional-testing/pom.xml",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "ad97d94ce637",
+      "timestamp": "2026-07-21T23:23:29.745900+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "code_change",
+      "summary": "2nd build: all modules COMPILE (awaitility fix good); 3 test ERRORS in shared/networkservices = logback classic/core skew (NoSuchMethodError LoggerContext.initCollisionMaps). DW5.0.2 needs logback 1.5.33; appianway overrode classic to 1.5.21/1.5.6. Fixed: aligned 7 poms to 1.5.33.",
+      "detail": "`mvn -o -B --fail-at-end clean install` result: ALL modules compiled (no awaitility/compile errors -> awaitility 4.3.0 convergence confirmed working reactor-wide on a clean build). Tests: 1499 run in shared with 3 ERRORS; 1726+ passed in other modules. shared FAILED first so -fae SKIPPED all dependents.\\n\\n3 ERRORS all in com.inttra.mercury.shared.networkservices (GetIntegrationProfileFormatIntegrationTest, GetIntegrationProfileIntegrationTest, NetworkParticipantTest) - the only tests that boot a real DW app via DropwizardClientRule/DropwizardTestSupport. Identical stack: java.lang.NoSuchMethodError: 'void ch.qos.logback.classic.LoggerContext.initCollisionMaps()' at DefaultLoggingFactory.configureLoggers -> DropwizardTestSupport.startIfRequired.\\n\\nROOT CAUSE: logback classic/core version skew. DW5.0.2 dropwizard-dependencies BOM pins logback.version=1.5.33 (both logback-core AND logback-classic). appianway overrode ONLY logback-classic to older versions (root/gen2-parser/functional-testing/watermill property=1.5.21; watermill-publisher/consumer-commons/cargoscreen-consumer hardcoded=1.5.6), while logback-core resolved 1.5.33 from the DW BOM. initCollisionMaps() exists only in newer logback -> classic 1.5.21/1.5.6 lacked it -> NoSuchMethodError. NOT caused by my changes; a DW4->5 upgrade gap.\\n\\nFIX (7 pom edits, all -> logback 1.5.33 to match DW5 core):\\n1. pom.xml root: logback-classic.version 1.5.21 -> 1.5.33 (covers shared, error-processor, event-writer, transformer, splitter via inherited property)\\n2. gen2-parser/pom.xml: local property 1.5.21 -> 1.5.33\\n3. functional-testing/pom.xml (no parent): 1.5.21 -> 1.5.33\\n4. watermill/pom.xml (no parent): 1.5.21 -> 1.5.33\\n5. watermill-publisher/pom.xml: hardcoded 1.5.6 -> 1.5.33\\n6. watermill/consumer-commons/pom.xml: hardcoded 1.5.6 -> 1.5.33\\n7. watermill/cargoscreen-consumer/pom.xml: hardcoded 1.5.6 -> 1.5.33\\nNOT changed: booking-inbound-consumer (only EXCLUDES logback, inherits 1.5.33 from DW BOM), itv-gps/visibility consumers (don't declare logback), out-of-reactor load-testing/fulfiller/validator. No logback-core override exists anywhere (comes from DW BOM=1.5.33). 1.5.33 present in .m2 (offline OK).\\n\\nRunning 3rd full clean install to verify all tests pass.",
+      "tags": [
+        "ION-16098",
+        "tests",
+        "logback",
+        "dropwizard5",
+        "NoSuchMethodError",
+        "fix"
+      ],
+      "references": [
+        "pom.xml",
+        "gen2-parser/pom.xml",
+        "functional-testing/pom.xml",
+        "watermill/pom.xml",
+        "watermill-publisher/pom.xml",
+        "watermill/consumer-commons/pom.xml",
+        "watermill/cargoscreen-consumer/pom.xml"
+      ]
+    },
+    {
+      "id": "26e5bdc2e980",
+      "timestamp": "2026-07-21T23:35:00.215677+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "code_change",
+      "summary": "3rd build: shared+most pass; 2 more DW5 test regressions found & fixed: (A) missing Jakarta JAXB runtime in watermill-publisher [my jaxb2-plugin removal side-effect]; (B) JUnit5 platform skew across watermill modules + transformer. Fixed both.",
+      "detail": "`mvn -o -B --fail-at-end clean install` #3: shared SUCCESS (logback 1.5.33 fix worked - 3 networkservices integration tests now pass). Failures: transformer, watermill-publisher, consumer-commons, cargoscreen-consumer; SKIPPED itv-gps/booking-inbound/visibility (depend on consumer-commons).\\n\\nTWO distinct DW5-upgrade regressions (both legit upgrade gaps, needed for 'tests pass'):\\n\\n(A) JAXB RUNTIME MISSING - watermill-publisher only. StatusEventProtobufTransformerTest (23 tests) all error: jakarta.xml.bind.JAXBException: Implementation not found / ClassNotFoundException org.glassfish.jaxb.runtime.v2.ContextFactory, at CJAXBContextFactory.getJAXBContext -> XMLTransformer.unconvert. CJAXBContextFactory/XMLTransformer live ONLY in watermill-publisher/src/main. DW5/Jersey3(EE10) no longer transitively provides the glassfish JAXB runtime; it had been supplied accidentally by the stray jaxb2-maven-plugin dep I removed. FIX: add org.glassfish.jaxb:jaxb-runtime:4.0.4 (runtime scope) to watermill-publisher - the PROPER runtime artifact (compatible with DW5 jakarta.xml.bind-api 4.0.5; present in .m2; does NOT drag plexus-utils, so CVE-2025-67030 stays fixed). Consumers don't do JAXB (no jakarta.xml.bind in their poms) so no jaxb-runtime needed there.\\n\\n(B) JUNIT5 PLATFORM SKEW - transformer, consumer-commons, cargoscreen, watermill-publisher (+ booking-inbound/visibility at risk). NoSuchMethodError org.junit.platform.commons.util.ReflectionUtils.returnsVoid during test discovery. Modules pinned old jupiter (watermill-publisher api 5.10.0-M1/engine 5.7.1; consumer-commons/transformer/booking 5.10.1; cargoscreen 5.7.1; visibility junit-jupiter 5.14.2) which skewed against DW5 junit-bom-managed junit-platform-commons 1.14.4. DW5.0.2 junit-bom = junit5.version 5.14.4. FIX: dropped the explicit <version> on junit-jupiter-api/engine (and visibility's junit-jupiter aggregator) in all 6 modules so they inherit the DW5 junit-bom 5.14.4 uniformly. structuralvalidator passed (uses ${junit.version}) - left alone.\\n\\nTotal files changed so far (13): pom.xml(root), ingestor/pom.xml, watermill/pom.xml, watermill-publisher/pom.xml, functional-testing/pom.xml, functional-testing/.../IntegrationTestRule.java, gen2-parser/pom.xml, transformer/pom.xml, watermill/consumer-commons/pom.xml, watermill/cargoscreen-consumer/pom.xml, watermill/booking-inbound-consumer/pom.xml, watermill/itv-gps-consumer/pom.xml, watermill/visibility-inbound-consumer/pom.xml.\\n\\nRunning 4th full clean install to verify all green.",
+      "tags": [
+        "ION-16098",
+        "tests",
+        "jaxb",
+        "junit5",
+        "dropwizard5",
+        "fix"
+      ],
+      "references": [
+        "watermill-publisher/pom.xml",
+        "transformer/pom.xml",
+        "watermill/consumer-commons/pom.xml",
+        "watermill/cargoscreen-consumer/pom.xml",
+        "watermill/booking-inbound-consumer/pom.xml",
+        "watermill/visibility-inbound-consumer/pom.xml"
+      ]
+    },
+    {
+      "id": "823e1e1efa3f",
+      "timestamp": "2026-07-21T23:45:17.827735+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "code_change",
+      "summary": "4th build: watermill-publisher/consumer-commons/cargoscreen/itv-gps now PASS (JAXB+JUnit fixes good). Last 3 failures = surefire junit-platform launcher/engine misalignment. Fixed by removing explicit surefire-junit-platform provider pins; building ONLINE now (VPN up) for visibility's auto-resolved provider.",
+      "detail": "Build #4 (`mvn -o clean install`): 19/22 SUCCESS incl. all JAXB+JUnit-fixed modules. Remaining 3 failures, 0 test failures (goal failures):\\n- transformer + booking-inbound-consumer: surefire 'TestEngine junit-jupiter failed to discover tests'. Forked .dump root cause: 'JUnitException: OutputDirectoryCreator not available; probably due to unaligned versions of junit-platform-engine and junit-platform-launcher'. These 2 (and structuralvalidator) EXPLICITLY pin surefire-junit-platform:3.2.5 as a surefire <plugin><dependencies> provider, which forces an OLD junit-platform-launcher (~1.10) that clashes with junit-platform-engine 1.14.4 (now from DW5 junit-bom). Passing modules (cargoscreen/consumer-commons) have NO surefire config -> surefire auto-aligns launcher to classpath 1.14.4.\\n- visibility-inbound-consumer: uses surefire 3.5.4 (property), NO explicit provider; failed OFFLINE only because surefire auto-resolves surefire-junit-platform:3.5.4 which wasn't cached ('absent ... offline mode'). Not a code issue.\\n\\nFIX: removed the explicit surefire-junit-platform 3.2.5 <dependencies> provider block from transformer/pom.xml and watermill/booking-inbound-consumer/pom.xml (kept plugin+argLine config). Lets surefire auto-provision an aligned launcher, matching the passing modules. structuralvalidator left as-is (passes; its jupiter uses ${junit.version} so no 1.14.4 engine to misalign). visibility needs no pom change - just online resolution.\\n\\nBuild #5 now running ONLINE (VPN reconnected): `mvn -B --fail-at-end clean install` (no -o) so surefire-junit-platform 3.5.4 + any missing artifacts download. Expect all 22 green + fat jars for OWASP.\\n\\nRunning tally of changed files unchanged at 13 poms/1 java (transformer/booking already counted).",
+      "tags": [
+        "ION-16098",
+        "tests",
+        "surefire",
+        "junit-platform",
+        "launcher",
+        "fix"
+      ],
+      "references": [
+        "transformer/pom.xml",
+        "watermill/booking-inbound-consumer/pom.xml",
+        "watermill/visibility-inbound-consumer/pom.xml"
+      ]
+    },
+    {
+      "id": "095edee94047",
+      "timestamp": "2026-07-22T00:00:36.645742+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "test_result",
+      "summary": "DONE: BUILD SUCCESS 22/22 (0 test failures) + OWASP re-scan clean. All 14 modules now 0 CRITICAL / 2 HIGH, the 2 HIGH = httpcore 4.x FP (CVE-2026-54399/54428) only. watermill-publisher plexus-utils CVE ELIMINATED (3H->2H); ingestor Netty fully removed (0 CRIT).",
+      "detail": "Build #5 online `mvn -B --fail-at-end clean install` = BUILD SUCCESS, all 22 reactor modules, 0 failures / 0 errors. Fat jars produced.\\n\\nOWASP re-scan (dependency-check 12.2.2, --noupdate cached NVD, per-module suppressions.xml) of all 14 deployable fat jars, reports republished to C:\\\\temp\\\\appianway-dw5\\\\<module>\\\\ (HTML+JSON). Parsed JSON summary (HIGH/CRIT deduped per CVE):\\n\\nEVERY module: 0 CRITICAL / 2 HIGH. The 2 HIGH are IDENTICAL across all 14 = CVE-2026-54399 + CVE-2026-54428 (the httpcore 4.x CPE false positive; real httpcore5 is patched 5.4.3). Union of all HIGH/CRIT CVEs across the whole platform = just those 2.\\n\\nDeltas vs yesterday's 'after' scan:\\n- watermill-publisher: 0C/3H -> 0C/2H (plexus-utils CVE-2025-67030 ELIMINATED by removing the stray jaxb2-maven-plugin dep).\\n- ingestor: 0C/2H (same count as yesterday's bump, but Netty now REMOVED entirely - 0 netty jars in the fat jar vs the 4.2.15.Final bump).\\n- All others: 0C/2H (unchanged; httpcore FP).\\n\\nNET: 0 CRITICAL, 0 real HIGH platform-wide. Only residual = 2x httpcore 4.x FP (pending Infosec suppression sign-off). Meets release goal (CVE Critical & High free, justified httpcore HIGH for Infosec exemption).\\n\\nDoc 2026-07-20-appway-owasp-report.md updated: §10.2 (full applied-changes writeup), §10.3 (status), §4 remediation table (items 1/5/6), §8.3.2 (dependency:tree provenance), §8.6 (follow-ups), §11 (today's command log). Remaining: git rebase onto develop + single amended commit + push.",
+      "tags": [
+        "ION-16098",
+        "owasp",
+        "cve",
+        "build-success",
+        "result",
+        "clean"
+      ],
+      "references": [
+        "C:/temp/appianway-dw5",
+        "CVE-2026-54399",
+        "CVE-2026-54428",
+        "CVE-2025-67030"
+      ]
+    },
+    {
+      "id": "eb64c32b5230",
+      "timestamp": "2026-07-22T00:03:33.951384+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "progress",
+      "summary": "COMPLETE 2026-07-21: single commit force-pushed. a40bcd3f -> 659bff9d on feature/ION-16098-jetty-cve (13 files, no docs). 0 behind develop (no rebase needed). All goals met: build green, tests pass, CVEs clean, reports republished, doc updated.",
+      "detail": "FINAL STATE - all today's objectives done:\\n\\nGIT: git fetch OK (VPN restored). Branch 0 behind / 1 ahead of origin/develop (develop had NOT advanced -> no rebase needed). Staged ONLY 12 tracked modifications via `git add -u` (11 poms + IntegrationTestRule.java; NO *.md/docs/.claude staged). Amended into the single commit -> 659bff9d (was a40bcd3f), 13 files changed (includes itv-gps-consumer/pom.xml from yesterday, unchanged today). Message keeps 'ION-16098' (Bitbucket control-freak passed) + expanded scope + Co-Authored-By trailer. `git push --force-with-lease` = success (a40bcd3f...659bff9d forced update). PR create link: https://git.dev.e2open.com/projects/INT/repos/appianway/pull-requests?create&sourceBranch=refs/heads/feature/ION-16098-jetty-cve\\n\\nDELIVERABLES:\\n- Build: mvn clean install BUILD SUCCESS 22/22, 0 test failures/errors.\\n- OWASP: all 14 modules 0 CRITICAL / 2 HIGH (httpcore 4.x FP only); watermill-publisher plexus-utils eliminated; ingestor Netty fully removed. Reports republished HTML+JSON to C:\\\\temp\\\\appianway-dw5\\\\<module>\\\\.\\n- Doc 2026-07-20-appway-owasp-report.md fully updated (untracked/local, NOT committed): §4 table, §8.3.2 provenance, §8.6 follow-ups, §10.2 applied changes, §10.3 status, §10.5 re-scan results, §11 command log.\\n\\n13 files in commit 659bff9d: pom.xml, ingestor/pom.xml, watermill/pom.xml, watermill-publisher/pom.xml, functional-testing/pom.xml, functional-testing/.../IntegrationTestRule.java, gen2-parser/pom.xml, transformer/pom.xml, watermill/consumer-commons/pom.xml, watermill/cargoscreen-consumer/pom.xml, watermill/booking-inbound-consumer/pom.xml, watermill/visibility-inbound-consumer/pom.xml, watermill/itv-gps-consumer/pom.xml.\\n\\nOPEN (out of scope / follow-up): (1) Infosec sign-off for httpcore 4.x suppression -> then apply narrow httpcore*@4.* suppression for 0/0. (2) AWS SDK 1.x->v2 migration (only way to drop platform-wide httpcore 4.4.x). (3) Raise the PR. QA build tomorrow.",
+      "tags": [
+        "ION-16098",
+        "complete",
+        "pushed",
+        "659bff9d",
+        "owasp",
+        "final"
+      ],
+      "references": [
+        "feature/ION-16098-jetty-cve",
+        "659bff9d",
+        "2026-07-20-appway-owasp-report.md",
+        "C:/temp/appianway-dw5"
+      ]
+    },
+    {
+      "id": "dc5d4aa3977b",
+      "timestamp": "2026-07-22T02:54:21.999547+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "test_result",
+      "summary": "Runtime startup verification: all 14 jars bootstrap clean under DW5 (no-args -> Application init + {server,check,run}, no NoClassDef/NoSuchMethod/ServiceLoader errors). DW5 config pipeline works (check reaches type-validation). Full DW5+Jetty12 boot proven by shared+email-sender tests. gen2-parser revert verified (splitter build green).",
+      "detail": "User challenged: with so many TEST fixes, what gives confidence PRODUCTION runtime/startup works? Evidence gathered:\\n\\n1. ZERO deployed-service src/main changes in the commit (only 12 poms + functional-testing test-support IntegrationTestRule). DW4->5/Jetty11->12/EE9->EE10 needed NO production code change = API-compatible. Of the fixes, awaitility/junit/surefire are test-only (no runtime footprint); only logback 1.5.33 + jaxb-runtime 4.0.4 are runtime, and both are validated by tests exercising real production paths.\\n\\n2. Bootstrap smoke (java -jar <jar> no-args) on ALL 14 deployable jars -> every DW5 Application constructs, initializes bundles, registers {server,check,run}; NO NoClassDefFoundError/NoSuchMethodError/ServiceConfigurationError. Rules out DW5/Jetty12/Jersey3/EE10 class-graph + ServiceLoader breakers platform-wide.\\n\\n3. DW5 config pipeline: `java -jar <jar> check <yaml>` on transformer + distributor-rest reached config TYPE-VALIDATION, failing only on 'healthCheckConfig.errorRateThreshold is of type String, expected Double' = stock check doesn't apply the app's custom property-file substitution (that's the run/ConfigProcessingServerCommand path); ${...} placeholder passed through literally. Proves YAML->Jackson->Configuration POJO->Hibernate-Validator all run under DW5; NOT a DW5 API failure.\\n\\n4. Full DW5 app boot PROVEN in tests: shared 3 integration tests (14 methods, active) + email-sender functional test boot a real DW5 app with embedded Jetty 12 (DropwizardClientRule/IntegrationTestRule) and PASS. watermill-publisher StatusEventProtobufTransformerTest drives real XMLTransformer.unconvert JAXB path.\\n\\nRESIDUAL GAP (deferred to QA deploy tomorrow): full `run` startup of each worker with real dev config (substitution + Jetty bind + live SQS/S3/SNS) not run locally - SQS workers would consume dev-queue msgs; most services' full-boot functional tests are @Ignore. Watch: dropwizard-redirect-bundle DW5 compat, Jetty-12 URI-compliance (ION-16032).\\n\\nALSO: gen2-parser/pom.xml logback bump REVERTED to develop original (unnecessary - splitter overrides logback-classic directly at 1.5.33; gen2-parser has no DW tests). Commit re-amended a40bcd3f->659bff9d->e526d03c (12 files now), force-pushed. splitter -pl -am test after revert = BUILD SUCCESS. Cluster ARNs (FYI): transformer->ANEINCONTIVO-001, splitter->ANEINAPWY-002, others->ANEDVAW-001.\\n\\nDoc updated: §10.6 runtime startup verification added.",
+      "tags": [
+        "ION-16098",
+        "startup",
+        "runtime",
+        "smoke-test",
+        "dropwizard5",
+        "verification"
+      ],
+      "references": [
+        "e526d03c",
+        "2026-07-20-appway-owasp-report.md"
+      ]
+    },
+    {
+      "id": "ced5a42a71ae",
+      "timestamp": "2026-07-22T03:09:55.963448+00:00",
+      "agent": "claude-code-opus-4.8",
+      "category": "test_result",
+      "summary": "Full `run` against dev: DISTRIBUTOR started end-to-end on Jetty 12.1.9 (port bound, EE10 /application+/admin contexts, live SQS listener, 0 errors). SPLITTER reached same DW5 init, blocked only by AWS SSM param lookup (env/config placeholder creds, pre-existing, not DW5). Confirms DW5 production startup works.",
+      "detail": "User asked to do a full proper `run` for distributor + splitter against dev (AWS dev profile 081020446316 active, OK to consume dev SQS). Replicated the real container command: java -jar <app>-1.0.jar run <app>.yaml <dev props> with ENV=int.\\n\\nKey mechanics learned: ConfigProcessingServerCommand (the custom `run`) loads the YAML as a JAR CLASSPATH RESOURCE by name (ResourceConfigurationSourceProvider) - arg is 'distributor.yaml' NOT a path; conf/*.yaml is bundled into the jar. Properties files are filesystem args used for ${} substitution; fail-fast on any unresolved var. ENV=int == dev (task json = *-dev-Task.json). Dev props in <module>/conf/int/. Shared configuration/dev/{network-services,datadog}.properties exist but point network-services at localhost:8080/8095 (placeholders for a locally-run NS).\\n\\nDISTRIBUTOR: first run failed on AuthClient GET http://localhost:8080/auth ConnectException (no local NS) - an ENV dependency, not DW5. Stood up a tiny python stub on :8080 (returns valid Token: token_expiry_type=FixedTimeout, fresh tokenGeneratedUtc, token_ttl=86400) + :8095. Re-ran -> FULL CLEAN DW5 STARTUP: 'SimpleServerFactory Registering jersey handler /application'; 'AuthClient Get call ...8080/auth 310ms'; 'SetUIDListener Opened DistributorApplication{HTTP/1.1}{0.0.0.0:8081}'; 'SQSListener starting.' (live dev SQS); EE10 ServletContextHandler /application + /admin STARTED; 'org.eclipse.jetty.server.Server Started [12.1.9,sto=30000] @189ms'. ZERO errors. Benign WARN: logback-access 2.0.12 expects logback-core 1.5.32 but found 1.5.33 = DW5.0.2's own managed pairing, cosmetic.\\n\\nSPLITTER: reached SimpleServerFactory + jersey + admin handler registration, then Guice failed: ParameterStore$ParameterNameNotFound: Invalid SSM Parameter Store parameters: [AppianWay, UltraSecretKey]. Cause: splitter/src/.../modules/ExternalServicesModule:61 uses new ParameterStoreModule(clientId, clientSecret) (2-arg ctor forces usePassThrough=false -> SsmParameterSupplier), and splitter.yaml does NOT map usePassThrough (distributor.yaml does). So splitter always uses SSM; local generic config gave placeholder client creds (AppianWay/UltraSecretKey) that aren't real SSM param names. Pre-existing config/env detail, NOT DW5 - in cluster the SSM params exist.\\n\\nCONCLUSION: DW5/Jetty12/EE10 production startup path is proven (distributor fully up on Jetty 12.1.9 incl. live SQS). Remaining local blockers (NS reachability, SSM param names) are environment deps the cluster satisfies -> QA deploy tomorrow. No leftover processes (verified jps/ps clean). Doc §10.6 updated with full run results.",
+      "tags": [
+        "ION-16098",
+        "startup",
+        "runtime",
+        "dropwizard5",
+        "jetty12",
+        "distributor",
+        "splitter",
+        "verified"
+      ],
+      "references": [
+        "distributor/conf/int/distributor.properties",
+        "splitter/src/main/java/com/inttra/mercury/splitter/modules/ExternalServicesModule.java",
+        "configuration/dev/network-services.properties"
+      ]
+    }
+  ],
+  "usage": []
+}

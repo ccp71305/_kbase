@@ -1,0 +1,52 @@
+{
+  "id": "a0e9dc68b8f14672",
+  "name": "ION-12317 AppianWay AWS SDK v2 (cloud-sdk) Upgrade — design + implementation",
+  "description": "AppianWay 14-module migration off AWS Java SDK v1 (1.12.720) + appianway `shared` onto mercury-services-commons 1.0.27-SNAPSHOT (commons + cloud-sdk-api + cloud-sdk-aws) + slim appianway-commons, on the ION-16098 DW5/Jetty12/Java17/Jackson2.21.4 baseline. Design phase COMPLETE — all 14 module design pages + program landing page published to Confluence BRM under parent 650546306 (program page 672212104). NEXT: implement the mercury-services-commons cloud-sdk gaps (S-G2, W-G9, X-G7) then execute the 5-wave module rollout per the published design. Full design set + summary in appianway/docs (2026-07-23-appway-awsupgrade-design-summary.md).",
+  "project": "appianway / mercury-services",
+  "created_at": "2026-07-23T04:15:51.906349+00:00",
+  "updated_at": "2026-07-23T04:16:24.772734+00:00",
+  "status": "active",
+  "tags": [
+    "ION-12317",
+    "aws-sdk-v2",
+    "cloud-sdk",
+    "appianway",
+    "mercury-services-commons",
+    "design"
+  ],
+  "entries": [
+    {
+      "id": "7a2180b53bdd",
+      "timestamp": "2026-07-23T04:16:04.459212+00:00",
+      "agent": "claude-opus-4-8",
+      "category": "progress",
+      "summary": "Design phase COMPLETE — all 14 ION-12317 module design pages + program landing page published to Confluence BRM (parent 650546306).",
+      "detail": "Program page 672212104 (v5). Child pages: event-writer 672212105, distributor-rest 672212106, splitter 672212107, ingestor 672212108, dispatcher 672212125, distributor 672212126, error-processor 672212128, email-sender 672212131, transformer 672212132, watermill-publisher 672212135, booking-inbound-consumer 672212136, cargoscreen-consumer 672212137, itv-gps-consumer 672212138, visibility-inbound-consumer 672212139. Baseline ION-16098 (DW5/Jetty12/Java17/Jackson2.21.4) page 672212099. Publish-ready markdown sources in appianway/docs/2026-07-22-ION-12317-*.md. Confluence storage-format conversion via scratchpad/convert_doc.py through the mcp-summary-server venv python.",
+      "tags": [],
+      "references": [
+        "ION-12317",
+        "ION-16098",
+        "https://confluence.dev.e2open.com/pages/viewpage.action?pageId=672212104",
+        "appianway/docs/2026-07-23-appway-awsupgrade-design-summary.md"
+      ]
+    },
+    {
+      "id": "446e54bce8f3",
+      "timestamp": "2026-07-23T04:16:24.772692+00:00",
+      "agent": "claude-opus-4-8",
+      "category": "decision",
+      "summary": "NEXT PHASE: implement the mercury-services-commons cloud-sdk gaps (Wave 0) before any module migration. Order: S-G2, W-G9, X-G7 — all strictly additive to libs consumed in production by mercury-services.",
+      "detail": "Wave 0 gap implementations (in mercury-services-commons, target line 1.0.27-SNAPSHOT):\nS-G2 (cloud-sdk-api + cloud-sdk-aws): StorageClient.putObject(bucket,key,byte[],Map metadata,String contentType) + InputStream variant + copyObject(...,Map replacedMetadata,String contentType) (S3 REPLACE). Consumers: event-writer, dispatcher, distributor, error-processor (+ transformer/splitter ref).\nW-G9 (cloud-sdk-api): (1) add annotations + setAnnotations to Event.Builder and copy in Builder(Event) — fixes the WIRE round-trip defect where Event.parseJson silently drops an annotations block (W-G9.1); (2) add the 6 missing MetaData.Projection + 8 missing Event.Token String constants (W-G9.2, source-compat only). Gate: JSON round-trip corpus test (event-writer S3 archives) asserting appianway-shared serialization == cloud-sdk-api serialization, byte-stable, incl. an annotations-bearing payload.\nX-G7 (cloud-sdk-api + SES): additive replyTo field + builder setter on MailContent, mapped by SesEmailServiceImpl to SES v2 replyToAddresses. Consumer: email-sender. Fallback if not delivered: email-sender composes Reply-To locally against the underlying SesV2Client.\nDe-scoped (NOT cloud-sdk changes): DynamoDB optimistic lock (native v2 @DynamoDbVersionAttribute), Thymeleaf/Handlebars template, health helpers. X-G8 (ingestor Jest signing) CORRECTED: keep the vc.inreach v1 SigV4 signer + a minimal AWS v1 auth jar coexisting with v2 — NO cloud-sdk change.\nNon-negotiable contract: every gap change must be strictly additive (new default methods, overloads, types, visibility-widening only); verify cloud-sdk CI + full mercury-services build green before/after.\nAfter Wave 0 lands: appianway-commons (slim residue) + functional-testing fakes, then the 5-wave module rollout (event-writer pilot first, gated on the W-G9 corpus test).",
+      "tags": [],
+      "references": [
+        "ION-12317",
+        "S-G2",
+        "W-G9",
+        "X-G7",
+        "X-G8",
+        "mercury-services-commons:1.0.27-SNAPSHOT"
+      ]
+    }
+  ],
+  "usage": []
+}

@@ -1,0 +1,19 @@
+{
+  "id": "a61f253982c84f67",
+  "name": "publish-doc-2026-07-30-ion-16380-watermill-publisher-aws-upgrade",
+  "description": "Published the ION-16380 watermill-publisher AWS SDK 2.x (cloud-sdk) upgrade + ION-16235 retry-framework rebase design doc to Confluence BRM. Page 672213462 v1 under parent 672212969 (26.4 Design Documents). Source: watermill-publisher/watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md. Verified against body.storage: 37 tables, 5/5 CDATA code blocks byte-identical, toc+info+2 panels+10 task-list ids intact.",
+  "project": "mercury-services",
+  "created_at": "2026-07-30T23:50:32.928339+00:00",
+  "updated_at": "2026-07-30T23:50:32.928360+00:00",
+  "status": "active",
+  "tags": [
+    "confluence",
+    "design-doc",
+    "ION-16380",
+    "watermill-publisher",
+    "aws-sdk-v2",
+    "cloud-sdk"
+  ],
+  "entries": [],
+  "usage": []
+}

@@ -1,0 +1,37 @@
+{
+  "id": "80233b5680a442be",
+  "name": "visibility-lambda-credprovider-null-prompt-gen-20260730",
+  "description": "Generator run of generalized-issue-fix-generator.md for the visibility lambda CredentialsProvider-must-not-be-null issue (ION-16387). Produces a self-contained issue-fix prompt under .github/prompts/issue-fix/.",
+  "project": "mercury-services",
+  "created_at": "2026-07-30T15:26:06.839279+00:00",
+  "updated_at": "2026-07-30T15:28:31.982350+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "ION-16387",
+    "issue-fix",
+    "prompt-generator",
+    "lambda-credprovider-null"
+  ],
+  "entries": [
+    {
+      "id": "56294d982f3d",
+      "timestamp": "2026-07-30T15:28:31.982319+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Generated issue-fix prompt for visibility lambda CredentialsProvider-null (ION-16387)",
+      "detail": "Ran generalized-issue-fix-generator.md. Validated mandatory inputs (module=visibility, doc=visibility/docs/2026-07-30-lambda-credprovider-missing-issue.md, goals=CredentialsProvider must not be null in visibility lambda handlers + HandlerSupport coverage <80% in visibility-s3-archiver, branch=bugfix/ION-16387, jira=ION-16387, aws_profile=081020446316_INTTRA-Dev-Engg). Optional: references (4 visibility/docs files) rendered; ecs_cluster=ANEINVIS-002 and cloudwatch_log_group=inttra-ecs-logs present so AWS-log investigation block included; confluence blank so dropped. Derived: yyyymmdd=20260730, brief-summary=lambda-credprovider-null, workspace=mercury-services (C:\\Users\\arijit.kundu\\projects\\mercury-services). Generator file NOT modified. Output: .github/prompts/issue-fix/20260730-visibility-lambda-credprovider-null.md",
+      "tags": [
+        "prompt-generator",
+        "visibility",
+        "ION-16387"
+      ],
+      "references": [
+        ".github/prompts/generalized-issue-fix-generator.md",
+        ".github/prompts/issue-fix/20260730-visibility-lambda-credprovider-null.md",
+        "ION-16387"
+      ]
+    }
+  ],
+  "usage": []
+}
