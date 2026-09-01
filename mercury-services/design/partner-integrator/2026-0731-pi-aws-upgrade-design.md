@@ -1,7 +1,7 @@
 # partner-integrator — AWS SDK 1.x → 2.x (cloud-sdk) Upgrade — Plan & Design
 
-**Jira:** ION-16397 · **Branch:** `feature/ION-16397-pi-aws-upgrade` · **Date:** 2026-07-31
-**Target commons line:** `mercury-services-commons` **1.0.28-SNAPSHOT** (`commons`, `cloud-sdk-api`, `cloud-sdk-aws`, `dynamo-integration-test`)
+**Jira:** ION-16397 · **Branch:** `feature/ION-16397-pi-aws-upgrade` · **Date:** 2026-07-31 · **Updated:** 2026-08-20
+**Target commons line:** `mercury-services-commons` **1.0.31-SNAPSHOT** (`commons`, `cloud-sdk-api`, `cloud-sdk-aws`, `dynamo-integration-test`)
 **Reference migrations:** `booking` (ION-14382), `visibility` (ION-12316), `booking-cargoscreen` (ION-16397, commit `2f8a4829e8`), `watermill-publisher`
 **Companion docs:** `2026-06-30-partner-integrator-current-state-DESIGN-claude.md`, `2026-06-30-partner-integrator-aws2x-DESIGN-claude.md`, `docs/2026-0730-mercury-services-aws-pending.md`
 
@@ -11,7 +11,7 @@
 
 ## 0. Executive summary
 
-`partner-integrator` ("PI") is the largest remaining AWS-SDK-v1 module in the monorepo: **8 submodules, 104 files
+`partner-integrator` ("PI") includes **8 submodules, 104 files
 in `src/main/java` and 26 in `src/test/java`** referencing `com.amazonaws.*`. It uses **DynamoDB (v1
 `DynamoDBMapper` ORM), S3, SQS, SNS and SSM/Parameter Store**, plus two AWS Lambda handlers.
 
@@ -21,9 +21,9 @@ The migration is **not** uniformly mechanical. Discovery surfaced three hard con
 
 | # | Constraint | Consequence |
 |---|---|---|
-| **C1** | `commons` 1.0.28-SNAPSHOT **deletes the entire `com.inttra.mercury.messaging.*` package** and **`com.inttra.mercury.module.JestModule`**. PI imports 6 symbols from `messaging.*` and `JestModule`. | The commons bump alone breaks compilation. Every removed symbol must be re-pointed at `com.inttra.mercury.cloudsdk.*`, and `ESConfiguration`-style config classes must implement the cloud-sdk `ElasticSearchServiceConfig` interface. |
-| **C2** | `dynamo-client` is **not published at 1.0.28-SNAPSHOT** (latest is 1.0.25-SNAPSHOT) and is a deprecated lib per the pending-inventory doc. PI imports 6 symbols from `com.inttra.mercury.dynamo.*` across 20+ files. | `dynamo-client` must be **dropped**, not bumped. `DynamoDBCrudRepository` → cloud-sdk `DatabaseRepository`, `DynamoHashKey`/`DynamoHashAndSortKey` → `DefaultPartitionKey`/`DefaultCompositeKey`, `dynamo.annotation.DynamoDBStream` → `cloudsdk.database.annotation.DynamoDBStream`, `dynamo.respository.module.DynamoDbConfig` → `cloudsdk.database.config.BaseDynamoDbConfig`. |
-| **C3** | Three DynamoDB **entity classes live in pinned external model jars**, not in this repo's build. Their v1 `@DynamoDB*` annotations cannot be changed from a PI-only branch. | See §2 — this is the one genuine blocker. `booking` is resolvable today (**3.0.0.M** exists and is v2-annotated); `visibility` is resolvable with a rebuild; `shipping-instruction` is **not**. |
+| **C1** | `commons` 1.0.31-SNAPSHOT **no longer ships `com.inttra.mercury.messaging.*` or `com.inttra.mercury.module.JestModule`** — both have been **migrated into `cloud-sdk-api`** as `com.inttra.mercury.cloudsdk.messaging.*` (`MessagingClient`, `QueueMessage`, `Listener`, `ReceiveMessageOptions`, `MessagingException`) and `com.inttra.mercury.cloudsdk.elasticsearch.JestClientBuilder`/`JestClientRetryHandler`. PI imports 6 symbols from `messaging.*` and `JestModule`. | The commons bump alone breaks compilation. Every moved symbol must be re-pointed at its `com.inttra.mercury.cloudsdk.*` counterpart, and `ESConfiguration`-style config classes must implement the cloud-sdk `com.inttra.mercury.cloudsdk.config.ElasticSearchServiceConfig` interface. |
+| **C2** | `dynamo-client` is **deprecated and needs to be dropped** . PI imports 6 symbols from `com.inttra.mercury.dynamo.*` across 20+ files. | `dynamo-client` must be **dropped**, not bumped. `DynamoDBCrudRepository` → cloud-sdk `DatabaseRepository`, `DynamoHashKey`/`DynamoHashAndSortKey` → `DefaultPartitionKey`/`DefaultCompositeKey`, `dynamo.annotation.DynamoDBStream` → `cloudsdk.database.annotation.DynamoDBStream`, `dynamo.respository.module.DynamoDbConfig` → `cloudsdk.database.config.BaseDynamoDbConfig`. |
+| **C3** | Three DynamoDB **entity classes live in pinned external model jars**, not in this repo's build. Their v1 `@DynamoDB*` annotations cannot be changed from a PI-only branch. | See §2 — originally the one genuine blocker, **now fully resolved**. `booking` → **3.0.0.M** (exists, v2-annotated); `visibility` → **2.0.M** (rebuild from in-repo v2 source); `shipping-instruction` → **2.0.M** (rebuild from the ION-16396 v2 source now on `develop`). |
 
 A fourth finding is decisive for the Lambda/stream path and is good news:
 
@@ -61,21 +61,21 @@ byte-identical** or the indexer and the writer disagree on the stored shape.
 
 ### 1.2 Cross-module symbol inventory (the compile-break set)
 
-| Symbol imported by PI | Count | Status in 1.0.28-SNAPSHOT | Replacement |
+| Symbol imported by PI | Count | Status in 1.0.31-SNAPSHOT | Replacement |
 |---|---:|---|---|
-| `com.inttra.mercury.dynamo.respository.module.DynamoDbConfig` | 20 | artifact not published at 1.0.28 | `cloudsdk.database.config.BaseDynamoDbConfig` |
+| `com.inttra.mercury.dynamo.respository.module.DynamoDbConfig` | 20 | artifact not published at 1.0.31 | `cloudsdk.database.config.BaseDynamoDbConfig` |
 | `…dynamo.respository.id.DynamoHashAndSortKey` | 10 | ″ | `cloudsdk.database.api.id.DefaultCompositeKey<String,String>` |
 | `…dynamo.respository.DynamoRepositoryConfig` | 7 | ″ | `cloudsdk.database.config.DynamoRepositoryConfig` |
 | `…dynamo.respository.DynamoDBCrudRepository` | 7 | ″ | `cloudsdk.database.api.DatabaseRepository<T,ID>` |
 | `…dynamo.annotation.DynamoDBStream` | 6 | ″ | `cloudsdk.database.annotation.DynamoDBStream` |
 | `…dynamo.respository.id.DynamoHashKey` | 1 | ″ | `cloudsdk.database.api.id.DefaultPartitionKey<String>` |
-| `com.inttra.mercury.messaging.model.MetaData` | 5 | **deleted** | `cloudsdk.notification.workflow.MetaData` |
-| `…messaging.logging.EventLogger` | 4 | **deleted** | `cloudsdk.notification.workflow.EventLogger` |
-| `…messaging.sns.SNSClient` | 3 | **deleted** | (no direct equivalent — see §5.3) |
-| `…messaging.logging.SNSEventPublisher` | 3 | **deleted** | `cloudsdk.notification.api.NotificationService` via `NotificationClientFactory` |
-| `…messaging.logging.EventPublisher` | 3 | **deleted** | `cloudsdk.notification.workflow.EventPublisher` |
-| `…messaging.model.Event` | 1 | **deleted** | `cloudsdk.notification.workflow.Event` |
-| `com.inttra.mercury.module.JestModule` | 1 | **deleted** | `cloudsdk.aws.module.JestModule` (takes `cloudsdk.config.ElasticSearchServiceConfig`) |
+| `com.inttra.mercury.messaging.model.MetaData` | 5 | **moved → `cloud-sdk-api`** | `cloudsdk.notification.workflow.MetaData` |
+| `…messaging.logging.EventLogger` | 4 | **moved → `cloud-sdk-api`** | `cloudsdk.notification.workflow.EventLogger` |
+| `…messaging.sns.SNSClient` | 3 | **moved → `cloud-sdk-api`** | (no direct equivalent — see §5.3) |
+| `…messaging.logging.SNSEventPublisher` | 3 | **moved → `cloud-sdk-api`** | `cloudsdk.notification.api.NotificationService` via `NotificationClientFactory` |
+| `…messaging.logging.EventPublisher` | 3 | **moved → `cloud-sdk-api`** | `cloudsdk.notification.workflow.EventPublisher` |
+| `…messaging.model.Event` | 1 | **moved → `cloud-sdk-api`** | `cloudsdk.notification.workflow.Event` |
+| `com.inttra.mercury.module.JestModule` | 1 | **moved → `cloud-sdk-api`** | `cloudsdk.aws.module.JestModule` (takes `cloudsdk.config.ElasticSearchServiceConfig`) |
 | `com.inttra.mercury.config.ApplicationConfiguration` / `ServiceDefinition` / `ElasticSearchServiceConfig` | — | present, unchanged | unchanged |
 
 ### 1.3 Baseline build (must be reproduced green at the end)
@@ -105,7 +105,7 @@ mvn -f partner-integrator/pom.xml clean verify      # BUILD SUCCESS
 
 ---
 
-## 2. The model-jar blocker (C3) — decision required
+## 2. The model-jar blocker (C3) — resolved
 
 PI does **not** own the entity classes for three of its four DynamoDB tables. They arrive as pinned `*.M` "model"
 jars, some from an S3-backed Maven wagon, some from git-tracked per-module `lib/` repositories.
@@ -114,7 +114,7 @@ jars, some from an S3-backed Maven wagon, some from git-tracked per-module `lib/
 |---|---|---|:--:|---|
 | `<prefix>_booking_booking` | `com.inttra.mercury.booking.model.BookingDetail` | `com.inttra.mercury:booking` — pinned **2.1.7.M** (`pi-booking-processor/lib/`), **2.1.8.M** (`pi-statusevents-out-processor/lib/`), **1.0.M** (S3 wagon, `pi-si-out-processor`) | **YES at 3.0.0.M** | pi-booking-processor, pi-statusevents-out-processor, pi-si-out-processor |
 | `<prefix>_container_events` | `com.inttra.mercury.visibility.common.model.containerEvent.ContainerEvent` | `com.inttra.mercury:visibility` — pinned **1.4.M** (`pi-statusevents-out-processor/lib/`) | **no jar, but v2 source is in-repo** | pi-statusevents-out-processor |
-| `<prefix>_si` | `com.inttra.mercury.shippinginstruction.model.SIVersion` | `com.inttra.mercury:shipping-instruction` — pinned **1.0.M** (S3 wagon) | **NO** | pi-si-in-processor, pi-si-out-processor |
+| `<prefix>_si` | `com.inttra.mercury.shippinginstruction.model.SIVersion` | `com.inttra.mercury:shipping-instruction` — pinned **1.0.M** (S3 wagon) | **YES** — v2 source on `develop` since ION-16396; repackage as **2.0.M** into `lib/` (§2.3) | pi-si-in-processor, pi-si-out-processor |
 | `<prefix>_bill_of_lading` | `…blfeed.model.BLVersion` / `…pi.model.BLVersion` | **PI-owned source** (duplicated in two submodules) | n/a — we migrate it | pi-bl-in-processor, pi-bl-es-lambda |
 
 ### 2.1 `booking` → **3.0.0.M** (resolved, no decision needed)
@@ -154,66 +154,92 @@ at `pi-statusevents-out-processor/src/test/java/com/inttra/mercury/visibility/co
 command so it is reproducible. Verify the model-jar include list covers `model/containerEvent/converters/**` (it does —
 the include is a path prefix).
 
-### 2.3 `shipping-instruction` `SIVersion` → **no v2 artifact exists** — RESOLVED: Option A
+### 2.3 `shipping-instruction` `SIVersion` → **v2 model now exists (ION-16396)** — RESOLVED: consume it
 
-`shipping-instruction-1.0.M` is v1-annotated, and the in-repo source
-(`shipping-instruction/src/main/java/…/model/SIVersion.java`) is **also** v1-annotated — `@DynamoDBTable("si")`,
-`@DynamoDBHashKey`/`@DynamoDBRangeKey`/`@DynamoDBAutoGeneratedKey`, `@DynamoDBTypeConverted(CompressionConverter)`,
-`@DynamoDBTypeConverted(DateToEpochSecond)`, `implements DynamoHashAndSortKey`. The `shipping-instruction` module is
-listed as **pending migration** in `docs/2026-0730-mercury-services-aws-pending.md` §1.2 (62 v1 files, tracked
-separately as ION-16396).
+> **Superseded 2026-08-20.** The original text of this section (written 2026-07-31) recorded that ION-16396 was an
+> empty placeholder branch and chose **Option A** — PI owning a migrated `com.inttra.mercury.common.vo.SI` in
+> `pi-commons`. **That is no longer the situation: ION-16396 has landed on `develop`.** The section below replaces the
+> earlier analysis; Options A/B/C are kept only as the record of how the decision moved.
 
-> **Verified 2026-07-31 — the ION-16396 migration has not been implemented.** Review asked whether PI could consume
-> the upgraded v2 SI model generated from that ticket's branch. It cannot yet:
->
-> ```
-> git rev-parse feature/ION-16396-si-aws-upgrade   ->  b86d536fedd4b5b85aa38f091e5f394465edb3fe
-> git rev-parse develop                            ->  b86d536fedd4b5b85aa38f091e5f394465edb3fe
-> git diff --stat develop feature/ION-16396-si-aws-upgrade   ->  (empty)
-> ```
->
-> The branch is an empty placeholder at develop's tip. The only ION-16396 artifact present is the **untracked**
-> `shipping-instruction/docs/2026-07-30-si-aws-upgrade-design.md` (421 lines, design only — not `git add`-ed, no
-> commits, no stash, no worktree, no remote branch). Its own §4.1 scopes **48 bean classes** plus the `siDraft`
-> entity, a CloudFormation migration and the `@DynamoDBAutoGeneratedKey` problem — i.e. the model is not separable
-> from the rest of that ticket: migrating only `SIVersion` in place would break `shipping-instruction`'s own
-> `SIDao`/`DynamoSupport`, which still call v1 `DynamoDBMapper` on it, and the reactor build with it.
+**Verified 2026-08-20:**
 
-Three options, in the order I'd rank them:
+```
+git rev-parse --short develop                                   ->  ac6f2f804c
+git log --oneline --all -- shipping-instruction/.../SIVersion.java
+  588c531b85 ION-16396: shipping-instruction AWS SDK 2.x (cloud-sdk) upgrade
+  51dfac9cc5 ION-16396: shipping-instruction AWS SDK 2.x (cloud-sdk) upgrade
+git branch --contains 588c531b85            ->  develop, feature/ION-16396-si-aws-upgrade
+git merge-base --is-ancestor 588c531b85 HEAD ->  false      # this PI branch is still at b86d536fed
+```
 
-**Option A (recommended) — own the `si` entity inside `pi-commons`.**
+`shipping-instruction/src/main/java/…/model/SIVersion.java` on `develop` is now **fully v2-annotated** and matches
+the shape PI needs, field for field:
+
+| Aspect | v2 `SIVersion` on `develop` |
+|---|---|
+| Table | `@Table(name = "si")` (`cloudsdk.database.annotation.Table`) + `@DynamoDbBean` |
+| Stream | `@DynamoDBStream(StreamViewType.KEYS_ONLY)` (`cloudsdk.database.annotation`, v2 `StreamViewType`) |
+| Keys | `@DynamoDbPartitionKey` on `id`, `@DynamoDbSortKey` on `sequenceNumber` (generated by `SIDao.save`, replacing `@DynamoDBAutoGeneratedKey`) |
+| GSI | `@DynamoDbSecondaryPartitionKey(indexNames = INTTRA_REFERENCE_NUMBER_INDEX)` on `siInttraReferenceNumber` |
+| Converters | `@DynamoDbConvertedBy(CompressionConverter.class)` on `message`; `@DynamoDbConvertedBy(DateToEpochSecond.class)` on `expiresOn` |
+| Interfaces | `implements Expires` — the `DynamoHashAndSortKey` indirection is gone |
+| Fields | includes `contract` (the attribute `pi-commons`' `vo.SI` was missing) |
+
+`shipping-instruction/pom.xml` on `develop` is already on `mercury.commons.version` **1.0.31-SNAPSHOT** — the same
+commons line this ticket targets — so the model classes and PI link against one cloud-sdk version, not two.
+
+**DECISION (2026-08-20): consume the ION-16396 v2 SI model. Option A is dropped.**
+PI keeps importing `com.inttra.mercury.shippinginstruction.model.SIVersion`; only the *jar behind that import*
+changes. Concretely:
+
+1. **Rebase `feature/ION-16397-pi-aws-upgrade` onto `develop`** (`b86d536fed` → `ac6f2f804c`) so the v2
+   `shipping-instruction` source is in the tree and the baseline is re-measured against it (§1.3).
+2. **Build the SI model jar** from the existing `-Psi-model` profile, which packages
+   `com/inttra/mercury/shippinginstruction/{model,util,dao}/**`:
+   ```powershell
+   mvn -f shipping-instruction/pom.xml -Psi-model clean package -DskipTests=false
+   ```
+3. **Install it as `com.inttra.mercury:shipping-instruction:2.0.M` into `pi-si-in-processor/lib/` and
+   `pi-si-out-processor/lib/`**, mirroring the `booking` 3.0.0.M and `visibility` 2.0.M convention (§2.1/§2.2), and
+   repin both submodules from `1.0.M` to `2.0.M`.
+   > ⚠️ **Do not re-deploy over `1.0.M`.** The `si-model-deploy` execution publishes to
+   > `s3://inttra-deployment/Shipping-instruction/repo/release` at the fixed coordinate `${project.version}.M` =
+   > `1.0.M`, so running it would silently replace the released **v1** jar in place and break every other consumer
+   > still on v1. A new `.M` version is the safe route; retiring the S3 wagon pin is then a bonus (PI already has to
+   > do this for `booking` 1.0.M in `pi-si-out-processor` — §2.1).
+4. `pi-commons`' `com.inttra.mercury.common.vo.SI` is **still migrated to v2** — it is used by
+   `CreateTables`/`DeleteTables` in `pi-bl-in-processor` and `pi-si-out-processor` — but it stays a
+   provisioning-only schema declaration. **No `contract` field is added** and no processor is repointed to it, so the
+   ≈6-file import churn of Option A disappears.
+
+- ✅ One owner for the `si` entity, in the module that owns the table's writer; no divergent duplicate schema.
+- ✅ No stored-shape risk from a re-declared entity: PI and `shipping-instruction` write through the *same* class.
+- ⚠️ Cross-module release coupling returns — PI now needs the SI model jar built and committed to `lib/`. Same cost
+  already accepted for `visibility` 2.0.M (§9/R2); the exact command is logged in Appendix A.
+- ⚠️ `vo.SI`'s converter-parity tests (§6.1/§7.1) still apply, since it provisions the live table's key schema, GSI,
+  stream and TTL.
+
+<details>
+<summary>Historical options (2026-07-31) — kept for the decision record</summary>
+
+**Option A — own the `si` entity inside `pi-commons`.**
 `pi-commons` **already has its own entity for the same table**: `com.inttra.mercury.common.vo.SI`
 (`@DynamoDBTable("si")`, same `id`/`sequenceNumber` keys, same `INTTRA_REFERENCE_NUMBER_INDEX` GSI, same
 `CompressionConverter`/`DateToEpochSecond`, same `EnrichedAttributes`). Field-by-field it is **`SIVersion` minus the
-`contract` attribute**. Today `vo.SI` is used only by the `CreateTables`/`DeleteTables` admin commands — i.e. PI already
-declares the `si` schema twice and provisions the table from its own copy.
-
-Plan: migrate `vo.SI` to v2, **add the missing `contract` field**, and repoint `pi-si-in-processor` and
-`pi-si-out-processor` from `shippinginstruction.model.SIVersion` to `com.inttra.mercury.common.vo.SI`
-(≈6 main files + their tests: `SIDao`, `SIFeedHandler`, `SIFeedService`, `OutboundProcessor`).
-
-- ✅ Removes PI's dependency on an unmigrated sibling; no cross-module release coupling; PI keeps a single `si`
-  schema definition instead of two divergent ones (a latent-bug cleanup).
-- ⚠️ The stored item shape must be **byte-identical** to what `SIVersion` writes. Guarded by the converter-parity and
-  round-trip tests in §7.1/§7.3; the field sets are provably equal once `contract` is added.
-- ⚠️ `shipping-instruction`'s own app still writes the same table via v1 `SIVersion`. That is **fine and unchanged** —
-  v1 and v2 write the same attribute names/types; this is exactly the coexistence the booking and visibility
-  migrations already rely on. It stays true until ION-16396 lands.
+`contract` attribute**. The plan was to migrate `vo.SI` to v2, add the missing `contract` field, and repoint
+`pi-si-in-processor`/`pi-si-out-processor` off `shippinginstruction.model.SIVersion` (≈6 main files + tests).
+Chosen on 2026-07-31 **only because no v2 SI model existed**; superseded once ION-16396 landed.
 
 **Option B — migrate `SIVersion` in the `shipping-instruction` module and publish a new `.M` jar.**
-Correct in the long run, but it means editing a module outside this ticket's scope whose own application still uses
-v1 `DynamoDBMapper` on that class — so it forces the ION-16396 migration into this branch. Rejected for this ticket.
+Rejected in July as out of scope for this ticket. **ION-16396 has since done exactly this**, which is why the
+decision above is effectively Option B minus the cost — PI only has to package and pin the result.
 
 **Option C — leave the SI DynamoDB path on v1.**
 Keep `dynamo-client:1.0.25-SNAPSHOT` + `aws-java-sdk-dynamodb` for `pi-si-in-processor`/`pi-si-out-processor` only.
 Technically possible (v1 and v2 coexist), but it leaves 2 of 8 submodules unmigrated, keeps a v1 SDK on two shaded
-jars, and `dynamo-client` 1.0.25 has never been tested against `commons` 1.0.28. Documented as the fallback only.
+jars, and `dynamo-client` 1.0.25 has never been tested against `commons` 1.0.31. Rejected.
 
-**DECISION (2026-07-31): Option A.** Review's preference was to consume the ION-16396 v2 SI model; since that work
-does not exist yet (above), Option A is the only route that both (a) gives PI a genuine **v2** `si` entity now and
-(b) completes all 8 submodules on this branch. It is also **forward-compatible with ION-16396 by construction**: the
-stored item is byte-identical either way, so when the SI model jar ships, PI switches back by changing one import in
-each of ~6 files plus the pom pin. That switch point is called out in §5.5 and §9/R1 so it is not lost.
+</details>
 
 **DECISION (2026-07-31): `visibility` — build `2.0.M` into `pi-statusevents-out-processor/lib/`** (§2.2), per review.
 Mirrors the existing `booking`/`visibility` `lib/` convention rather than pulling visibility's whole dependency tree
@@ -225,7 +251,7 @@ Mirrors the existing `booking`/`visibility` `lib/` convention rather than pullin
 
 ```mermaid
 flowchart TB
-  subgraph CS["cloud-sdk 1.0.28-SNAPSHOT (AWS SDK 2.x)"]
+  subgraph CS["cloud-sdk 1.0.31-SNAPSHOT (AWS SDK 2.x)"]
     ST["StorageClient<br/>StorageClientFactory.createS3Client(AwsStorageConfig)"]
     MS["MessagingClient&lt;String&gt;<br/>MessagingClientFactory.createConfiguredClient"]
     NS["NotificationService (extends EventPublisher)<br/>NotificationClientFactory.createConfiguredClient"]
@@ -263,9 +289,9 @@ flowchart TB
   RP -.-> DYM
 ```
 
-### 3.1 Service-by-service mapping (verified against the 1.0.28-SNAPSHOT jars)
+### 3.1 Service-by-service mapping (verified against the 1.0.31-SNAPSHOT jars)
 
-| v1 usage in PI | cloud-sdk 1.0.28 target | Verified signature |
+| v1 usage in PI | cloud-sdk 1.0.31 target | Verified signature |
 |---|---|---|
 | `AmazonS3` + `GetObjectRequest`/`CopyObjectRequest`/`ObjectMetadata`/`S3Object` | `StorageClient` | `putObject(b,k,String\|byte[]\|InputStream,long\|File)`, `putObject(b,k,byte[],Map<String,String>,String)`, `getContent(b,k,Charset)`, `getObject(b,k) → StorageObject{getContent(),getMetadata()}`, `copyObject(sb,sk,tb,tk[,Map,String])` |
 | `AmazonSQS.sendMessage/deleteMessage` | `MessagingClient<String>` | `sendMessage(url,T)`, `sendMessage(url,T,Map<String,String>)` *(attributes, **not** delay)*, `deleteMessage(url,handle)` |
@@ -310,7 +336,7 @@ Introduce the shared version properties and a `dependencyManagement` block so th
 ```xml
 <properties>
   <maven.compiler.release>17</maven.compiler.release>
-  <mercury.commons.version>1.0.28-SNAPSHOT</mercury.commons.version>
+  <mercury.commons.version>1.0.31-SNAPSHOT</mercury.commons.version>
   <aws.lambda.events.version>3.13.0</aws.lambda.events.version>
   <jackson-bom.version>2.21.4</jackson-bom.version>
 </properties>
@@ -355,10 +381,10 @@ The `jackson-bom 2.21.4` import mirrors the `rates` / `watermill-publisher` / `b
 
 | Submodule | Changes |
 |---|---|
-| `pi-commons` | as above; `commons` → `1.0.28-SNAPSHOT` |
+| `pi-commons` | as above; `commons` → `1.0.31-SNAPSHOT` |
 | `pi-booking-processor` | `booking` 2.1.7.M → **3.0.0.M**; add jar+pom to `lib/`; update `dependency:get` artifact coordinate |
-| `pi-si-in-processor` | `shipping-instruction` 1.0.M **removed** (Option A) or retained (Option C) |
-| `pi-si-out-processor` | `booking` 1.0.M → **3.0.0.M** (via local `lib/`); `shipping-instruction` per Option A/C; `aws-lambda-java-events` 2.0.1 → managed 3.13.0 |
+| `pi-si-in-processor` | `shipping-instruction` 1.0.M (S3 wagon) → **2.0.M** via local `lib/` (§2.3) |
+| `pi-si-out-processor` | `booking` 1.0.M → **3.0.0.M** and `shipping-instruction` 1.0.M → **2.0.M** (both via local `lib/`); `aws-lambda-java-events` 2.0.1 → managed 3.13.0 |
 | `pi-statusevents-out-processor` | `booking` 2.1.8.M → **3.0.0.M**; `visibility` 1.4.M → **2.0.M**; both into `lib/`; update `dependency:get` |
 | `pi-bl-in-processor` | `aws-lambda-java-events` 2.2.2 → managed 3.13.0; add cloud-sdk (currently transitive via pi-commons — declare it) |
 | `pi-bl-es-lambda` | drop `dynamo-client`; add cloud-sdk; `aws-lambda-java-events` → 3.13.0 |
@@ -536,7 +562,8 @@ public class SI implements Expires {
                                                               public String getSiInttraReferenceNumber() { … }
     @DynamoDbConvertedBy(CompressionAttributeConverter.class)  public String getMessage() { … }
     @DynamoDbConvertedBy(DateEpochSecondAttributeConverter.class) @TTL public Date getExpiresOn() { … }
-    // + contract (Option A), enrichedAttributes (nested @DynamoDbBean → M)
+    // + enrichedAttributes (nested @DynamoDbBean → M). No `contract` — see §2.3; the processors use
+    //   shippinginstruction.model.SIVersion, and vo.SI stays a provisioning-only schema declaration.
 }
 ```
 
@@ -570,10 +597,96 @@ Converters:
 | Submodule | Work |
 |---|---|
 | `pi-booking-processor` | `BookingApplicationInjector`: drop `AmazonDynamoDB`/`DynamoDBMapper`/`DynamoDBMapperConfig` bindings and `booking.dynamodb.DynamoSupport`; install `PiDynamoModule`-style provider. `BookingDao`: `DynamoDBCrudRepository<BookingDetail, DynamoHashAndSortKey>` → `DatabaseRepository<BookingDetail, DefaultCompositeKey<String,String>>`; the three `query(...)` calls → `DefaultQuerySpec`. `booking` → 3.0.0.M. |
-| `pi-si-in-processor` | `SIApplicationInjector` + `SIDao` same shape; entity `SIVersion` → `vo.SI` (Option A). `SIFeedHandler`/`SIFeedService` type changes. |
-| `pi-si-out-processor` | Widest surface: `SIFeedApplicationInjector` (S3+SQS+SNS+DDB), `SIDao`, `OutboundProcessor`, `Utils.ssmParameterlookup` → `CloudParameterStore`, `CreateTables`/`DeleteTables` → `DynamoDbAdminCommand`. **Latent bug found:** `SIDao extends DynamoDBCrudRepository<ContainerEvent, …>` but its only method loads `SIVersion` — the generic parameter is wrong (harmless under v1's untyped mapper, a compile error under typed repositories). It gets corrected to the SI entity, and the correction is called out in the commit message rather than slipped in. |
+| `pi-si-in-processor` | `SIApplicationInjector` + `SIDao` same shape; entity stays `shippinginstruction.model.SIVersion`, now the **v2** class from `shipping-instruction:2.0.M` (§2.3) — imports unchanged, only the pin moves. `SIFeedHandler`/`SIFeedService` type changes. |
+| `pi-si-out-processor` | Widest surface: `SIFeedApplicationInjector` (S3+SQS+SNS+DDB), `SIDao`, `OutboundProcessor`, `Utils.ssmParameterlookup` → `CloudParameterStore`, `CreateTables`/`DeleteTables` → `DynamoDbAdminCommand`. **Latent bug found:** `SIDao extends DynamoDBCrudRepository<ContainerEvent, …>` but its only method loads `SIVersion` — the generic parameter is wrong (harmless under v1's untyped mapper, a compile error under typed repositories). It gets corrected to `SIVersion`, and the correction is called out in the commit message rather than slipped in. |
 | `pi-statusevents-out-processor` | `SEFeedApplicationInjector` (S3+SQS+SNS+DDB + the `_booking` resolver), `BookingDao`, `ContainerEventDao`, `OutboundProcessor`, `Utils.ssmParameterlookup`. `EventPublisher` provider → `NotificationService`. `booking` → 3.0.0.M, `visibility` → 2.0.M. |
 | `pi-bl-in-processor` | `BLApplicationInjector`, `dao/DynamoSupport` (module-local copy — delete), `BLDynamoDao`, `CreateTables`/`DeleteTables` (which use `TableUtils` + GSI/TTL/stream/SSE specs → `DynamoDbAdminUtil`), and **28 BL model classes**. `JestModule` coordinates + `ESConfiguration implements cloudsdk.config.ElasticSearchServiceConfig`. |
+
+### 5.5.1 `pi-si-out-processor` — completion notes & two code-quality findings (DONE & GREEN, 2026-08-21)
+
+`pi-si-out-processor` is fully migrated and green (**243 tests, 0 failures**). Two findings from this
+module are worth calling out explicitly because both are corrected as part of the migration:
+
+**Finding 1 — latent generic-type bug in `SIDao` (`ContainerEvent` → `SIVersion`).**
+The AWS SDK 1.x DAO was declared as
+`SIDao extends DynamoDBCrudRepository<ContainerEvent, DynamoHashAndSortKey<String,String>>` and
+constructed with `DynamoRepositoryConfig.builder().domainType(ContainerEvent.class)`, i.e. the CRUD
+base and its domain type pointed at `ContainerEvent` (table `container_events`). Yet the only method
+ever used, `load(id, rangeKey)`, hard-codes `dynamoDBMapper.load(SIVersion.class, …)` — a **different**
+entity, on the `si` table. Every *inherited* CRUD operation (`save`/`findById`/`query`/`delete`) would
+therefore have targeted the wrong entity and table. It was **latent** because nothing ever called those
+inherited methods — only the hand-written `load()` override was used, and it explicitly names
+`SIVersion.class`, masking the mismatch under v1's loosely-typed mapper. The cloud-sdk rewrite makes the
+repository strongly typed — `DatabaseRepository<SIVersion, DefaultCompositeKey<String,String>>`, with
+`load` = `findById(new DefaultCompositeKey<>(id, seq), true).orElse(null)` — so the declared type and the
+actual read target finally agree. The correction is called out in the commit, not slipped in silently.
+
+**Finding 2 — vestigial `BookingDetail` table-name special-case in the injector (dead code, removed).**
+The v1 `SIFeedApplicationInjector` bound a single generic `DynamoDBMapper` whose
+`DynamoDBMapperConfig.withTableNameResolver(...)` special-cased `BookingDetail` to resolve to the
+double-prefixed `<prefix>_booking_<table>` scheme (the same special resolution that
+`pi-statusevents-out-processor` genuinely needs for its `BookingDao`):
+
+```java
+.withTableNameResolver((clazz, cfg) -> {
+    if (BookingDetail.class.equals(clazz)) {
+        return String.format("%s_%s", prefix + "_booking", <table>);   // special
+    }
+    return String.format("%s_%s", prefix, <table>);                    // standard
+})
+```
+
+In `pi-si-out-processor` this branch is **dead code**: the module's only DynamoDB access is `SIDao`
+against the `si` table — there is no `BookingDao` and no `BookingDetail` DynamoDB access anywhere in the
+module (verified by grep: `BookingDetail`/`com.inttra.mercury.booking` appeared *only* on the import line
+and that `if`). It was carried over by copy-paste from the statusevents injector and could never be
+exercised at runtime. The cloud-sdk wiring builds one explicit per-entity repository
+(`getTablePrefix() + @Table.name()` for `SIVersion` only), so the generic mapper and its resolver
+disappear — and with them the special-case. That removed the module's *only* use of the `booking` model,
+so the `booking:1.0.M` dependency and its S3 model repository were dropped from the pom entirely.
+
+> **Note:** the real `<prefix>_booking_booking` special-casing still matters for
+> `pi-statusevents-out-processor`, where `BookingDao` **is** used; it must be preserved when that module
+> is migrated (see §5.5 row and §6.2).
+
+Other pi-si-out specifics: `CreateTables` + `DeleteTables` (v1) were consolidated into a single
+`SIFeedDynamoDbAdminCommand extends DynamoDbAdminCommand<SIFeedApplicationConfig>` (entity `vo.SI`),
+matching the create-oriented admin-command pattern of the `booking` and `shipping-instruction`
+references (cloud-sdk exposes no delete command); `Utils.ssmParameterlookup` → `CloudParameterStore`;
+SNS event logging → `NotificationService`/`EventLogger` (cloud-sdk `notification.workflow`);
+`aws-lambda-java-events` normalised to the parent-managed **3.14.0**.
+
+### 5.5.2 `pi-statusevents-out-processor` — completion notes (DONE & GREEN, 2026-08-21)
+
+Fully migrated and green (**58 tests, 0 failures**; baseline 50). Key points:
+
+- `SEFeedApplicationConfig.dynamoDbConfig` → `BaseDynamoDbConfig`.
+- `BookingDao` and `ContainerEventDao` rebuilt as **composition over `DatabaseRepository`** (they no longer extend
+  the v1 CRUD base). `BookingDao` = `DatabaseRepository<BookingDetail, DefaultCompositeKey<String,String>>` with the
+  `INTTRA_REFERENCE_NUMBER_INDEX` GSI queried via `DefaultQuerySpec` and main-table re-fetch via `findById(key, true)`;
+  `ContainerEventDao` = `DatabaseRepository<ContainerEvent, DefaultPartitionKey<String>>` (`load(id)` →
+  `findById(new DefaultPartitionKey<>(id))`).
+- **Cross-service booking table name (design-doc correction).** §6.2 listed the booking table as
+  `<prefix>_booking_booking`, but the v1 `@DynamoDBTable` name on `BookingDetail` is **`BookingDetail`** (verified by
+  reflection against `booking:2.1.8.M` **and** `3.0.0.M`), so the real physical table is
+  **`<prefix>_booking_BookingDetail`**. The v2 `@Table.name()` is also `BookingDetail`, so the injector reproduces it
+  exactly as `clientConfig.getTablePrefix() + "booking_" + BookingDetail.class.getAnnotation(Table.class).name()`
+  (the base `getTablePrefix()` already carries the trailing `_`). `ContainerEvent` uses the standard
+  `getTablePrefix() + "container_events"`.
+- `OutboundProcessor`: `process(SQS Message)` → `process(QueueMessage<String>)` (`getBody()` → `getPayload()`);
+  `messaging.model.MetaData`/`messaging.logging.EventLogger` → `cloudsdk.notification.workflow.{MetaData,EventLogger}`
+  (the cloud-sdk `MetaData.Builder` and the 8-arg `EventLogger.logCloseRunEvent` overload are API-compatible);
+  `com.amazonaws.services.dynamodbv2.model.OperationType` → `…events.models.dynamodb.OperationType` (events 3.x).
+  `AppianwayIntegrator.outbound(...)`'s `MetaData` parameter retyped to the cloud-sdk workflow `MetaData`.
+- `SEFeedApplicationInjector` rewired to cloud-sdk (`StorageClient`, two named `MessagingClient`s + `SqsClient`,
+  `NotificationService` + `EventLogger`, `DynamoDbClientConfig`, and the two DAOs). `Utils.ssmParameterlookup` →
+  `CloudParameterStore`.
+- pom: `visibility` → 2.0.M, `booking` → 3.0.0.M, `+cloud-sdk-api`/`cloud-sdk-aws`, `aws-lambda-java-events`
+  parent-managed, `purge-local-repository` `manualInclude` narrowed to `com.inttra.mercury:booking:3.0.0.M` (§4.4),
+  `sonar.coverage.exclusions=**/config/**` added so the AWS-bound `@Provides` methods are not coverage-gated.
+- Tests: `BookingDaoTest`/`ContainerEventDaoTest`/`UtilsTest` rewritten to mock the cloud-sdk repository / parameter
+  store; `OutboundProcessorTest`/`AppianwayIntegratorTest` retyped (`QueueMessage`, cloud-sdk `MetaData`, `void`
+  `putObject`).
 
 ### 5.6 Lambdas
 
@@ -606,11 +719,56 @@ routing table gets a dedicated test.
 > at cold start. Every config built in this migration sets **both** `region` and `credentialsProvider` explicitly,
 > and §7.5 adds a test asserting non-null for each.
 
+#### 5.6.1 `pi-lambda-streamToSns` — completion notes (DONE & GREEN, 2026-08-21)
+
+Fully migrated and green (**22 tests, 0 failures**; baseline 16). A new `HandlerSupport` centralises the
+region+credentials seam (mirrors `lambda/auth-tokens-archive` and the ION-16415 pattern):
+`resolveRegion(Supplier<Region>)` falls back to `US_EAST_1`, credentials via `DefaultCredentialsProvider.create()`,
+and `createNotificationService(topicArn)` builds the client through `NotificationClientFactory.createConfiguredClient`.
+Both processors drop `AmazonSNS`/`PublishRequest` for `NotificationService.publish(topicArn, message)`, and
+`com.amazonaws.services.dynamodbv2.model.{OperationType,AttributeValue}` for the events-3.x
+`…events.models.dynamodb.*`. The dual-publish routing is preserved with **two** `NotificationService` instances (one
+per topic ARN), unambiguously honouring INSERT/REMOVE → both topics, MODIFY → all-events only. pom: removed
+`aws-java-sdk-sns`/`aws-java-sdk-dynamodb`, `aws-lambda-java-events` parent-managed (was 2.2.2), `+cloud-sdk-api`/
+`cloud-sdk-aws`. Tests retyped to the events-3.x models and a mocked `NotificationService` (reflection field
+injection), plus a new `HandlerSupportTest` covering the `resolveRegion` success/null/exception branches and the
+factory-backed `createNotificationService`.
+
 **`pi-bl-es-lambda`** (`HandlerSupport`, `IndexerHandler`, `dao/DynamoSupport`, `BLDynamoDao`, 28 BL models): the
 SNS-in-SQS envelope parsing (`extractSns` → `extractDynamoDbStreamRecord`) is unchanged; `DynamoDBMapper.load(id, seq)`
 → `DatabaseRepository.findById(new DefaultCompositeKey<>(id, seq))`; Jest indexing untouched. Its BL model copy must
 be updated **identically** to `pi-bl-in-processor`'s — enforced by a byte-comparison check in Phase 4 rather than by
 eyeballing.
+
+#### 5.6.2 `pi-bl-in-processor` + `pi-bl-es-lambda` — completion notes (DONE & GREEN, 2026-08-21)
+
+Both green: **`pi-bl-in-processor` 279 tests**, **`pi-bl-es-lambda` 90 tests**, 0 failures. Highlights:
+
+- **`BLVersion`** migrated to the `vo.SI` shape: `@Table(name="bill_of_lading")` + `@DynamoDbBean`,
+  `@DynamoDBStream(KEYS_ONLY)`; partition `getId()`→`id`, sort `getSequenceNumber()`→`sequenceNumber`, GSI
+  `getBlInttraReferenceNumber()` (`@DynamoDbSecondaryPartitionKey` + `@GsiConfig KEYS_ONLY`), `expiresOn`
+  `@DynamoDbConvertedBy(DateToEpochSecond)`. **`message` stays a plain `String` (no compression)** — the v1 BL entity
+  never compressed it (unlike `SI`). `get/set HashKey/SortKey` kept as `@DynamoDbIgnore` convenience.
+- **28 nested `@DynamoDBDocument` beans → `@DynamoDbBean`**; every `@DynamoDBTypeConvertedEnum` dropped — verified
+  that **no** enum in `…model.types.*` overrides `toString()`, so the SDK 2.x default enum converter stores the same
+  `name()`/`S` value (R4 closed). `DateToEpochSecond` rewritten as a v2 `AttributeConverter` (epoch-seconds `N`).
+- **`BLDynamoDao`** rebuilt on `DatabaseRepository<BLVersion, DefaultCompositeKey<String,String>>` (load →
+  `findById(key, true)`, GSI/partition fan-out via `DefaultQuerySpec`). Module-local `DynamoSupport` deleted.
+- **`CreateTables` + `DeleteTables` → one `BLFeedDynamoDbAdminCommand extends DynamoDbAdminCommand<BLApplicationConfig>`**
+  (entity `BLVersion`), registered on the Application. `BLApplicationConfig.dynamoDbConfig` → `BaseDynamoDbConfig`.
+- **ES:** `com.inttra.mercury.module.JestModule` → `cloudsdk.aws.module.JestModule`; `ESConfiguration implements
+  com.inttra.mercury.cloudsdk.config.ElasticSearchServiceConfig`. Jest/Elasticsearch logic itself untouched (OpenSearch
+  is a separate track).
+- **`pi-bl-es-lambda`:** new `HandlerSupport` (explicit region + credentials, `US_EAST_1` fallback); `IndexerHandler`
+  moved to events-3.x `…events.models.dynamodb.*`; DAO on the cloud-sdk repository.
+- **Model parity:** the two 60-file model trees (28 beans + `BLVersion` + `DateToEpochSecond` + 30 `types/` enums) are
+  equivalent — after normalising the package root, the only difference is a single **commented-out** import line in
+  `Contact.java` (each module's own `util` package). Two value-less `@ApiModelProperty` annotations were removed from
+  **both** `BLVersion` copies to keep them identical without adding a swagger dependency to the slim lambda (no
+  metadata/serialization/API-doc impact).
+
+**Full-reactor result:** `mvn -f partner-integrator/pom.xml clean test` → **4438 tests, 0 failures / 0 errors** across
+all 8 submodules (baseline 4452; net delta is obsolete v1 tests removed and replaced with cloud-sdk equivalents).
 
 ---
 
@@ -625,7 +783,7 @@ eyeballing.
 | `SI.enrichedAttributes`, `ContainerEvent.enrichedAttributes` | `@DynamoDBDocument` | **M** | nested `@DynamoDbBean` | ✔ |
 | BL model nested beans (28 classes) | `@DynamoDBDocument` | **M** | nested `@DynamoDbBean` | ✔ |
 | `EquipmentSizeCode` & friends | `@DynamoDBTypeConvertedEnum` | **S** | v2 default enum converter | ⚠ **verify**: v2's `EnumAttributeConverter` uses `toString()`, v1's used `name()`. If any of these enums overrides `toString()` the stored string changes. Every enum in the BL model graph is checked, and an explicit converter is added where they differ. |
-| `SI.contract` (Option A, new field) | `@DynamoDBAttribute` on `SIVersion` | **S** | plain `String` property | ✔ |
+| `SIVersion.contract` | `@DynamoDBAttribute` on v1 `SIVersion` | **S** | `@DynamoDbAttribute` on v2 `SIVersion` (`shipping-instruction:2.0.M`, §2.3) | ✔ |
 
 This is the S-vs-M rule from `[[reference_aws2x_format_decoupling]]`: the v2 converter must write the same type the v1
 converter wrote, **per field** — booking and visibility legitimately made *opposite* choices for identically-named
@@ -736,13 +894,82 @@ Via `dynamo-integration-test` (`BaseDynamoDbIT`, `@Tag("integration")`) for `si`
 | Commit | `git add -A && git commit -m "ION-16397: …"`; then `git log --oneline develop..HEAD` = **exactly one line**; fold later work with `git commit --amend` |
 | Push | **NO.** Reviewer pushes. |
 
+### 8.1 Boot-check runbook & results (executed 2026-08-21, INT profile)
+
+**Environment.** A valid INT AWS SSO session is required (the `${awsps:…}` Parameter Store lookups in the INT
+config, plus the DynamoDB/S3/SQS/SNS clients, resolve at start-up). An earlier attempt on an **expired** SSO session
+failed at the AWS credential boundary (`SsoOidcTokenProvider: InvalidGrantException`) during the `${awsps:…}`
+client-secret resolution — that is an environment/INT-outage condition (the continue-on-INT-outage rule), not a
+wiring defect. With a fresh session it boots clean.
+
+```powershell
+# 0) One-time: authenticate the INT AWS SSO session and confirm the identity/account/region
+aws sso login --profile 081020446316_INTTRA-Dev-Engg     # or the configured INT profile
+aws sts get-caller-identity
+#   -> Account 081020446316, Arn .../AWSReservedSSO_INTTRA-Dev-Engg/...   (us-east-1)
+
+# 1) Build the shaded jars / Lambda assemblies for the whole reactor (authoritative gate)
+mvn -f partner-integrator/pom.xml clean verify        # BUILD SUCCESS, 4438 tests, 0 failures/0 errors
+
+# 2) Boot each Dropwizard submodule ONE AT A TIME (booking/si-in/si-out/statusevents share 8080/8081;
+#    bl-in uses 8090/8091). Set the region explicitly, then run the shaded jar with its INT config:
+$env:AWS_REGION = 'us-east-1'
+
+java -jar partner-integrator/pi-statusevents-out-processor/target/pi-statusevents-out-processor-1.0.jar server partner-integrator/pi-statusevents-out-processor/conf/int/config.yaml
+java -jar partner-integrator/pi-si-out-processor/target/pi-si-out-processor-1.0.jar                 server partner-integrator/pi-si-out-processor/conf/int/config.yaml
+java -jar partner-integrator/pi-si-in-processor/target/pi-si-in-processor-1.0.jar                   server partner-integrator/pi-si-in-processor/conf/int/config.yaml
+java -jar partner-integrator/pi-booking-processor/target/pi-booking-processor-1.0.jar               server partner-integrator/pi-booking-processor/conf/int/config.yaml
+java -jar partner-integrator/pi-bl-in-processor/target/pi-bl-in-processor-1.0.jar                   server partner-integrator/pi-bl-in-processor/conf/int/config.yaml
+
+# 3) Wait for "Started ...Server ... @<n>ms" (application@0.0.0.0:<appPort> / admin@0.0.0.0:<adminPort>),
+#    then healthcheck the app ping and the admin healthcheck (expect HTTP 200). Root path prefixes differ per module.
+#    booking (8080/8081, prefix /booking):
+Invoke-WebRequest http://localhost:8080/booking/services/ping -UseBasicParsing        # 200 {"healthy":"true"}
+Invoke-WebRequest http://localhost:8081/admin/healthcheck    -UseBasicParsing         # 200 (Basic functionality, deadlocks, oracle)
+#    si-in / si-out (8080/8081, prefix /pisi):
+Invoke-WebRequest http://localhost:8080/pisi/services/ping   -UseBasicParsing         # 200
+Invoke-WebRequest http://localhost:8081/admin/healthcheck    -UseBasicParsing         # 200
+#    statusevents (8080/8081, ping at /services/ping, admin at root):
+Invoke-WebRequest http://localhost:8080/services/ping        -UseBasicParsing         # 200 {"healthy":"true"}
+Invoke-WebRequest http://localhost:8081/healthcheck          -UseBasicParsing         # 200
+Invoke-WebRequest http://localhost:8081/ping                 -UseBasicParsing         # 200 pong
+#    bl-in (8090/8091, prefix /bl app, /admin admin):
+Invoke-WebRequest http://localhost:8090/bl/services/ping     -UseBasicParsing         # 200 {"healthy":"true"}
+Invoke-WebRequest http://localhost:8091/admin/healthcheck    -UseBasicParsing         # 200 (Basic functionality, deadlocks, oracle)
+
+# 4) Stop the process (Ctrl-C in the foreground, or by PID) before booting the next module:
+Get-CimInstance Win32_Process -Filter "Name='java.exe'" |
+  Where-Object { $_.CommandLine -match '<module-jar-name>' } |
+  ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
+```
+
+**Results — all 5 Dropwizard submodules ✅ (HTTP 200 on app ping + admin healthcheck):**
+
+| Submodule | Ports (app/admin) | App ping path | App ping | Admin healthcheck |
+|---|---|---|---|---|
+| `pi-statusevents-out-processor` | 8080 / 8081 | `/services/ping` | ✅ 200 `{"healthy":"true"}` | ✅ 200 (Basic functionality, deadlocks) |
+| `pi-si-out-processor` | 8080 / 8081 | `/pisi/services/ping` | ✅ 200 `{"healthy":"true"}` | ✅ 200 (Basic functionality, deadlocks) |
+| `pi-si-in-processor` | 8080 / 8081 | `/pisi/services/ping` | ✅ 200 `{"healthy":"true"}` | ✅ 200 (Basic functionality, deadlocks, **oracle**) |
+| `pi-booking-processor` | 8080 / 8081 | `/booking/services/ping` | ✅ 200 `{"healthy":"true"}` | ✅ 200 (Basic functionality, deadlocks, **oracle**) |
+| `pi-bl-in-processor` | 8090 / 8091 | `/bl/services/ping` | ✅ 200 `{"healthy":"true"}` | ✅ 200 (Basic functionality, deadlocks, **oracle**) |
+
+Every boot logged the cloud-sdk wiring coming up cleanly, e.g.:
+`BaseDynamoDbConfig - Resolved AWS region from DefaultAwsRegionProviderChain: us-east-1` /
+`Using DefaultCredentialsProvider for DynamoDbClientConfig`; `StorageClientFactory - Creating S3Client with defaults`
+(si-out); `SIFeedDynamoDbAdminCommand/BLFeedDynamoDbAdminCommand initialized with 1 entity classes`; the SQS/MQ
+listeners started; then `Started …Server … @<n>ms` on the app/admin connectors.
+
+> The two Lambda submodules (`pi-lambda-streamToSns`, `pi-bl-es-lambda`) and the `pi-commons` library are not
+> bootable Dropwizard servers — their AWS wiring is validated by the unit tests (including the `HandlerSupport`
+> region+credentials seam) and the shaded/assembly packaging produced by `mvn verify`.
+
 ---
 
 ## 9. Risks, gaps and open items
 
 | # | Item | Severity | Handling |
 |---|---|---|---|
-| R1 | `shipping-instruction` has no v2 model jar; **ION-16396 branch verified empty** (§2.3) | **blocker-class → resolved** | **Option A** — PI owns `vo.SI`. Switch-back to the ION-16396 model jar when it ships = one import in ~6 files + the pom pin; stored item is byte-identical either way, so no data migration is ever needed. |
+| R1 | `shipping-instruction` v2 model must be packaged and pinned; **ION-16396 landed on `develop` @ `ac6f2f804c`** (§2.3) | **blocker-class → resolved** | Rebase this branch onto `develop`, build `-Psi-model`, install as `shipping-instruction:2.0.M` into both SI submodules' `lib/`. **Never re-deploy over the released `1.0.M` coordinate** — the `si-model-deploy` execution publishes at a fixed `${project.version}.M`, so it would overwrite the v1 jar other consumers still resolve. |
 | R2 | `visibility:2.0.M` must be built and committed to `lib/` (§2.2) | medium → accepted | reproducible `-Pvisibility-model` command, logged in Appendix A |
 | R3 | 28 BL model classes duplicated across two submodules | medium | byte-comparison gate in §8 |
 | R4 | `@DynamoDBTypeConvertedEnum` → v2 `toString()` vs `name()` | medium | audit every enum in the entity graph; explicit converter where they differ (§6.1) |
@@ -762,7 +989,7 @@ Via `dynamo-integration-test` (`BaseDynamoDbIT`, `@Tag("integration")`) for `si`
 ## 10. Definition of done
 
 - [ ] Session `5a888b9118314ed3` records model, decisions, findings, per-phase test results and the commit SHA.
-- [ ] `commons` / `cloud-sdk-api` / `cloud-sdk-aws` / `dynamo-integration-test` at **1.0.28-SNAPSHOT**; `dynamo-client`
+- [ ] `commons` / `cloud-sdk-api` / `cloud-sdk-aws` / `dynamo-integration-test` at **1.0.31-SNAPSHOT**; `dynamo-client`
       and every `com.amazonaws:aws-java-sdk-*` removed from all 8 submodules.
 - [ ] `aws-lambda-java-events` normalized to **3.13.0** in parent `dependencyManagement`; `jackson-bom 2.21.4` imported
       and no hard-coded `jackson-*` version overrides it.
@@ -773,7 +1000,7 @@ Via `dynamo-integration-test` (`BaseDynamoDbIT`, `@Tag("integration")`) for `si`
       byte-identical by golden tests.
 - [ ] `mvn -f partner-integrator/pom.xml clean verify` BUILD SUCCESS, **≥ 4452 tests, 0 failures**, nothing disabled.
 - [ ] OWASP baseline + post reports published per module; HIGH/CRITICAL delta documented; 0 remaining or justified.
-- [ ] Boot-check run for all 5 Dropwizard submodules; INT-outage failures verified-and-flagged, real defects fixed.
+- [x] Boot-check run for all 5 Dropwizard submodules; INT-outage failures verified-and-flagged, real defects fixed. **All 5 green (HTTP 200) on the INT profile, 2026-08-21 (§8.1).**
 - [ ] VS Code Run/Debug configs added for all 5 Dropwizard mains.
 - [ ] Exactly **one** commit on `feature/ION-16397-pi-aws-upgrade`, message contains `ION-16397`, **not pushed**.
 - [ ] This document updated with the full command log, per-module CVE delta, boot-check results and every deviation.
@@ -791,14 +1018,20 @@ grep -rho 'import com\.amazonaws\.[^;]*' partner-integrator/<module>/src/main/ja
 grep -rho 'import com\.inttra\.mercury\.(messaging|dynamo|cloudsdk)[^;]*' --include=*.java partner-integrator/ |
   sort | uniq -c | sort -rn
 
-# what 1.0.28-SNAPSHOT actually contains / removes
-unzip -l ~/.m2/.../commons/1.0.28-SNAPSHOT/commons-1.0.28-SNAPSHOT.jar        # messaging/* and module/JestModule gone
-unzip -l ~/.m2/.../cloud-sdk-api/1.0.28-SNAPSHOT/cloud-sdk-api-1.0.28-SNAPSHOT.jar
+# what 1.0.31-SNAPSHOT actually contains / removes
+unzip -l ~/.m2/.../commons/1.0.31-SNAPSHOT/commons-1.0.31-SNAPSHOT.jar        # messaging/* and module/JestModule gone
+unzip -l ~/.m2/.../cloud-sdk-api/1.0.31-SNAPSHOT/cloud-sdk-api-1.0.31-SNAPSHOT.jar   # cloudsdk/messaging/*, cloudsdk/elasticsearch/* present
 javap -cp "<cloud-sdk-api>;<cloud-sdk-aws>" com.inttra.mercury.cloudsdk.storage.api.StorageClient …
 
 # model-jar blocker
 javap -cp booking/3.0.0.M/booking-3.0.0.M.jar com.inttra.mercury.booking.model.BookingDetail
 comm -23 <PI booking imports> <classes in booking-3.0.0.M>          # 104/105 covered
+
+# SI model: confirm ION-16396 landed and the model source is v2 (§2.3)
+git log --oneline --all -- shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/model/SIVersion.java
+git branch --contains 588c531b85 --all
+git show develop:shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/model/SIVersion.java
+git show develop:shipping-instruction/pom.xml    # mercury.commons.version, -Psi-model profile, si-model-deploy coordinate
 
 # aws-lambda-java-events 2.x is an AWS-SDK-v1 dependency
 javap -cp aws-lambda-java-events-2.2.2.jar  ...DynamodbEvent\$DynamodbStreamRecord   # extends dynamodbv2.model.Record
@@ -861,8 +1094,8 @@ jar --create --file <PI>/lib/com/inttra/mercury/visibility/2.0.M/visibility-2.0.
 |---|---|
 | `*DynamoModule` + per-entity `DatabaseRepository` providers | `visibility/visibility-commons/…/config/VisibilityDynamoModule.java` |
 | `*Dao` over `DatabaseRepository` + `DefaultQuerySpec` GSI queries | `booking/…/dao/BookingDetailDao.java` |
-| v2-annotated entity with converters, GSIs, `@TTL` | `visibility/visibility-commons/…/model/containerEvent/ContainerEvent.java` |
+| v2-annotated entity with converters, GSIs, `@TTL` | `visibility/visibility-commons/…/model/containerEvent/ContainerEvent.java`; `shipping-instruction/…/model/SIVersion.java` (ION-16396) |
 | v2 model jar committed to a per-module `lib/` repo | `visibility/visibility-commons/lib/com/inttra/mercury/booking/3.0.0.M/` |
 | Dropwizard table-admin command on cloud-sdk | `booking-3.0.0.M` → `com.inttra.mercury.booking.dynamodb.BookingDynamoDbAdminCommand` |
-| commons-1.0.28 breakage playbook (messaging/*, JestModule, retry parity, mutable queue message) | commit `2f8a4829e8` (booking-cargoscreen) |
+| commons-1.0.31 breakage playbook (messaging/*, JestModule, retry parity, mutable queue message) | commit `2f8a4829e8` (booking-cargoscreen) |
 | Lambda region+credentials wiring | ION-16387 / `docs/2026-0730-mercury-services-aws-pending.md` §C |

@@ -136,6 +136,7 @@ See `reference_confluence_mcp_publish` in Claude's memory for the full list.
 | `../analysis/issue-analysis-generator.md` | Analyze defect / module / produce impl plan |
 | `confluence-design-doc-generator.md` | Generate + publish architecture/defect-fix design doc |
 | `confluence-publish-doc.md` | Publish an already-written doc (Steps 4–5 only) |
+| `2026-08-26-publish-confluence-design.md` | **Self-contained runbook** — publish an already-written design doc given only the source `.md` + the landing-page URL (SSO refresh, converter, MCP publish, byte-level verify) |
 | `confluence-api-design-generator.md` | Generate + publish API design doc |
 | `confluence-feature-spec-generator.md` | Generate + publish feature spec |
 | `confluence-runbook-generator.md` | Generate + publish runbook |
