@@ -1,0 +1,62 @@
+{
+  "id": "05759212da464ea3",
+  "name": "shipping-instruction-lambda-log4j-NoClassDefFound-analysis-2026-09-11",
+  "description": "QA post-AWS-upgrade defect: NoClassDefFoundError Could not initialize class org.elasticsearch.index.query.BoolQueryBuilder (caused by missing org/apache/logging/log4j/LogManager) in the shipping-instruction SI Lambda (IndexerHandler -> Indexer). Root cause analysis of the lambda shade log4j exclusion.",
+  "project": "mercury-services",
+  "created_at": "2026-09-11T13:35:36.354426+00:00",
+  "updated_at": "2026-09-11T14:17:15.397904+00:00",
+  "status": "active",
+  "tags": [
+    "shipping-instruction",
+    "lambda",
+    "elasticsearch",
+    "log4j",
+    "aws-upgrade",
+    "defect-fix",
+    "analysis",
+    "in-progress"
+  ],
+  "entries": [
+    {
+      "id": "69014fa2e579",
+      "timestamp": "2026-09-11T13:36:58.233089+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Root cause identified & verified live in QA: shipping-instruction lambda shade excludes log4j-api, breaking ES query builders",
+      "detail": "MODULE = shipping-instruction (NOT partner-integrator; NOT the lambda module). Failing path: com.inttra.mercury.shippinginstruction.lambda.IndexerHandler.handle -> Indexer.findInttraRefBySiId -> buildSearchSourceBuilder -> QueryBuilders.boolQuery().\n\nROOT CAUSE: shipping-instruction/pom.xml, maven-shade-plugin execution id 'shade-lambda' (line ~348) has artifactSet exclude '<exclude>org.apache.logging.log4j:*</exclude>' with comment 'Lambda logs via SLF4J/Logback'. This strips log4j-api (which contains org.apache.logging.log4j.LogManager) from the SI lambdas uber-jar (classifier 'lambdas', finalName shipping-instruction-lambdas-<ver>). Elasticsearch 6.8.13 (es.version=6.8.13) rest-high-level-client query-builder classes use log4j2 directly: org.elasticsearch.index.query.AbstractQueryBuilder.<clinit> (line 57) references LogManager. With log4j-api absent -> ClassNotFoundException: org.apache.logging.log4j.LogManager -> ExceptionInInitializerError in AbstractQueryBuilder.<clinit> -> surfaces on every call as NoClassDefFoundError: Could not initialize class org.elasticsearch.index.query.BoolQueryBuilder.\n\nThe pom comment claims the shade keeps 'Jest/Elasticsearch query builders' and that it 'Mirrors the booking-lambdas approach' - but booking lambdas do the same log4j exclusion (booking/pom.xml line 534) and get away with it because booking's lambda handlers never invoke ES QueryBuilders; SI's IndexerHandler does. That difference was missed during the AWS 2.x upgrade repackaging.\n\nVERIFIED LIVE (QA profile 642960533737_INTTRA2-QATeam): function inttra2_qa_lambda_si_es_stream (handler IndexerHandler::handle, java17, deployed 2026-09-09T18:49) CloudWatch log group /aws/lambda/inttra2_qa_lambda_si_es_stream shows the exact stack trace within last 7 days, including 'Caused by: java.lang.ClassNotFoundException: org.apache.logging.log4j.LogManager' - confirming the class is physically absent from the deployed shaded jar.</detail>\n<parameter name=\"references\">[\"shipping-instruction/pom.xml:348\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/elasticsearch/Indexer.java:84\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/lambda/IndexerHandler.java:89\", \"booking/pom.xml:534\", \"lambda:inttra2_qa_lambda_si_es_stream\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "adc94826ff57",
+      "timestamp": "2026-09-11T13:48:25.168774+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "DLQ not redriving = downstream of same log4j bug; verified 5423 msgs stuck, redrive futile until lambda fixed. Analysis doc written.",
+      "detail": "QA SQS topology (account 642960533737, us-east-1):\n- Source queue inttra2_qa_sqs_pi_si_es: RedrivePolicy deadLetterTargetArn=inttra2_qa_sqs_pi_si_es_dlq, maxReceiveCount=10; currently ~0 msgs.\n- Consumer Lambda inttra2_qa_lambda_si_es_stream (IndexerHandler::handle), event source mapping = source queue, BatchSize=1, State=Enabled, failing 100% with the log4j NoClassDefFoundError (still firing in last 3h).\n- DLQ inttra2_qa_sqs_pi_si_es_dlq: 5423 messages, NotVisible=0, oldest ~154h and climbing linearly. No RedriveAllowPolicy on the DLQ. list-message-move-tasks returns EMPTY (no redrive task completing).\n\nDLQ-not-redriving is a downstream symptom of the SAME log4j packaging bug, NOT a separate SQS misconfig. Any redrive returns messages to the source queue where the still-broken Lambda fails them again; after maxReceiveCount=10 they bounce back to the DLQ. Net drain=0. Remediation order is mandatory: fix+deploy the SI lambdas jar (keep log4j-api / exclude only log4j-core, add log4j-to-slf4j) FIRST, verify no NoClassDefFoundError in QA, THEN start DLQ redrive to drain the 5423 messages.\n\nAnalysis doc written to shipping-instruction/docs/2026-09-11-si-es-lambda-issue.md (8 sections). Earlier draft 2026-09-11-si-lambda-log4j-noclassdeffound.md removed to avoid duplication.</detail>\n<parameter name=\"references\">[\"shipping-instruction/docs/2026-09-11-si-es-lambda-issue.md\", \"sqs:inttra2_qa_sqs_pi_si_es_dlq\", \"sqs:inttra2_qa_sqs_pi_si_es\", \"lambda:inttra2_qa_lambda_si_es_stream\", \"shipping-instruction/pom.xml:348\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "9712b1bab103",
+      "timestamp": "2026-09-11T14:08:52.281078+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Review Q&A logged: root-cause blind spots (why size-fix ION-16789 missed it) + consumer/blast-radius mapping. Holding off on fix and doc update per user instruction.",
+      "detail": "Q1 - Why ION-16789 (slim SI Lambda jar / 250MB size fix, commit fd852d50a3) did not catch it. It is a runtime-only LinkageError, only in the shaded slim jar, only on the REMOVE path. Four reasons:\n1. Packaging-scoped exclusion: <exclude>org.apache.logging.log4j:*</exclude> only strips log4j-api from shipping-instruction-lambdas-*.jar. log4j-api is transitive from elasticsearch-rest-high-level-client, so it is always on the Maven compile/test classpath -> no unit test / mvn verify / IDE run can reproduce.\n2. Unit tests do not exercise the path: IndexerTest findInttraRefBySiId success/no-hits/null/missing tests are placebos (assertTrue(true, 'verified via code review')). Only testFindInttraRefBySiIdIOException reaches QueryBuilders.boolQuery() but passes because log4j-api is present on the test classpath.\n3. Lazy class-init + REMOVE-only: AbstractQueryBuilder/boolQuery loaded only when findInttraRefBySiId runs, which IndexerHandler.handle calls only for DynamoDB REMOVE events. INSERT/MODIFY use indexer.index() (no boolQuery). The pom boot check (pom line 330) was scoped to the wiring/startup path (found jetty RuntimeIOException dependency, kept jetty) and never drove a REMOVE event, so the class was never loaded. INT creds irrelevant - it is a LinkageError, not a connectivity issue.\n4. Error not Exception: handle() catch(Exception) does NOT catch NoClassDefFoundError/ExceptionInInitializerError (LinkageError/Error) -> invocation fails -> DLQ after maxReceiveCount=10.\nRepro requires: build slim -lambdas jar + run that jar + feed a REMOVE DynamoDB-stream event.\n\nQ2 - Consumer & blast radius (QA verified via AWS CLI). Producer: partner-integrator lambda inttra2_qa_lambda_pi_si_stream (com.inttra.mercury.pi.StreamToSnSProcessor) tails SI DynamoDB stream -> publishes to SNS inttra2_qa_sns_pi_si. SNS fans out to 3 SQS: _pi_si_s3 (SI S3ArchiveHandler), _pi_si_es (SI IndexerHandler - BROKEN), _pi_si (third consumer). Source queue policy only allows sends from that SNS topic. IndexerHandler maintains the SI Elasticsearch index; downstream consumers = SI search/lookup (SIElasticSearchService, SIInttraService, SI search endpoints).\nImpact: shipping-instruction - only REMOVE (delete) crashes; INSERT/MODIFY indexing still works; SI deletions are NOT propagated to ES -> stale/orphaned SI docs remain searchable; ES diverges from DynamoDB. partner-integrator - NOT functionally broken (keeps publishing; _s3 and _pi_si consumers fine); only exposure is the 5423-message DLQ pile-up. DLQ retention = 14 days (1209600s); oldest ~6.4 days -> no loss yet, ~7.6 days before delete events start expiring unless fixed + redriven.\n\nSize-fix commit: fd852d50a3 ION-16789. AWS 2.x upgrade commit: 588c531b85 ION-16396.</detail>\n<parameter name=\"references\">[\"shipping-instruction/src/test/java/com/inttra/mercury/shippinginstruction/elasticsearch/IndexerTest.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/lambda/IndexerHandler.java\", \"shipping-instruction/pom.xml:330\", \"commit:fd852d50a3\", \"commit:588c531b85\", \"sns:inttra2_qa_sns_pi_si\", \"sqs:inttra2_qa_sqs_pi_si_es_dlq\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "2871edf21754",
+      "timestamp": "2026-09-11T14:17:15.397885+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Appended Section 13 (Root Cause, Testing & Impact + mermaid diagram + TL;DR) to the analysis doc per user request.",
+      "detail": "Appended Section 13 'Root Cause, Testing and Impact — consolidated summary' to the end of shipping-instruction/docs/2026-09-11-si-es-lambda-issue.md (doc already contained sections 5-12 from a prior Claude Opus 5 review). Section 13 contains: 13.1 TL;DR brief summary of root cause + impact; 13.2 a table of why each safety gate (unit tests, boot check, test-scope dependency, INT-credential smoke run) was present/green yet missed the defect, explicitly highlighting that log4j-api was on the test/compile classpath (so tests could not observe the missing class) and that the boot check succeeded because AbstractQueryBuilder is lazily class-loaded only on the REMOVE branch - concluding the escape should have been caught by end-to-end QA verification; the precise 4-condition trigger scenario; 13.3 a mermaid flowchart of the components (SI DynamoDB stream -> PI StreamToSnSProcessor -> SNS inttra2_qa_sns_pi_si -> 3 SQS fan-out -> SI S3ArchiveHandler/IndexerHandler(broken)/3rd consumer, with ES index -> SI search services and the DLQ). No code changes made in this turn; documentation only, appended per user instruction.</detail>\n<parameter name=\"references\">[\"shipping-instruction/docs/2026-09-11-si-es-lambda-issue.md\"]",
+      "tags": [],
+      "references": []
+    }
+  ],
+  "usage": []
+}

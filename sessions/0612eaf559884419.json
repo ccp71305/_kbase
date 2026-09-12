@@ -1,0 +1,107 @@
+{
+  "id": "0612eaf559884419",
+  "name": "ION-16741 SDK-commons CVE change analysis (httpclient5/jsoup/jackson)",
+  "description": "Assess PR #51/#52 (feature/ION-16741_OWASP_FIXES_OCT_REL, v1.R.01.027/028) merged to develop against the ION-12310 SDK-commons feature branch and prior analysis docs. Focus: httpclient5 5.6.4 gzip double-decoding concern (visibility/partner-integrator vs ocean-schedules), jsoup 1.23.2 residual HIGH, jackson 2.21.6 resolution. Assess only, no rebase/staging.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-09-09T23:12:42.717733+00:00",
+  "updated_at": "2026-09-12T07:01:42.462289+00:00",
+  "status": "active",
+  "tags": [
+    "owasp",
+    "cve",
+    "httpclient5",
+    "jsoup",
+    "jackson",
+    "ION-16741",
+    "ION-12310",
+    "assessment"
+  ],
+  "entries": [
+    {
+      "id": "83e35a62c6a7",
+      "timestamp": "2026-09-09T23:20:43.218256+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "httpclient5 5.6.4 gzip double-decode CONFIRMED as verified prod regression (ION-16417/ION-16792); ocean-schedules assertion is coincidental not causal",
+      "detail": "mercury-services doc partner-integrator/docs/2026-09-03-pise-out-gzip-issue-analysis.md (ION-16417) proves: httpclient5 5.6.4 (5.5+ content-compression rewrite, new DecompressingEntity path) transparently decompresses Content-Encoding: gzip at transport layer DESPITE Dropwizard disableContentCompression(true); Jersey GZipDecoder then decodes again -> java.util.zip.ZipException: Not in GZIP format. Broke PISE_OUT-qa in prod (first error at 2026-09-03 00:40 deploy). CRITICAL nuance: only manifests in SHADED FAT-JAR at runtime, NOT reactor mvn test -> commons unit tests stay green. Reproduction tests GzipResponseDecodeTest exist in pi-commons AND visibility-commons. Fix pi/visibility applied: remove their 5.6.4 pin to fall back to commons 5.4.4 + suppress CVE-2026-71290 (async TLS hostname bypass) & CVE-2026-40542 (SCRAM) since Dropwizard uses classic/sync client + bearer auth.\n\nocean-schedules: collector uses plain JAX-RS ClientBuilder.newClient()/injected Client (APIClient WebTarget), NOT commons JerseyClientModule Dropwizard gzip-enabled path -> no second GZipDecoder stacked -> unaffected. Dev's rationale ('only non-AWS-upgraded module using cloud-sdk') is coincidental, NOT the real cause. Real determinant = ships 5.6.4 AND uses Dropwizard gzip-enabled Jersey client vs a gzip-returning endpoint.\n\nKEY RISK: if commons (feature branch) bumps httpclient5 to 5.6.4, it REMOVES the 5.4.4 fallback that pi & visibility fixes depend on -> RE-BREAKS them and widens blast radius to every Dropwizard-gzip service. Recommendation: keep 5.4.4 in sdk-commons, suppress the two async/SCRAM CVEs (unreachable). PR#51's commons httpclient5 5.6.4 bump on develop is dangerous and likely re-introduces the prod regression.</detail>\n<parameter name=\"references\">[\"partner-integrator/docs/2026-09-03-pise-out-gzip-issue-analysis.md\", \"ION-16417\", \"ION-16792\", \"CVE-2026-71290\", \"CVE-2026-40542\", \"GzipResponseDecodeTest\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "fb79303d7f78",
+      "timestamp": "2026-09-09T23:20:43.229732+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Analyzed PR #51/#52 (ION-16741, v1.R.01.027/028) merged to develop vs ION-12310 SDK-commons feature branch",
+      "detail": "Main-line PR #51 (commit dda7648) changed commons/pom.xml (httpclient5 5.4.4->5.6.4, jsoup 1.17.2->1.23.2), root pom (jackson satellite props 2.21.4->2.21.6), README, version .026->.027. PR #52 (ea94526, now on develop, v1.R.01.028) added <jackson.version>2.21.6</jackson.version> + jackson-bom import BEFORE dropwizard-dependencies (first-imported-wins) to pin all jackson artifacts.\n\nCurrent feature branch (feature/ION-12310-commons-cloudsdk-refactoring) ALREADY has: jackson 2.21.6 via jackson-bom import (more complete than PR#51 alone, equal to PR#52), jsoup 1.23.2, but httpclient5 still 5.4.4 / httpcore5 5.4.3. So the ONLY genuine delta from the main line is httpclient5 5.4.4->5.6.4.</detail>\n<parameter name=\"references\">[\"commons/pom.xml\", \"pom.xml\", \"PR#51 dda7648\", \"PR#52 ea94526\", \"feature/ION-12310-commons-cloudsdk-refactoring\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "d339d733f9db",
+      "timestamp": "2026-09-09T23:22:36.965974+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Assessment complete; analysis doc written; no rebase/staging performed",
+      "detail": "Delivered docs/2026-09-09-sdk-commons-cve-change-analysis.md. Conclusions: (1) httpclient5 5.6.4 = reject; keep 5.4.4 on feature branch; PR#51 commons bump likely re-breaks pi/visibility (removes 5.4.4 fallback their fix relies on). Stay OWASP-clean by suppressing CVE-2026-71290 (async TLS) + CVE-2026-40542 (SCRAM), both unreachable on classic/sync+bearer stack. (2) jsoup already 1.23.2 on branch; 1.23.2 clears MEDIUM CVE-2026-71497 but HIGH CVE-2026-75140 has no released fix -> dated suppression, preferred delete orphaned jsoup. (3) Jackson already 2.21.6 via jackson-bom import on branch (ahead of PR#51, equal to PR#52) -> no rebase; app-side bumps still needed downstream (visibility 2.22.2). (4) ocean-schedules unaffected because it uses plain JAX-RS ClientBuilder.newClient(), not Dropwizard gzip JerseyClientModule - dev's 'non-AWS-upgraded' rationale is coincidental not causal. No rebase, no staging performed - only the new untracked doc added.",
+      "tags": [],
+      "references": [
+        "docs/2026-09-09-sdk-commons-cve-change-analysis.md"
+      ]
+    },
+    {
+      "id": "adfdabb21a8b",
+      "timestamp": "2026-09-12T06:09:03.236512+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Validated recommendation to add jackson-databind as a direct dep in commons; sound but should include jackson-core/annotations too",
+      "detail": "Verified in code: (1) commons/pom.xml re-declares httpcore5, httpcore5-h2, gson, httpclient5, jetty-server et al. as DIRECT deps to force safe versions into the flattened published POM. (2) jackson-databind is NOT re-declared — it only appears as <exclusion> under jackson-dataformat-csv (line 306) and jackson-datatype-joda (line 410). (3) The jackson 2.21.6 pin lives in the ROOT pom.xml <dependencyManagement> via jackson-bom import (lines 111-117), inherited into commons — NOT in commons' own dependencyManagement (which only holds httpcomponents, lines 30-70). (4) commons flatten-maven-plugin uses DEFAULT flatten mode (NOT flattenDependencyMode=all), which strips <dependencyManagement> from the published POM. => The jackson-bom pin governs commons' OWN build but never reaches consumers; consumers resolve databind transitively via commons->dropwizard-core at DW's version, not 2.21.6. So the user's diagnosis is CORRECT and matches the httpcore5/gson 'trap'. Recommendation to add databind as direct dep at ${jackson.version} is consistent and correct. REFINEMENT: declare jackson-core + jackson-annotations as direct deps too (not databind alone) to avoid split-version skew (databind 2.21.6 depth-1 vs core/annotations transitive at DW version) and to fully mirror the two-piece httpcore5+httpcore5-h2 pattern. Caveats user raised are accurate: (a) self-managing consumers (booking, visibility import jackson-bom / pin databind) still override via their own dependencyManagement regardless of depth -> per-app bumps still required; (b) nearest-wins gives unmanaged consumers commons' depth-1 2.21.6. No code change made — assessment only.</detail>\n<parameter name=\"references\">[\"commons/pom.xml:306\", \"commons/pom.xml:410\", \"pom.xml:111-117\", \"commons/pom.xml:30-70\", \"commons/pom.xml:481-493\", \"docs/2026-09-11-sdk-commons-owasp-fix-rebase.md\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "dbf21831f6e0",
+      "timestamp": "2026-09-12T06:21:25.174872+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Implemented jackson direct-dep fix in commons; clean install PASS; flattened POM confirmed carries databind/core 2.21.6 + annotations 2.21; not committed",
+      "detail": "commons/pom.xml: added jackson-databind, jackson-core, jackson-annotations as DIRECT deps (versions omitted, inherited from root jackson-bom import). Initial attempt hardcoded ${jackson.version}=2.21.6 and FAILED build: jackson-annotations:2.21.6 does not exist on Maven Central (annotations tracks its own version). Fixed by omitting versions (mirrors existing jetty-server direct-dep pattern). README.md v1.0.34-SNAPSHOT section: added item 4 documenting the direct-dep fix and why versions are BOM-inherited. Version stays 1.0.34-SNAPSHOT (already the in-flight uncommitted release; not re-bumped). Build: `mvn clean install` full reactor BUILD SUCCESS, all tests PASS (cloud-sdk-api, cloud-sdk-aws, dynamo-integration-test built first; resumed `mvn install -rf :commons` -> commons 193 wtg tests + others all green, dynamo-client/email-sender/local-*/wtg-federation SUCCESS). Verified flattened_pom.xml now contains: jackson-databind 2.21.6, jackson-core 2.21.6, jackson-annotations 2.21 as direct deps at depth 1 -> pin now reaches consumers. NOT committed - awaiting user review/confirmation. Note: uncommitted working tree also contains prior rebase changes (jsoup removal, httpclient5 5.6.4->5.4.4) from the same in-flight 1.0.34 release.",
+      "tags": [],
+      "references": [
+        "commons/pom.xml",
+        "README.md",
+        "commons/flattened_pom.xml",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "e5fab461dec7",
+      "timestamp": "2026-09-12T06:30:13.802118+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Committed and force-with-lease pushed 1.0.34 jackson direct-dep fix; branch in sync with remote",
+      "detail": "Committed working-tree 1.0.34 dependency-hygiene changes (README.md, commons/pom.xml, pom.xml) as commit 1c45c00 'ION-12310: pin commons dependency hygiene for 1.0.34' (jackson direct deps + httpclient5 5.4.4 + jsoup drop), with Copilot co-author trailer. Branch had diverged from rebase (ahead 70 / behind 63 vs origin 9dd413c). Ran git fetch first, then pushed with --force-with-lease (integrity-safe): 9dd413c...1c45c00 forced update succeeded. Branch now in sync with origin/feature/ION-12310-commons-cloudsdk-refactoring. Open PR #29 -> develop. Build verified green (mvn clean install) prior to commit.",
+      "tags": [],
+      "references": [
+        "1c45c00",
+        "origin/feature/ION-12310-commons-cloudsdk-refactoring",
+        "PR #29"
+      ]
+    },
+    {
+      "id": "7d04cf471269",
+      "timestamp": "2026-09-12T07:01:42.462268+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Appended §4 (jackson direct-dep fix) to the local design doc; docs/ is gitignored so not committed",
+      "detail": "Appended new section '4. Jackson databind pin now actually reaches consumers (2026-09-12)' to docs/2026-09-11-sdk-commons-owasp-fix-rebase.md (gap/fix/verification/caveat/commit ref 1c45c00). User had manually edited/restructured the doc (now sections 0-3); preserved their edits, only appended at end. Note: docs/ is gitignored (.gitignore:17) so the design doc is local-only and intentionally NOT committed/pushed — consistent with why commit 1c45c00 touched only README.md/commons/pom.xml/pom.xml. No further commit needed for the doc.",
+      "tags": [],
+      "references": [
+        "docs/2026-09-11-sdk-commons-owasp-fix-rebase.md",
+        ".gitignore:17",
+        "1c45c00"
+      ]
+    }
+  ],
+  "usage": []
+}

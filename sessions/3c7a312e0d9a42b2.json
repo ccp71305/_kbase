@@ -1,0 +1,175 @@
+{
+  "id": "3c7a312e0d9a42b2",
+  "name": "PIBL-ES Lambda build failure — package size after PI AWS upgrade",
+  "description": "Investigate and recommend fix for PIBL-ES Lambda Jenkins job failure: UpdateFunctionCode InvalidParameterValueException \"Unzipped size must be smaller than 262144000 bytes\" after partner-integrator AWS SDK 2.x upgrade. Document in partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md",
+  "project": "partner-integrator",
+  "created_at": "2026-08-28T14:45:54.680909+00:00",
+  "updated_at": "2026-08-28T16:46:40.071838+00:00",
+  "status": "active",
+  "tags": [
+    "partner-integrator",
+    "aws-upgrade",
+    "lambda",
+    "build-issue",
+    "pibl-es"
+  ],
+  "entries": [
+    {
+      "id": "f469add96461",
+      "timestamp": "2026-08-28T14:57:31.773142+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Agent model: Claude Opus 4.8 (claude-opus-4.8) via GitHub Copilot CLI",
+      "detail": "Investigation and documentation performed by GitHub Copilot CLI powered by claude-opus-4.8.",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "a51ea6f0734d",
+      "timestamp": "2026-08-28T14:57:31.786996+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Root cause: pi-bl-es-lambda shaded jar is 334.4 MB unzipped vs Lambda 250 MB (262144000 B) limit; AWS SDK upgrade tipped it over",
+      "detail": "Jenkins deploy fails: UpdateFunctionCode InvalidParameterValueException 'Unzipped size must be smaller than 262144000 bytes'. Measured shaded jar pi-bl-es-lambda-1.0.jar = 138 MB zipped / 350,672,249 B (334.4 MB) unzipped, over by 84.4 MB. Commit 8bba065f0e (ION-16417) replaced lean AWS SDK v1 dynamo-client (~4MB) with cloud-sdk-aws aggregate (AWS SDK 2.x for s3/ses/sns/sqs/ssm/dynamodb + 3 HTTP clients incl aws-crt native + transitive AWS SDK v1) ~40MB zipped. Stacked on org.elasticsearch:elasticsearch 8.17.0 server jar (35.5MB zipped, used only for QueryBuilders/SearchSourceBuilder to build query strings; actual ES I/O via Jest) and full Dropwizard/Jetty/POI/MyBatis/MySQL tree from commons (~25MB zipped, unused by a Lambda). Footprint by group (zipped): other 44.9, aws-sdk-v2 40.3, es+lucene 35.5, poi+xmlbeans 12.7, dropwizard/jetty 8.7, mysql+mybatis 4.0, aws-sdk-v1 3.8.",
+      "tags": [
+        "lambda",
+        "package-size",
+        "aws-upgrade",
+        "root-cause"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "partner-integrator/pi-bl-es-lambda/src/main/java/com/inttra/mercury/pi/elasticsearch/Indexer.java",
+        "commit 8bba065f0e",
+        "ION-16417"
+      ]
+    },
+    {
+      "id": "1e5cb872a84e",
+      "timestamp": "2026-08-28T14:57:31.802137+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Validated fix: Maven exclusions on commons + cloud-sdk-aws drop jar to 177.7 MB unzipped (72MB under limit), 93/93 tests pass, no code change",
+      "detail": "Applied <exclusions> in pi-bl-es-lambda/pom.xml: from commons excluded dropwizard*/jetty*/jersey*/hk2*/mysql/mybatis/poi/xmlbeans/curvesapi/jsoup/spring-security-crypto; from cloud-sdk-aws excluded AWS v2 s3, s3-transfer-manager, sesv2, sns, sqs, ssm, url-connection-client, aws-crt-client(+native aws-crt), amazon-sqs-java-extended-client-lib, AWS v1 aws-java-sdk-core/sqs/sns/s3, handlebars, javax.mail. CRITICAL: must NOT exclude software.amazon.awssdk:apache-client — cloud-sdk DynamoDbClientConfig uses ApacheHttpClient; excluding it -> NoClassDefFoundError in HandlerSupportTest. Keep exactly one sync HTTP client (Apache). Result: shaded jar 76.9MB zipped / 186,299,610 B (177.7MB) unzipped, UNDER 262144000 by 72.3MB. mvn -pl partner-integrator/pi-bl-es-lambda package: BUILD SUCCESS, 93 tests, 0 failures/errors. Lambda Layers do NOT help (250MB limit = code + layers combined). Future: remove ES server jar by rewriting query building (Jest/co.elastic client) for ~80MB more. Changes staged in working tree, not committed — awaiting user confirmation.",
+      "tags": [
+        "lambda",
+        "fix",
+        "maven-exclusions",
+        "validated"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md"
+      ]
+    },
+    {
+      "id": "a311de19062e",
+      "timestamp": "2026-08-28T15:31:50.486298+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Committed pom size fix on feature/ION-16417-pibl-es-lambda-size-fix and pushed to origin with upstream tracking",
+      "detail": "Created branch feature/ION-16417-pibl-es-lambda-size-fix off develop. Committed b6463e8e14 'ION-16417: shrink pi-bl-es-lambda deploy package under Lambda 250MB limit' (1 file, 41 insertions: partner-integrator/pi-bl-es-lambda/pom.xml exclusions). Doc partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md not committed (**/docs/ gitignored per repo convention). Pushed to origin with upstream tracking set. PR create URL: https://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests?create&sourceBranch=refs/heads/feature/ION-16417-pibl-es-lambda-size-fix",
+      "tags": [
+        "git",
+        "commit",
+        "push",
+        "ION-16417"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "commit b6463e8e14",
+        "branch feature/ION-16417-pibl-es-lambda-size-fix"
+      ]
+    },
+    {
+      "id": "2626c565e8b0",
+      "timestamp": "2026-08-28T15:58:50.785481+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Expanded fix: 3-path exclusions + Indexer.java cleanup drop full web stack; jar now 146.5 MB unzipped, 93/93 tests pass",
+      "detail": "Extended web-stack exclusions (io.dropwizard*, jetty*, jersey*, hk2*) to cloud-sdk-api and cloud-sdk-aws in addition to commons. Source cleanup in Indexer.java: removed dead @Timed annotation (no metrics registry/AOP in raw lambda) and replaced org.eclipse.jetty.io.RuntimeIOException with java.io.UncheckedIOException (3 throw sites); IndexerTest.java updated (import + 3 assertThrows). Result: dropwizard/jetty/jersey/hk2/codahale absent from tree; shaded jar 153,598,295 B (146.5 MB) unzipped, 103.5 MB under limit; mvn package BUILD SUCCESS, 93/93 tests pass. apache-client retained (cloud-sdk needs ApacheHttpClient).",
+      "tags": [
+        "fix",
+        "lambda",
+        "validated"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "partner-integrator/pi-bl-es-lambda/src/main/java/com/inttra/mercury/pi/elasticsearch/Indexer.java",
+        "partner-integrator/pi-bl-es-lambda/src/test/java/com/inttra/mercury/pi/elasticsearch/IndexerTest.java"
+      ]
+    },
+    {
+      "id": "066abfcf13a5",
+      "timestamp": "2026-08-28T15:58:50.803441+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Review comment assessment: wildcard exclusions DO work (reviewer's mechanism wrong); real gap was dropwizard on 3 dependency paths + actual code usage",
+      "detail": "Reviewer claimed wildcard artifactId exclusions don't work. Verified FALSE: Maven supports wildcard * in exclusion groupId/artifactId since 3.2.1 (MNG-5600); build uses Maven 3.9.11. Proof: wildcard exclusions org.apache.poi:*, org.apache.xmlbeans:*, mysql:*, org.mybatis:*, org.springframework.security:* all took effect (jar 334->178MB). BUT reviewer surfaced a real gap: dropwizard-core (->jetty/jersey/hk2) is declared by ALL THREE in-house aggregates (commons, cloud-sdk-api, cloud-sdk-aws); excluding from one just re-resolves via the next (transitive whack-a-mole). Concrete artifact IDs would NOT have fixed it. Also Indexer.java actually used com.codahale.metrics.annotation.@Timed and org.eclipse.jetty.io.RuntimeIOException, so blanket-excluding the stack broke compilation.",
+      "tags": [
+        "pr-review",
+        "maven",
+        "wildcard-exclusions",
+        "assessment"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "Indexer.java",
+        "MNG-5600"
+      ]
+    },
+    {
+      "id": "0b4fde2973f1",
+      "timestamp": "2026-08-28T16:14:16.920697+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Confirmed @Timed was inert (no interceptor/registry); added real logged index() duration instead. Commit 886e867480, 93/93 tests pass",
+      "detail": "Verified @Timed was inert in the Lambda: Indexer built via new Indexer(jestClient) in IndexerHandler line 48; no MetricRegistry/SharedMetricRegistries, no Guice Injector/AbstractModule/bindInterceptor, no JAX-RS/Jersey InstrumentedResourceMethodApplicationListener anywhere in module -> nothing intercepts @Timed, so no timer recorded. It was likely live when code ran inside a Dropwizard/Jersey service historically. Replaced lost intent with real dependency-free timing: System.nanoTime() around index(), elapsed ms appended to existing info log ('Indexed bl %s in %d ms'). Commit 886e867480. mvn package BUILD SUCCESS, 93/93 tests; jar size unchanged 146.5 MB unzipped.",
+      "tags": [
+        "metrics",
+        "timing",
+        "lambda",
+        "fix"
+      ],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/src/main/java/com/inttra/mercury/pi/elasticsearch/Indexer.java",
+        "partner-integrator/pi-bl-es-lambda/src/main/java/com/inttra/mercury/pi/lambda/IndexerHandler.java",
+        "commit 886e867480"
+      ]
+    },
+    {
+      "id": "45810ccde3b5",
+      "timestamp": "2026-08-28T16:27:14.909374+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Documented full command runbook in build-issue doc §11 and added a Lambda-change section to the Confluence design doc",
+      "detail": "Added §11 'Runbook — exact commands used' to partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md: step-by-step PowerShell/Maven/git commands for investigation (git log/show, dependency:tree, package, unzipped-size measurement via System.IO.Compression, dependency:build-classpath footprint), first fix, all git commands (checkout -b, add, commit, push --set-upstream, verify), review-pushback web-stack removal, and @Timed verification; plus a command-reference table. Added new '## Post-Merge Fix — pi-bl-es-lambda Deployment Package Size' section to partner-integrator/docs/2026-08-21-pi-awsupgrade-confluence-design.md (before the approval matrix): failure detail, stressed pre-existing full ES server jar for 2-line query building, near-threshold + cloud-sdk all-services push over 250MB, resolution keeps only necessary runtimes, tripwires (apache-client required, Indexer used DW metrics/jetty, @Timed dead code -> dependency-free logging), and pre/post unzipped sizes (334.4->146.5MB) with 93/93 test validation. Both docs are gitignored (**/docs/), so not committed.",
+      "tags": [
+        "documentation",
+        "runbook",
+        "confluence"
+      ],
+      "references": [
+        "partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md",
+        "partner-integrator/docs/2026-08-21-pi-awsupgrade-confluence-design.md"
+      ]
+    },
+    {
+      "id": "c80d2d7daf94",
+      "timestamp": "2026-08-28T16:46:40.071813+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "documentation",
+      "summary": "Added and verified Git Bash/Unix equivalents (find/awk/stat/jar/unzip) for the size-measurement commands in §11",
+      "detail": "Added a 'Git Bash / Unix equivalents for steps 1.5-1.7' subsection to §11 of 2026-08-29-pibl-es-lambda-build-issue.md. Verified all commands run in the repo's Git Bash: 1.5 find -printf+awk; 1.6A `jar tvf | awk '{sum+=$1} END{...}'` (JDK, portable) and 1.6B `unzip -l | tail -1 | awk` both yield identical unzipped bytes (matched .NET zip-entry method); 1.7 dependency:build-classpath -> tr ';'/'\\\\' -> stat -c %s per jar -> awk group by .m2 path segment after /repository/ -> sort. Documented that a .jar is a ZIP so tar cannot read it (use jar tvf or unzip). Doc is gitignored (**/docs/), not committed.",
+      "tags": [
+        "documentation",
+        "git-bash",
+        "runbook"
+      ],
+      "references": [
+        "partner-integrator/docs/2026-08-29-pibl-es-lambda-build-issue.md"
+      ]
+    }
+  ],
+  "usage": []
+}

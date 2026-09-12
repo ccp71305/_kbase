@@ -1,0 +1,106 @@
+{
+  "id": "db33f8087acd49c7",
+  "name": "ION-12310 cloud-sdk 1.0.32 gap-closure for mft-s3-aqua-appia (aw-bridge)",
+  "description": "Address cloud-sdk-api/aws design gaps identified by aw-bridge-ib and aw-bridge-ob current-state design docs, to unblock their AWS SDK v2 migration. Version bump to 1.0.32-SNAPSHOT. Backward-compatible additive changes only: StorageClient.getMetadata (HeadObject), File+metadata putObject overload, MessagingClient.changeMessageVisibility, receive-with-attributes, S3 event-notification model, batch getParameters. Thorough tests (assertj, mockito, dynamo-integration-test). Design doc at cloud-sdk-api/docs/2026-08-21-cloudsdk-gaps-mft-s3-aqua-appia-design.md. Update README, mvn verify 4 modules, one commit ION-12310 (no push).",
+  "project": "mercury-services-commons",
+  "created_at": "2026-08-21T04:27:16.782083+00:00",
+  "updated_at": "2026-08-21T04:57:47.762196+00:00",
+  "status": "active",
+  "tags": [
+    "ION-12310",
+    "cloud-sdk",
+    "aws-sdk-v2",
+    "aw-bridge",
+    "mft-s3-aqua-appia",
+    "1.0.32-SNAPSHOT",
+    "design-in-progress"
+  ],
+  "entries": [
+    {
+      "id": "246c4e22af8d",
+      "timestamp": "2026-08-21T04:31:25.681076+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Plan: close 6 cloud-sdk-api/aws gaps for aw-bridge migration, additive & backward-compatible, bump to 1.0.32-SNAPSHOT",
+      "detail": "Reviewed aw-bridge-ib and aw-bridge-ob current-state design docs in mft-s3-aqua-appia. Gaps to close (all additive/default methods so external implementors and Mockito mocks keep compiling):\nG1 StorageClient.getMetadata(bucket,key) -> HeadObject-only metadata read (default falls back to getObject().getMetadata(); S3StorageClient overrides with headObject).\nG2 StorageClient.putObject(bucket,key,File,Map,contentType) -> stream-from-disk + user metadata (default falls back to putObject(File); S3StorageClient uses RequestBody.fromFile).\nG3 MessagingClient.changeMessageVisibility(queueUrl,receiptHandle,seconds) -> default throws UnsupportedOperationException; SqsMessagingClient overrides via SqsClient.changeMessageVisibility.\nG4 ReceiveMessageOptions.messageAttributeNames + messageSystemAttributeNames; wire into SqsMessagingClient receive; QueueMessage.getMessageAttributes() new default (empty) implemented by SqsMessage from message.messageAttributes(). getAttributes() (system attrs) semantics unchanged.\nG5 S3 event-notification model in new pkg com.inttra.mercury.cloudsdk.storage.event: S3EventNotification.parseJson(json) using JsonSupport, Jackson-bound records, getUrlDecodedKey().\nG6 CloudParameterStore.getParameters(String...) batch with invalid-key fail-fast (default loops getParameter; SsmCloudParameterStore overrides with GetParameters + invalidParameters()).\nTests: assertj + mockito unit tests for each; dynamo-integration-test unaffected. Version bump 1.0.32-SNAPSHOT in root pom dependency.version. README release note. Design doc cloud-sdk-api/docs/2026-08-21-cloudsdk-gaps-mft-s3-aqua-appia-design.md. mvn verify on cloud-sdk-api,cloud-sdk-aws,commons,dynamo-integration-test. One commit ION-12310, no push.\nBranch feature/ION-12310-commons-cloudsdk-refactoring. Prior gap wave labeled S-G2 (metadata put/copy overloads) already merged.",
+      "tags": [
+        "plan",
+        "gap-closure",
+        "cloud-sdk"
+      ],
+      "references": [
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/api/StorageClient.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/api/MessagingClient.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/model/ReceiveMessageOptions.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/paramstore/api/CloudParameterStore.java",
+        "mft-s3-aqua-appia/aw-bridge-ob/docs/2026-08-20-aw-bridge-ob-current-state-design.md",
+        "mft-s3-aqua-appia/aw-bridge-ib/docs/2026-08-20-aw-bridge-ib-current-state-design.md"
+      ]
+    },
+    {
+      "id": "a49bb33b8526",
+      "timestamp": "2026-08-21T04:50:11.165945+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Implemented all 6 gaps + tests; api+aws unit tests green (1076/0/0); version bumped to 1.0.32-SNAPSHOT",
+      "detail": "Implemented all 6 gaps additively (default methods keep external implementors/mocks compiling):\n- StorageClient.getMetadata(bucket,key) default+S3 headObject override; putObject(File,Map,contentType) default+S3 RequestBody.fromFile override.\n- MessagingClient.changeMessageVisibility default(throws)+SqsMessagingClient override; ReceiveMessageOptions.messageAttributeNames/messageSystemAttributeNames wired into SqsMessagingClient receive; QueueMessage.getMessageAttributes default(empty)+SqsMessage impl (message.messageAttributes()).\n- cloud-sdk-api new pkg storage.event.S3EventNotification (Jackson, parseJson, getUrlDecodedKey).\n- CloudParameterStore.getParameters(String...) default fail-fast + SsmCloudParameterStore chunked GetParameters override.\nVersion bumped root pom dependency.version 1.0.31-SNAPSHOT -> 1.0.32-SNAPSHOT.\nTests: new S3EventNotificationTest, StorageClientDefaultsTest, MessagingClientDefaultsTest, ReceiveMessageOptionsTest, CloudParameterStoreDefaultsTest (api); SqsMessageTest + added nested tests to S3StorageClientMetadataTest (PutFileWithMetadata, GetMetadata) and SqsMessagingClientTest (ChangeMessageVisibilityTests, ReceiveMessageAttributeNamesTests) and SsmCloudParameterStoreTest (batch getParameters). \nmvn -pl cloud-sdk-api,cloud-sdk-aws -am test: 1076 tests run, 0 failures, 0 errors.",
+      "tags": [
+        "code_change",
+        "test_result",
+        "green"
+      ],
+      "references": [
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/storage/event/S3EventNotification.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/storage/impl/S3StorageClient.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClient.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/paramstore/impl/SsmCloudParameterStore.java"
+      ]
+    },
+    {
+      "id": "adef598bc608",
+      "timestamp": "2026-08-21T04:56:14.690745+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "mvn verify BUILD SUCCESS across all 4 modules at 1.0.32-SNAPSHOT (unit + failsafe integration, incl. local DynamoDB); design doc + README done",
+      "detail": "mvn -o -pl cloud-sdk-api,cloud-sdk-aws,commons,dynamo-integration-test -am verify => BUILD SUCCESS.\nReactor: cloud-sdk-api 1.0.32-SNAPSHOT SUCCESS; dynamo-integration-test 1.0.32-SNAPSHOT SUCCESS; cloud-sdk-aws 1.0.32-SNAPSHOT SUCCESS; commons 1.0.32-SNAPSHOT SUCCESS. Total 03:00 min.\nFailsafe integration-test+verify executed for dynamo-integration-test, cloud-sdk-aws, commons (local DynamoDB IT). Surefire unit totals: commons 931/0/0; cloud-sdk-api+aws 1076/0/0 earlier. No failures/errors anywhere. Design doc created at cloud-sdk-api/docs/2026-08-21-cloudsdk-gaps-mft-s3-aqua-appia-design.md. README v1.0.32-SNAPSHOT release note added.",
+      "tags": [
+        "test_result",
+        "green",
+        "mvn-verify"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-21-cloudsdk-gaps-mft-s3-aqua-appia-design.md",
+        "README.md",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "ee14611227e9",
+      "timestamp": "2026-08-21T04:57:38.718410+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Model info: Claude Opus 4.8",
+      "detail": "Agent model: Claude Opus 4.8 (claude-opus-4.8) via GitHub Copilot CLI. Session for ION-12310 cloud-sdk 1.0.32-SNAPSHOT gap-closure.",
+      "tags": [
+        "model_info"
+      ],
+      "references": []
+    },
+    {
+      "id": "b01fa7509a9f",
+      "timestamp": "2026-08-21T04:57:47.762155+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Task complete: gaps closed, tests green, 1.0.32-SNAPSHOT, single ION-12310 commit created (unpushed)",
+      "detail": "COMPLETE. Single commit d2fb57c on feature/ION-12310-commons-cloudsdk-refactoring (ahead 1, NOT pushed per user instruction). 21 files, +1461/-5. Includes 6 additive gap closures (G1-G6) + tests + version bump 1.0.32-SNAPSHOT + README release note. Design doc at cloud-sdk-api/docs/2026-08-21-cloudsdk-gaps-mft-s3-aqua-appia-design.md exists on disk but is NOT committed because docs/ is gitignored (.gitignore:17) — consistent with the 1.0.31 bump precedent (ef54dee committed only README+pom). mvn verify green across all 4 modules. Awaiting user review before push.",
+      "tags": [
+        "progress",
+        "complete"
+      ],
+      "references": [
+        "d2fb57c"
+      ]
+    }
+  ],
+  "usage": []
+}

@@ -1,0 +1,115 @@
+{
+  "id": "ace0319263e241bf",
+  "name": "ION-12310 CloudSDK 1.0.33 — SQS Delay Gap + Cloud Exception Model",
+  "description": "Implement the 2026-08-29-sqs-gaps-design.md in mercury-services-commons on branch feature/ION-12310-commons-cloudsdk-refactoring. Two separate commits: (1) Section A — S1 DelaySeconds gap: SendMessageOptions + default MessagingClient overloads + SqsMessagingClient delegation; (2) Section B — E1-E6 exception model: CloudSdkException, AwsFailureClassifier, MessagingException re-parent, NotificationException, SnsExceptionHandler.handle, SnsService catch widening, receiveMessages(String,int,int) wrapping. Each commit verified with full mvn verify over cloud-sdk-api, cloud-sdk-aws, commons, dynamo-integration-test. Version bump to 1.0.33-SNAPSHOT + README update + mvn install once green. Exhaustive unit tests (AssertJ, @Nested, parameterized). No push — user reviews first. Finally: side-effect sweep across mercury-services excluding bill-of-lading, bill-of-lading-v2, ocean-schedules, libs/atlantida.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-08-30T00:11:41.885940+00:00",
+  "updated_at": "2026-08-30T01:23:34.019811+00:00",
+  "status": "active",
+  "tags": [
+    "java",
+    "aws",
+    "sqs",
+    "sns",
+    "cloud-sdk",
+    "exception-model",
+    "ION-12310",
+    "1.0.33"
+  ],
+  "entries": [
+    {
+      "id": "f89fc892976f",
+      "timestamp": "2026-08-30T00:12:47.977957+00:00",
+      "agent": "claude-opus-5",
+      "category": "progress",
+      "summary": "Baseline established: branch clean, design doc read in full, all touched sources inspected",
+      "detail": "Branch feature/ION-12310-commons-cloudsdk-refactoring @ ea154df, in sync with origin, clean tree, no stashes. cloud-sdk-api/docs is gitignored (.gitignore:17 'docs/') so the design docs stay untracked — confirmed desired by the user.\n\nRead in full: cloud-sdk-api/docs/2026-08-29-sqs-gaps-design.md (1912 lines, §1-§17).\n\nCurrent sources inspected:\n- cloud-sdk-api MessagingClient.java (102 lines) — sendMessage(String,T), sendMessage(String,T,Map), deleteMessage, default changeMessageVisibility, listMessages, receiveMessages(ReceiveMessageOptions), default receiveMessages(String,int,int), getQueueAttributes.\n- cloud-sdk-api MessagingException.java — extends RuntimeException, 2 ctors.\n- cloud-sdk-api ReceiveMessageOptions.java — builder precedent (non-final class, @Getter, private ctor(Builder), null-normalising setters, unmodifiable collections).\n- cloud-sdk-aws SqsMessagingClient.java (420 lines) — two separate sendMessage request-build sites; receiveMessages(String,int,int) at line 206 has NO try/catch (E5); handleException at 368 computes message then discards classification; OPERATION_DESCRIPTIONS map at 411.\n- cloud-sdk-aws SnsExceptionHandler.java — 18 lines, returns bare RuntimeException.\n- cloud-sdk-aws SnsService.java — 6 catch(SnsException) sites at lines 86, 113, 139, 161, 183, 205; class javadoc line 39 references non-existent CloudSdkException (E6); listTopics javadoc line 193 too.\n- Tests: SqsMessagingClientTest (779 lines, @Nested + @ParameterizedTest + AssertJ + Mockito captors), SnsServiceTest (246 lines), MessagingClientDefaultsTest (39 lines, doCallRealMethod pattern for defaults).\n- README.md 447 lines; per-version 'Commons v1.0.NN-SNAPSHOT' sections; 1.0.32 section ends at line 447.\n- Root pom.xml: dependency.version = 1.0.32-SNAPSHOT (line 20).\n\nCRITICAL REGRESSION RISK FOUND (not called out precisely in the design doc):\nSqsMessagingClientTest.SendMessageWithAttributesTests.shouldSendMessageWithAttributesSuccessfully uses `verify(sqsClient).sendMessage(expectedRequest)` with EXACT SendMessageRequest equality, where expectedRequest has delaySeconds unset (null). The design §5 says to always call `.delaySeconds(options.getDelaySeconds())`, which would set 0 rather than null and break equality. Beyond the test, this is a real WIRE-SEMANTIC change: omitting DelaySeconds makes SQS apply the queue-level DelaySeconds attribute, while an explicit 0 overrides it to zero. Mitigation to propose: set delaySeconds on the request only when > 0.",
+      "tags": [
+        "baseline",
+        "analysis",
+        "regression-risk"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-29-sqs-gaps-design.md",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClient.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClientTest.java"
+      ]
+    },
+    {
+      "id": "177cdf6ea494",
+      "timestamp": "2026-08-30T00:17:47.609991+00:00",
+      "agent": "claude-opus-5",
+      "category": "decision",
+      "summary": "Four reviewer decisions confirmed by the user — these resolve §17.4 and one extra fork I found",
+      "detail": "D1 (§17.4.1) AwsFailureClassifier shape: ADOPT visibility's ordering guard, NOT the §8.3 deletion. Order is: JacksonException -> false (poison payload, must precede IOException because JsonProcessingException extends JacksonException extends IOException); SdkClientException -> true; SdkServiceException -> isRetryableException||isThrottlingException||isClockSkewException||statusCode>=500; SdkException -> retryable(); IOException -> true (genuine socket IO); else false. Requires jackson-core on the cloud-sdk-aws compile classpath — verify it is present.\n\nD2 (§17.4.2) No-cause default: new MessagingException(\"msg\") and new MessagingException(\"msg\", cause) report isRetryable() == TRUE. This preserves today's visibility behaviour and keeps RetryClassifierTest:169 + WMEventProcessorTest:503,550 green when visibility later adopts isRetryable(). NOTE this deliberately CONTRADICTS the §8.1 code sketch, where the legacy ctors pass retryable=false. Resolved in favour of true. Same rule applies to NotificationException's legacy ctors for symmetry. The classifying 5-arg ctor used by SqsMessagingClient/SnsExceptionHandler always passes an explicit value, so wrapped NPEs still get false.\n\nD3 (§17.4.3) SHIP E4 (SnsService catch widened to Exception) and E5 (receiveMessages(String,int,int) gains try/catch) in 1.0.33. Blast radius to be re-verified by my own sweep across mercury-services.\n\nD4 (mine, not in the doc) DelaySeconds request building: set .delaySeconds(...) ONLY when > 0, rejecting the doc §5 unconditional .delaySeconds(options.getDelaySeconds()). Two reasons: (a) keeps existing requests byte-identical so SqsMessagingClientTest's exact-equality assertion stays green untouched; (b) SQS semantics — an omitted DelaySeconds lets the queue-level DelaySeconds attribute apply, an explicit 0 overrides it to zero. Accepted trade-off: a caller cannot force an explicit 0 over a queue default; no consumer needs that today.\n\nCommit plan: 3 commits — (1) Section A / S1 delay gap, (2) Section B / E1-E6 exception model, (3) version bump 1.0.33-SNAPSHOT + README. Each of (1) and (2) verified with full mvn verify over cloud-sdk-api, cloud-sdk-aws, commons, dynamo-integration-test. No push.",
+      "tags": [
+        "decision",
+        "reviewer-signoff",
+        "design-deviation"
+      ],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-29-sqs-gaps-design.md"
+      ]
+    },
+    {
+      "id": "4a9a05739dcb",
+      "timestamp": "2026-08-30T00:53:58.083354+00:00",
+      "agent": "claude-opus-5",
+      "category": "code_change",
+      "summary": "COMMIT 1 (Section A / S1 DelaySeconds gap) landed as 9097a02 — full mvn verify green on all four modules",
+      "detail": "Commit 9097a02 \"ION-12310: close the SQS DelaySeconds gap (S1) on MessagingClient\". 6 files, +978/-61.\n\nNEW:\n- cloud-sdk-api/.../messaging/model/SendMessageOptions.java (131 lines). final class, @Getter, private ctor(Builder), static builder(). Fields delaySeconds (int) + attributes (Map<String,String>). MAX_DELAY_SECONDS=900. delaySeconds(int) validates 0..900 -> IllegalArgumentException \"delaySeconds must be between 0 and 900 (inclusive), got: N\". attributes(Map) null-tolerant AND deliberately permissive about content (it is on the delegation path of the pre-existing 3-arg sendMessage, so validating there would change that published method's behaviour). attribute(name,value) is copy-on-write (safe after attributes(Map.of(...))), validates null/blank name and null value, preserves insertion order. Constructor takes a defensive LinkedHashMap copy and wraps unmodifiable.\n- cloud-sdk-api/.../messaging/model/SendMessageOptionsTest.java (289 lines, 38 cases, 5 @Nested groups).\n\nCHANGED:\n- MessagingClient.java: +2 default methods. sendMessage(String,T,SendMessageOptions) throws UnsupportedOperationException(\"sendMessage(String, T, SendMessageOptions) is not supported by this MessagingClient implementation\"). sendMessage(String,T,int) delegates to it via SendMessageOptions.builder().delaySeconds(n).build().\n- SqsMessagingClient.java: 2-arg and 3-arg sendMessage now delegate to the new options override. Extracted private static toMessageAttributes(Map). Class javadoc bullet updated.\n- MessagingClientDefaultsTest.java: restructured into @Nested; added hand-written LegacyClient (implements only the abstract members) and ModernClient (overrides only the options send) as the P2/P3 guard. NOTE test-double fields had to be package-private, not private: private members are not inherited into the subclass TYPE, so ModernClient references to LegacyClient fields fail to compile.\n- SqsMessagingClientTest.java: +234 lines, 3 new @Nested classes (SendMessageWithOptionsTests 16, SendMessageDelaySecondsOverloadTests 5, SendMessageDelegationRegressionTests 5) + shared captureSendRequest() helper. New imports SendMessageOptions, ValueSource, Mockito.never.\n\nTWO IMPLEMENTATION DEVIATIONS FROM THE DESIGN DOC, both deliberate:\n1. §5 says .delaySeconds(options.getDelaySeconds()) unconditionally. Implemented as \"only when > 0\" instead. Reason: an explicit DelaySeconds=0 overrides a queue-level DelaySeconds attribute to no-delay, whereas omitting the field leaves the queue config in force — which is what every pre-1.0.33 send did. Also keeps the existing exact-equality test assertion green untouched.\n2. The response is dereferenced null-safely for the debug log.\n\nBUG CAUGHT BY THE EXISTING SUITE (worth recording): the first verify FAILED on the pre-existing SqsMessagingClientTest$SendMessageWithAttributesTests.shouldSendMessageWithAttributesSuccessfully with NPE \"Cannot invoke SendMessageResponse.messageId() because response is null\". That test never stubbed a SendMessageResponse because the OLD 3-arg path ignored the return value. Unifying the paths made the shared site dereference it. Fixed in the production code (null-safe log), NOT by editing the test — the whole point of the delegation refactor is that legacy paths keep behaving identically.\n\nMINOR BEHAVIOUR CHANGE shipped knowingly: sendMessage(url, body, (Map) null) previously threw MessagingException(NPE); now normalised to \"no attributes\" per the options builder's null tolerance. Covered by a named test.\n\nVERIFY (mvn -o -pl cloud-sdk-api,cloud-sdk-aws,commons,dynamo-integration-test verify): BUILD SUCCESS. cloud-sdk-api 140, dynamo-integration-test 149 + 6, cloud-sdk-aws 1012, commons 931. 0 failures, 0 errors.\n\nPROCESS NOTE: never pipe mvn into `head` — the closed pipe SIGPIPEs Maven and it hangs. Redirect to a log file and grep the file.",
+      "tags": [
+        "commit",
+        "section-a",
+        "S1",
+        "green"
+      ],
+      "references": [
+        "9097a02",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/messaging/model/SendMessageOptions.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/messaging/aws/impl/SqsMessagingClient.java"
+      ]
+    },
+    {
+      "id": "f03f369aebb7",
+      "timestamp": "2026-08-30T01:11:27.888504+00:00",
+      "agent": "claude-opus-5",
+      "category": "code_change",
+      "summary": "COMMIT 2 (Section B / E1-E6 exception model) landed as a801069 — full mvn verify green, first run",
+      "detail": "Commit a801069 \"ION-12310: classified, AWS-free cloud-sdk exception model (E1-E6)\". 13 files, +1514/-51.\n\nNEW (cloud-sdk-api):\n- exception/CloudSdkException.java — unchecked base, fields retryable/operation/resource, 3 ctors. The 1-arg and 2-arg ctors pass retryable=TRUE (decision D2, contradicting the doc's §8.1 sketch).\n- notification/exception/NotificationException.java — SNS counterpart, same 3-ctor shape.\n- test exception/CloudSdkExceptionHierarchyTest.java (187 lines).\n\nNEW (cloud-sdk-aws):\n- exception/AwsFailureClassifier.java — final class, private ctor, static isRetryable(Throwable). Arm order: null->false; JacksonException->false; SdkClientException->true; SdkServiceException-> isRetryableException||isThrottlingException||isClockSkewException||statusCode>=500; SdkException->retryable(); IOException->true; else false.\n- test exception/AwsFailureClassifierTest.java (348 lines, 49 cases, 6 @Nested).\n- test notification/exception/SnsExceptionHandlerTest.java (188 lines).\n\nCHANGED:\n- MessagingException — extends CloudSdkException; both legacy ctors retained verbatim; +5-arg classifying ctor. Javadoc @deprecated tags ONLY, no @Deprecated annotation (doc §8.2/§12.1 recommendation — the annotation would emit warnings in consumer builds for calls that are not wrong).\n- SqsMessagingClient — handleException now computes AwsFailureClassifier.isRetryable(e), logs WARN \"{} (retryable)\" when true else ERROR, returns the 5-arg MessagingException. receiveMessages(String,int,int) wrapped in try/catch (E5). Message selection logic untouched.\n- SnsExceptionHandler — handleSnsException(SnsException) keeps its RuntimeException descriptor and legacy \"SNS error: <detail>\" format, now delegates to new handle(String,String,Throwable) which classifies. handle takes Throwable, not SnsException.\n- SnsService — all 6 catches widened SnsException -> Exception, routed through handle(op, resource, e). Dead SnsException import removed. E6: all @throws javadoc tags now name NotificationException (previously referenced a non-existent CloudSdkException plus SnsServiceException/ResourceAlreadyExistsException/InvalidParameterException that were never imported).\n- cloud-sdk-aws/pom.xml — jackson-core declared explicitly (version from the DW BOM; resolves to 2.21.4) because AwsFailureClassifier imports JacksonException directly.\n- SqsMessagingClientTest +208 (ExceptionClassificationTests, ReceiveMessagesUnwrappedOverloadTests).\n- SnsServiceTest +166 (ExceptionHandlingTests, 13 cases) AND two EXISTING assertions updated from hasMessage(\"SNS error: AWS SNS Error\") to the new operation-naming format — E4 changes SnsService's message format by design. The legacy format survives only on the direct handleSnsException path, asserted byte-for-byte in SnsExceptionHandlerTest.\n\nAWS SDK API FACTS VERIFIED BY javap AGAINST 2.30.24 (not assumed):\n- SdkServiceException.Builder has NO retryable(...) setter, and SdkException.Builder has none either. SdkServiceException.isRetryableException() is literally `iconst_0; ireturn` on the base class. Tests therefore exercise that arm via an anonymous subclass override, not a builder flag.\n- AwsServiceException.isThrottlingException() consults awsErrorDetails().errorCode() via AwsErrorCode, null-safe through Optional.ofNullable — so AwsErrorDetails needs no sdkHttpResponse in tests.\n- AwsServiceException.isClockSkewException() returns false early when clockSkew or sdkHttpResponse is null, so 4xx test fixtures cannot accidentally classify as clock skew.\n- \"ThrottlingException\" confirmed present in AwsErrorCode's throttling set.\n\nVERIFY: BUILD SUCCESS first run. cloud-sdk-api 158 (was 140), dynamo-integration-test 149 + 6, cloud-sdk-aws 1105 (was 1012), commons 931. 0 failures, 0 errors.",
+      "tags": [
+        "commit",
+        "section-b",
+        "E1-E6",
+        "green"
+      ],
+      "references": [
+        "a801069",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/exception/AwsFailureClassifier.java",
+        "cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/exception/CloudSdkException.java"
+      ]
+    },
+    {
+      "id": "021809040cf8",
+      "timestamp": "2026-08-30T01:23:34.019789+00:00",
+      "agent": "claude-opus-5",
+      "category": "progress",
+      "summary": "COMPLETE: 3 commits, full reactor installed at 1.0.33-SNAPSHOT, README + implementation doc written, mercury-services impact sweep done. Not pushed.",
+      "detail": "Branch feature/ION-12310-commons-cloudsdk-refactoring is 3 ahead of origin, clean tree, NOT PUSHED (user reviews first).\n- 9097a02 Section A / S1 DelaySeconds gap\n- a801069 Section B / E1-E6 exception model\n- 0b079f2 version bump 1.0.33-SNAPSHOT + README\n\nVERSION BUMP FINDING: root ${dependency.version} governs SIX artifacts — commons, dynamo-client, email-sender, cloud-sdk-api, cloud-sdk-aws, dynamo-integration-test. Installing only the four verified modules would leave dynamo-client and email-sender unresolvable at 1.0.33 for consumers. Ran full-reactor `mvn -o install` instead: BUILD SUCCESS, all 10 reactor modules. utils/* (utils.dependency.version) and libs/* (libs.dependency.version) unaffected.\n\nTEST TOTALS 1.0.32 -> 1.0.33: cloud-sdk-api 140->158, cloud-sdk-aws 1012->1105 (cloud-sdk total 1152->1263, +111), commons 931 (unchanged), dynamo-integration-test 149+6 (unchanged), dynamo-client 27, email-sender 9. 0 failures, 0 errors throughout.\n\nDOCS (both gitignored under cloud-sdk-api/docs/, as the user wants):\n- NEW cloud-sdk-api/docs/2026-08-29-cloud-sdk-sqs-exception-gap-refactor.md — implementation record: architecture diagram, new/changed file tables with line counts, curated before/after diffs, the two Section-A deviations, the classifier's three load-bearing properties, test inventory, verification results, full mercury-services impact analysis, AWS-facts-verified-by-javap table, open items.\n- README.md +146 lines: v1.0.33-SNAPSHOT section with a 3-row behavioural-change table and per-consumer follow-ups.\n\nMERCURY-SERVICES IMPACT SWEEP (repo @ feature/ION-16417-pibl-es-lambda-size-fix, 886e867480; excluded bill-of-lading, bill-of-lading-v2, oceanschedules, oceanschedules-process, libs/atlantida). VERDICT: nothing breaks, zero source changes required. Key results:\n- ZERO in-scope modules implement MessagingClient (all compose). So the new default methods reach no hand-written implementor — §9.2's accidental-override hazard is structurally impossible, not merely absent. pi-commons.SQSClient DOES declare sendMessage(String,String,int) but implements MessageSender, not MessagingClient.\n- ZERO three-arg sendMessage calls on a MessagingClient anywhere; all 10 hits are on pi-commons's own concrete SQSClient. No overload-resolution change.\n- Exactly ONE production catch of our MessagingException: pi-commons/SQSClient.java:32 `catch (MessagingException | SdkException ex)`. Stays legal — hierarchies remain disjoint (asserted by a test).\n- ZERO callers of SnsExceptionHandler or cloudsdk.notification.exception outside commons. E3 invisible to every app.\n- All 13 surviving AWS-exception catches are S3/storage (pi-commons S3WorkspaceService ×11, self-service-reports S3Service) plus the one messaging catch. E4/E5 touch neither.\n- E5 KEY FINDING: booking-cargoscreen SqsMessageHandler.getMessages() is the ONLY main-source caller of receiveMessages(String,int,int). Its loop catches Exception and isAbortSignal walks the full cause chain. Its own javadoc ALREADY states cloud-sdk \"routes every failure through handleException ... so the abort now only ever arrives as a cause\" — which was FALSE for exactly this method before 1.0.33. E5 makes reality match what that module already assumes. Corrective, not merely safe. No change needed there.\n- Version pins confirmed across six commons versions: 1.0.31 ×14, 1.0.27 ×4, 1.0.28 ×2, 1.0.26 ×2, 1.0.29 ×1, plus 1.R.01.x (SDK v1, excluded).\n- QueueMessage/EventPublisher: 7 external implementors confirmed to exist; neither interface was touched, so no impact — but P2 remains a hard constraint for future SNS work.\n\nFOLLOW-UPS ENABLED (not in this release): partner-integrator delete raw SqsClient + 2 providers; watermill-publisher replace blanket catch(RuntimeException) AND delete its now-redundant SQSListenerClient/SqsQueueMessage workaround (the capability shipped in 1.0.32; its javadoc is stale at 1.0.28); visibility RetryClassifier consult isRetryable() as a SEPARATE commit after the bump; aw-bridge B2/B4; booking-cargoscreen extend suppression tests.",
+      "tags": [
+        "complete",
+        "impact-analysis",
+        "1.0.33",
+        "not-pushed"
+      ],
+      "references": [
+        "9097a02",
+        "a801069",
+        "0b079f2",
+        "cloud-sdk-api/docs/2026-08-29-cloud-sdk-sqs-exception-gap-refactor.md",
+        "README.md"
+      ]
+    }
+  ],
+  "usage": []
+}

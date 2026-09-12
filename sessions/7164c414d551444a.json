@@ -1,0 +1,160 @@
+{
+  "id": "7164c414d551444a",
+  "name": "ION-12310 cloud-sdk 1.0.31 defect fix — units, D-1 HttpClient, lifecycle",
+  "description": "Implements cloud-sdk-api/docs/2026-08-14-cloud-sdk-defect-refactor.md §5.5 commits 1-4 in mercury-services-commons: (1) HTTP timeout units fix via new AwsHttpDefaults, (2) reachable tuned defaults via BaseAwsConfigBuilder.defaultHttpClient hook, (3) D-1 Option A AwsHttpClientWrapper rewrite (Mode enum, applyToSync/applyToAsync, D-10 dead catch removal) + factory edits, (4) CloudResource/ManagedCloudResource lifecycle replacing AutoCloseable. Constraints agreed with user: keep BINARY compatibility via bridge overloads (stricter than the doc), accept §1.7 Part 5 runtime deltas, keep DynamoDbClientConfig.maxConnections deferred, bump to 1.0.31-SNAPSHOT, incremental commits, unit tests for every change, zero source changes required in mercury-services modules.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-08-16T19:35:23.805684+00:00",
+  "updated_at": "2026-08-16T22:37:14.607596+00:00",
+  "status": "active",
+  "tags": [
+    "java",
+    "aws",
+    "cloud-sdk",
+    "refactoring",
+    "ION-12310",
+    "ION-16431",
+    "1.0.31-SNAPSHOT"
+  ],
+  "entries": [
+    {
+      "id": "4730aebeed87",
+      "timestamp": "2026-08-16T19:42:18.015321+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Commit 1 landed: HTTP timeout units bug fixed via new AwsHttpDefaults",
+      "detail": "Commit 9958924. New AwsHttpDefaults (Duration constants + syncBuilder/dynamoDbSyncBuilder/asyncBuilder + sync()/dynamoDbSync()/async()). S3ClientFactory, DynamoRepositoryFactory, MessagingClientFactory, NotificationClientFactory createHttpClient() all delegate. AwsHttpClientWrapper.defaultSyncClient()/defaultAsyncClient() delegate. Old int _MILLIS constants deprecated but retained (NotificationClientFactoryTest:168-171 still asserts them, still passes). AwsHttpDefaultsTest includes a source-scan guard rejecting Duration.ofSeconds/ofMinutes on any _MILLIS identifier. mvn test on the affected set: 129 tests, 0 failures.</detail>\n<parameter name=\"references\">[\"cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpDefaults.java\", \"cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpDefaultsTest.java\", \"ION-12310\", \"ION-16431\"]",
+      "tags": [
+        "commit-1",
+        "units-bug",
+        "AwsHttpDefaults"
+      ],
+      "references": []
+    },
+    {
+      "id": "07c404e6204b",
+      "timestamp": "2026-08-16T20:00:48.875402+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Commits 2 and 3 landed: reachable tuned defaults + D-1 Option A wrapper rewrite",
+      "detail": "Commit 0801e66 (commit 2): BaseAwsConfigBuilder.defaultHttpClient(boolean) protected hook; DynamoDbClientConfig.Builder overrides it -> AwsHttpDefaults.dynamoDbSync() (100 conns). getHttpClient() non-null guarantee preserved. New BaseAwsConfigDefaultHttpClientTest (7 tests).\nCommit 27402e4 (commit 3): AwsHttpClientWrapper rewritten with Mode enum + applyToSync/applyToAsync + static null-tolerant forms + typed accessors; dead try/catch removed (D-10); getTypedClient deprecated. Binary-compat bridges kept: ofSyncBuilder(ApacheHttpClient.Builder) and ofAsyncBuilder(Object) (now validated). Call sites updated: S3ClientFactory, DynamoRepositoryFactory, MessagingClientFactory x2, NotificationClientFactory, TransferManagerFactory (applyToAsync; resolveAsyncHttpClient kept deprecated for its tests), EmailClientFactory + ParameterStoreClientFactory now honour the configured client, AwsStorageConfig.get*HttpClientForTesting throws IllegalStateException in builder mode. New tests: AwsHttpClientWrapperApplyTest (18), AllFactoriesBuilderModeTest (14, parameterised over all 7 factories x builder/instance mode). Full cloud-sdk-aws suite: 965 tests, 0 failures. Existing AwsHttpClientWrapperTest untouched and still passing.</detail>\n<parameter name=\"references\">[\"cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpClientWrapper.java\", \"cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/aws/config/AllFactoriesBuilderModeTest.java\", \"ION-12310\"]",
+      "tags": [
+        "commit-2",
+        "commit-3",
+        "D-1",
+        "D-10",
+        "backward-compatible"
+      ],
+      "references": []
+    },
+    {
+      "id": "6ce50bf661f7",
+      "timestamp": "2026-08-16T20:13:25.690530+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Commit 4 (lifecycle) and version bump landed; design document written",
+      "detail": "Commit cfa27f9 (commit 4): new cloud-sdk-api config/CloudResource (default void close(), deliberately NOT AutoCloseable) and config/ManagedCloudResource (Dropwizard Managed adapter with shutdown-safe catch). MessagingClient no longer extends AutoCloseable and drops its abstract close(); MessagingClient, StorageClient, NotificationService, EmailService all extend CloudResource. SqsMessagingClient.close() Javadoc corrected (does NOT close the pool in instance mode - NonManagedSdkHttpClient.close() is a no-op). New CloudResourceTest (9 tests). cloud-sdk-api: 61 tests green.\nCommit 8ee8315: root pom dependency.version 1.0.30-SNAPSHOT -> 1.0.31-SNAPSHOT + README release note.\nDesign doc written at cloud-sdk-api/docs/2026-08-16-cloud-sdk-defect-fix-refactor.md.\nKey deviation from the 2026-08-14 design, agreed with the user: BINARY compatibility retained via bridge overloads (ofSyncBuilder(ApacheHttpClient.Builder), ofAsyncBuilder(Object) now validated, TransferManagerFactory.resolveAsyncHttpClient kept deprecated), and getTypedClient deprecated WITHOUT forRemoval. Net: mercury-services modules need neither a source change nor strictly a recompile.</detail>\n<parameter name=\"references\">[\"cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/config/CloudResource.java\", \"cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/config/ManagedCloudResource.java\", \"cloud-sdk-api/docs/2026-08-16-cloud-sdk-defect-fix-refactor.md\", \"ION-12310\"]",
+      "tags": [
+        "commit-4",
+        "CloudResource",
+        "1.0.31-SNAPSHOT",
+        "documentation"
+      ],
+      "references": []
+    },
+    {
+      "id": "d579c0744faf",
+      "timestamp": "2026-08-16T20:15:15.163453+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "test_result",
+      "summary": "Full reactor mvn verify green: BUILD SUCCESS, 2329 tests, 0 failures",
+      "detail": "Reactor Summary all SUCCESS at 1.0.31-SNAPSHOT: cloud-sdk-api 61 tests, dynamo-integration-test 6, cloud-sdk-aws 965, commons 149+931, dynamo-client 27, email-sender 9, local-dynamodb 1, local-elasticsearch 2, wtg-federation 178. Zero failures, zero errors, zero skipped anywhere. No pre-existing test was modified; all new coverage is additive (AwsHttpDefaultsTest, BaseAwsConfigDefaultHttpClientTest, AwsHttpClientWrapperApplyTest, AllFactoriesBuilderModeTest, CloudResourceTest). Note: cloud-sdk-api/docs is gitignored in this repo, so 2026-08-16-cloud-sdk-defect-fix-refactor.md stays untracked, same as the 2026-08-14 design doc. README.md has uncommitted user edits to the 1.0.31 release note - left untouched. Final commits on feature/ION-12310-commons-cloudsdk-refactoring: 9958924, 0801e66, 27402e4, cfa27f9, 8ee8315.</detail>\n<parameter name=\"references\">[\"ION-12310\", \"ION-16431\"]",
+      "tags": [
+        "verification",
+        "mvn-verify",
+        "1.0.31-SNAPSHOT"
+      ],
+      "references": []
+    },
+    {
+      "id": "b05b55723c03",
+      "timestamp": "2026-08-16T21:00:18.705994+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "decision",
+      "summary": "DynamoDB 100-connection pool withdrawn — it was never applied, all modules always ran 50",
+      "detail": "User challenged the 50->100 DynamoDB pool increase. Verified directly and the user is correct: (1) DynamoRepositoryFactory.createHttpClient() is only the fallback arm of a ternary BaseAwsConfig never lets fire; (2) createDefaultDynamoClient() is a bare DynamoDbClient.create(); (3) sweep of C:\\Users\\arijit.kundu\\projects\\mercury-services found ZERO DynamoDB configs supplying an explicit HTTP client and only ONE .httpClient( call site in the entire repo (visibility S3 builder mode). So the 100 was never applied and every module has always run DynamoDB at the SDK default of 50. Raising it would have been an untested capacity change.\nCommit f21c80f removes AwsHttpDefaults.DYNAMODB_MAX_CONNECTIONS / dynamoDbSyncBuilder() / dynamoDbSync(), the DynamoDbClientConfig.Builder override, and the BaseAwsConfigBuilder.defaultHttpClient(boolean) hook (which existed solely to let DynamoDB differ). BaseAwsConfig and DynamoDbClientConfig return to their 1.0.30 form - commit 6 partially reverts commit 2. Tuned defaults remain reachable purely via commit 1's defaultClient()/defaultAsyncClient() delegation. One uniform pool of 50 for all services. cloud-sdk-aws now 964 tests (one fewer, the deleted dynamoDbSyncBuilder test), all green.\nNOTE: a subagent research report on mercury-services was UNRELIABLE - it fabricated AwsHttpDefaults constants (S3_CONNECTION_TIMEOUT, DYNAMO_CONNECTION_TIMEOUT) that do not exist and cited our own design doc as evidence instead of consumer source. All findings were re-verified by direct grep. Do not trust subagent output for compatibility guarantees without independent verification.</detail>\n<parameter name=\"references\">[\"cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/AwsHttpDefaults.java\", \"cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/config/BaseAwsConfig.java\", \"ION-12310\"]",
+      "tags": [
+        "commit-6",
+        "dynamodb",
+        "no-runtime-delta",
+        "backward-compatibility",
+        "subagent-unreliable"
+      ],
+      "references": []
+    },
+    {
+      "id": "50bef2fa2737",
+      "timestamp": "2026-08-16T21:33:56.391660+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "progress",
+      "summary": "Downstream consumer session created for booking 1.0.31-SNAPSHOT adoption",
+      "detail": "New session ec3111711f2e4b66 (project mercury-services) tracks bumping booking/pom.xml mercury.commons.version 1.0.27-SNAPSHOT -> 1.0.31-SNAPSHOT, clean package, and app boot / AWS client startup verification against dev credentials. This validates the 1.0.31 zero-source-change constraint on a real consumer.",
+      "tags": [
+        "link",
+        "booking",
+        "1.0.31-SNAPSHOT"
+      ],
+      "references": [
+        "ec3111711f2e4b66",
+        "booking/pom.xml"
+      ]
+    },
+    {
+      "id": "d7e7f61e937a",
+      "timestamp": "2026-08-16T21:55:19.284657+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "blocker",
+      "summary": "1.0.31 POM regression found downstream: split logback (core 1.5.38 / classic 1.5.18) breaks Dropwizard boot in ALL consumers — fix belongs in commons",
+      "detail": "Validated 1.0.31 against booking (see session ec3111711f2e4b66). Java API surface: PASS — zero source changes needed in booking; all cloud-sdk factories (paramstore SsmCloudParameterStore, DynamoRepositoryFactory, MessagingClientFactory, NotificationClientFactory, StorageClientFactory, EmailClientFactory, JestModule) initialise correctly against dev account 081020446316.\n\nBUT the commons 1.0.31 POM breaks app boot for every consumer:\n- commons-1.0.31 excludes ch.qos.logback:logback-core from io.dropwizard:dropwizard-core:5.0.2 and adds a direct logback-core 1.5.38.\n- dynamo-integration-test-1.0.31 pins logback-classic 1.5.18.\n- Result in a consumer app: logback-core 1.5.38 + logback-classic 1.5.18 -> java.lang.NoSuchMethodError: ch.qos.logback.classic.LoggerContext.initCollisionMaps() thrown from DefaultLoggingFactory.configureLoggers -> app dies before Jetty starts. commons 1.0.27 had no logback declarations at all, so this is a 1.0.28..1.0.31 regression.\n\nREQUESTED UPSTREAM FIX (mercury-services-commons): bump dynamo-integration-test's logback-classic to 1.5.38, or better, declare a logback-classic + logback-core pair in the commons parent <dependencyManagement> so the two can never drift. Also consider 1.5.32/1.5.33 to match dropwizard's logback-access 2.0.12 expectation and silence \"For logback-core, expected version 1.5.32 but found 1.5.38\".\n\nWorkaround applied downstream in booking/pom.xml: dependencyManagement pinning both logback artifacts to 1.5.38. Every other consumer (auth, booking-bridge, db-migration, registration, tx-tracking, network, rates, value-added-service, visibility, webbl, bill-of-lading-v2, watermill-publisher) will need the same workaround unless fixed upstream.</detail>\n<parameter name=\"references\">[\"ec3111711f2e4b66\", \"booking/pom.xml\", \"commons-1.0.31-SNAPSHOT.pom\", \"dynamo-integration-test-1.0.31-SNAPSHOT.pom\"]",
+      "tags": [
+        "blocker",
+        "logback",
+        "regression",
+        "1.0.31-SNAPSHOT",
+        "downstream-validation"
+      ],
+      "references": []
+    },
+    {
+      "id": "918e02752f3b",
+      "timestamp": "2026-08-16T22:12:35.877666+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Logback split-pair regression fixed at source - both halves now 1.5.38 in all published modules",
+      "detail": "Reported from booking integration: split logback pair with commons 1.0.31. Investigated with dependency:tree and the defect was BROADER than reported - two independent splits, not one:\n  BEFORE  commons                 -> logback-classic 1.5.33 / logback-core 1.5.38  (split on its own)\n          dynamo-integration-test -> logback-classic 1.5.18 / logback-core 1.5.33  (coherent internally)\n          consumer of both        -> classic 1.5.18 (nearest, from d-i-t) / core 1.5.38 (nearest, from commons)\nSo fixing only dynamo-integration-test as the user suggested would NOT have been sufficient - commons alone was already mismatched 1.5.33/1.5.38. Root cause is the 1.0.30 OWASP rebase (commit 1e2fcd6) excluding logback-core from dropwizard-core and re-pinning only that half; NOT caused by any of the 1.0.31 defect-fix commits.\nFIX (commit 27e187b): root pom replaces <logback.core.version> with a single <logback.version>=1.5.38 governing both halves, with a comment explaining classic/core are a matched pair that fails at RUNTIME when mismatched. commons now excludes BOTH halves from dropwizard-core and re-declares both (so the flattened POM carries them at depth 1). dynamo-integration-test uses the property instead of hardcoded 1.5.18 and declares logback-core alongside classic.\nAFTER  commons 1.5.38/1.5.38, dynamo-integration-test 1.5.38/1.5.38, cloud-sdk-api/aws + dynamo-client + email-sender 1.5.33/1.5.33 (coherent, transitive only; commons' depth-1 pins win in any consumer combining them). Flattened POMs verified. Full clean build with tests: 2328 tests, 0 failures. Consumers can drop their local logback workarounds.\nNOTE for future: utils/local-elasticsearch pins logback 1.5.18 core+classic - coherent pair, separate release train (1.R.01.004), left alone.</detail>\n<parameter name=\"references\">[\"pom.xml\", \"commons/pom.xml\", \"dynamo-integration-test/pom.xml\", \"ION-12310\"]",
+      "tags": [
+        "logback",
+        "dependency-management",
+        "regression",
+        "1.0.31-SNAPSHOT",
+        "owasp"
+      ],
+      "references": []
+    },
+    {
+      "id": "02adac44ee3a",
+      "timestamp": "2026-08-16T22:37:14.607583+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "1.0.31 validated on a 2nd consumer (tx-tracking) — logback fix generalises; version-bump-only upgrade confirmed",
+      "detail": "Second consumer (tx-tracking) validated on commons 1.0.31 in mercury-services. It has NO logback dependencyManagement of its own, and dependency:tree still yields the matched pair logback-core 1.5.38 + logback-classic 1.5.38 straight from commons. Build (287 tests) and boot both clean, no NoSuchMethodError.\n\n=> The commons-side logback fix generalises; consumers need ONLY the mercury.commons.version bump. Confirms the §4 conclusion from the booking checkout doc on an independent module.\n\nExtra data point for the upstream backlog: tx-tracking still declares the legacy `com.inttra.mercury:email-sender` artifact (its own property mercury.emailsender.version, bumped to 1.0.31-SNAPSHOT here) even though all of its email code already imports com.inttra.mercury.cloudsdk.email.* (EmailService / EmailClientFactory / SesEmailServiceImpl / MailContentImpl) supplied by cloud-sdk-aws. Worth checking whether email-sender can now be dropped from tx-tracking entirely, which would also remove a second version property that has to be kept in lockstep with commons.\n\nAlso note tx-tracking does not declare cloud-sdk-api / cloud-sdk-aws directly — it relies on them arriving transitively through commons.</detail>\n<parameter name=\"references\">[\"ec3111711f2e4b66\", \"tx-tracking/pom.xml\"]",
+      "tags": [
+        "downstream-validation",
+        "tx-tracking",
+        "logback",
+        "1.0.31-SNAPSHOT"
+      ],
+      "references": []
+    }
+  ],
+  "usage": []
+}

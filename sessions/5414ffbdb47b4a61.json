@@ -1,0 +1,20 @@
+{
+  "id": "5414ffbdb47b4a61",
+  "name": "Visibility Outbound overnight progress check (2026-08-25)",
+  "description": "Read-only overnight progress verification of the VisibilityOutbound prod processor since the §5f snapshot (~03:19 UTC / 23:19 EDT, 8-task scale-up) and the §8 high tx-count IPF backlog progression, continuing the doc visibility/docs/2026-08-24-visibility-outbound-post-cursorbump-4task-check.md. AWS read-only profile 642960533737_INTTRA2-QATeam.",
+  "project": "visibility",
+  "created_at": "2026-08-25T12:42:23.823867+00:00",
+  "updated_at": "2026-08-25T12:42:23.823891+00:00",
+  "status": "active",
+  "tags": [
+    "visibility",
+    "outbound",
+    "monitoring",
+    "ION-16663",
+    "read-only",
+    "cursor-bump",
+    "ipf-backlog"
+  ],
+  "entries": [],
+  "usage": []
+}

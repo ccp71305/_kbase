@@ -1,0 +1,210 @@
+{
+  "id": "bb4da162aa974eb7",
+  "name": "SI lambda deploy size fix — separate lambda jar (2026-09-03)",
+  "description": "SI lambda deploy (inttra2_qa_lambda_si_es_stream / inttra2_qa_lambda_si_s3) fails UpdateFunctionCode 'Unzipped size must be smaller than 262144000 bytes' after ION-16396 SI AWS SDK v2 (cloud-sdk) upgrade. Full app shaded jar grew past 250MB. Replicate booking approach: add shade-lambda execution producing a slim shipping-instruction-lambdas jar + update build.sh. Document at shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md.",
+  "project": "shipping-instruction",
+  "created_at": "2026-09-03T17:43:20.945395+00:00",
+  "updated_at": "2026-09-03T21:02:49.990992+00:00",
+  "status": "active",
+  "tags": [
+    "shipping-instruction",
+    "lambda",
+    "aws-upgrade",
+    "build-issue",
+    "package-size",
+    "ION-16396",
+    "ION-16417"
+  ],
+  "entries": [
+    {
+      "id": "721fd37992c3",
+      "timestamp": "2026-09-03T17:45:11.799881+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Chosen fix: replicate booking approach — add shade-lambda execution producing slim shipping-instruction-lambdas jar + build.sh move line; deploy job points SI lambdas at that jar",
+      "detail": "Booking (build.sh + pom shade-lambda, ION-14382) produces a second classifier=lambdas shaded jar (booking-lambdas-1.0.jar -> Booking-Lambdas-${RELEASE}.jar) with aggressive artifactSet excludes; its shade-lambda even targets the same S3ArchiveHandler/IndexerHandler. Reusing booking's validated exclude set for SI. KEEP (required by the two SI handlers): cloud-sdk-api, cloud-sdk-aws (Dynamo Enhanced, StorageClient/S3, Jest module), org.elasticsearch (Indexer uses QueryBuilders/BoolQueryBuilder/SearchSourceBuilder + Jest io.searchbox), aws-lambda-java-events, aws-java-sdk-dynamodb v1 (AttributeValue/OperationType event model), Jackson+Joda, logback/slf4j, commons-lang3, AWS v2 dynamodb/s3/auth/regions, and CRITICALLY software.amazon.awssdk:apache-client (cloud-sdk DynamoDbClientConfig uses ApacheHttpClient — excluding it => NoClassDefFoundError, per PI). EXCLUDE server-only/heavy: aws-crt(+native), netty-nio-client, ssm, sesv2, sso/ssooidc, s3-transfer-manager, sqs-extended, mysql, jetty/dropwizard/jersey/hk2, swagger, POI/xmlbeans, hibernate-validator, hystrix/rxjava/archaius, javers, log4j, testng, sqlite4java; plus SI-only server deps: Oracle ojdbc10, dropwizard-jdbi3/jdbi3, AWS v2 cloudformation. No source changes needed (no lambda class imports excluded server packages). Not committing until user confirms Jira ticket/branch.",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "booking/build.sh",
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/build.sh",
+        "ION-14382"
+      ]
+    },
+    {
+      "id": "da9dcf93d166",
+      "timestamp": "2026-09-03T17:45:11.814550+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Root cause: SI full app shaded jar grew past Lambda 250MB unzipped limit after ION-16396 AWS SDK v2 (cloud-sdk) upgrade; both SI lambdas deploy the full app jar",
+      "detail": "SI Deploy job (release 26.08.001) fails: UpdateFunctionCode InvalidParameterValueException 'Unzipped size must be smaller than 262144000 bytes'. Two SI lambdas both deploy the single full app jar: inttra2_qa_lambda_si_es_stream (handler com.inttra.mercury.shippinginstruction.lambda.IndexerHandler::handle, java17) and inttra2_qa_lambda_si_s3 (S3ArchiveHandler::handle). Last good deploy 25.03.010 had CodeSize=92,773,633 (zipped ~88MB). ION-16396 replaced lean AWS SDK v1 with cloud-sdk-aws aggregate (AWS SDK 2.x s3/dynamodb + HTTP clients incl aws-crt native + transitive v1) pushing unzipped over 262144000. deploy_*.sh use CodeS3Key=LAMBDA_CODE_PATH placeholder substituted by Jenkins deploy job; build.sh currently produces only shipping-instruction-1.0.jar (the DW app jar). Same problem/pattern as PI (session 3c7a312e0d9a42b2, pi-bl-es-lambda) and booking (fixed under ION-14382).",
+      "tags": [],
+      "references": [
+        "shipping-instruction/build.sh",
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/si_es_stack/cfscripts/deploy_qa.sh",
+        "shipping-instruction/si_s3_stack/cfscripts/deploy_qa.sh",
+        "shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/lambda/IndexerHandler.java",
+        "ION-16396",
+        "ION-16417"
+      ]
+    },
+    {
+      "id": "0528706869bb",
+      "timestamp": "2026-09-03T17:49:12.798517+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Gap confirmed: SI Lambda handlers were migrated under ION-16396 (commit 588c531b85) but were NOT documented in any SI AWS-upgrade design/analysis doc — the in-module lambdas + 250MB constraint were outside the documented blast radius",
+      "detail": "The two SI Lambda handlers WERE migrated to cloud-sdk as part of commit 588c531b85 'ION-16396: shipping-instruction AWS SDK 2.x (cloud-sdk) upgrade' (S3ArchiveHandler -> StorageClient/S3, IndexerHandler/HandlerSupport -> DynamoDbClientConfig + JestModule). HOWEVER none of the SI AWS-upgrade design/analysis docs mention them: grep (case-insensitive) for lambda|IndexerHandler|S3ArchiveHandler|handler|indexer|archive|stream|StorageClient|si_es_stream|si_s3 across shipping-instruction/docs/{2026-07-30-si-aws-upgrade-design.md, 2026-08-18-si-aws-upgrade.md, 2026-08-18-si-aws-upgrade-confluence-design.md, 2026-09-03-si-es-query-latency-issue.md} returned zero matches. So the module's two in-module Lambda deployables and their separate 250MB packaging constraint were never captured in the upgrade blast-radius analysis — the same blind spot as PI (pi-bl-es-lambda). Context from user: SI Lambdas are unusual (most modules keep lambdas in the dedicated lambda module or as CFN scripts; booking was thought the only in-module outlier). In dev the Lambda trigger is disabled, and in higher envs the functions had not been updated for a long time (QA function LastModified 2025-04-10, release 25.03.010) — so 26.08 is the first update attempt since the upgrade and it failed at UpdateFunctionCode on size, which also explains new subscriptions/SIs not being indexed into ES -> not flowing to cargo visibility.",
+      "tags": [],
+      "references": [
+        "commit 588c531b85",
+        "ION-16396",
+        "shipping-instruction/docs/2026-07-30-si-aws-upgrade-design.md",
+        "shipping-instruction/docs/2026-08-18-si-aws-upgrade-confluence-design.md",
+        "shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/lambda/"
+      ]
+    },
+    {
+      "id": "c854aff26763",
+      "timestamp": "2026-09-03T18:09:23.032699+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Implemented booking-style fix: shade-lambda execution in SI pom + build.sh move line producing SI-Lambdas-${RELEASE}.jar; deploy job (out-of-repo) must repoint the two SI lambdas at the slim jar",
+      "detail": "Two in-repo changes on shipping-instruction (mirroring booking ION-14382). (1) shipping-instruction/pom.xml: added a 'shade-lambda' execution BEFORE 'shade-main' in maven-shade-plugin (v3.5.3). shade-lambda: finalName shipping-instruction-lambdas-${project.version}, shadedArtifactAttached=true, shadedClassifierName=lambdas, createDependencyReducedPom=false, ServicesResourceTransformer (merges META-INF/services — required by AWS SDK v2 ServiceLoader), artifactSet/excludes for sqlite4java, aws-crt(+crt), netty-nio-client/io.netty, ssm, sesv2, sns, sso/ssooidc, s3-transfer-manager, cloudformation, sqs-extended, oracle ojdbc10, dropwizard-jdbi3/jdbi, mysql, jetty/dropwizard/jersey/hk2, swagger, POI/xmlbeans, hibernate, hystrix/rxjava/archaius, javers, uom, rholder, testng, log4j; plus filters for non-linux JNI natives + fonts + META-INF signatures. shade-main unchanged (still ships full app jar with SIApplication mainClass). Ordering matters: shade-lambda first so both executions shade the ORIGINAL unshaded artifact. (2) shipping-instruction/build.sh: added `mv ${app_dir}/target/shipping-instruction-lambdas-1.0.jar ${bld_dir}/SI-Lambdas-${RELEASE}.jar` so the slim jar lands in out/docker_build/app alongside SI-${RELEASE}.jar. NO source changes (no lambda class imports excluded server packages). REMAINING external step (out-of-repo, Jenkins): the SI Lambda deploy job must point CodeS3Key/LAMBDA_CODE_PATH for si_es_stream and si_s3 at SI-Lambdas-${RELEASE}.jar instead of SI-${RELEASE}.jar (booking made the analogous deploy-job change). Not committed yet — awaiting user confirmation of Jira ticket/branch.",
+      "tags": [],
+      "references": [
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/build.sh",
+        "booking/pom.xml",
+        "booking/build.sh",
+        "ION-14382"
+      ]
+    },
+    {
+      "id": "ef14b3ed0110",
+      "timestamp": "2026-09-03T18:09:23.044230+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "Validated: new shipping-instruction-lambdas jar = 171MB unzipped (79MB under 250MB limit) vs full app jar 333.3MB (83.3MB over); 1127/1127 tests pass; handlers + all required libs (incl apache-client) present",
+      "detail": "mvn -q package -P mercury-commons -pl shipping-instruction: BUILD SUCCESS, surefire 1127 tests, 0 failures, 0 errors, 0 skipped. Produced two shaded jars in shipping-instruction/target: (1) shipping-instruction-1.0.jar (full DW app) = 135.9MB zipped / 349,453,121 B (333.3MB) unzipped => 83.3MB OVER the 262,144,000 (250MB) Lambda limit — reproduces the exact deploy failure; (2) NEW shipping-instruction-lambdas-1.0.jar (classifier lambdas) = 72.3MB zipped / 179,291,148 B (171MB) unzipped => 79MB UNDER the limit. Lambda jar content verified: KEEPS IndexerHandler, S3ArchiveHandler, cloud-sdk StorageClient, io.searchbox JestClient, org.elasticsearch QueryBuilders, AWS v2 apache-client (48 classes), AWS v2 dynamodb, lucene, elasticsearch. Big offenders REMOVED (0 present): Oracle ojdbc10, aws-crt(+native ~44MB unzipped), io.netty, AWS v2 cloudformation. Residual inert (~4-5MB): web-server stack org.eclipse.jetty (231), io.dropwizard (161), org.glassfish.jersey (153) survive artifactSet wildcard excludes because they resolve via multiple in-house aggregates (commons/cloud-sdk-api/cloud-sdk-aws) — same multi-path 'whack-a-mole' PI documented; harmless (never instantiated by handlers) and jar is well under limit. Probe proof: POI/xmlbeans/hibernate/hystrix/rxjava/javers/swagger/log4j all 0 (either excluded or not present in SI tree).",
+      "tags": [],
+      "references": [
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/build.sh",
+        "shipping-instruction/target/shipping-instruction-lambdas-1.0.jar"
+      ]
+    },
+    {
+      "id": "934e251a8d32",
+      "timestamp": "2026-09-03T18:13:56.651814+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Agent model: Claude Opus 4.8 (claude-opus-4.8) via GitHub Copilot CLI",
+      "detail": "Investigation, implementation and documentation performed by GitHub Copilot CLI powered by Claude Opus 4.8 (model id claude-opus-4.8).",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "acd6ab2a0ab1",
+      "timestamp": "2026-09-03T18:13:56.681832+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Documentation complete: 2026-09-03-si-lambda-size-refactor.md with root cause, fix, validation, doc-gap finding, and full command runbook",
+      "detail": "Wrote shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md (12 sections): summary, affected functions (si_es_stream/IndexerHandler, si_s3/S3ArchiveHandler), root cause (ION-16396 cloud-sdk upgrade grew unzipped jar past 262144000 B; dev triggers disabled + functions stale since 2025-04-10 explain why it only surfaced at deploy and why subscriptions stopped flowing to cargo visibility), documentation-gap note (SI docs never mention the in-module Lambdas), the booking-style fix (shade-lambda execution + build.sh SI-Lambdas jar), residual inert web-stack note, impact, testing strategy incl recommended CI size-guard, Jira refs, files changed, rollback, and a full §11 runbook with exact PowerShell + Git Bash commands and a command-reference table. Doc is under **/docs/ (gitignored per repo convention) so it will not be committed. Awaiting user confirmation of Jira ticket/branch before committing pom.xml + build.sh; Jenkins SI Deploy job change is out-of-repo.",
+      "tags": [],
+      "references": [
+        "shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md"
+      ]
+    },
+    {
+      "id": "caef52508fca",
+      "timestamp": "2026-09-03T18:14:52.062014+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Autonomous decision (user away): leave changes uncommitted in working tree due to ticket ambiguity; session left active with clear next steps",
+      "detail": "User unavailable to confirm the Jira ticket. Autonomous decision: DO NOT commit/push, leave pom.xml + build.sh staged in the working tree (booking/PI precedent). Reason: the commit/branch prefix is genuinely ambiguous (ION-16396 = the SI AWS upgrade that caused the growth; ION-16417 = reporter-referenced QA-closed umbrella / PI ticket; or a new defect ticket), and pushing to origin with a guessed prefix is not cleanly reversible. All engineering work is complete and validated (slim jar 171MB < 250MB limit, 1127/1127 tests pass). Session left ACTIVE. Remaining human/CI steps: (1) pick ticket, then `git checkout -b feature/<ticket>-si-lambda-size-fix develop`, commit the two files (Co-authored-by trailer), push --set-upstream, open PR; (2) update the out-of-repo Jenkins 'SI Deploy' job to deploy SI-Lambdas-<release>.jar to inttra2_<env>_lambda_si_es_stream and inttra2_<env>_lambda_si_s3; (3) optional CI size-guard; (4) update SI AWS-upgrade design/Confluence doc to record the in-module Lambdas + package-size budget.",
+      "tags": [],
+      "references": [
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/build.sh",
+        "shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md"
+      ]
+    },
+    {
+      "id": "fd5db8d818dd",
+      "timestamp": "2026-09-03T18:23:36.308371+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Committed on feature/ION-16789-si-lambda-fix (commit f36df7c87d), ION-16789-only concise message, 2 files/133 insertions, not pushed pending user review",
+      "detail": "Per user, committed the fix on new branch feature/ION-16789-si-lambda-fix (off develop). Final commit f36df7c87d27bd6396de9cbff20193dcd7d6d4af, subject 'ION-16789: build a separate slim SI Lambda jar to fit the 250MB limit'. Committed ONLY the two intended files: shipping-instruction/pom.xml (+129, shade-lambda execution) and shipping-instruction/build.sh (+4, stage SI-Lambdas jar) = 2 files changed, 133 insertions(+). Commit message deliberately references ONLY ION-16789 (user: do not reference the closed ION-16396 or any other Jira; keep it concise) and includes the Co-authored-by: Copilot trailer. NOT pushed (no upstream) — user will review first, then push via `git push --set-upstream origin feature/ION-16789-si-lambda-fix`. The gitignored doc (shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md) and unrelated untracked working-tree artifacts were intentionally excluded.",
+      "tags": [],
+      "references": [
+        "feature/ION-16789-si-lambda-fix",
+        "commit f36df7c87d",
+        "shipping-instruction/pom.xml",
+        "shipping-instruction/build.sh",
+        "ION-16789"
+      ]
+    },
+    {
+      "id": "989378cc17ca",
+      "timestamp": "2026-09-03T19:23:33.930218+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "Added shade-order deep-dive (§4.4) to the doc; pushed feature/ION-16789-si-lambda-fix to origin with upstream tracking (user to open PR)",
+      "detail": "Added §4.4 'Why the shade execution order matters (deep dive)' to shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md — explains the three maven-shade facts (reads current main artifact + deps; replaces main artifact by default unless shadedArtifactAttached=true; artifactSet/excludes only filters dependency artifacts, cannot reach classes already merged) with a concrete Scenario A (shade-lambda first → 171MB) vs Scenario B (shade-main first → excludes become no-ops, ≈333MB) walk-through and a one-line mental model. Pushed branch feature/ION-16789-si-lambda-fix to origin with upstream tracking (commit f36df7c87d). PR create URL: https://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests?create&sourceBranch=refs/heads/feature/ION-16789-si-lambda-fix — user will create the PR.",
+      "tags": [],
+      "references": [
+        "shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md",
+        "feature/ION-16789-si-lambda-fix",
+        "commit f36df7c87d"
+      ]
+    },
+    {
+      "id": "f7980f72c842",
+      "timestamp": "2026-09-03T19:45:27.720813+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "INT boot checks: caught a real NoClassDefFoundError (jetty) in the slim jar's IndexerHandler; DW app jar boots fully to listening Jetty; after fix, lambda handlers instantiate + live DynamoDB DescribeTable succeeds",
+      "detail": "Ran INT sanity boot checks with AWS SSO creds (account 081020446316 = inttra_int), exporting the SSO session into AWS_* env vars (mirrors the Lambda IAM-role env-var creds; required because the slim jar excludes sso/ssooidc). LAMBDA: a standalone LambdaBootCheck.java compiled against the slim jar instantiated S3ArchiveHandler() and IndexerHandler() and ran a live DynamoDbClient.describeTable('inttra_int_si') via ApacheHttpClient -> status=ACTIVE itemCount=115. FIRST ATTEMPT FAILED: IndexerHandler.<init> threw java.lang.NoClassDefFoundError: org/eclipse/jetty/io/RuntimeIOException (the Jest/AWS request-signing path references it; class lives in jetty-io-12.1.12.jar, which my org.eclipse.jetty:* exclude had stripped). S3ArchiveHandler (DynamoDB+S3 only) was unaffected, which is why unit tests (full classpath) and size checks did not catch it — an actual boot check was required. DW: `java -jar shipping-instruction-1.0.jar check conf/int/config.yaml` -> 'Configuration is OK' (exercises ${awsps} SSM param substitution via creds); `server conf/int/config.yaml` -> booted SIApplication end-to-end (Jersey+admin handlers, Jest/ES client AWS-signed, DynamoDB enhanced repos for inttra_int_si/inttra_int_siDraft) and bound Jetty 8080/8081 (connectors bind last => full run() success); stopped by PID.</detail>\n<parameter name=\"references\">[\"shipping-instruction/target/shipping-instruction-lambdas-1.0.jar\", \"shipping-instruction/target/shipping-instruction-1.0.jar\", \"shipping-instruction/conf/int/config.yaml\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "c669b5f60111",
+      "timestamp": "2026-09-03T19:45:52.240239+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Fixed excludes (keep web/DI stack), re-validated (190.2MB, boot passes), amended commit fd852d50a3 force-pushed; PR #1237 updated; doc updated with boot-check section",
+      "detail": "Corrected shipping-instruction/pom.xml shade-lambda artifactSet excludes after the boot-check failure: REMOVED the web/DI/HTTP stack exclusions (org.eclipse.jetty*, io.dropwizard*, org.glassfish.jersey*, org.glassfish.hk2*, org.jdbi, hibernate, hystrix/rxjava/archaius, javers, swagger, uom, rholder, palominolabs, dropwizard-metrics) because a class on the Jest path references org.eclipse.jetty.io.RuntimeIOException. KEPT excludes only for independent heavy leaf libs proven unreachable from handler paths: sqlite4java, aws-crt(+crt), netty, ssm, sesv2, sns, sso/ssooidc, s3-transfer-manager, cloudformation, sqs-extended, oracle ojdbc10, mysql, POI/xmlbeans, testng, log4j. Rebuilt: slim jar now 81.1MB zipped / 199,436,526 B (190.2MB) unzipped = 59.8MB under the 262144000 limit (up from 171MB but runtime-correct); RuntimeIOException now present; boot check passes. Unit tests unaffected by exclude-only change (surefire uses full dependency classpath, not the shaded jar) — 1127/1127 still valid from the prior full run. Amended commit -> fd852d50a3 (message unchanged, ION-16789 only), force-pushed with --force-with-lease to origin/feature/ION-16789-si-lambda-fix. PR #1237 (=> develop) already exists and now reflects the corrected commit. Final change vs develop: pom.xml +105, build.sh +4 (2 files, 109 insertions). Updated shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md: rewrote §5 (why the web stack is kept), added §13 (INT boot checks + full commands + LambdaBootCheck.java), corrected sizes and diff numbers, added §4.4 shade-order deep dive earlier.",
+      "tags": [],
+      "references": [
+        "shipping-instruction/pom.xml",
+        "commit fd852d50a3",
+        "feature/ION-16789-si-lambda-fix",
+        "pull-requests/1237",
+        "shipping-instruction/docs/2026-09-03-si-lambda-size-refactor.md"
+      ]
+    },
+    {
+      "id": "1aef1bf2de42",
+      "timestamp": "2026-09-03T21:02:49.990958+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "PR #1237 review comment (lambda jar filename) assessed INVALID: finalName sets on-disk name (verified ...-lambdas-1.0.jar exists), 1.0 is static ${project.version} not ${RELEASE}; reviewer's fix would break the build. No change; drafted reply.",
+      "detail": "git-svc-code-review (svc_git_e2codereview_rw) commented on PR #1237 that build.sh's `mv shipping-instruction-lambdas-1.0.jar` is wrong: (a) claims shade produces shipping-instruction-lambdas-1.0-lambdas.jar because shadedClassifierName=lambdas, and (b) suggests using ${RELEASE} instead of hard-coded 1.0. ASSESSMENT: comment is INVALID (confirmed with user). Evidence: (a) target/ after build contains shipping-instruction-lambdas-1.0.jar (plus shade's original- backup) and NO -lambdas-suffixed file — when <finalName> is set it defines the on-disk name; shadedClassifierName only tags the attached Maven artifact metadata, it does not suffix the file. The boot check + size checks all ran against shipping-instruction-lambdas-1.0.jar successfully. (b) 1.0 is the static Maven ${project.version} (repo-wide: every module is version 1.0); the shade finalName is shipping-instruction-lambdas-${project.version} -> ...-1.0.jar. ${RELEASE} is the Jenkins release number (e.g. 26.08.001) used ONLY for the destination SI-Lambdas-${RELEASE}.jar. Adopting the suggested mv shipping-instruction-lambdas-${RELEASE}.jar would reference a non-existent ...-26.08.001.jar and, under set -e, break the build — i.e. the fix introduces the very bug it warns about. Matches booking precedent (ION-14382): mv booking-lambdas-1.0.jar -> Booking-Lambdas-${RELEASE}.jar with the same finalName/classifier config. Decision: NO code change; provided a ready-to-paste reviewer reply. If project version ever becomes dynamic the correct token is ${project.version}, not ${RELEASE}.",
+      "tags": [],
+      "references": [
+        "pull-requests/1237",
+        "shipping-instruction/build.sh",
+        "shipping-instruction/pom.xml",
+        "booking/build.sh",
+        "booking/pom.xml",
+        "ION-14382"
+      ]
+    }
+  ],
+  "usage": []
+}

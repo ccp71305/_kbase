@@ -1,0 +1,144 @@
+{
+  "id": "32010fb188da4974",
+  "name": "OWASP scan + commons 1.0.34-SNAPSHOT bump (visibility, booking)",
+  "description": "Update mercury.commons.version to 1.0.34-SNAPSHOT in visibility and booking module poms. Run OWASP dependency-check before and after via owasp-scan-v2.ps1, rename reports before/after, mvn clean package -DskipTests.",
+  "project": "mercury-services",
+  "created_at": "2026-09-11T20:00:29.115305+00:00",
+  "updated_at": "2026-09-12T06:43:16.038715+00:00",
+  "status": "active",
+  "tags": [
+    "owasp",
+    "maven",
+    "visibility",
+    "booking",
+    "commons-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "fed8db33d4b8",
+      "timestamp": "2026-09-11T20:11:11.691092+00:00",
+      "agent": "unknown",
+      "category": "code_change",
+      "summary": "Bumped commons to 1.0.34-SNAPSHOT; recorded before OWASP results",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "visibility/pom.xml",
+        "booking/pom.xml",
+        "owasp-reports/"
+      ]
+    },
+    {
+      "id": "07e47826fcfc",
+      "timestamp": "2026-09-11T20:18:38.045901+00:00",
+      "agent": "unknown",
+      "category": "test_result",
+      "summary": "After OWASP: booking HIGH 4->3 (jsoup fixed); visibility unchanged",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "owasp-reports/booking/dependency-check-report-after.json",
+        "owasp-reports/s3-archiver/dependency-check-report-after.json"
+      ]
+    },
+    {
+      "id": "c806807f7663",
+      "timestamp": "2026-09-12T02:38:03.040221+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Booking OWASP: databind fixed via jackson 2.21.6 bump; httpclient5 suppressed; wired --suppression into v2 script; t-digest flagged",
+      "detail": "Findings for booking after-report: 4 HIGH/CRITICAL by severity field: databind CVE-2026-68497 (HIGH), httpclient5 CVE-2026-71290 (CRITICAL) + CVE-2026-40542 (HIGH), t-digest CVE-2026-87822 (HIGH).\n\nRoot cause databind: booking pom's own dependencyManagement imports jackson-bom at jackson.version=2.21.4, which wins over commons. Commons 1.0.34-SNAPSHOT uses jackson 2.21.6 but EXCLUDES jackson-databind from its jackson artifacts, so commons never drives databind. Fix: bumped booking jackson.version 2.21.4->2.21.6 (bom cached in .m2).\n\nhttpclient5: added CVE-2026-71290 + CVE-2026-40542 suppressions mirroring visibility (ION-16792, async/SCRAM paths not reachable; classic sync client used).\n\nTooling: owasp-scan-v2.ps1 (and v1 owasp-scan.ps1/.v1.ps1) never passed --suppression, so suppressions.xml only took effect in CI. Evidence: owasp-reports/s3-archiver (v2) has CVE-2026-71290 present vs owasp-reports/visibility/visibility-s3-archiver (CI) suppressed. Updated v2 to pass --suppression <module>/suppressions.xml when present.\n\nt-digest CVE-2026-87822 (3.2): NaN centroid DoS, affects 3.1-3.3, no fix; left open for decision.\n\nDoc written: booking/docs/2026-09-11-owasp-chk.md</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"booking/suppressions.xml\", \"owasp-scan-v2.ps1\", \"booking/docs/2026-09-11-owasp-chk.md\", \"owasp-reports/booking/dependency-check-report-after.json\"]",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "32aaa3e6369a",
+      "timestamp": "2026-09-12T02:42:35.260537+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Fresh booking scan: CRITICAL 1->0, HIGH 3->1 (only t-digest left). Commons parent jackson-bom governs commons repo only, not booking.",
+      "detail": "Fresh owasp-scan-v2.ps1 -Group Booking -Module booking -Build (build OK 174s, suppression applied): booking CRITICAL 1->0, HIGH 3->1. databind CVE-2026-68497 gone (jackson 2.21.6); httpclient5 CVE-2026-71290/CVE-2026-40542 suppressed via new --suppression wiring. Only remaining HIGH: t-digest CVE-2026-87822 (3.2, no fix in 3.1-3.3), left open for decision. Promoted report to owasp-reports/booking/dependency-check-report-after.json.\n\ncommons parent finding: mercury-services-commons repo parent pom DOES import jackson-bom 2.21.6 in dependencyManagement, but it only governs the commons repo's own modules. It does NOT reach booking: dependencyManagement inherits via <parent> only, booking's parent is mercury-services:1.0 (monorepo root, which has no jackson-bom), and the published commons jar pom is flattened (no parent/depMgmt). Recommendation: add jackson-bom import (or a published mercury-bom) to the mercury-services root pom depMgmt and drop per-module jackson.version pins.",
+      "tags": [],
+      "references": [
+        "owasp-reports/booking/dependency-check-report-after.json",
+        "booking/pom.xml",
+        "booking/suppressions.xml",
+        "owasp-scan-v2.ps1",
+        "booking/docs/2026-09-11-owasp-chk.md",
+        "mercury-services-commons/pom.xml"
+      ]
+    },
+    {
+      "id": "e35e9007689e",
+      "timestamp": "2026-09-12T02:52:05.801225+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "t-digest 3.2 is transitive via Elasticsearch 6.6.2 in booking; commons repo PARENT pom (published, unflattened) has jackson-bom 2.21.6 and can be imported as a BOM",
+      "detail": "t-digest 3.2 provenance (mvn dependency:tree -pl booking -Dincludes=com.tdunning:t-digest):\ncom.inttra.mercury:booking:jar:1.0\n  -> org.elasticsearch:elasticsearch:jar:6.6.2:compile\n     -> com.tdunning:t-digest:jar:3.2:compile\nSo t-digest is transitive from Elasticsearch 6.6.2 (direct compile dep of booking), shaded into booking-1.0.jar. CVE-2026-87822 has no fixed release (3.1-3.3 affected) so a version override won't clear it; options are suppress-with-justification or ES upgrade.\n\nParent BOM confirmation: the mercury-services-commons REPO PARENT pom (com.inttra.mercury:mercury-services-commons:1.0, packaging pom) is published to .m2 and RETAINS <jackson.version>2.21.6</jackson.version> + jackson-bom import in dependencyManagement (it is NOT flattened; only the commons module jar pom is flattened via flatten-maven-plugin default/inherited mode which strips parent/depMgmt). So booking COULD import mercury-services-commons:1.0 as a BOM (type=pom, scope=import) to inherit databind 2.21.6 centrally. Depending on the commons JAR alone does not inherit it.",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "mercury-services-commons/pom.xml",
+        "org.elasticsearch:elasticsearch:6.6.2"
+      ]
+    },
+    {
+      "id": "8182b60be2d1",
+      "timestamp": "2026-09-12T03:09:56.360172+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Visibility full scan (10 modules, commons 1.0.34): CRITICAL=0, HIGH=16. Remaining: databind 2.22.0 (needs 2.22.2) + t-digest 3.2. after-reports generated.",
+      "detail": "owasp-scan-v2.ps1 -Group Visibility -Build -NoUpdate (commons 1.0.34-SNAPSHOT). Reactor BUILD SUCCESS 556s. All 10 deployable modules scanned with --suppression now applied. -after reports generated (dependency-check-report-after.json/.html) in each Out dir.\n\nTotals: CRITICAL=0, HIGH=16 across 10 modules.\nPer-module HIGH:\n- 4 lambdas (s3-archiver, error-email, pending-start, outbound-poller): HIGH=1 each = CVE-2026-68497 jackson-databind 2.22.0.\n- 6 shaded jars (inbound, itv-gps-processor, matcher, outbound, pending, wm-inbound-processor): HIGH=2 each = CVE-2026-68497 databind 2.22.0 + CVE-2026-87822 t-digest 3.2.\n\nhttpclient5 CVEs no longer appear (CRITICAL=0) -> confirms the new --suppression wiring works for visibility too.\n\nRoot cause databind in visibility: visibility/pom.xml pins <jackson.version>2.22.0</jackson.version>; CVE-2026-68497 fixed in 2.22.x line at 2.22.2. Fix = bump 2.22.0->2.22.2 (note: 2.22.2 not yet in local .m2, would need download). t-digest 3.2 transitive via elasticsearch (same as booking), no fix release.\n\nAlso extended owasp-scan-v2.ps1 Visibility group from 4 to all 10 deployable modules.",
+      "tags": [],
+      "references": [
+        "owasp-scan-v2.ps1",
+        "visibility/pom.xml",
+        "owasp-reports/*/dependency-check-report-after.json"
+      ]
+    },
+    {
+      "id": "96084db34a2a",
+      "timestamp": "2026-09-12T05:57:22.663437+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Reconciled doc §6 vs artifacts: commons 2.21.6 does not propagate to consumers; removing booking's pin would NOT inherit 2.21.6 (falls to mediation/2.21.4). Per-app bump is required.",
+      "detail": "Reconciled user's question against mercury-services-commons/docs/2026-09-09-sdk-commons-cve-change-analysis.md §6. The doc's \"databind resolves to 2.21.6 in the flattened commons POM\" describes resolution WITHIN commons' own build (jackson-bom imported ahead of dropwizard-dependencies). It does NOT propagate to consumers: verified the flattened commons-1.0.34-SNAPSHOT.pom in .m2 has jackson-databind only as <exclusion>s (no databind dep, no dependencyManagement; flatten uses default mode per commons/pom.xml:485 \"Do NOT use flattenDependencyMode=all\"). The doc's own §6 caveat confirms: commons 2.21.6 is \"necessary but not sufficient — each app must still bump its own Jackson property (visibility needs 2.22.2)\".\n\nAnswer to \"if booking pin removed, does it inherit 2.21.6?\": NO. booking dependencyManagement imports only jackson-bom (booking/pom.xml:53-63); removing it drops single-version enforcement and databind falls to nearest-wins mediation (dropwizard 2.21.4 / shaded local-es 2.17.2 / etc.), not 2.21.6. Central inheritance only possible by importing a BOM that manages databind (e.g. mercury-services-commons:1.0 parent pom, published unflattened with jackson-bom 2.21.6, as type=pom scope=import) or adding it to the mercury-services root pom. So the applied booking bump to 2.21.6 is the correct \"app must bump its own\" step.",
+      "tags": [],
+      "references": [
+        "mercury-services-commons/docs/2026-09-09-sdk-commons-cve-change-analysis.md",
+        "booking/pom.xml",
+        "commons/pom.xml (flatten default mode)",
+        ".m2 commons-1.0.34-SNAPSHOT.pom"
+      ]
+    },
+    {
+      "id": "b53aeba3e0e0",
+      "timestamp": "2026-09-12T06:39:12.960161+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Removed booking jackson-bom pin: databind now inherits 2.21.6 from commons, OWASP clean (only t-digest). BUT Jackson stack fragmented (yaml/smile 2.8.11, cbor 2.12.6) via ES 6.6.2 — recommend restoring the bom import.",
+      "detail": "User updated commons 1.0.34-SNAPSHOT (reinstalled 02:18) to declare jackson-databind 2.21.6 as a DIRECT dependency (verified in flattened .m2 pom). Then removed booking's jackson-bom dependencyManagement import (kept ${jackson.version}=2.21.6 property, still used by jackson-module-jsonSchema and jackson-dataformat-xml). Rebuilt + rescanned.\n\nRESULT: build OK 176s. databind resolves to 2.21.6 inherited from commons. OWASP CRITICAL=0 HIGH=1 (only t-digest CVE-2026-87822). Report promoted to dependency-check-report-after.json.\n\nREGRESSION FOUND: removing the jackson-bom import fragmented the Jackson stack (bom previously aligned the whole family). Now shaded: databind/core 2.21.6, but dataformat-yaml 2.8.11, dataformat-smile 2.8.11, dataformat-cbor 2.12.6, annotations 2.21, datatype-guava/jakarta-rs/several modules 2.21.4. Old ones come transitively from Elasticsearch 6.6.2. This is exactly what the removed comment warned about. Mixing databind 2.21.6 with dataformat-yaml/smile 2.8.11 is a runtime-compat risk; tests were skipped.\n\nRECOMMENDATION: restore jackson-bom import at 2.21.6 — clears databind CVE AND realigns whole stack. Awaiting user decision.",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "owasp-reports/booking/dependency-check-report-after.json",
+        ".m2 commons-1.0.34-SNAPSHOT.pom (direct databind 2.21.6)"
+      ]
+    },
+    {
+      "id": "fa584d8121f7",
+      "timestamp": "2026-09-12T06:43:16.038688+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Final: restored jackson-bom import at 2.21.6 — booking OWASP CRITICAL=0 HIGH=1 (t-digest only) with full Jackson stack aligned to 2.21.6. Pin-removal fragmentation avoided.",
+      "detail": "Restored booking's jackson-bom import at 2.21.6 (reverting the pin removal) after the pin-removal test showed Jackson stack fragmentation. Rebuilt + rescanned: build OK 97s, OWASP CRITICAL=0 HIGH=1 (t-digest only), and ALL com.fasterxml.jackson* artifacts now aligned to 2.21.6 (dataformat-yaml/smile/cbor back to 2.21.6; annotations 2.21 minor-line normal). Report promoted to dependency-check-report-after.json. Doc updated (booking/docs/2026-09-11-owasp-chk.md §5a + §6).\n\nRationale: the jackson-bom import aligns the whole Jackson family, not just databind. Removing it cleared the databind CVE (via commons' new direct 2.21.6) but let ES 6.6.2's old transitive jackson (2.8.11/2.12.6) leak in — a runtime-compat risk. Keeping the import gives both: databind 2.21.6 + aligned stack. commons' direct databind remains a safety net for consumers that drop their pin.",
+      "tags": [],
+      "references": [
+        "booking/pom.xml",
+        "owasp-reports/booking/dependency-check-report-after.json",
+        "booking/docs/2026-09-11-owasp-chk.md"
+      ]
+    }
+  ],
+  "usage": []
+}

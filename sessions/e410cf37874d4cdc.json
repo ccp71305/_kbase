@@ -1,0 +1,252 @@
+{
+  "id": "e410cf37874d4cdc",
+  "name": "ION-16415 Lambda AWS SDK v2 Upgrade - Review, Rebase & Startup",
+  "description": "Complete/verify the lambda module AWS SDK v1->v2 cloud-sdk migration (ION-16415). Review changes, confirm cloud-sdk for DynamoDB, rebase onto develop, produce 2026-08-19-lambda-aws-refactor.md, verify seamless lambda startup with AWS INT credentials.",
+  "project": "mercury-services",
+  "created_at": "2026-08-19T16:34:18.526378+00:00",
+  "updated_at": "2026-08-19T20:43:13.400342+00:00",
+  "status": "active",
+  "tags": [
+    "java",
+    "aws",
+    "cloud-sdk",
+    "lambda",
+    "ION-16415",
+    "refactoring"
+  ],
+  "entries": [
+    {
+      "id": "720318596bf6",
+      "timestamp": "2026-08-19T16:50:21.134403+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Bumped commons/cloud-sdk to 1.0.31, rebased onto develop, fixed a missed v1 leftover, verified build + startup",
+      "detail": "1) Bumped mercury.commons.version 1.0.28-SNAPSHOT -> 1.0.31-SNAPSHOT in all 6 lambda poms (auth-tokens-archive, bounceback-email, optionalvalidation-archive, subscription-archive, partner-integration, registration-archive) per user request. 2) Found a real gap: bounceback-email BlacklistService.java still used AWS SDK v1 com.amazonaws.util.StringUtils (only compiled via a transitive jar); replaced with guava com.google.common.base.Strings (module already depends on guava). 3) Rebased feature/ION-16415-lambda-aws-upgrade from old develop b86d536 onto new develop 4e266d36 (clean, no conflicts). 4) Reactor mvn clean verify across all 7 lambda modules: 367 tests, 0 failures/0 errors/0 skipped (incl. registration-archive DynamoDB-Local ProcessorIT). 5) Single amended commit 5a62dd9ecf (develop..HEAD == 1). 6) DynamoDB confirmed on cloud-sdk: registration-archive Processor uses HandlerSupport.newDynamoDbClient() -> DynamoRepositoryFactory.createDynamoDbClient(DynamoDbClientConfig...) + v2 GetItemRequest. 7) Startup smoke check with real INT SSO creds: all 5 AWS modules build clients OK (S3/SNS/SSM/DynamoDB), region us-east-1, creds resolved from INTTRA-Dev-Engg.",
+      "tags": [
+        "aws",
+        "cloud-sdk",
+        "lambda",
+        "rebase",
+        "startup"
+      ],
+      "references": [
+        "lambda/registration-archive/src/main/java/com/inttra/mercury/registration/archive/Processor.java",
+        "lambda/bounceback-email/src/main/java/com/inttra/mercury/bouncebackemail/networkservices/blacklistemail/BlacklistService.java",
+        "ION-16415",
+        "commit 5a62dd9ecf"
+      ]
+    },
+    {
+      "id": "09e60ab6a9de",
+      "timestamp": "2026-08-19T16:52:16.122167+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "ION-16415 lambda cloud-sdk upgrade finalized, verified, and documented (model: Claude Opus 4.8)",
+      "detail": "Agent model: Claude Opus 4.8 (model ID claude-opus-4.8) via GitHub Copilot CLI. Final deliverables: (1) commons/cloud-sdk 1.0.31-SNAPSHOT across all lambda poms; (2) single commit 5a62dd9ecf rebased onto develop 4e266d36c8 (develop..HEAD==1, not pushed); (3) reactor clean verify green 367 tests 0F/0E/0S incl registration-archive DynamoDB-Local ProcessorIT; (4) DynamoDB confirmed on cloud-sdk DynamoRepositoryFactory.createDynamoDbClient; (5) startup smoke-check passed for all 5 AWS modules with real INT SSO creds (region us-east-1, S3/SNS/SSM/DynamoDB clients build); (6) doc lambda/docs/2026-08-19-lambda-aws-refactor.md (git-ignored) with changes, command log, and cloud-sdk gaps. Gaps logged: cloud-sdk pulls dropwizard-core (excluded), no raw-item DynamoDB helper (v2 client leaks through), SNS bound to single topic at build, StorageClient logs access key id at INFO, no ES/OpenSearch signer (elasticsearch-purge still v1, out of scope).",
+      "tags": [
+        "model_info",
+        "completion",
+        "ION-16415"
+      ],
+      "references": [
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md",
+        "commit 5a62dd9ecf",
+        "ION-16415"
+      ]
+    },
+    {
+      "id": "c02b1c9202ce",
+      "timestamp": "2026-08-19T17:03:25.992960+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Doc updated for 3 review comments; elasticsearch-purge v1-signing migration assessed (Option A feasible offline via acm19 3.0.0)",
+      "detail": "Addressed 3 review comments on 2026-08-19-lambda-aws-refactor.md: (1) Confirmed commit 5a62dd9ecf message DOES contain ION-16415 in subject + body (no amend needed). (2) Expanded DynamoDB section with before/after code (v1 Document API DynamoDB/Table/Item/GetItemSpec -> cloud-sdk DynamoRepositoryFactory.createDynamoDbClient + v2 GetItemRequest/AttributeValue), split Path A (table read, registration-archive) vs Path B (stream event models via aws-lambda-java-events 3.x), and documented the cloud-sdk gap (no raw-item helper; v2 DynamoDbClient leaks through factory) plus what-needs-doing. (3) Assessed lambda/elasticsearch-purge: uses aws-java-sdk-core 1.12.638 v1 ONLY for SigV4 signing (AWS4Signer + DefaultAWSCredentialsProviderChain + awslabs AWSRequestSigningApacheInterceptor jitpack b3772780da) wrapping EOL elasticsearch-rest-high-level-client 6.6.2. cloud-sdk has no ES signing client. v1 is NOT required: acm19 aws-request-signing-apache-interceptor 3.0.0 (present in ~/.m2, along with AWS SDK v2 http-auth-aws) enables v2 signing (AwsV4HttpSigner + DefaultCredentialsProvider). Documented Option A (swap signing to v2, keep RHLC) recommended as separate ticket/commit, and Option B (opensearch-java + AwsSdk2Transport) deferred to OpenSearch epic. NOT implemented (out of ION-16415 scope) - awaiting go-ahead.",
+      "tags": [
+        "elasticsearch-purge",
+        "documentation",
+        "aws-sigv4",
+        "review-comments"
+      ],
+      "references": [
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md",
+        "lambda/elasticsearch-purge/src/main/java/com/inttra/mercury/elasticsearchpurge/Processor.java",
+        "lambda/elasticsearch-purge/pom.xml",
+        "commit 5a62dd9ecf"
+      ]
+    },
+    {
+      "id": "37447d02e4b6",
+      "timestamp": "2026-08-19T17:22:02.935913+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Documented ES SigV4 signing estate: upgraded modules still on v1 for ES; acm19 3.0.0 is v2 + HttpClient4/5; Jest/RHLC both EOL",
+      "detail": "ES SigV4 signing analysis added as section 10 of 2026-08-19-lambda-aws-refactor.md. Key findings: (1) The 'AWS-upgraded/COMPLETED' service modules STILL sign Elasticsearch with AWS SDK v1 - visibility uses com.amazonaws.auth.AWS4Signer + DefaultAWSCredentialsProviderChain + a copied-in-repo awslabs interceptor clone (visibility-inbound/config/ElasticSearchClientModule.java + inbound/aws/AwsRequestSigner.java) around RestHighLevelClient; ES signing is the common v1 holdout because cloud-sdk has no ES signing abstraction. (2) booking (IN PROGRESS) and webbl (COMPLETED) use Jest (io.searchbox.JestClient) but only @Inject it - no JestClient is built anywhere in this repo, so it comes from the shared commons library; their signing is a commons concern. (3) acm19 3.0.0 (verified in ~/.m2): signs with AWS SDK v2 (software.amazon.awssdk:auth:2.27.17), ships AwsRequestSigningApacheInterceptor (HttpClient 4.x) + AwsRequestSigningApacheV5Interceptor (5.x), both httpclient 4.5.14 and httpclient5 5.3.1 as provided; it is the community successor to archived amazon-archives interceptor, healthy cadence but no active maintainers. (4) Premise 'Jest only works with v1 signing' is false - Apache interceptor decouples signer from client, so v2 signer works with Jest (oceanschedules-process already injects an interceptor into Jest, just v1). (5) Both ES clients are EOL: RestHighLevelClient deprecated 7.15/removed 8.0 (6.6.2 is 2019), Jest abandoned ~2019. Option A removes v1 SDK but keeps EOL client; durable end-state is opensearch-java + AwsSdk2Transport (Option B).",
+      "tags": [
+        "elasticsearch",
+        "aws-sigv4",
+        "acm19",
+        "jest-eol",
+        "documentation"
+      ],
+      "references": [
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/config/ElasticSearchClientModule.java",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/aws/AwsRequestSigner.java",
+        "webbl/src/main/java/com/inttra/mercury/webbl/elasticsearch/ElasticSearchService.java",
+        "booking/src/main/java/com/inttra/mercury/booking/elasticsearch/Searcher.java"
+      ]
+    },
+    {
+      "id": "6410df1df040",
+      "timestamp": "2026-08-19T17:35:16.911624+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Confirmed v1 Jest+signing (vc.inreach 0.0.22 + aws-java-sdk-core + Jest) shaded in booking/tx-tracking; acm19 unused anywhere; AWS upgrade never migrated ES signing",
+      "detail": "CORRECTION + evidence (updated section 10 of 2026-08-19-lambda-aws-refactor.md). User was right: booking/tx-tracking/webbl DO carry v1 Jest+signing deps. OWASP dependency-check reports (owasp-reports/booking, owasp-reports/tx-tracking, built 2026-08-16) prove the shaded uber-jars bundle: com.amazonaws:aws-java-sdk-core:1.12.730 (+ s3/sns/sqs/kms/ses v1), io.searchbox:jest:5.3.3 + jest-common, and vc.inreach.aws:aws-signing-request-interceptor:0.0.22 (the actual v1 SigV4 signer for Jest; MIT ~2016, abandoned). So even 'COMPLETED' modules (tx-tracking, webbl) still ship AWS SDK v1 for ES signing. Three distinct v1 signing mechanisms in the estate: (a) vc.inreach.aws AWSSigner/AWSSigningRequestInterceptor for Jest (booking/tx-tracking/webbl/oceanschedules-process); (b) copied-in-repo awslabs clone AwsRequestSigner + AWS4Signer for visibility (RHLC); (c) external awslabs jitpack interceptor + AWS4Signer for elasticsearch-purge lambda (RHLC). NO module uses acm19 - repo grep for acm19/io.github.acm19 = zero hits; acm19 is only the proposed Option A. Git provenance: visibility AwsRequestSigner written by pbono 2021-07-19 ('Avoided dependency by writing aws interceptor signer', pre-upgrade, v1); visibility ElasticSearchClientModule last touched by Arijit Kundu 2026-06-23 under ION-12316 (visibility AWS SDK 2.x) but that commit was rebase/conflict/test-fix and LEFT signing on v1; elasticsearch-purge Processor by sgo001 2020, updated Mukesh Vellanki 2025 (ION-11880 JDK17), never migrated. So the AWS 2.x upgrade did NOT migrate ES signing off v1 in any module.",
+      "tags": [
+        "elasticsearch",
+        "vc.inreach",
+        "jest",
+        "aws-v1",
+        "git-provenance",
+        "correction"
+      ],
+      "references": [
+        "owasp-reports/booking/dependency-check-junit.xml",
+        "owasp-reports/tx-tracking/dependency-check-junit.xml",
+        "oceanschedules-process/loader/src/main/java/com/inttra/mercury/oceanschedules/process/loader/module/JestModule.java",
+        "visibility/visibility-inbound/src/main/java/com/inttra/mercury/visibility/inbound/config/ElasticSearchClientModule.java",
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md"
+      ]
+    },
+    {
+      "id": "ec8ea4735ff6",
+      "timestamp": "2026-08-19T17:45:54.973603+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Aligned ES-signing doc: added Direct-Answers TL;DR, corrected booking->COMPLETED, clarified 'clone', refined acm19/Option A stance and tables",
+      "detail": "Aligned/consistency-fixed section 9-10 of 2026-08-19-lambda-aws-refactor.md per review: (1) Added section 10.0 'Direct answers' TL;DR answering: all ES modules sign with v1 today (Jest via vc.inreach 0.0.22, RHLC via AWS4Signer+awslabs); v1 signing is valid-but-not-required with Jest; v2 signing CAN be used with existing Jest (acm19 HttpClient-4.x interceptor swapped into JestClientFactory); the visibility 'in-repo clone' = hand-copied source of archived awslabs AWSRequestSigningApacheInterceptor (still v1); acm19 makes sense only as short bridge (esp for the lambda where it fully de-v1s) since it's used nowhere and keeps EOL clients - opensearch-java+AwsSdk2Transport is the strategic fix. (2) Corrected booking status IN PROGRESS -> COMPLETED throughout. (3) Clarified 'clone' wording. (4) Refined Option A framing: clean full de-v1 win for elasticsearch-purge lambda, only partial de-v1 (bridge) for service modules which shade other v1 aws-java-sdk jars. (5) Updated 10.4 comparison table (added tx-tracking, vc.inreach) and 10.6 recommendation. Verified: no stale 'IN PROGRESS'/'recommended now' remain. No code changed; ION-16415 commit untouched.",
+      "tags": [
+        "documentation",
+        "consistency",
+        "elasticsearch",
+        "acm19"
+      ],
+      "references": [
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md"
+      ]
+    },
+    {
+      "id": "fd560b7fd421",
+      "timestamp": "2026-08-19T18:06:33.364131+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Validated Jest-v2-signing constraint via javap: not a runtime impossibility; real blocker is hard-typed commons JestClientBuilder API + additive-only rule + X-G8 decision to prefer OpenSearch SDK",
+      "detail": "Validated the 'JestClient cannot use v2 signing' constraint against actual class signatures (javap) rather than just the commons doc claim; documented as section 11 of 2026-08-19-lambda-aws-refactor.md. SOURCE: booking/tx-tracking/webbl get their signed JestClient from mercury-services-commons cloud-sdk-aws/.../aws/module/JestModule.java (newAwsSigningClient) which uses vc.inreach.aws.AWSSigner over v1 DefaultAWSCredentialsProviderChain; the cloud-sdk-api/commons JestClientBuilder constructor is HARD-TYPED to concrete vc.inreach.aws.request.AWSSigningRequestInterceptor. AUTHORITATIVE DECISION: cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md section 7.1 gap X-G8 says the earlier 'v2 interceptor' note was WRONG, booking/visibility/webbl Jest usage is 'compatible with the vc.inreach 1.x signer only', ES signing is orthogonal to the v1->v2 flip, and OpenSearch-SDK is a separate future workstream. TECHNICAL VALIDATION (javap on both m2 jars): BOTH vc.inreach AWSSigningRequestInterceptor:0.0.22 and acm19 AwsRequestSigningApacheInterceptor:3.0.0 implement the SAME org.apache.http.HttpRequestInterceptor with the SAME process(HttpRequest,HttpContext), and BOTH buffer the request body (vc.inreach body()->Optional<byte[]>/TO_BYTE_ARRAY; acm19 lambda$process$0(ByteArrayOutputStream)->InputStream). acm19 constructor takes v2 types (HttpSigner<AwsCredentialsIdentity>, AwsCredentialsProvider, Region). CONCLUSION: NO fundamental runtime impossibility - Jest CAN be signed with v2 (acm19 4.x interceptor is a drop-in at the Apache HttpClient 4.x layer). The REAL blocker is the hard-typed shared commons JestClientBuilder API (widening it to the HttpRequestInterceptor interface is a breaking, non-additive change the appianway program forbids) + no v2 port of vc.inreach + strategic decision to retire Jest via OpenSearch SDK. Corrected my earlier overstated 'v2 works with Jest as a simple drop-in' answer.",
+      "tags": [
+        "jest",
+        "v2-signing",
+        "vc.inreach",
+        "acm19",
+        "javap-validation",
+        "commons",
+        "X-G8"
+      ],
+      "references": [
+        "mercury-services-commons/cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/aws/module/JestModule.java",
+        "mercury-services-commons/cloud-sdk-api/src/main/java/com/inttra/mercury/cloudsdk/elasticsearch/JestClientBuilder.java",
+        "mercury-services-commons/cloud-sdk-api/docs/2026-07-23-sdk-gap-appway-aws-upgrade-design.md",
+        "mercury-services-commons/cloud-sdk-aws/docs/2026-05-27-aws-java-sdk-core-version-issue.md",
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md"
+      ]
+    },
+    {
+      "id": "8126717204d4",
+      "timestamp": "2026-08-19T18:25:14.353354+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Created Confluence design doc for the ION-16415 lambda AWS SDK v2 (cloud-sdk) upgrade",
+      "detail": "Authored lambda/docs/2026-08-19-lambda-aws-upgrade-confluence-design.md, modeled on the SI and booking-cargoscreen Confluence templates. Sourced content from the two lambda design/refactor docs. Includes a per-lambda key-changes table for all seven in-scope modules and explicitly documents that elasticsearch-purge is left out due to its v1 AWS SigV4 signing dependency (no cloud-sdk signing wrapper). Model: Claude Opus 4.8.",
+      "tags": [
+        "documentation",
+        "confluence",
+        "aws",
+        "lambda",
+        "ION-16415"
+      ],
+      "references": [
+        "lambda/docs/2026-08-19-lambda-aws-upgrade-confluence-design.md",
+        "lambda/docs/2026-0731-lambda-aws-upgrade-design.md",
+        "lambda/docs/2026-08-19-lambda-aws-refactor.md",
+        "ION-16415"
+      ]
+    },
+    {
+      "id": "4905e83e9ed4",
+      "timestamp": "2026-08-19T19:52:27.574615+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pushed ION-16415 lambda migration branch to origin (41 files, commit 5a62dd9ecf)",
+      "detail": "Pushed the ION-16415 lambda AWS SDK v1->v2 (cloud-sdk) migration to remote. Command: `git push -u origin feature/ION-16415-lambda-aws-upgrade` (no prior upstream; new remote branch created). Single commit 5a62dd9ecf ('ION-16415: migrate standalone lambdas to cloud-sdk (AWS SDK v2)'), 41 files all under lambda/**, across seven modules (auth-tokens-archive 7, booking-outbound 2, bounceback-email 8, optionalvalidation-archive 7, partner-integration 4, registration-archive 6, subscription-archive 7). Local HEAD == origin HEAD == 5a62dd9ecf; branch now tracks origin. Untracked scratch files in the working tree were not staged/pushed. Bitbucket offered a PR-create URL. elasticsearch-purge remains out of scope.",
+      "tags": [
+        "git",
+        "push",
+        "lambda",
+        "aws",
+        "ION-16415"
+      ],
+      "references": [
+        "feature/ION-16415-lambda-aws-upgrade",
+        "5a62dd9ecf",
+        "ION-16415",
+        "origin/feature/ION-16415-lambda-aws-upgrade"
+      ]
+    },
+    {
+      "id": "6c149af56095",
+      "timestamp": "2026-08-19T20:11:16.551457+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Fixed Sonar new-code coverage gate on Utils.java by testing the region/creds seams; amended + force-pushed",
+      "detail": "Fixed Sonar 'Coverage on New Code' gate failure (78.3% < 80%) on lambda/partner-integration/src/main/java/com/inttra/mercury/partnerintegration/Utils.java (Sonar reported 3 uncovered lines + 2 uncovered conditions on new code). Root cause: the migration-added region/credentials seams resolveRegion(Supplier<Region>), resolveRegion(), and resolveCredentialsProvider() had no unit tests. Added 5 tests to UtilsTest: supplied-region returns that region; null-region defaults to us-east-1; supplier-throws defaults to us-east-1 (covers both branch conditions + catch); no-arg resolveRegion non-null; resolveCredentialsProvider non-null. UtilsTest 8->13 tests, all pass. JaCoCo confirms resolveRegion(Supplier) LINE miss=0 BRANCH miss=0 cov=2, resolveRegion() and resolveCredentialsProvider() covered. Amended into the single ION-16415 commit (now 3861b92f65, still 41 files) and force-pushed with --force-with-lease to origin/feature/ION-16415-lambda-aws-upgrade (5a62dd9ecf -> 3861b92f65). Local==remote. Existing PR #1194 (feature/ION-16415-lambda-aws-upgrade => develop).",
+      "tags": [
+        "sonar",
+        "coverage",
+        "test",
+        "lambda",
+        "ION-16415"
+      ],
+      "references": [
+        "lambda/partner-integration/src/test/java/com/inttra/mercury/partnerintegration/UtilsTest.java",
+        "lambda/partner-integration/src/main/java/com/inttra/mercury/partnerintegration/Utils.java",
+        "3861b92f65",
+        "ION-16415",
+        "PR-1194"
+      ]
+    },
+    {
+      "id": "6d9c8a6d3fdb",
+      "timestamp": "2026-08-19T20:43:13.400301+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "Fixed Sonar new-code coverage on registration-archive & auth-tokens-archive HandlerSupport/Processor; amended + force-pushed",
+      "detail": "Fixed additional Sonar 'Coverage on New Code' gate failures on two more lambda modules (integration tests do not count toward Sonar; only unit tests do). registration-archive: HandlerSupport.java was 0% (16 lines) and Processor.java 44.2% (25 lines/18 conditions). auth-tokens-archive: HandlerSupport.java 47.4% (10 lines). Root cause: per-module HandlerSupport client factories (newS3Client/newDynamoDbClient/createStorageClient/createNotificationService) and resolveRegion/resolveCredentialsProvider seams had no UNIT tests, and Processor.toPlainValue's number/bool/map/list/string-set/number-set/null branches were only hit by the IT. Fixes: (1) new registration HandlerSupportClientUnitTest (10 tests) covering resolveRegion(Supplier) 3 branches, resolveRegion() no-arg, resolveCredentialsProvider, newS3Client/newDynamoDbClient via Mockito.mockStatic on the cloud-sdk factories (CI-safe, no AWS creds), plus getTableName/getAWSRegion/getS3BucketName throw-path; (2) registration ProcessorUnitTest new all-attribute-types test to cover toPlainValue branches; (3) auth-tokens HandlerSupportUnitTest extended (4->7) with createStorageClient/createNotificationService via mockStatic + no-arg resolveRegion. Local JaCoCo now: registration Processor 93.8% line (branch 39/40), registration HandlerSupport 84% line + 4/4 branch (~86% Sonar-combined), auth-tokens HandlerSupport 100%. Full verify green incl. DynamoDB-Local ProcessorIT. Note: getTableName-style one-line getters can't be line-covered via the throwing path (JaCoCo exit-probe doesn't fire on exception); success-path would need junit-pioneer @SetEnvironmentVariable, not added to registration (margin already sufficient). JsonSupport.java (57%) and Utils.java overall (73.8%) are NOT new code in this commit so Sonar does not gate them. Amended into single ION-16415 commit (6925e289b9, 42 files) and force-pushed with --force-with-lease. PR #1194.",
+      "tags": [
+        "sonar",
+        "coverage",
+        "test",
+        "lambda",
+        "ION-16415"
+      ],
+      "references": [
+        "lambda/registration-archive/src/test/java/com/inttra/mercury/registration/archive/util/HandlerSupportClientUnitTest.java",
+        "lambda/registration-archive/src/test/java/com/inttra/mercury/registration/archive/ProcessorUnitTest.java",
+        "lambda/auth-tokens-archive/src/test/java/com/inttra/mercury/auth/lambda/HandlerSupportUnitTest.java",
+        "6925e289b9",
+        "ION-16415",
+        "PR-1194"
+      ]
+    }
+  ],
+  "usage": []
+}

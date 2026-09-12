@@ -1,0 +1,59 @@
+{
+  "id": "ad3af3d400334445",
+  "name": "D-2 export() pagination cap + integration tests 2026-08-14",
+  "description": "Address gap D-2 from visibility doc 2026-08-12-visibility-shared-http-client-dynamo-refactoring.md §5.3: EnhancedDynamoRepository.export(projectionExpression, limit) auto-paginates the whole table via the enhanced client's lazy PageIterable, ignoring the intended total cap and with a misleading Javadoc. Fix: treat limit as a total result cap using the same lazy early-return pattern proven in query() (ION-16431); correct the Javadoc. Add DynamoDB-Local integration tests verifying export cap + projection behavior. Follows-on from rebase session 5fab7d4aa9ff4d22.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-08-14T23:19:34.130824+00:00",
+  "updated_at": "2026-08-14T23:32:20.589801+00:00",
+  "status": "completed",
+  "tags": [
+    "D-2",
+    "ION-16431",
+    "cloud-sdk",
+    "dynamo",
+    "pagination",
+    "integration-test",
+    "java"
+  ],
+  "entries": [
+    {
+      "id": "db7baae05a6e",
+      "timestamp": "2026-08-14T23:27:39.788248+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Resumed after server error. Confirmed export() source fix is present but uncommitted; remaining work is integration tests.",
+      "detail": "git status shows EnhancedDynamoRepository.java modified (uncommitted). Diff confirms export(projectionExpression, limit) now: (1) treats limit as total result cap via lazy early-return over table.scan() pages (same pattern as query()), (2) corrected Javadoc, (3) capped ArrayList presize. findAll() unpaginated still guarded by isFindAllUnpaginatedScanEnabled() (out of scope per doc, default off). Next: add DynamoDB-Local integration tests verifying export cap + projection.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/EnhancedDynamoRepository.java:1015"
+      ]
+    },
+    {
+      "id": "5c1354a58d47",
+      "timestamp": "2026-08-14T23:32:08.563330+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "D-2 integration tests added and passing (61 completed, 0 failures). Doc created.",
+      "detail": "Added @Nested ExportIntegrationTests (12 tests) to EnhancedDynamoRepositoryIT covering: limit null=all; limit<,=,>total; non-positive limit {0,-1,-100} parameterized => unbounded; empty table => empty; projection populates only requested attrs (data/tags/attributes null); projection parsing tolerates blank/embedded/trailing-empty segments; blank projection => full items; projection + cap combined. Added ValueSource import. Ran: mvn -pl cloud-sdk-aws -am verify -Dit.test=EnhancedDynamoRepositoryIT with failIfNoSpecifiedTests=false flags. failsafe-summary.xml: completed=61, failures=0, errors=0, skipped=0. All pass. Created cloud-sdk-aws/docs/2026-08-14-export-total-cap-integration-tests.md.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/database/integration/EnhancedDynamoRepositoryIT.java",
+        "cloud-sdk-aws/docs/2026-08-14-export-total-cap-integration-tests.md"
+      ]
+    },
+    {
+      "id": "d41fd9d534d0",
+      "timestamp": "2026-08-14T23:32:20.589788+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Final: D-2 gap addressed with integration tests; all verified green.",
+      "detail": "D-2 complete. Deliverables: (1) EnhancedDynamoRepository.export() source fix (total cap + lazy early return + corrected Javadoc) — was already present uncommitted from prior session run; (2) NEW 12 DynamoDB-Local integration tests in EnhancedDynamoRepositoryIT.ExportIntegrationTests verifying cap + projection behavior — all passing (failsafe completed=61, 0 failures); (3) module doc cloud-sdk-aws/docs/2026-08-14-export-total-cap-integration-tests.md. findAll() unpaginated scan is out of scope (guarded by isFindAllUnpaginatedScanEnabled, default off) per doc. Changes left uncommitted for review. Model: claude-opus-4.8.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/EnhancedDynamoRepository.java",
+        "cloud-sdk-aws/src/test/java/com/inttra/mercury/cloudsdk/database/integration/EnhancedDynamoRepositoryIT.java"
+      ]
+    }
+  ],
+  "usage": []
+}

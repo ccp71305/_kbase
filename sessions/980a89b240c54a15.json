@@ -1,0 +1,153 @@
+{
+  "id": "980a89b240c54a15",
+  "name": "ION-16415-lambda-aws-upgrade-20260731",
+  "description": "",
+  "project": "mercury-services",
+  "created_at": "2026-07-31T23:11:15.526521+00:00",
+  "updated_at": "2026-08-01T04:20:38.841895+00:00",
+  "status": "active",
+  "tags": [
+    "ION-16415",
+    "lambda",
+    "aws-sdk-v2",
+    "cloud-sdk",
+    "design-in-progress"
+  ],
+  "entries": [
+    {
+      "id": "8b5b480eb286",
+      "timestamp": "2026-07-31T23:21:13.339837+00:00",
+      "agent": "unknown",
+      "category": "finding",
+      "summary": "Resumed ION-16415 lambda upgrade; verified cloud-sdk 1.0.28 APIs + per-lambda service map",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/auth-tokens-archive",
+        "lambda/bounceback-email",
+        "lambda/registration-archive",
+        "lambda/partner-integration",
+        "lambda/booking-outbound",
+        "docs/2026-0730-mercury-services-aws-pending.md"
+      ]
+    },
+    {
+      "id": "bbdc1bc825ed",
+      "timestamp": "2026-07-31T23:26:20.525864+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Resolved events-model vs aws-java-sdk-dynamodb coupling; design+branch ready",
+      "detail": "",
+      "tags": [],
+      "references": []
+    },
+    {
+      "id": "b78fbe6221c8",
+      "timestamp": "2026-08-01T00:11:55.630740+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "partner-integration lambda migrated to cloud-sdk 1.0.28 and green (17 tests)",
+      "detail": "Resumed after VS Code crash. Branch feature/ION-16415-lambda-aws-upgrade created off develop (unrelated ION-16397 partner-integrator pom edits left untouched). Design doc kept git-ignored on disk (NOT staged, per user); added Progress-log section 8. partner-integration COMPLETE: Utils SSM->cloud-sdk ParameterStoreClientFactory/CloudParameterStore with resolveRegion(Supplier<Region>)/resolveCredentialsProvider() seams; Processor DynamoDB stream model imports swapped to aws-lambda-java-events 3.14.0 self-contained ...runtime.events.models.dynamodb.* (dropped aws-java-sdk-dynamodb/-ssm, bumped events to 3.14.0, added cloud-sdk-api/-aws 1.0.28-SNAPSHOT). UtilsTest 3 SSM tests rewritten. mvn test = 17 pass, BUILD SUCCESS.",
+      "tags": [],
+      "references": [
+        "lambda/partner-integration/pom.xml",
+        "lambda/partner-integration/src/main/java/com/inttra/mercury/partnerintegration/Utils.java",
+        "lambda/partner-integration/src/main/java/com/inttra/mercury/partnerintegration/Processor.java",
+        "lambda/partner-integration/src/test/java/com/inttra/mercury/partnerintegration/UtilsTest.java"
+      ]
+    },
+    {
+      "id": "26cf459ee55c",
+      "timestamp": "2026-08-01T03:16:50.329147+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "ION-16415: 2/7 lambdas done (partner-integration, booking-outbound)",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/partner-integration/pom.xml",
+        "lambda/booking-outbound/pom.xml"
+      ]
+    },
+    {
+      "id": "8c7d29b010e7",
+      "timestamp": "2026-08-01T03:16:50.371911+00:00",
+      "agent": "unknown",
+      "category": "decision",
+      "summary": "Jersey-2 vs cloud-sdk dropwizard-core exclusion fix",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/partner-integration/pom.xml"
+      ]
+    },
+    {
+      "id": "d11d981db91f",
+      "timestamp": "2026-08-01T03:32:18.772895+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "ION-16415: bounceback-email migrated (3/7), 63 tests pass",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/bounceback-email/pom.xml",
+        "lambda/bounceback-email/src/main/java/com/inttra/mercury/bouncebackemail/HandlerSupport.java",
+        "lambda/bounceback-email/src/main/java/com/inttra/mercury/bouncebackemail/Processor.java",
+        "lambda/bounceback-email/src/main/java/com/inttra/mercury/bouncebackemail/networkservices/blacklistemail/SSMParameterLookUp.java"
+      ]
+    },
+    {
+      "id": "34efe74f2b6f",
+      "timestamp": "2026-08-01T03:40:48.543951+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "ION-16415: 5/7 lambdas done (OV + subscription archive)",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/optionalvalidation-archive/pom.xml",
+        "lambda/subscription-archive/pom.xml"
+      ]
+    },
+    {
+      "id": "8a28b4d4cfbf",
+      "timestamp": "2026-08-01T03:58:25.080584+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "ION-16415: auth-tokens-archive done (6/7), 64 tests",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/auth-tokens-archive/pom.xml",
+        "lambda/auth-tokens-archive/src/main/java/com/inttra/mercury/auth/lambda/HandlerSupport.java",
+        "lambda/auth-tokens-archive/src/main/java/com/inttra/mercury/auth/lambda/AuthTokenDynamoStreamProcessor.java",
+        "lambda/auth-tokens-archive/src/main/java/com/inttra/mercury/auth/lambda/AuthTokenSQStoS3Processor.java"
+      ]
+    },
+    {
+      "id": "38a466b014a3",
+      "timestamp": "2026-08-01T04:20:26.978511+00:00",
+      "agent": "unknown",
+      "category": "progress",
+      "summary": "ION-16415 COMPLETE 7/7: reactor green, single commit 0716579bcd (not pushed)",
+      "detail": "",
+      "tags": [],
+      "references": [
+        "lambda/registration-archive/src/main/java/com/inttra/mercury/registration/archive/Processor.java",
+        "lambda/registration-archive/src/test/java/com/inttra/mercury/registration/archive/ProcessorIT.java",
+        "lambda/docs/2026-0731-lambda-aws-upgrade-design.md"
+      ]
+    },
+    {
+      "id": "5375a062a7ff",
+      "timestamp": "2026-08-01T04:20:38.841878+00:00",
+      "agent": "unknown",
+      "category": "model_info",
+      "summary": "Model: Claude Opus 4.8",
+      "detail": "",
+      "tags": [],
+      "references": []
+    }
+  ],
+  "usage": []
+}

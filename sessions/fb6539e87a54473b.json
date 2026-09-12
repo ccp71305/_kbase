@@ -1,0 +1,81 @@
+{
+  "id": "fb6539e87a54473b",
+  "name": "SI /summary rangeInDays=7 returns no data - root cause",
+  "description": "Investigating why GET /si/summary?rangeInDays=7 returns no data while rangeInDays=2 works. ECS SI-qa on cluster ANEQAWEBSVC-001, account 642960533737. Suspected: SIElasticSearchService counts hits with SIStateType.valueOf(state) which only supports ORIGINAL/REPLACE; an out-of-enum state value in the wider window throws and fails the whole summary.",
+  "project": "shipping-instruction",
+  "created_at": "2026-09-03T14:38:43.298554+00:00",
+  "updated_at": "2026-09-03T16:28:13.572288+00:00",
+  "status": "active",
+  "tags": [
+    "shipping-instruction",
+    "elasticsearch",
+    "bug",
+    "summary",
+    "qa"
+  ],
+  "entries": [
+    {
+      "id": "34a0dbb7b20a",
+      "timestamp": "2026-09-03T14:55:51.828802+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Root-cause investigation of SI /summary rangeInDays=7 returning no data (rangeInDays=2 works)",
+      "detail": "Model: claude-opus-4.8.\nSummary path: SIResource.getSummaryByCompanyId -> SIService.getSISummary -> SIElasticSearchService.getSISummary (ES) + EDIReconcileDao.getEDIReconcile (Oracle).\n\nVerified:\n1) ES layer is HEALTHY and returns MORE data for 7d than 2d. Queried the qa ES domain (search-inttra2-qa-es-bk-search-...us-east-1.es.amazonaws.com, alias 'si' -> index 'si_v2', 145,053 docs) via SigV4. Replicated the exact app query (match requestorId + range lastModifiedDateUtc gte, size 1000, no sort): company 1002660 -> 7d total=794 (729 ORIGINAL+65 REPLACE) vs 2d total=254; company 802441 -> 7d=408 vs 2d=153. So ES is not the cause of 'empty'.\n2) lastModifiedDateUtc mapping = date type, format 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis' - range works across the Aug/Sep month boundary.\n3) Distinct state values index-wide = ONLY ORIGINAL and REPLACE, so SIStateType.valueOf() (enum has only ORIGINAL/REPLACE) does NOT throw. Not the cause.\n4) No company exceeds 1000 SIs in the 7d window (max 794), and ES size caps at 1000, so Oracle ORA-01795 (IN-list>1000) is NOT currently triggered.\n5) No server ERROR logs in SI-qa (log group inttra2-ecs-logs, stream prefix SI-latest-qa-Task) since deploy or over 7 days ('Error in SI Service', 'Reconcile', 'ERROR' all empty). So the 7d call is NOT throwing app-side.\n6) Only 2 real /si/summary calls in SI-qa logs in last 3 days, BOTH Aug 31, BOTH rangeInDays=7 -> 200/144B/~150ms. But those were for COMPANY 1000 which has 0 SIs (empty fast response) - does NOT prove 7d works for a company WITH data.\n7) ALB alb-qa-api-e2open idle_timeout=60s; targets healthy. CloudWatch TargetResponseTime = 0 datapoints over 2 days on both SI target groups (tg-qa-sisummary, tg-qa-sisummary-e2open) -> SI-qa is currently receiving NO client traffic; user's current failing calls are NOT hitting SI-qa (api-beta routing SI elsewhere now).\n\nLatent code issues found in summary path (both UNCHANGED by the AWS upgrade commit):\nA) EDIReconcileDao.getEDIReconcile builds 'internal_reference IN (#INTTRA_REF_IDS)' via raw String.join of up to 1000 IDs, nested inside a MAX()/GROUP BY scan of inttra.EDI_RECONCILE. Scales with #IDs -> 7d window (hundreds of IDs) can be slow and exceed the 60s ALB idle timeout -> client gets no data with NO app error/log (prime hypothesis). Also SQL-injection-style concatenation + latent ORA-01795 if MAX_RESULT_SET_SIZE ever raised above 1000.\nB) SIElasticSearchService.buildElasticSearchRequest uses size=MAX_RESULT_SET_SIZE(1000) with NO sort -> for any company with >1000 SIs in the window, counts are silently truncated/wrong.\n\nDeployment timing: AWS-upgrade commit 588c531b85 (ION-16396, authored 2026-08-18) deployed to SI-qa since ~2026-08-19 (ECS deployment PRIMARY createdAt 2026-08-19T20:39 EDT, task def SI-latest-qa-Task:7). Current running tasks restarted TODAY 2026-09-03 08:11 EDT (deployment updatedAt 08:14), image centos:SI-dev digest sha256:a6af3c6a... The AWS-upgrade commit did NOT change SIElasticSearchService or EDIReconcileDao (summary query logic), so the 7d failure is a pre-existing data-volume/latency issue, not introduced by the upgrade.</detail>\n<parameter name=\"references\">[\"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/resources/SIResource.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/service/SIService.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/service/SIElasticSearchService.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/dao/EDIReconcileDao.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/elasticsearch/ElasticsearchSupport.java\", \"commit:588c531b85 ION-16396\"]",
+      "tags": [
+        "shipping-instruction",
+        "elasticsearch",
+        "oracle",
+        "alb-timeout",
+        "root-cause",
+        "ION-16396"
+      ],
+      "references": []
+    },
+    {
+      "id": "ff8fe57c292c",
+      "timestamp": "2026-09-03T14:59:32.217124+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "DEFINITIVE root cause: /summary latency scales with SI count; 7d/14d exceed UI client timeout for high-volume company 1002660 (backend returns 200 in 7-9s). Plus ES size=1000 truncation bug.",
+      "detail": "Reproduced against the live beta API by authenticating as the two test users (POST https://api-beta.inttra.com/auth password grant, then GET https://api-beta.inttra.e2open.com/si/summary?rangeInDays=N).\n\nqacloud2+001@inttra.com -> companyId 1002660 (AutoCustomer1, HIGH volume):\n  1d: HTTP200 2.96s (submitted178) | 2d: 200 2.87s (234) | 7d: 200 7.29s (submitted729/amended65) | 14d: 200 8.99s (931/69).\nqacloud2+878821_2@inttra.com -> companyId 878821 (LOW volume):\n  1d:1.18s 2d:1.10s 7d:1.65s 14d:2.33s, all HTTP200.\n\nROOT CAUSE (definitive): The SI /summary backend WORKS and returns HTTP 200 for all ranges, but response latency scales with the number of SIs in the window. For a high-volume company the 7d (~7.3s) and 14d (~9s) responses exceed the my-beta frontend/gateway client read-timeout (~5s), so the browser UI shows 'no data' for 7/14 days while <=48h (<=3s) succeeds. Low-volume company never exceeds ~2.3s so it always works. This is why there are NO 500s / ERROR logs server-side.\n\nLatency driver: EDIReconcileDao.getEDIReconcile builds 'internal_reference IN (<up to 1000 ids joined by comma>)' via raw string concat, nested inside 'select MAX(edi_reconcile_id) ... group by internal_reference' scanning inttra.EDI_RECONCILE. Cost scales with #IDs (1d~184 -> 3s, 14d~1000 -> 9s). ES part is fast.\n\nSecondary bug (correctness): SIElasticSearchService.buildElasticSearchRequest uses size=MAX_RESULT_SET_SIZE(1000) with NO sort. For 1002660 at 14d, submitted+amended = 931+69 = exactly 1000 => ES result truncated at 1000 => counts undercounted for windows with >1000 SIs.\n\nNOT a regression from the AWS SDK 2.x upgrade (ION-16396): that commit did not modify SIElasticSearchService or EDIReconcileDao. Symptom emerged as company SI volume grew.\n\nRecommended fixes: (1) Replace client-side hit-counting with ES aggregations (terms agg on state within the requestorId+date filter) to get submitted/amended counts without fetching/truncating docs; (2) rewrite EDIReconcileDao query with bind parameters + chunk IDs in batches of <=1000 (fixes latency-driving pattern, ORA-01795 latent risk, and SQL-injection-style concat), and ensure inttra.EDI_RECONCILE is indexed on internal_reference; (3) short-term: raise the frontend/gateway timeout for the summary call.</detail>\n<parameter name=\"references\">[\"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/dao/EDIReconcileDao.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/service/SIElasticSearchService.java\", \"shipping-instruction/src/main/java/com/inttra/mercury/shippinginstruction/elasticsearch/ElasticsearchSupport.java\", \"company:1002660\", \"company:878821\"]",
+      "tags": [
+        "shipping-instruction",
+        "root-cause",
+        "performance",
+        "timeout",
+        "oracle",
+        "elasticsearch"
+      ],
+      "references": []
+    },
+    {
+      "id": "cfa321ca4fc9",
+      "timestamp": "2026-09-03T15:06:16.839242+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Documented findings + code-flow trace in shipping-instruction/docs/2026-09-03-si-es-query-latency-issue.md",
+      "detail": "Created shipping-instruction/docs/2026-09-03-si-es-query-latency-issue.md documenting the root cause. Sections: 1 Summary + repro tables, 2 Root cause (primary Oracle EDIReconcile latency, secondary ES size=1000 truncation, verified-not-causes, AWS-upgrade relationship + deploy timeline), 3 Code flow SIResource->SIService->SIElasticSearchService/EDIReconcileDao explaining WHY the summary joins ES (submitted/amended from state ORIGINAL/REPLACE) with Oracle EDI_RECONCILE (accepted/rejected/pending/NA carrier ack status), 4 Recommendations (ES terms agg, parameterized+batched DAO, index, short-term timeout, validation plan), 5 Appendix.</detail>\n<parameter name=\"references\">[\"shipping-instruction/docs/2026-09-03-si-es-query-latency-issue.md\"]",
+      "tags": [
+        "documentation",
+        "shipping-instruction",
+        "root-cause"
+      ],
+      "references": []
+    },
+    {
+      "id": "1324ae6cae88",
+      "timestamp": "2026-09-03T16:28:13.572227+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Added detailed §5 command runbook (AWS CLI, CloudWatch, ELB, git, ES SigV4, live API repro) with syntax explanations to the SI latency doc",
+      "detail": "Expanded §5 into a full command runbook (5.0-5.11): prerequisites; AWS CLI flag/JMESPath explanations; sts get-caller-identity; ecs describe-services/describe-task-definition/list-tasks/describe-tasks with --query projections; CloudWatch Logs filter-log-events with epoch-ms time computation and the describe-log-streams/order-by + invalid-filter-pattern gotchas; elbv2 describe-target-groups/load-balancer-attributes (idle_timeout=60)/target-health; cloudwatch get-metric-statistics TargetResponseTime with ISO time + dimensions; git log/show/--stat/--format with Select-String; the es_probe.py SigV4 botocore helper listing plus the 5 ES queries (aliases, mapping, appquery, byCompany agg, byState agg); and the live API repro (curl.exe auth password-grant -> access_token, /auth/principal to resolve companyId, summary loop with -w timing) for both test users. Passwords replaced with <PASSWORD> placeholders.</detail>\n<parameter name=\"references\">[\"shipping-instruction/docs/2026-09-03-si-es-query-latency-issue.md\"]",
+      "tags": [
+        "documentation",
+        "runbook",
+        "shipping-instruction"
+      ],
+      "references": []
+    }
+  ],
+  "usage": []
+}

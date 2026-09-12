@@ -1,0 +1,281 @@
+{
+  "id": "f9cd7026c5814cd4",
+  "name": "ION-16693 Visibility Lambda OWASP (jna-jpms HIGH)",
+  "description": "Address jna-jpms 5.14.0 HIGH OWASP finding on the four visibility lambda deployment packages (s3-archiver, error-email, pending-start, outbound-poller). Follow-up to the 2026-08-31 visibility OWASP refactor (commons 1.0.33-SNAPSHOT). Branch feature/ION-16693-vis-lambda-owasp-fix.",
+  "project": "mercury-services / visibility",
+  "created_at": "2026-09-01T19:58:11.607459+00:00",
+  "updated_at": "2026-09-02T01:35:13.853451+00:00",
+  "status": "completed",
+  "tags": [
+    "visibility",
+    "owasp",
+    "lambda",
+    "ION-16693",
+    "security",
+    "jna"
+  ],
+  "entries": [
+    {
+      "id": "5e352a2dcc7d",
+      "timestamp": "2026-09-01T20:02:04.931216+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "finding",
+      "summary": "Root cause: jna-jpms 5.14.0 HIGH is a dependency-check FALSE POSITIVE (CPE sun:java_se, Low confidence); arrives via cloud-sdk-api -> dropwizard-core 5.0.2 -> jetty-setuid-jna 2.0.3; visible only in lambdas because they ship an exploded lib/ ZIP instead of a shaded uber-jar",
+      "detail": "OWASP summary-table extraction from the 4 Jenkins CI reports (26.09.002) shows an IDENTICAL set of 3 HIGH rows in all four lambdas:\n\n| Dependency | Highest Sev | CVE count | CPE confidence | CPE |\n|---|---|---|---|---|\n| jackson-databind-2.22.0.jar | HIGH | 5 | Highest | cpe:2.3:a:fasterxml:jackson-databind:2.22.0 |\n| jna-jpms-5.14.0.jar | HIGH | 9 | **Low** | cpe:2.3:a:**sun:java_se**:5.14.0 |\n| jsoup-1.17.2.jar | HIGH | 2 | Highest | cpe:2.3:a:jsoup:jsoup@1.17.2 |\n\njackson-databind + jsoup are the two HIGHs the user is taking a release exception for (also present in other modules at commons 1.0.33-SNAPSHOT). In scope for this session: jna-jpms only.\n\nROOT CAUSE OF THE jna-jpms FINDING = FALSE POSITIVE CPE MATCH.\ndependency-check's CPE analyzer mapped net.java.dev.jna:jna-jpms 5.14.0 onto `cpe:2.3:a:sun:java_se:5.14.0` (Oracle/Sun Java SE) at **Low** confidence, because the jar's package namespace is `com/sun/jna/**` and it embeds native `jnidispatch.dll` / `.so` / `.dylib` binaries whose only evidence is \"Vendor=jnidispatch (file name), Product=jnidispatch (file name)\". The 9 CVEs are Oracle Java SE CVEs, not JNA CVEs. Confirmed from the report:\n  jna-jpms-5.14.0.jar cpe:2.3:a:sun:java_se:5.14.0 pkg:maven/net.java.dev.jna/jna-jpms@5.14.0 HIGH 9 Low 54\n  ...matched \"cpe:2.3:a:sun:java_se:*:14:*\" versions up to (including) 6\n\nDEPENDENCY ORIGIN (mvn dependency:tree, visibility-s3-archiver):\n  com.inttra.mercury:visibility-s3-archiver:jar:1.0\n  \\- com.inttra.mercury:cloud-sdk-api:jar:1.0.33-SNAPSHOT:compile\n     \\- io.dropwizard:dropwizard-core:jar:5.0.2:compile\n        \\- org.eclipse.jetty.toolchain.setuid:jetty-setuid-jna:jar:2.0.3:compile\n           \\- net.java.dev.jna:jna-jpms:jar:5.14.0:compile\ndropwizard-core 5.0.2 declares jetty-setuid-jna as a direct compile dependency (dropwizard-core-5.0.2.pom line 167-169; version property jetty-setuid-jna.version=2.0.3 in dropwizard-dependencies-5.0.2.pom).\n\nWHY ONLY THE LAMBDAS:\nThe 4 lambda modules package via maven-assembly-plugin src/assembly/deployment_package.xml -> a ZIP with a `lib/` dependencySet, i.e. every runtime dependency stays a SEPARATE jar file that dependency-check unpacks and scans as its own dependency node (and it recurses into the jar to find the jnidispatch native libs). The other visibility modules ship a maven-shade uber-jar, where JNA's classes are merged into one artifact, so no standalone `jna-jpms-5.14.0.jar` node is ever created and the sun:java_se CPE is never assigned. Verified: Visibility-26.09.005-OWASP.html (shaded app) has 0 occurrences of \"jna-jpms\"; all four lambda reports have 53 each.\n\nRUNTIME REACHABILITY:\n`io.dropwizard.core.server.AbstractServerFactory` is the ONLY dropwizard-core class referencing org.eclipse.jetty.setuid (verified by extracting dropwizard-core-5.0.2.jar and scanning every .class). Its `buildServer(LifecycleEnvironment, ThreadPool)` UNCONDITIONALLY calls `buildSetUIDListener()` -> `new org.eclipse.jetty.setuid.SetUIDListener()`. So a reactor-wide exclusion would break every Dropwizard service in visibility. The 4 lambdas are AWS RequestHandler implementations and contain ZERO references to io.dropwizard / jetty / Configuration (grep over all 4 src trees = no matches), so they never build a Jetty Server.",
+      "tags": [
+        "root-cause",
+        "jna",
+        "owasp",
+        "false-positive",
+        "dropwizard",
+        "assembly"
+      ],
+      "references": [
+        "visibility/visibility-s3-archiver/pom.xml",
+        "visibility/visibility-s3-archiver/src/assembly/deployment_package.xml",
+        "VisibilityS3Archiver-26.09.002-OWASP.html",
+        "VisibilityOutboundPoller-26.09.002-OWASP.html",
+        "VisibilityErrorEmail-26.09.002-OWASP.html",
+        "VisibilityPendingStart-26.09.002-OWASP.html",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "27b10fe64675",
+      "timestamp": "2026-09-01T20:44:46.353218+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "finding",
+      "summary": "Explained local-vs-Jenkins OWASP discrepancy: (1) jna FP is hidden locally by dependency-check's hosted publishedSuppressions.xml (upstream declares sun:java_se on maven artifacts an FP); Jenkins agent lacks that file. (2) Jenkins' 490 vs local 240 dep count = it scans exploded lib/ AND the zip, cataloguing all 221 jars twice. Both proven by controlled experiment; same DC 13.0.0 both sides.",
+      "detail": "User asked why their local run\n  dependency-check --project visibility-ob-poller --scan .\\visibility-outbound-poller-1.0-deployment_package.zip --out owasp --suppression ..\\suppressions.xml --nvdApiKey $env:NVD_API_KEY\n(run BEFORE the fix) showed jackson-databind + jsoup HIGH but NOT jna-jpms, while Jenkins showed all three and ~2x the dependency count.\n\nANSWER: the command was correct. Two INDEPENDENT differences, both proven by controlled experiment.\n\n(1) THE jna FALSE POSITIVE IS SUPPRESSED LOCALLY BY THE HOSTED SUPPRESSION FILE.\nBoth sides run dependency-check 13.0.0 (Jenkins HTML footer literally states \"dependency-check version : 13.0.0\"), so it is NOT a version gap.\ndependency-check auto-downloads <data>/publishedSuppressions.xml. That file (local copy dated 2026-09-01) contains an upstream base rule:\n    <suppress base=\"true\">\n      <notes>FP per issue #8257, #8701, #8718, #8719, #8720, #8721, #8722, #8723</notes>\n      <packageUrl regex=\"true\">^pkg:maven/.*@.*$</packageUrl>\n      <cpe regex=\"true\">cpe:/a:oracle:java_se(:.*)?$</cpe>\n      <cpe regex=\"true\">cpe:/a:sun:java_se(:.*)?$</cpe>\n    </suppress>\ni.e. upstream itself declares sun/oracle:java_se on a Maven artifact to be a false positive. The dev workstation has internet + --nvdApiKey so it has the file; the Jenkins agent evidently does not (no egress to the hosted-suppressions URL), so the FP surfaces there.\n\nIMPORTANT SUBTLETY: passing --disableHostedSuppressions is NOT enough to reproduce Jenkins - an already-downloaded publishedSuppressions.xml is still applied. Had to clone the data dir and delete the file:\n    Copy-Item C:\\dependency-check\\dependency-check-current\\data\\* $env:TEMP\\dc-data-nosupp -Recurse\n    Remove-Item $env:TEMP\\dc-data-nosupp\\publishedSuppressions.xml*\n    dependency-check.bat --scan <jna-jpms-5.14.0.jar> --data $env:TEMP\\dc-data-nosupp --noupdate --disableHostedSuppressions\nRESULT - reproduces Jenkins exactly:\n    CPE: cpe:2.3:a:sun:java_se:5.14.0:*:*:*:*:*:*:*  | confidence: LOW\n    vulnerabilities: 9  -> {HIGH: 4, MEDIUM: 5}\n    CVE-2009-2476/2689/2475/2716 (HIGH) + CVE-2009-2676/2717/2690/2719/2720 (MEDIUM)\nAll nine are 2009 Sun Java SE CVEs, against a JNA library released in 2024 - conclusive false positive.\nWith the file present: 0 vulnerabilities and vulnerabilityIds is EMPTY (the CPE itself is stripped).\n\n(2) THE ~2x DEPENDENCY COUNT IS JENKINS SCANNING THE PACKAGE TWICE.\nJenkins reports \"Dependencies Scanned : 490\" (outbound-poller) / 492 (s3-archiver); local zip scan reports 240/241.\nParsing the Jenkins report's file paths shows the scanned workspace contains BOTH the exploded lib/ AND the .zip:\n    <ws>/VisibilityOutboundPoller-26.09.002-<ts>/lib/<jar>            -> 221 distinct jars\n    <ws>/VisibilityOutboundPoller-26.09.002-<ts>/<pkg>.zip/lib/<jar>  -> the SAME 221 jars\n    jars appearing in both forms: 221 (100%)\nSo every jar is catalogued twice (221 x 2 = 442, plus native .dll/.so entries and the zip itself = 490). The 206 \"Related Dependencies\" blocks in the report are dependency-check merging those pairs. 221 also exactly matches the pre-fix lib/ jar count reconstructed locally.\nA/B control (same content scanned as zip-only vs as an exploded dir) gave IDENTICAL results locally - 206 dependency entries either way - so the scan LAYOUT does not change findings, only the duplicate cataloguing inflates the count.\n\nCONSEQUENCE FOR THE FIX: a suppressions.xml entry would also have silenced this, but removing the dependency is strictly better - the artifact is gone from the package, so the finding cannot recur regardless of scanner configuration, and the dead jar (plus its bundled Windows/macOS/Linux native libs) leaves the deployment ZIP.\nRECOMMENDATION for the platform/CI team: give the Jenkins agent access to the hosted suppression list (or commit a copy and pass --suppression), otherwise every known upstream FP will keep appearing only in CI.",
+      "tags": [
+        "owasp",
+        "false-positive",
+        "jenkins",
+        "dependency-check",
+        "root-cause",
+        "tooling"
+      ],
+      "references": [
+        "visibility/visibility-outbound-poller/suppressions.xml",
+        "VisibilityOutboundPoller-26.09.002-OWASP.html",
+        "owasp-reports/jna-nosupp/dependency-check-report.json",
+        "owasp-reports/ab/A-zip-only",
+        "owasp-reports/ab/B-exploded-dir",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "a941f0b8f764",
+      "timestamp": "2026-09-01T20:55:29.895571+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "progress",
+      "summary": "ION-16693 complete: jna-jpms excluded from all 4 visibility lambdas, committed 9793f14a48; doc renamed to date-prefix convention",
+      "detail": "Final state of the visibility-lambda OWASP fix.\n\nCOMMIT: 9793f14a48 on branch feature/ION-16693-vis-lambda-owasp-fix\n  4 files changed, +77/-1 (poms only)\n  - visibility/visibility-s3-archiver/pom.xml   : exclude jetty-setuid-jna on cloud-sdk-api, cloud-sdk-aws, visibility-commons; log4j-core 2.23.1 -> ${log4j.version} (2.25.5)\n  - visibility/visibility-pending-start/pom.xml : exclude jetty-setuid-jna (x3 deps)\n  - visibility/visibility-outbound-poller/pom.xml : exclude jetty-setuid-jna (x3 deps)\n  - visibility/visibility-error-email/pom.xml   : exclude jetty-setuid-jna on visibility-commons (its only mercury dep)\n\nDOC: visibility/docs/2026-09-01-visibility-lambda-owasp.md\n  NOTE FOR FUTURE SESSIONS - repo doc convention is a DATE-PREFIXED FILENAME directly\n  under <module>/docs/, i.e. docs/YYYY-MM-DD-<slug>.md. Do NOT create a docs/<date>/ folder.\n  Corrected by the user this session. Also note **/docs/ is gitignored (.gitignore:110),\n  so module docs are local-only and are never part of the commit.\n  10 sections: summary; origin of jna-jpms; why lambda-only; false-positive proof;\n  local-vs-Jenkins scan discrepancy; the fix; verification; commands used (16 numbered\n  commands with syntax + explanation); files changed; residual risk.\n\nROOT CAUSE RECAP:\n  dropwizard-core 5.0.2 declares org.eclipse.jetty.toolchain.setuid:jetty-setuid-jna:2.0.3\n  directly, which pulls net.java.dev.jna:jna-jpms:5.14.0. Lambda-only because the 4 lambdas\n  run maven-assembly-plugin (deployment_package.xml keeps each dependency as its own jar in\n  lib/) while the other 7 modules ship a shaded uber-jar, so DC never sees a standalone\n  jna-jpms jar there.\n\nFALSE POSITIVE: DC matched jna-jpms to cpe:2.3:a:sun:java_se:5.14.0 at LOW confidence\n  (com/sun/jna/** namespace + jnidispatch native evidence). All 9 CVEs are 2009 Sun Java SE\n  JRE bugs. Upstream DC suppresses this in its hosted publishedSuppressions.xml.\n\nSAFETY: AbstractServerFactory is the only dropwizard-core class referencing\n  org/eclipse/jetty/setuid, and buildServer() calls buildSetUIDListener() UNCONDITIONALLY\n  (javap -c verified) -> the exclusion MUST stay lambda-only, never reactor-wide.\n\nVERIFICATION: mvn -o clean verify BUILD SUCCESS across all 12 visibility modules (unit +\n  failsafe/DynamoDB ITs); 0 jna/setuid jars in all 4 ZIPs (220/219/219/219 lib jars); all 4\n  handlers boot from their actual deployment ZIPs via Class.forName(initialize=true) + no-arg\n  ctor, exit 0, reaching app code and stopping only at env-var validation; constant-pool scan\n  of ~220 jars per lambda shows no reachable setuid ref; DC re-scan shows 0 HIGH and no jna\n  artifact; all 7 non-lambda modules still resolve jetty-setuid-jna:2.0.3 unchanged.\n\nALSO FIXED (pre-existing, unrelated): VisibilityS3ArchiverIT was failing with\n  NoSuchMethodError ServiceLoaderUtil.loadServices - s3-archiver was the only module\n  hardcoding log4j-core 2.23.1 against log4j-api 2.25.5. Missed yesterday because\n  verification used `mvn package`, which does not run failsafe. Lesson: use `mvn verify`.\n\nOUT OF SCOPE (agreed release exception, code freeze): jackson-databind-2.22.0 and\n  jsoup-1.17.2 HIGHs - both jars still ship unchanged, also present in other modules on\n  commons 1.0.33-SNAPSHOT.\n\nOPEN ITEM FOR CI/PLATFORM: give the Jenkins agent egress to DC's hosted suppression URL, or\n  commit publishedSuppressions.xml and pass --suppression. Otherwise every upstream-known FP\n  will keep surfacing in CI only. Captured in section 5.3 of the doc.\n\nEXPECTED NEXT JENKINS SCAN: 2 HIGH instead of 3, jna-jpms row gone, ~2 fewer jars per package.",
+      "tags": [
+        "ION-16693",
+        "owasp",
+        "visibility",
+        "lambda",
+        "jna-jpms",
+        "dependency-check",
+        "completed"
+      ],
+      "references": [
+        "visibility/docs/2026-09-01-visibility-lambda-owasp.md",
+        "visibility/docs/2026-08-31-visibility-owasp-refactor.md",
+        "visibility/visibility-s3-archiver/pom.xml",
+        "visibility/visibility-error-email/pom.xml",
+        "visibility/visibility-pending-start/pom.xml",
+        "visibility/visibility-outbound-poller/pom.xml",
+        ".gitignore:110",
+        "9793f14a48",
+        "feature/ION-16693-vis-lambda-owasp-fix",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "a6ff439bca0b",
+      "timestamp": "2026-09-01T20:55:37.423026+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "general",
+      "summary": "model_info: Claude Opus 5 via GitHub Copilot CLI 1.0.81",
+      "detail": "Agent: GitHub Copilot CLI v1.0.81\nModel: Claude Opus 5 (model id: claude-opus-5)\nWork performed: ION-16693 visibility lambda OWASP jna-jpms fix, branch feature/ION-16693-vis-lambda-owasp-fix, commit 9793f14a48.",
+      "tags": [
+        "model_info",
+        "telemetry"
+      ],
+      "references": [
+        "claude-opus-5",
+        "copilot-cli-1.0.81",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "c0a1da90f89f",
+      "timestamp": "2026-09-01T22:15:24.836183+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "finding",
+      "summary": "ION-16693 follow-ups: commons 1.0.27 was a -pl-without-am artifact; s3-archiver IT never runs in CI; jsoup/jackson HIGHs are OSS-Index-only and DC13 needs a token; 12.2.2 data copy harmless; suppression-rename reproduces the jna HIGH exactly",
+      "detail": "Five follow-up questions from the user, all investigated with controlled experiments. Doc updated\n(visibility/docs/2026-09-01-visibility-lambda-owasp.md, now 11 sections). No code change needed;\ncommit 9793f14a48 stands.\n\n--- Q1: why did error-email show commons 1.0.27-SNAPSHOT? ---\nIT WAS A PROBE ARTIFACT, NOT REALITY. My probe was `mvn -o dependency:tree -pl visibility-error-email`\nWITHOUT `-am`. Without -am, visibility-commons:1.0 is resolved from ~/.m2, and its INSTALLED parent\npom ~/.m2/repository/com/inttra/mercury/visibility/1.0/visibility-1.0.pom (last installed 2026-07-24)\nstill carries <mercury.commons.version>1.0.27-SNAPSHOT</mercury.commons.version>.\nWith `-am` it correctly shows commons/cloud-sdk-api/cloud-sdk-aws = 1.0.33-SNAPSHOT.\nGENERAL LESSON FOR THIS REPO: ALWAYS pass -am to dependency:tree / help:effective-pom, otherwise you\nread stale installed poms. The Jenkins job already uses --also-make so CI was never affected.\nRe-ran the whole §7.1 verification with -am: 4 lambdas have NO jna; all 7 other modules still resolve\njetty-setuid-jna:2.0.3 -> jna-jpms:5.14.0. Conclusion unchanged.\n\n--- Q2: how did the s3-archiver IT survive a full build? ---\nIT IS NEVER EXECUTED - not locally, not in CI.\nBefore yesterday: visibility/pom.xml log4j.version=2.23.1 AND s3-archiver hardcoded log4j-core 2.23.1\n-> matched, no problem. Commit 08a0c83d41 bumped the property to 2.25.5, leaving log4j-core 2.23.1\nagainst log4j-api 2.25.5 -> NoSuchMethodError ServiceLoaderUtil.loadServices.\nYesterday's documented local command (2026-08-31 doc line 199) was `mvn -pl visibility -amd clean\npackage` - failsafe binds to integration-test/verify, both AFTER package.\nJenkins job (supplied by user) is also package-only:\n  mvn -ntp package sonar:sonar -P mercury-commons,sonar ... -pl ${app_dir} --also-make\nTIMELINE PROOF: PR #1226 merged 2026-09-01 07:18 UTC; Jenkins built VisibilityS3Archiver-26.09.002 at\n2026-09-01 09:02 UTC (workspace epoch stamp 1788253326) - i.e. 1h44m AFTER the bump - and SUCCEEDED.\nSo CI ran the broken combination and passed because it never runs the IT.\nNOTE: log4j-core is <scope>test</scope> in s3-archiver -> the fix has ZERO effect on the deployed\nartifact; it only repairs the IT.\nFOLLOW-UP TO RAISE: CI should run `verify` so DynamoDB-Local ITs gate the build.\n\n--- Q3: origin + fix versions of the jsoup / jackson HIGHs ---\njsoup 1.17.2  <- TRANSITIVE from commons 1.0.33-SNAPSHOT. Not declared anywhere in visibility.\n                 Owned by mercury-services-commons. Fix requires a bump there, or a\n                 dependencyManagement pin in visibility/pom.xml.\njackson-databind 2.22.0 <- DECLARED in visibility/visibility-commons/pom.xml:51-54 as\n                 ${jackson.version}, set in visibility/pom.xml:36. WE own this one.\nCVE-2026-75140 (jsoup) HIGH, CVSSv4 8.7, CWE-770: XmlTreeBuilder copies the whole inherited namespace\n  map per start element -> quadratic memory -> OOM. Affects jsoup THROUGH 1.23.2. Fix commit 862ba2f,\n  PR jhy/jsoup#2556. FIXED IN jsoup 1.23.3  <-- clean upgrade available, clears a HIGH.\nCVE-2026-71497 (jsoup) MEDIUM XSS - same upgrade.\nCVE-2026-68497 (jackson-databind) HIGH, CVSSv4 8.7, CWE-770: missing StreamReadConstraints number-len\n  limit on XMLGregorianCalendar/Duration. PR FasterXML/jackson-databind#6127. Confirmed fixed in 3.1.6;\n  NO published 2.22.x backport as of 2026-09-01.\njackson 2.22.1 exists and fixes CVE-2026-54515 / 59889 / 77310 (MEDIUMs) but NOT the HIGH.\nRECOMMENDATION: do the jsoup bump first - it is the only one that actually reduces the HIGH count.\n\n--- Q4: was copying the 12.2.2 data dir into 13.0.0 wrong / suppressions file invalid? ---\nNO, the copy is harmless and the suppression file IS valid.\ndependency-check-current -> symlink -> dependency-check-13.0.0.\n12.2.2/data last refreshed 2026-08-31 19:48 (publishedSuppressions.xml 84,781 B).\n13.0.0/data after copy + first run: 2026-09-01 15:16, publishedSuppressions.xml 85,038 B,\n  *.properties grew 56 -> 59 bytes (rewritten under the new version marker),\n  odc.mv.db 249,405,440 -> 249,643,008 B. No schema-mismatch error; scans run normally.\nFunctional proof it is valid: renaming it flips jna 0 -> 9 vulns and back (Q5).\nTHE REAL CAUSE of the jackson/jsoup difference is the 12.2.2 -> 13.0.0 UPGRADE, not the data copy:\n  [WARN] Sonatype OSS Index Analyzer disabled due to missing credentials. Authentication with token\n         is now required, and OSS Index is migrating to Sonatype Guide.\nBoth jackson CVE-2026-68497 and both jsoup CVEs are (OSSINDEX)-sourced, not NVD. Local JSON shows\nvuln sources = ['NVD'] only and 0 occurrences of \"OSSINDEX\" in the HTML. Jenkins reports are ALSO\n13.0.0 but contain 25-41 OSSINDEX hits each -> CI HAS AN OSS INDEX TOKEN, the workstation does not.\nUnder 12.2.2 OSS Index worked anonymously, which is why the user's earlier local scan showed\njackson+jsoup. So: three HIGHs, two data sources, each disabled in a different place.\nNOTE: dependency-check-maven is COMMENTED OUT in the root pom - CI runs the DC CLI as its own step and\nfeeds Sonar via -Dsonar.dependencyCheck.htmlReportPath.\n\n--- Q5: rename the suppression file and confirm the jna HIGH appears ---\nDONE, in place, on a full reconstructed PRE-FIX s3-archiver package (222 jars = 220 + jna-jpms +\njetty-setuid-jna), with try/finally to guarantee restore.\n  file present                     -> jna 0 vulns\n  --disableHostedSuppressions only -> jna 0 vulns (flag stops REFRESH, not USE)\n  file renamed to .DISABLED        -> jna {'HIGH': 4, 'MEDIUM': 5} = 9, CVE-2009-2476/2689/2475/2716...\n  restored                         -> jna 0 vulns  (verified by re-scan)\nEXACT match for Jenkins.\nGOTCHA: while the real file is renamed away, DC writes a FRESH BUNDLED snapshot (82,965 B) into the\ndata dir. You must delete that and rename your original (85,038 B) back - a plain Rename-Item back\nfails with \"Cannot create a file when that file already exists\". Handled and restored.\n\n--- Doc changes ---\nNew/rewritten: §2.1 (stale-pom trap), §5 fully restructured into 5.1-5.5 with a 3-source summary\ntable, §6.3 expanded with the CI job + timeline, §7.1 re-verified with -am, §7.5 caveat rewritten,\nnew §9 (the other two HIGHs), §10/§11 renumbered, §8 gained commands 3a, 10(c), 10a, 17, 18, 19, 20, 21.",
+      "tags": [
+        "ION-16693",
+        "owasp",
+        "dependency-check",
+        "oss-index",
+        "maven",
+        "stale-pom",
+        "ci",
+        "visibility"
+      ],
+      "references": [
+        "visibility/docs/2026-09-01-visibility-lambda-owasp.md",
+        "visibility/pom.xml:36",
+        "visibility/visibility-commons/pom.xml:51",
+        "visibility/visibility-s3-archiver/pom.xml",
+        "08a0c83d41",
+        "7573ea93aa",
+        "9793f14a48",
+        "CVE-2026-75140",
+        "CVE-2026-68497",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "7af47d8d1fdf",
+      "timestamp": "2026-09-01T22:19:23.404602+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "progress",
+      "summary": "ION-16693 lambda OWASP work complete — all 5 follow-up questions answered, doc finalised at 56 KB",
+      "detail": "FINAL SUMMARY.\n\nCode fix: commit 9793f14a48 on feature/ION-16693-vis-lambda-owasp-fix (local only, not pushed).\n4 pom.xml files, +77/-1: <exclusion> of org.eclipse.jetty.toolchain.setuid:jetty-setuid-jna on the\nmercury deps of all 4 lambdas, plus an unrelated log4j-core 2.23.1 -> ${log4j.version} repair in\nvisibility-s3-archiver (test scope only, zero effect on the deployed artifact).\n\nVerified: mvn -o clean verify green across all 12 visibility modules (unit + IT); all 4 lambdas boot\nfrom their actual deployment ZIPs (exit 0); DC re-scan shows 0 jna findings; 7 non-lambda modules\nbyte-for-byte unchanged in dependency resolution.\n\nFollow-up answers (all in visibility/docs/2026-09-01-visibility-lambda-owasp.md):\n Q1 §2.1  commons 1.0.27-SNAPSHOT was a PROBE ARTIFACT. dependency:tree without -am resolves sibling\n          modules from ~/.m2 using the stale installed visibility-1.0.pom (2026-07-24). With -am it\n          is 1.0.33-SNAPSHOT. CI unaffected (Jenkins uses --also-make).\n Q2 §6.3  The s3-archiver IT is never executed anywhere. failsafe binds to integration-test/verify;\n          both the local command (mvn -pl visibility -amd clean package) and the Jenkins job\n          (mvn ... package sonar:sonar ... --also-make) stop at package. PR #1226 merged 09-01\n          07:18 UTC, Jenkins built 26.09.002 at 09:02 UTC and went green with the broken combo.\n Q3 §9    jsoup 1.17.2 is TRANSITIVE from commons (owned by mercury-services-commons) —\n          CVE-2026-75140 HIGH, fixed in jsoup 1.23.3. jackson-databind 2.22.0 is DECLARED by us in\n          visibility-commons via ${jackson.version} (visibility/pom.xml:36) — CVE-2026-68497 HIGH,\n          fixed only in 3.1.6, no 2.22.x backport as of 2026-09-01 (2.22.1 clears 3 MEDIUMs only).\n          Recommendation: bump jsoup first, it is the only one that lowers the HIGH count.\n Q4 §5.2/5.3  The 12.2.2 -> 13.0.0 data-dir copy was HARMLESS (13.0.0 re-downloaded\n          publishedSuppressions.xml 84,781 -> 85,038 B, rewrote the .properties marker, no schema\n          error). The real cause of the jackson/jsoup discrepancy is the VERSION UPGRADE: DC 13\n          requires a token for Sonatype OSS Index (\"disabled due to missing credentials\"). Both\n          HIGHs are (OSSINDEX)-sourced. Local reports: sources ['NVD'], 0 OSSINDEX hits. Jenkins\n          (same 13.0.0): 25-41 OSSINDEX hits => CI has a token, the workstation does not.\n Q5 §5.1  Rename experiment reproduced Jenkins exactly, protected by try/finally:\n             present -> 0 | --disableHostedSuppressions only -> 0 | renamed .DISABLED -> 9 (4 HIGH\n             + 5 MEDIUM, CVE-2009-2476/2689/2475/2716) | restored -> 0.\n          Note --disableHostedSuppressions stops the file being REFRESHED, not USED. Restore gotcha:\n          DC writes a fresh bundled snapshot (82,965 B) while the real file is renamed away, so the\n          rename-back fails unless the snapshot is removed first.\n\nOutstanding, none blocking: branch not pushed / no PR; raise tickets to (a) make Jenkins run verify\nso the DynamoDB-Local ITs gate the build and (b) publish an OSS Index token to developers; re-check\nfor a jackson-databind 2.22.x backport before the 2-week exception lapses.\n\nHygiene flagged to the user: their NVD API key is passed inline and is readable via\nGet-CimInstance Win32_Process — should move to $env:NVD_API_KEY and be rotated.",
+      "tags": [
+        "ION-16693",
+        "owasp",
+        "visibility",
+        "lambda",
+        "jna-jpms",
+        "dependency-check",
+        "completed"
+      ],
+      "references": [
+        "visibility/docs/2026-09-01-visibility-lambda-owasp.md",
+        "visibility/visibility-s3-archiver/pom.xml",
+        "visibility/visibility-error-email/pom.xml",
+        "visibility/visibility-pending-start/pom.xml",
+        "visibility/visibility-outbound-poller/pom.xml",
+        "commit 9793f14a48",
+        "feature/ION-16693-vis-lambda-owasp-fix",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "bed95a5d1572",
+      "timestamp": "2026-09-01T23:26:13.611424+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "progress",
+      "summary": "Pushed feature/ION-16693-vis-lambda-owasp-fix to origin with upstream tracking set",
+      "detail": "git push -u origin feature/ION-16693-vis-lambda-owasp-fix\n\nResult: * [new branch] feature/ION-16693-vis-lambda-owasp-fix -> feature/ION-16693-vis-lambda-owasp-fix\nUpstream now tracks origin/feature/ION-16693-vis-lambda-owasp-fix.\nlocal SHA == remote SHA == 9793f14a486e868718ca57b5885ccb413e56ebf9. Working tree in sync (no ahead/behind).\n\nCommit subject already carried the ticket key, so no amend/rewrite was needed:\n  \"ION-16693: exclude jetty-setuid-jna from visibility lambda packages\"\nBody documents root cause (dropwizard-core 5.0.2 -> jetty-setuid-jna 2.0.3 -> jna-jpms 5.14.0), the\nlambda-only packaging reason, the false-positive analysis, the reachability argument for removing\nrather than suppressing, the unrelated log4j-core ${log4j.version} IT repair, and the verification\nevidence. Includes the Co-authored-by trailer.\n\nBitbucket PR creation link returned by the remote:\nhttps://git.dev.e2open.com/projects/INT/repos/mercury-services/pull-requests?create&sourceBranch=refs%2Fheads%2Ffeature%2FION-16693-vis-lambda-owasp-fix\n\nPR not raised yet - left for the user to open against develop.",
+      "tags": [
+        "ION-16693",
+        "git",
+        "push",
+        "visibility",
+        "lambda",
+        "owasp"
+      ],
+      "references": [
+        "feature/ION-16693-vis-lambda-owasp-fix",
+        "commit 9793f14a48",
+        "ION-16693",
+        "https://git.dev.e2open.com/scm/int/mercury-services.git"
+      ]
+    },
+    {
+      "id": "a104a35ebf93",
+      "timestamp": "2026-09-02T00:43:57.129671+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "finding",
+      "summary": "OSS Index auth in DC 13: token needs the sonatype_pat_ prefix OR a username, else silently disabled",
+      "detail": "Question: how to pass the OSS Index token to the dependency-check CLI to clear\n\"[WARN] Sonatype OSS Index Analyzer disabled due to missing credentials.\"\n\nFLAG: --ossIndexPassword <token>  (there is no --ossIndexToken; the token goes in the password slot)\nPROPERTY: analyzer.ossindex.password  (+ analyzer.ossindex.user for legacy tokens)\nFILE: -P / --propertyfile <file>\n\nCRITICAL GATE (not documented in --help; read from OssIndexAnalyzer.prepareAnalyzer() bytecode via\njavap -p -c on dependency-check-core-13.0.0.jar):\n\n  if (password.isEmpty() || (user.isEmpty() && !password.startsWith(\"sonatype_pat_\")))\n        -> LOG.warn(\"disabled due to missing credentials\"); setEnabled(false);\n\nSo a password ALONE is not enough. The analyzer enables only when either:\n  (a) the password starts with the literal prefix \"sonatype_pat_\" (Sonatype Guide PAT, no username\n      required), or\n  (b) BOTH analyzer.ossindex.user AND analyzer.ossindex.password are set (legacy OSS Index token;\n      also logs a deprecation warning - legacy tokens must be replaced before 2026-12-31).\n\nEMPIRICALLY VERIFIED with dummy values on a single-jar scan:\n  password unset                       -> \"disabled due to missing credentials\"\n  password=DUMMY_TOKEN, no user        -> STILL \"disabled due to missing credentials\" (no prefix)\n  password=sonatype_pat_DUMMY, no user -> ENABLED; runs, then \"invalid credentials\" (exit 14)\n  user + legacy password               -> ENABLED; runs, plus migration deprecation warning\nThe message changing from \"missing credentials\" to \"invalid credentials\" is the signal that the\ncredential was picked up.\n\nOTHER VERIFIED FACTS:\n- DC itself warns against the CLI flag: \"[WARN] ossIndexPassword used on the command line, consider\n  moving the password to a properties file using the key `analyzer.ossindex.password` and using the\n  --propertyfile argument instead\". This corroborates the earlier NVD-key hygiene advice - inline\n  secrets are readable via Get-CimInstance Win32_Process and land in shell history.\n- Default URL on 13.0.0 is already https://api.guide.sonatype.com (from the bundled\n  dependencycheck.properties) - do NOT override --ossIndexUrl.\n- OSS Index auth/remote failure is FATAL by default (exit 14). --ossIndexRemoteErrorWarnOnly true\n  returns exit 0 (verified).\n- Sonatype Guide free accounts are credit-metered per component report, unlike the old anonymous\n  OSS Index. Preserve the DC data dir between runs (the OSS Index cache lives there) and consider\n  analyzer.ossindex.cache.validforhours=168 locally. Argues for OSS Index on a scheduled CI job\n  rather than every commit.\n\nDocumented in visibility/docs/2026-09-01-visibility-lambda-owasp.md as new section 5.2.1 plus\ncommands 22 / 22a / 22b in section 8. This closes the loop on the 5.2 diagnosis (CI has a token,\nthe workstation does not).",
+      "tags": [
+        "ION-16693",
+        "owasp",
+        "dependency-check",
+        "oss-index",
+        "sonatype-guide",
+        "configuration"
+      ],
+      "references": [
+        "visibility/docs/2026-09-01-visibility-lambda-owasp.md",
+        "OssIndexAnalyzer.prepareAnalyzer()",
+        "dependency-check-core-13.0.0.jar",
+        "https://dependency-check.github.io/DependencyCheck/analyzers/oss-index-analyzer.html",
+        "ION-16693"
+      ]
+    },
+    {
+      "id": "13b06419c859",
+      "timestamp": "2026-09-02T01:35:13.853390+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "test_result",
+      "summary": "Credentialed re-scan confirms fix: jna-jpms gone, 25 OSSINDEX hits, only the 2 exception HIGHs remain",
+      "detail": "First fully-credentialed local scan (Sonatype Guide PAT + nvd.api.key in\n~/.dependency-check/dc.properties, passed via --propertyfile). Command:\n\n  dependency-check.bat --project \"VisibilityS3Archiver\" \\\n    --scan  visibility\\visibility-s3-archiver\\target\\visibility-s3-archiver-1.0-deployment_package.zip \\\n    --propertyfile $props --out owasp-reports\\verify-s3-archiver \\\n    --format HTML --format JSON --ossIndexRemoteErrorWarnOnly true\n\n  [INFO] Skipping the NVD API Update as it was completed within the last 240 minutes\n  [INFO] Finished Sonatype OSS Index Analyzer (7 seconds)\n  [INFO] Analysis Complete (37 seconds)     exit 0\n\nRESULTS\n  OSSINDEX mentions : 0 -> 25      (token accepted, analyzer actually ran)\n  jna-jpms mentions : 0            (fix holds - artifact absent, not merely suppressed)\n  jetty-setuid      : 0\n  severity counts   : {'MEDIUM': 10, 'HIGH': 2}\n  vuln sources      : {'OSSINDEX': 8, 'NVD': 4}\n\n  HIGH OSSINDEX CVE-2026-68497  jackson-databind-2.22.0.jar\n  HIGH OSSINDEX CVE-2026-75140  jsoup-1.17.2.jar\n\nCONCLUSIONS NOW EVIDENCE-BACKED (previously inferred):\n 1. The jna-jpms HIGH is genuinely gone from the lambda package.\n 2. The only remaining HIGHs are exactly the two under the 2-week release exception, and their CVE\n    ids match section 9 of the document precisely.\n 3. Both are OSSINDEX-sourced -> confirms the section 5.2 diagnosis (missing OSS Index credential\n    was the cause of the local-vs-Jenkins disagreement, NOT the data-dir copy or a bad suppression\n    file).\n 4. 4 NVD findings vs 8 OSS Index findings in a single package: a token-less local scan was blind to\n    roughly two-thirds of the vulnerabilities.\n 5. The \"Skipping the NVD API Update ... within the last 240 minutes\" line directly confirms the\n    nvd.api.check.validforhours=4 behaviour documented in section 5.2.2.\n\nRecorded as section 7.6 of visibility/docs/2026-09-01-visibility-lambda-owasp.md (now 72.5 KB,\n1379 lines). Only s3-archiver was re-scanned deliberately - Sonatype Guide free accounts are\ncredit-metered per component report.",
+      "tags": [
+        "ION-16693",
+        "owasp",
+        "verification",
+        "oss-index",
+        "visibility",
+        "lambda"
+      ],
+      "references": [
+        "visibility/docs/2026-09-01-visibility-lambda-owasp.md",
+        "owasp-reports/verify-s3-archiver/dependency-check-report.json",
+        "CVE-2026-68497",
+        "CVE-2026-75140",
+        "ION-16693",
+        "commit 9793f14a48"
+      ]
+    }
+  ],
+  "usage": [
+    {
+      "id": "135ff1a7a4fb",
+      "timestamp": "2026-09-01T20:55:43.802961+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 96000,
+      "output_tokens": 78000,
+      "cache_read_input_tokens": 3850000,
+      "cache_creation_input_tokens": 412000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "ION-16693 visibility lambda OWASP jna-jpms investigation + fix + verification + doc. Aggregate estimate for the session (Copilot CLI does not expose a per-turn usage block to the agent)."
+    },
+    {
+      "id": "f8c95a8349de",
+      "timestamp": "2026-09-01T22:19:31.364613+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 27000,
+      "output_tokens": 14500,
+      "cache_read_input_tokens": 905000,
+      "cache_creation_input_tokens": 41000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Final turn of the ION-16693 visibility-lambda OWASP session: closing out the 5 follow-up investigations (stale POM probe artifact, IT never run in CI, jsoup/jackson CVE origins, DC 12.2.2->13.0.0 data dir, suppression-file rename experiment) and finalising the 56 KB deliverable document."
+    },
+    {
+      "id": "df28fb42f060",
+      "timestamp": "2026-09-02T00:44:05.315445+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 12000,
+      "output_tokens": 11000,
+      "cache_read_input_tokens": 412000,
+      "cache_creation_input_tokens": 18000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Closing turns: pushed the branch with upstream tracking, then investigated and documented OSS Index token configuration for dependency-check 13 (bytecode analysis of the credential gate plus four empirical dummy-token scans). Session marked completed."
+    }
+  ]
+}

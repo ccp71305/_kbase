@@ -20,8 +20,8 @@ findings:
 | # | Dependency | CVEs | CPE confidence | In scope here? |
 |---|---|---:|---|---|
 | 1 | `jna-jpms-5.14.0.jar` | 9 | **Low** | **yes — this ticket** |
-| 2 | `jackson-databind-2.22.0.jar` | 5 | Highest | no — release exception (code freeze) |
-| 3 | `jsoup-1.17.2.jar` | 2 | Highest | no — release exception (code freeze) |
+| 2 | `jackson-databind-2.22.0.jar` | 5 | Highest | no — release exception (code freeze); see §9 |
+| 3 | `jsoup-1.17.2.jar` | 2 | Highest | no — release exception (code freeze); see §9 |
 
 (2) and (3) also affect other modules on commons 1.0.33-SNAPSHOT and are being carried under a
 two-week exception; they are untouched by this branch and both jars still ship.
@@ -214,9 +214,21 @@ dependency-check --project visibility-ob-poller `
   --out owasp --suppression ..\suppressions.xml --nvdApiKey $env:NVD_API_KEY
 ```
 
-**That command was correct.** There are two independent causes, both confirmed by experiment. Note
-first that this is *not* a version gap — the Jenkins HTML footer states `dependency-check version :
-13.0.0`, the same build used locally.
+**That command was correct — nothing was being done wrong.** There are *three* independent causes,
+each confirmed by a controlled experiment below. All three are environmental, not a mistake in how
+the scan was invoked.
+
+The single most useful summary is that **the three HIGHs come from two different data sources**, and
+each source is disabled in a different place:
+
+| Finding | Source | Local (DC 12.2.2) | Local (DC 13.0.0) | Jenkins (DC 13.0.0) |
+|---|---|---|---|---|
+| `jna-jpms` — `sun:java_se`, 9 CVEs | **NVD** | hidden (hosted suppressions) | hidden (hosted suppressions) | **shown** |
+| `jackson-databind` CVE-2026-68497 | **OSS Index** | **shown** | hidden (no token) | **shown** |
+| `jsoup` CVE-2026-75140 | **OSS Index** | **shown** | hidden (no token) | **shown** |
+
+That single table explains the whole puzzle: the scan that showed jackson+jsoup-but-not-jna was
+column 3, and the current local scans are column 4.
 
 ### 5.1 The missing `jna` finding — hosted suppressions
 
@@ -228,16 +240,259 @@ applied and the false positive surfaces.
 
 A useful subtlety: **`--disableHostedSuppressions` is not enough to reproduce Jenkins.** That flag
 stops the file being *refreshed*, not being *used* — an already-downloaded copy is still applied. The
-CI behaviour only reproduces once the file is actually absent from the data directory (§8, commands
-9-10):
+CI behaviour only reproduces once the file is actually absent from the data directory.
 
-| Local run | `publishedSuppressions.xml` | CPE assigned | Vulnerabilities |
+**Proof — rename the file in place and rescan the pre-fix package (§8, command 10).** This was run
+against a reconstructed pre-fix `visibility-s3-archiver` deployment ZIP (222 jars = the current 220
+plus `jna-jpms-5.14.0.jar` and `jetty-setuid-jna-2.0.3.jar`):
+
+| Local run | `publishedSuppressions.xml` | CPE assigned | Vulnerabilities on `jna-jpms-5.14.0.jar` |
 |---|---|---|---:|
-| default | present | none | 0 |
-| `--disableHostedSuppressions` | present (still applied) | none | 0 |
-| cloned data dir with the file deleted | **absent** | `cpe:2.3:a:sun:java_se:5.14.0` (LOW) | **9 (4 HIGH)** |
+| default | present | none | **0** |
+| `--disableHostedSuppressions` | present (still applied) | none | **0** |
+| **renamed to `.DISABLED`** | **absent** | `cpe:2.3:a:sun:java_se:5.14.0` (LOW) | **9 → 4 HIGH + 5 MEDIUM** |
+| renamed back | present again | none | **0** |
 
-### 5.2 The dependency count — Jenkins scans the package twice
+```
+jna-jpms   VisibilityS3Archiver-prefix.zip: jna-jpms-5.14.0.jar   {'HIGH': 4, 'MEDIUM': 5}
+           ['CVE-2009-2476', 'CVE-2009-2689', 'CVE-2009-2475', 'CVE-2009-2716', ...]
+```
+
+This is an exact match for the Jenkins report, on a full package scan rather than an isolated jar,
+and it is fully reversible — renaming the file back returns the count to 0.
+
+> **Gotcha when doing this.** With the file renamed away, DC logs
+> `Hosted suppressions using snapshot as of this Dependency-Check release` and **writes a fresh
+> `publishedSuppressions.xml` from the snapshot bundled inside the jar** (82,965 B) into the data
+> directory. That is *not* your original downloaded list (85,038 B). To restore properly you must
+> delete the snapshot copy and rename your backup back — see §8 command 10.
+
+### 5.2 The missing `jackson`/`jsoup` HIGHs — OSS Index needs a token in DC 13
+
+Both of those HIGHs are **OSS Index findings, not NVD findings** — the CI report labels them
+`(OSSINDEX)`. And DC 13.0.0 logs this on a local run:
+
+```
+[WARN] Sonatype OSS Index Analyzer disabled due to missing credentials. Authentication with token
+       is now required, and OSS Index is migrating to Sonatype Guide.
+```
+
+Confirmed from the local JSON reports — every finding is NVD-sourced, and the HTML contains the
+string `OSSINDEX` **zero** times:
+
+```
+visibility-error-email   vuln sources present: ['NVD']
+OSSINDEX mentions in local HTML report: 0
+```
+
+whereas the Jenkins reports contain 25-41 `OSSINDEX` hits each, on the same DC 13.0.0. **So the CI
+job has an OSS Index token configured and the workstation does not.**
+
+Under **DC 12.2.2** the OSS Index analyzer still worked anonymously. That is why the earlier local
+scan surfaced jackson and jsoup: it was run on 12.2.2, before today's upgrade.
+
+Consequence: **a local DC 13.0.0 scan without a token cannot see roughly a third of what CI sees.**
+Treat a local `HIGH = 0` as "no NVD HIGHs", never as "clean".
+
+#### 5.2.1 How to supply the token
+
+The relevant CLI options on 13.0.0 (`dependency-check.bat --advancedHelp`):
+
+| Option | Meaning |
+|---|---|
+| `--ossIndexPassword <token>` | **The token.** "Sets the Sonatype Guide personal access token or (deprecated) legacy OSS Index API token" |
+| `--ossIndexUsername <user>` | Only for **legacy** OSS Index API tokens; not needed with a Guide PAT |
+| `--ossIndexUrl <url>` | Defaults to `https://api.guide.sonatype.com` on 13.0.0 — do **not** override |
+| `--ossIndexCacheValidForHours <h>` | Default 24. Raise it to burn fewer Sonatype Guide credits |
+| `--ossIndexRemoteErrorWarnOnly <bool>` | Downgrade an OSS Index failure from fatal to a warning |
+| `--disableOssIndex` | Turn the analyzer off entirely |
+
+There is no `--ossIndexToken` option — the token goes in the ***password*** slot either way.
+
+**The exact enable/disable rule.** Simply setting a password is *not* enough, which cost me two
+failed attempts before I disassembled `OssIndexAnalyzer.prepareAnalyzer()`
+(`javap -p -c`, see §8 command 22). The gate is:
+
+```java
+// paraphrased from the 13.0.0 bytecode
+if (password.isEmpty()
+        || (user.isEmpty() && !password.startsWith("sonatype_pat_"))) {
+    LOG.warn("{} disabled due to missing credentials...");
+    setEnabled(false);
+}
+```
+
+So the analyzer only switches on when **either**:
+
+* **Sonatype Guide PAT (preferred)** — `analyzer.ossindex.password` starts with the literal prefix
+  **`sonatype_pat_`**, and *no username is needed*; **or**
+* **Legacy OSS Index token** — **both** `analyzer.ossindex.user` *and* `analyzer.ossindex.password`
+  are set. This path additionally logs a deprecation warning: legacy tokens must be replaced with a
+  Guide PAT **before 2026-12-31**.
+
+A password that is neither prefixed nor accompanied by a username is silently ignored and you get
+the exact WARN we were chasing. Get a PAT from <https://guide.sonatype.com/>.
+
+**Do not put the token on the command line.** DC itself objects:
+
+```
+[WARN] ossIndexPassword used on the command line, consider moving the password to a properties
+       file using the key `analyzer.ossindex.password` and using the --propertyfile argument instead
+```
+
+— and, as with the NVD key, a command-line value is readable by any local process via
+`Get-CimInstance Win32_Process` and lands in your PowerShell history. Use `-P`/`--propertyfile`.
+The keys were confirmed against the string constants compiled into
+`dependency-check-core-13.0.0.jar`:
+
+```powershell
+# one-time: write a private property file outside the repo
+$props = "$env:USERPROFILE\.dependency-check\dc.properties"
+New-Item -ItemType Directory -Force -Path (Split-Path $props) | Out-Null
+@"
+analyzer.ossindex.password=sonatype_pat_XXXXXXXXXXXXXXXX
+analyzer.ossindex.cache.validforhours=168
+nvd.api.key=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+"@ | Set-Content $props -Encoding ascii
+
+# lock it down to your account only
+icacls $props /inheritance:r /grant:r "$($env:USERNAME):(R)" | Out-Null
+
+# safer alternative to typing the token into the file: paste it at a prompt, so the
+# value never appears in the script, on a command line, or in PowerShell history
+$sec   = Read-Host "Paste your Sonatype Guide PAT" -AsSecureString
+$plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+           [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+(Get-Content $props) -replace 'PASTE_TOKEN_HERE', $plain | Set-Content $props -Encoding ascii
+Remove-Variable plain, sec
+
+# then every scan just references it - no secrets on the command line or in history
+dependency-check.bat --project "visibility-s3-archiver" `
+  --scan "path\to\deployment_package" `
+  --propertyfile $props `
+  --out "owasp-reports\s3-archiver" --format HTML --format JSON
+```
+
+For a **legacy** token add `analyzer.ossindex.user=<your-oss-index-email>` alongside the password.
+
+**Verified behaviour** (dummy values, single-jar scan, §8 command 22):
+
+| `analyzer.ossindex.password` | `analyzer.ossindex.user` | Result |
+|---|---|---|
+| *(unset)* | *(unset)* | `disabled due to missing credentials` — analyzer never runs |
+| `DUMMY_TOKEN` | *(unset)* | **still** `disabled due to missing credentials` — no `sonatype_pat_` prefix |
+| `sonatype_pat_DUMMY…` | *(unset)* | **enabled** → runs, then `invalid credentials` from the API (expected with a fake PAT) |
+| `legacy_api_token…` | `someone@e2open.com` | **enabled** → runs, plus the "replace legacy token before 2026-12-31" warning |
+
+The transition from *"disabled due to missing credentials"* to *"invalid credentials"* is the signal
+that the credential was actually picked up. With a real PAT that second message disappears too.
+
+**Confirming it worked on a real scan:**
+
+```powershell
+# 1. the disabled-analyzer WARN must be gone
+dependency-check.bat ... --propertyfile $props 2>&1 | Select-String "OSS Index Analyzer disabled"
+#    -> no output when the token is accepted
+
+# 2. the report must now carry OSSINDEX-sourced findings
+(Select-String -Path "owasp-reports\s3-archiver\dependency-check-report.html" `
+               -Pattern "OSSINDEX" -AllMatches).Matches.Count
+#    -> 0 before, 25-41 after (matching the Jenkins reports, i.e. the jackson + jsoup HIGHs appear)
+```
+
+Note that an OSS Index auth/remote failure is **fatal by default** — the run above exited with code
+`14`. Add `--ossIndexRemoteErrorWarnOnly true` (verified: exit code returns to `0`) if you do not
+want a flaky OSS Index to break a build.
+
+> **Credit warning.** Sonatype Guide free accounts are metered per component report, unlike the old
+> anonymous OSS Index. Preserve the DC `data` directory between runs (the OSS Index cache lives
+> there) and consider `analyzer.ossindex.cache.validforhours=168` locally, so repeated scans of the
+> same 200+ jars do not burn credits. This is also an argument for enabling OSS Index on a scheduled
+> CI job rather than on every commit.
+
+#### 5.2.2 The NVD API key is a *separate* concern — and is **not** read from the environment
+
+Worth stating plainly, because it is easy to assume otherwise (I initially did, and was wrong):
+**dependency-check does not read an `NVD_API_KEY` environment variable.** The string `NVD_API_KEY`
+does appear inside `dependency-check-cli-13.0.0.jar` and `dependency-check-utils-13.0.0.jar`, but
+only as the *Java constant name* for `CliParser.ARGUMENT.NVD_API_KEY` and `Settings.KEYS.NVD_API_KEY`
+— whose value is the property `nvd.api.key`. Disassembling the only two classes in the whole
+distribution that call `System.getenv` confirms it:
+
+* `App.determineName()` reads **`ODC_NAME`** only (used to label the run)
+* `utils/scarf/TelemetryCollector` — telemetry
+
+So if you have `$env:NVD_API_KEY` set, DC silently ignores it. You must pass `--nvdApiKey` or, better,
+put `nvd.api.key=...` in the property file.
+
+**What you lose by omitting it — and what you don't.** The NVD key affects **only the download /
+refresh of the NVD cache**, never the analysis of data already cached. Concretely:
+
+* with `--noupdate`, the key is irrelevant — nothing is missed;
+* without `--noupdate`, DC first checks whether the cache is stale. `nvd.api.check.validforhours=4`
+  (shipped default) means it will not even contact the NVD if the cache was refreshed in the last
+  4 hours;
+* when it *does* update, the shipped rate limits are
+  `nvd.api.requestsperthirtysecondswithoutapikey=5` versus
+  `nvd.api.requestsperthirtysecondswithapikey=50` — a **10x** difference. Without a key an update is
+  very slow and prone to throttling/timeouts, and a failed update leaves you analysing **stale NVD
+  data**, i.e. blind to recently published CVEs.
+
+The bookkeeping lives in the H2 database, not in a file, so it can be inspected directly:
+
+```powershell
+$h2 = Get-ChildItem "C:\dependency-check\dependency-check-current\lib" -Filter "h2-*.jar" |
+        Select-Object -First 1
+java -cp $h2.FullName org.h2.tools.Shell `
+  -url "jdbc:h2:file:C:\dependency-check\dependency-check-current\data\odc;ACCESS_MODE_DATA=r;IFEXISTS=TRUE" `
+  -user dcuser -password "DC-Pass1337!" -sql "select * from properties"
+```
+```
+ID                    | VALUE
+version               | 5.6
+nvd.api.last.checked  | 2026-09-01T19:35:37-04
+nvd.api.last.modified | 2026-09-01T23:30:58Z
+kev.checked           | 1788305738
+```
+
+`ACCESS_MODE_DATA=r` opens it read-only so an inspection cannot corrupt the cache; `dcuser` /
+`DC-Pass1337!` are dependency-check's built-in defaults. This is the quickest way to answer "is my
+NVD data actually current?" — and it explains why a scan run at 21:00 on 2026-09-01 needed no key at
+all: the cache had been refreshed at 19:35, well inside the 4-hour window.
+
+**Recommended final property file** (single place for both credentials, ACL-restricted, nothing on
+the command line):
+
+```properties
+# ~/.dependency-check/dc.properties   - DO NOT COMMIT
+analyzer.ossindex.password=<sonatype_pat_...>
+analyzer.ossindex.cache.validforhours=168
+nvd.api.key=<uuid>
+```
+
+### 5.3 Was copying the 12.2.2 `data` directory into 13.0.0 a mistake?
+
+**No — it is not the cause of anything here, and the suppression file is not invalid.** Evidence:
+
+| Check | Result |
+|---|---|
+| `dependency-check-current` | symlink → `dependency-check-13.0.0` |
+| `12.2.2/data` last refreshed | 2026-08-31 19:48 (`publishedSuppressions.xml` 84,781 B) |
+| `13.0.0/data` after the copy + first run | 2026-09-01 15:16 (`publishedSuppressions.xml` **85,038 B**) |
+| `*.properties` marker | grew 56 → 59 bytes — rewritten by 13.0.0 |
+| `odc.mv.db` | 249,405,440 → **249,643,008 B**, 2026-09-01 15:30 |
+| H2 schema | accepted; no schema-mismatch error, scans complete normally |
+| Suppression file functional? | **yes** — §5.1 shows renaming it flips `jna` 0 → 9 vulns and back |
+
+So 13.0.0 took over the inherited data directory cleanly, re-downloaded the hosted suppression list
+and `jsrepository.json` under its own version marker, and updated the NVD H2 database. The copy was
+harmless.
+
+The 12.2.2 → 13.0.0 **upgrade itself** is what changed the result — via §5.2, not via the data
+directory. If you want to eliminate the variable entirely, point 13.0.0 at an empty `--data` dir and
+let it build its own; it costs one full NVD download.
+
+### 5.4 The dependency count — Jenkins scans the package twice
 
 | | Dependencies Scanned |
 |---|---:|
@@ -261,14 +516,23 @@ corroborates the reading.)
 
 Importantly, an A/B control (§8, commands 7-8) scanning identical content **as a ZIP** and **as an
 exploded directory** produced *identical* results locally — 206 dependency entries and the same
-findings either way. **The layout inflates the count; it does not change the findings.** The only
-behavioural difference between local and CI is §5.1.
+findings either way. **The layout inflates the count; it does not change the findings.**
 
-### 5.3 Recommendation for the CI/platform team
+Note also that the OWASP report is *not* produced by `dependency-check-maven` — that plugin is
+commented out in the root `pom.xml`. The Jenkins job runs the DC CLI as its own step and feeds the
+result to Sonar via `-Dsonar.dependencyCheck.htmlReportPath=...`, which is why its scan root is a
+workspace directory rather than a single artifact.
 
-Give the Jenkins agent egress to the hosted-suppression URL, or commit a copy of
-`publishedSuppressions.xml` and pass it via `--suppression`. Otherwise every upstream-known false
-positive will keep appearing in CI only, and each will cost a manual investigation like this one.
+### 5.5 Recommendations for the CI/platform team
+
+1. **Give the Jenkins agent egress to the hosted-suppression URL** (or commit a copy of
+   `publishedSuppressions.xml` and pass `--suppression`). Otherwise every upstream-known false
+   positive will keep appearing in CI only, and each will cost a manual investigation like this one.
+2. **Publish the OSS Index token to developers** (a shared read-only Sonatype Guide token, or
+   document `--ossIndexUsername` / `--ossIndexApiToken`). Without it, no one can reproduce a CI
+   finding locally on DC 13, and local scans give a false sense of safety.
+3. **Point the CLI at the artifact, not the workspace directory** (`--scan .../target/*.zip`), to
+   halve the reported dependency count and make CI and local numbers comparable.
 
 ---
 
@@ -334,10 +598,18 @@ java.lang.NoSuchMethodError: 'java.util.stream.Stream
 ```
 
 This is **pre-existing and unrelated to this branch**. `visibility-s3-archiver` was the only module
-hardcoding `log4j-core` at `2.23.1` while every other module uses `${log4j.version}`; yesterday's bump
-of that property to 2.25.5 left `log4j-core` 2.23.1 running against `log4j-api` 2.25.5 (resolved
-transitively via `visibility-commons`), and the two are not binary compatible. It went unnoticed
-because yesterday's verification used `mvn package`, which does not run failsafe.
+hardcoding `log4j-core` at `2.23.1` while every other module uses `${log4j.version}`.
+
+Before yesterday the two agreed, so nothing was broken:
+
+```
+before 08a0c83d41:   visibility/pom.xml   <log4j.version>2.23.1</log4j.version>
+                     s3-archiver/pom.xml  log4j-core 2.23.1            -> match, IT passes
+after  08a0c83d41:   visibility/pom.xml   <log4j.version>2.25.5</log4j.version>
+                     s3-archiver/pom.xml  log4j-core 2.23.1 (hardcoded) -> log4j-api 2.25.5
+                                                                          + log4j-core 2.23.1
+                                                                          = NoSuchMethodError
+```
 
 Fixed by making it track the property, consistent with `visibility-commons`,
 `visibility-inbound` and `visibility-wm-inbound-processor`:
@@ -346,16 +618,68 @@ Fixed by making it track the property, consistent with `visibility-commons`,
 <version>${log4j.version}</version>
 ```
 
+**Note the scope**: `log4j-core` is `<scope>test</scope>` in this module — it exists only because
+embedded DynamoDB Local needs a logging backend at IT runtime. So this fix **changes nothing in the
+deployed artifact**; it only repairs the integration test.
+
+#### Why nobody saw it — the IT is never executed
+
+The obvious question is how this survived a full reactor build. It survived because
+**neither the documented local command nor the CI job ever reaches the `integration-test` phase.**
+
+Yesterday's local verification, as recorded in `2026-08-31-visibility-owasp-refactor.md` line 199:
+
+```
+mvn -pl visibility -amd clean package
+```
+
+`maven-failsafe-plugin` binds to `integration-test` / `verify`, both of which come *after* `package`
+in the default lifecycle. `package` stops one phase short, so `VisibilityS3ArchiverIT` never ran.
+
+The Jenkins job for this module does the same thing:
+
+```sh
+$M2_HOME/bin/mvn -ntp -Dorg.slf4j.simpleLogger.defaultLogLevel=warn \
+    package sonar:sonar -P mercury-commons,sonar \
+    -Dsonar.projectName=Ocean-Logistics-VisibilityS3Archiver \
+    -Dsonar.projectKey=mercury-services.visibility-visibility-s3-archiver \
+    -Dsonar.dependencyCheck.htmlReportPath=visibility/visibility-s3-archiver/target/dependency-check-report.html \
+    -Dsonar.projectVersion=${RELEASE} -pl ${app_dir} --also-make
+```
+
+`package sonar:sonar` — again, no `verify`. The timeline confirms CI genuinely ran the broken
+combination and still went green:
+
+| Event | Time (UTC) |
+|---|---|
+| PR #1226 (`Feature/ION-16693 visibility owasp`) merged to `develop`, bumping `log4j.version` to 2.25.5 | **2026-09-01 07:18** |
+| Jenkins built `VisibilityS3Archiver-26.09.002` (workspace stamp `1788253326`) | **2026-09-01 09:02** |
+| That build **succeeded** and published an OWASP report | — |
+
+So the CI build ran ~1h44m *after* the version bump landed, with `log4j-core 2.23.1` against
+`log4j-api 2.25.5` on the test classpath, and passed — because it never ran the test.
+
+**You were not missing anything.** `mvn -o clean verify` on this branch is, as far as I can tell, the
+first time `VisibilityS3ArchiverIT` has been executed since the bump. Two follow-ups worth raising
+separately:
+
+* the CI job should run `verify` (or `mvn package failsafe:integration-test failsafe:verify`) so
+  DynamoDB-Local ITs actually gate the build;
+* until it does, use `mvn -o clean verify` locally rather than `package` when changing shared
+  version properties.
+
 ---
 
 ## 7. Verification
 
 ### 7.1 Dependency resolution
 
+Re-run with `-am` after the §2.1 discovery, so these figures are not subject to the stale-POM trap:
+
 | Module set | `jetty-setuid-jna` / `jna-jpms` after the change |
 |---|---|
 | the 4 lambdas | **absent** |
-| `visibility-commons`, `-inbound`, `-wm-inbound-processor`, `-matcher`, `-outbound`, `-pending`, `-itv-gps-processor` | still `jetty-setuid-jna:2.0.3` → `jna-jpms:5.14.0`, **unchanged** |
+| `visibility-commons`, `-inbound`, `-wm-inbound-processor`, `-matcher`, `-outbound`, `-pending`, `-itv-gps-processor` | still `jetty-setuid-jna:2.0.3` → `jna-jpms:5.14.0`, **unchanged** (7/7) |
 
 ### 7.2 Deployment packages
 
@@ -423,13 +747,70 @@ is the correct behaviour off-Lambda where those env vars are not set.
 | visibility-pending-start | 0 | 0 | 3 | 0 | **False** |
 | visibility-outbound-poller | 0 | 0 | 3 | 0 | **False** |
 
-**Read the `HIGH = 0` column with §5.1 in mind.** A local scan also suppresses the `jackson-databind`
-and `jsoup` HIGHs (this NVD snapshot only rates `jackson-databind` MEDIUM via CVE-2026-54515), so this
-is *not* a like-for-like prediction of the next Jenkins run.
+**Read the `HIGH = 0` column with §5 firmly in mind — it does *not* mean the packages are clean.**
+Two independent local blind spots produce that zero:
+
+* `jna-jpms` would have been hidden anyway by the hosted suppression list (§5.1);
+* the `jackson-databind` and `jsoup` HIGHs are **OSS Index** findings, and the OSS Index analyzer is
+  disabled on this workstation for lack of a token (§5.2). Locally, `jackson-databind` shows only
+  CVE-2026-54515 (MEDIUM, from NVD) and `jsoup` shows nothing at all.
+
+So this table is **not** a like-for-like prediction of the next Jenkins run.
 
 The tool-independent guarantee is the last column: **`jna-jpms-5.14.0.jar` is no longer in the
 artifact**, so the finding cannot be reported again by any scanner configuration. `jsoup-1.17.2.jar`
 and `jackson-databind-2.22.0.jar` are still present, as intended.
+
+### 7.6 Definitive re-scan *with* an OSS Index token (2026-09-01 21:32)
+
+Once the Sonatype Guide PAT was configured per §5.2.1, the s3-archiver package was re-scanned with
+the exact command documented above. This is the like-for-like comparison against Jenkins that §7.5
+could not provide, and it closes out every claim in this document:
+
+```powershell
+$props = "$env:USERPROFILE\.dependency-check\dc.properties"
+dependency-check.bat --project "VisibilityS3Archiver" `
+  --scan "...\visibility-s3-archiver-1.0-deployment_package.zip" `
+  --propertyfile $props --out "owasp-reports\verify-s3-archiver" `
+  --format HTML --format JSON --ossIndexRemoteErrorWarnOnly true
+```
+```
+[INFO] Skipping the NVD API Update as it was completed within the last 240 minutes
+[INFO] Finished Sonatype OSS Index Analyzer (7 seconds)
+[INFO] Analysis Complete (37 seconds)          exit 0
+```
+
+Report contents:
+
+| Metric | Before token | After token | Meaning |
+|---|---:|---:|---|
+| `OSSINDEX` mentions | 0 | **25** | token accepted; the analyzer really ran (§5.2) |
+| `jna-jpms` mentions | 0 | **0** | the fix holds — artifact absent, not merely suppressed (§6) |
+| `jetty-setuid` mentions | 0 | **0** | the excluded parent artifact is gone too |
+| HIGH findings | 0 | **2** | both OSS Index-sourced, both expected |
+
+Severity/source breakdown and the surviving HIGHs:
+
+```
+severity counts: {'MEDIUM': 10, 'HIGH': 2}
+vuln sources   : {'OSSINDEX': 8, 'NVD': 4}
+
+HIGH  OSSINDEX  CVE-2026-68497  ...deployment_package.zip: jackson-databind-2.22.0.jar
+HIGH  OSSINDEX  CVE-2026-75140  ...deployment_package.zip: jsoup-1.17.2.jar
+```
+
+Four conclusions are now evidence-backed rather than inferred:
+
+1. **The `jna-jpms` HIGH is gone** — zero mentions in a fully-credentialed scan.
+2. **The two remaining HIGHs are exactly the two under the release exception**, and their CVE ids
+   match §9 precisely (`CVE-2026-68497` jackson-databind, `CVE-2026-75140` jsoup).
+3. **Both are `OSSINDEX`-sourced**, confirming the §5.2 diagnosis that the earlier local/Jenkins
+   disagreement was a missing OSS Index credential, not a data-directory or suppression problem.
+4. **The NVD-vs-OSS Index split is real**: 4 NVD findings vs 8 OSS Index findings in one package —
+   i.e. a token-less local scan was blind to two-thirds of the vulnerabilities.
+
+The `Skipping the NVD API Update as it was completed within the last 240 minutes` line is also direct
+confirmation of the `nvd.api.check.validforhours=4` behaviour described in §5.2.2.
 
 **Expected next Jenkins scan:** 2 HIGH (`jackson-databind`, `jsoup` — under the agreed exception)
 instead of 3, with the `jna-jpms` row gone entirely, and ~2 fewer jars per package.
@@ -440,6 +821,13 @@ instead of 3, with the `jna-jpms` row gone entirely, and ~2 fewer jars per packa
 
 Every command below was run from PowerShell on Windows. `$env:TEMP` is used for scratch work so
 nothing lands in the repo.
+
+> **Two safety notes.**
+> 1. Pass the NVD key as `--nvdApiKey $env:NVD_API_KEY`, never inline. A literal key on the command
+>    line is visible to any user on the box via `Get-CimInstance Win32_Process` and is retained in
+>    PowerShell history.
+> 2. Commands 10(c) and 10a temporarily modify the **shared** `C:\dependency-check` install. They are
+>    wrapped in `try/finally` for that reason — check the data directory is restored before moving on.
 
 **1 — Branch off `develop`.**
 ```powershell
@@ -464,11 +852,30 @@ for f in glob.glob(r"C:\Users\arijit.kundu\Downloads\Visibility*26.09*OWASP*.htm
 `-Dincludes` must be quoted in PowerShell, otherwise `net.java.dev.jna` is parsed as a lifecycle
 phase and Maven fails with “Unknown lifecycle phase .java.dev.jna”. Run from the `visibility`
 directory so the reactor is small and resolution is quick.
+
+> **Always add `-am`.** Without it, sibling modules such as `visibility-commons` are resolved from
+> `~/.m2` using their *installed* POMs, which may be weeks stale — that is exactly what produced the
+> bogus `commons 1.0.27-SNAPSHOT` reading described in §2.1.
+
 ```powershell
 cd C:\Users\arijit.kundu\projects\mercury-services\visibility
-mvn -o dependency:tree `
+mvn -o dependency:tree -am `
     -pl visibility-s3-archiver,visibility-error-email,visibility-pending-start,visibility-outbound-poller `
     "-Dincludes=org.eclipse.jetty.toolchain.setuid:*,net.java.dev.jna:*"
+```
+
+**3a — Demonstrate the stale-POM trap (§2.1).** Compare the two forms and inspect the installed
+parent POM that supplies the property.
+```powershell
+cd C:\Users\arijit.kundu\projects\mercury-services\visibility
+mvn -o dependency:tree -pl visibility-error-email     "-Dincludes=com.inttra.mercury:*"   # -> 1.0.27-SNAPSHOT (wrong)
+mvn -o dependency:tree -pl visibility-error-email -am "-Dincludes=com.inttra.mercury:*"   # -> 1.0.33-SNAPSHOT (right)
+
+# the culprit: the installed parent POM still carries the old property value
+Select-String -Path "$env:USERPROFILE\.m2\repository\com\inttra\mercury\visibility\1.0\visibility-1.0.pom" `
+              -Pattern "mercury.commons.version"
+Get-Item "$env:USERPROFILE\.m2\repository\com\inttra\mercury\visibility\1.0\visibility-1.0.pom" |
+  Select-Object LastWriteTime      # -> 2026-07-24, i.e. five weeks stale
 ```
 
 **4 — Check whether the lambdas use Dropwizard/Jetty at all.** (no matches ⇒ they never build a server)
@@ -549,23 +956,77 @@ foreach ($v in @(@("ziponly","A-zip-only"), @("jenkinslike","B-exploded-dir"))) 
 
 **10 — Prove the `jna` finding is a suppressed false positive.**
 `--disableHostedSuppressions` alone is *not* sufficient: an already-downloaded
-`publishedSuppressions.xml` is still applied. Clone the data directory (so the shared
-dependency-check install is never modified) and delete the file there.
+`publishedSuppressions.xml` is still applied. Two ways to get past it — (b) is non-destructive,
+(c) is the in-place rename and is the one that produced the §5.1 table.
+
 ```powershell
 # (a) confirm the upstream FP rule exists locally
 Select-String -Path "C:\dependency-check\dependency-check-current\data\publishedSuppressions.xml" `
               -Pattern "sun:java_se" -Context 4,4
 
-# (b) clone the data dir WITHOUT the hosted suppression list
+# (b) NON-DESTRUCTIVE: clone the data dir WITHOUT the hosted suppression list
 $dst = "$env:TEMP\dc-data-nosupp"
 New-Item -ItemType Directory $dst -Force | Out-Null
 Copy-Item "C:\dependency-check\dependency-check-current\data\*" $dst -Recurse -Force
 Remove-Item "$dst\publishedSuppressions.xml","$dst\publishedSuppressions.xml.properties" -Force
 
-# (c) scan the jar alone -> reproduces Jenkins exactly (sun:java_se, LOW, 9 CVEs / 4 HIGH)
 dependency-check.bat --project "jna-nosupp" `
   --scan "$env:USERPROFILE\.m2\repository\net\java\dev\jna\jna-jpms\5.14.0\jna-jpms-5.14.0.jar" `
   --data $dst --out "owasp-reports\jna-nosupp" --noupdate --disableHostedSuppressions --format JSON
+```
+
+**(c) In-place rename against a full pre-fix package.** First rebuild a pre-fix ZIP (220 current jars
++ the 2 removed ones = 222), then rename the suppression file, scan, and restore. The `try/finally`
+guarantees the shared install is restored even if the scan throws.
+
+```powershell
+# --- rebuild the pre-fix deployment package -------------------------------
+$t = "$env:TEMP\prefix2"
+Remove-Item $t -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory "$t\pkg","$t\zip" -Force | Out-Null
+Copy-Item "$env:TEMP\lambda-boot\visibility-s3-archiver\*" "$t\pkg" -Recurse -Force
+Copy-Item "$env:USERPROFILE\.m2\repository\net\java\dev\jna\jna-jpms\5.14.0\jna-jpms-5.14.0.jar" "$t\pkg\lib\"
+Copy-Item "$env:USERPROFILE\.m2\repository\org\eclipse\jetty\toolchain\setuid\jetty-setuid-jna\2.0.3\jetty-setuid-jna-2.0.3.jar" "$t\pkg\lib\"
+Compress-Archive -Path "$t\pkg\*" -DestinationPath "$t\zip\VisibilityS3Archiver-prefix.zip" -Force
+"lib jars: " + (Get-ChildItem "$t\pkg\lib" -Filter *.jar).Count      # -> 222
+
+# --- rename the hosted suppression list, scan, restore --------------------
+$data = "C:\dependency-check\dependency-check-current\data"
+$out  = "owasp-reports\q5-renamed-supp"
+New-Item -ItemType Directory $out -Force | Out-Null
+try {
+  Rename-Item "$data\publishedSuppressions.xml" "publishedSuppressions.xml.DISABLED" -Force
+  & "C:\dependency-check\dependency-check-current\bin\dependency-check.bat" `
+      --project "q5-prefix-supp-renamed" --scan "$t\zip\VisibilityS3Archiver-prefix.zip" `
+      --out $out --noupdate --disableHostedSuppressions `
+      --format JSON --format HTML --log "$out\dc.log"
+} finally {
+  # DC writes a FRESH bundled snapshot (82,965 B) while the real file is renamed away.
+  # Delete that, then put the original (85,038 B) back.
+  Remove-Item "$data\publishedSuppressions.xml" -Force -ErrorAction SilentlyContinue
+  Rename-Item "$data\publishedSuppressions.xml.DISABLED" "publishedSuppressions.xml" -Force
+}
+Get-ChildItem $data -Filter "publishedSuppressions*" | Select-Object Name,Length,LastWriteTime
+```
+
+Result — an exact match for Jenkins:
+
+```
+jna-jpms   VisibilityS3Archiver-prefix.zip: jna-jpms-5.14.0.jar   {'HIGH': 4, 'MEDIUM': 5}
+           ['CVE-2009-2476', 'CVE-2009-2689', 'CVE-2009-2475', 'CVE-2009-2716', ...]
+```
+
+**10a — Confirm the restore actually worked** (must print 0; also confirms the file is *functional*,
+which is the direct answer to “is my copied-over suppressions file valid?”).
+```powershell
+dependency-check.bat --project "q5-restored" `
+  --scan "$env:USERPROFILE\.m2\repository\net\java\dev\jna\jna-jpms\5.14.0\jna-jpms-5.14.0.jar" `
+  --out "owasp-reports\q5-restored-check" --noupdate --format JSON
+@'
+import json
+d=json.load(open(r"owasp-reports\q5-restored-check\dependency-check-report.json",encoding="utf-8"))
+print("jna vulns after restore:", sum(len(x.get("vulnerabilities") or []) for x in d["dependencies"]))
+'@ | python -      # -> 0
 ```
 
 **11 — Show that Jenkins catalogues every jar twice.**
@@ -661,9 +1122,239 @@ git checkout -- visibility/visibility-inbound/generated/swagger-ui/visibility-1.
 git --no-pager diff --stat
 ```
 
+**17 — Determine which vulnerability sources actually ran locally.** This is what exposed the OSS
+Index gap in §5.2. The `--log` file carries the analyzer warnings; the JSON carries the sources.
+```powershell
+# the WARN that explains the missing jackson/jsoup HIGHs
+Select-String -Path "owasp-reports\q5-renamed-supp\dc.log" -Pattern "OSS Index"
+# -> [WARN] Sonatype OSS Index Analyzer disabled due to missing credentials.
+
+@'
+import json
+d = json.load(open(r"owasp-reports\visibility-lambda-after\visibility-error-email\dependency-check-report.json", encoding="utf-8"))
+srcs = {v.get("source") for dep in d["dependencies"] for v in (dep.get("vulnerabilities") or [])}
+print("vuln sources present:", sorted(x for x in srcs if x))     # -> ['NVD']  (no OSSINDEX)
+'@ | python -
+
+# corroborate from the HTML
+(Select-String -Path "owasp-reports\visibility-lambda-after\visibility-s3-archiver\dependency-check-report.html" `
+               -Pattern "OSSINDEX" -AllMatches).Matches.Count      # -> 0
+```
+
+**18 — Audit the dependency-check installs and their data directories** (§5.3 — “was copying the
+12.2.2 data dir wrong?”). The `Where-Object` filter hides the ~170 two-hex-character cache
+subdirectories so the interesting files are readable.
+```powershell
+foreach ($p in "dependency-check-12.2.1","dependency-check-12.2.2","dependency-check-13.0.0","dependency-check-current") {
+  $d = "C:\dependency-check\$p\data"
+  Write-Host "=== $p ==="
+  if (Test-Path $d) {
+    Get-ChildItem $d | Where-Object { $_.Name -notmatch '^[0-9a-f]{2}$' } |
+      ForEach-Object { "   {0,-38} {1,10} {2}" -f $_.Name, $_.Length, $_.LastWriteTime }
+  } else { "   (no data dir)" }
+}
+# also confirm what 'current' points at
+(Get-Item "C:\dependency-check\dependency-check-current").Target    # -> dependency-check-13.0.0
+```
+
+**19 — Confirm the Jenkins scanner version and its OSS Index usage.** Proves the local/CI gap is a
+*credentials* difference, not a version difference: both are 13.0.0, but only CI has OSSINDEX rows.
+```powershell
+@'
+import re, glob
+from pathlib import Path
+for f in sorted(glob.glob(r"C:\Users\arijit.kundu\Downloads\Visibility*OWASP*.html")):
+    c = Path(f).read_text(encoding="utf-8", errors="ignore")
+    t = " ".join(re.sub(r"<[^>]+>", " ", c).split())
+    v = sorted(set(re.findall(r"[Dd]ependency-?[Cc]heck\s*(?:version)?\s*:?\s*v?(\d+\.\d+\.\d+)", t)))
+    print(f"{Path(f).name:52} versions={v[:3]}  OSSINDEX_hits={len(re.findall('OSSINDEX', c))}")
+'@ | python -
+```
+
+**20 — Map every CVE in a Jenkins report to the jar it was reported against.** Used to attribute the
+two out-of-scope HIGHs in §9. Anchors each CVE to the nearest preceding `*.jar` heading.
+```powershell
+@'
+import re
+from pathlib import Path
+c = Path(r"C:\Users\arijit.kundu\Downloads\VisibilityS3Archiver-26.09.002-OWASP.html").read_text(encoding="utf-8", errors="ignore")
+heads = [(m.start(), m.group(1)) for m in re.finditer(r'>([A-Za-z0-9_.\-]+\.jar)\s*<', c)]
+res = {}
+for m in re.finditer(r'(CVE-\d{4}-\d{4,7}|GHSA-[a-z0-9\-]+)', c):
+    prev = [h for pos, h in heads if pos < m.start()]
+    if prev: res.setdefault(prev[-1], []).append(m.group(1))
+for jar in ("jsoup-1.17.2.jar", "jackson-databind-2.22.0.jar", "jna-jpms-5.14.0.jar"):
+    ids = list(dict.fromkeys(res.get(jar, [])))
+    print(f"{jar:32} -> {', '.join(ids)}")
+'@ | python -
+```
+
+**21 — Establish the CI timeline for the integration-test question (§6.3).** The workspace directory
+name in the CI report embeds a Unix timestamp; compare it with the merge commit date.
+```powershell
+# build timestamp baked into the Jenkins workspace path
+@'
+import re
+from pathlib import Path
+c = Path(r"C:\Users\arijit.kundu\Downloads\VisibilityS3Archiver-26.09.002-OWASP.html").read_text(encoding="utf-8", errors="ignore")
+print(sorted(set(re.findall(r"VisibilityS3Archiver-26\.09\.002-(\d+)", c))))
+'@ | python -                                             # -> 1788253326
+[DateTimeOffset]::FromUnixTimeSeconds(1788253326).ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
+#   -> 2026-09-01 09:02:06 UTC
+
+cd C:\Users\arijit.kundu\projects\mercury-services
+git --no-pager log -1 --format="%h %ad %s" --date=iso 7573ea93aa   # PR #1226 merge
+#   -> 7573ea93aa 2026-09-01 07:18:04 +0000 Pull request #1226: Feature/ION-16693 visibility owasp
+
+# and show the property values on either side of the bump
+git --no-pager show 08a0c83d41^:visibility/pom.xml | Select-String "log4j.version>"   # 2.23.1
+git --no-pager show HEAD:visibility/pom.xml        | Select-String "log4j.version>"   # 2.25.5
+```
+
+**22 — Discover the OSS Index authentication options on the installed CLI (§5.2.1).** The `--help`
+output is truncated; `--advancedHelp` lists every option. The property-file keys and the actual
+enable/disable rule are not documented in the help at all, so they were read out of the jar:
+
+```powershell
+$bat = "C:\dependency-check\dependency-check-current\bin\dependency-check.bat"
+& $bat --advancedHelp 2>&1 | Out-String | Out-File "$env:TEMP\dc-help.txt" -Encoding utf8
+Get-Content "$env:TEMP\dc-help.txt" | Select-String "oss|Sonatype|propertyfile"
+#   -> --ossIndexPassword <password>   Sonatype Guide personal access token or legacy API token
+#   -> --ossIndexUsername <username>   (deprecated) only for legacy tokens
+#   -> -P, --propertyfile <file>       A property file to load.
+
+# the property keys accepted in that file - read out of the compiled constants
+python -c @"
+import zipfile,re
+z=zipfile.ZipFile(r'C:\dependency-check\dependency-check-current\lib\dependency-check-core-13.0.0.jar')
+keys=set()
+for n in z.namelist():
+    if n.endswith('.class'):
+        for m in re.finditer(rb'analyzer\.ossindex\.[a-z.]+', z.read(n)):
+            keys.add(m.group().decode())
+for k in sorted(keys): print(k)
+"@
+#   -> analyzer.ossindex.password / .user / .url / .enabled / .cache.validforhours / ...
+
+# and the shipped default URL (already migrated to Sonatype Guide on 13.0.0 - do not override)
+python -c @"
+import zipfile
+z=zipfile.ZipFile(r'C:\dependency-check\dependency-check-current\lib\dependency-check-core-13.0.0.jar')
+print([l for l in z.read('dependencycheck.properties').decode().splitlines() if 'ossindex' in l])
+"@
+#   -> ['analyzer.ossindex.enabled=true', 'analyzer.ossindex.url=https://api.guide.sonatype.com', ...]
+```
+
+**22a — Disassemble the credential gate.** Setting only a password still produced the "missing
+credentials" WARN, so the condition had to be read directly:
+
+```powershell
+# extract the analyzer class and disassemble it
+$core = "C:\dependency-check\dependency-check-current\lib\dependency-check-core-13.0.0.jar"
+python -c @"
+import zipfile
+z=zipfile.ZipFile(r'$core')
+[z.extract(n, r'$env:TEMP\dcoss') for n in z.namelist() if 'OssIndexAnalyzer' in n]
+"@
+javap -p -c "$env:TEMP\dcoss\org\owasp\dependencycheck\analyzer\OssIndexAnalyzer.class" |
+  Out-File "$env:TEMP\ossidx.txt" -Encoding utf8
+
+# prepareAnalyzer() -> disables unless password non-empty AND (user non-empty OR password
+#                      startsWith "sonatype_pat_")
+Get-Content "$env:TEMP\ossidx.txt" | Select-String "sonatype_pat_|missing credentials|setEnabled"
+```
+
+**22b — Empirically confirm the rule** with dummy values against a single jar (fast, no NVD update).
+The message changing from *"disabled due to missing credentials"* to *"invalid credentials"* proves
+the credential was accepted and the analyzer actually ran:
+
+```powershell
+$jar   = "$env:USERPROFILE\.m2\repository\net\java\dev\jna\jna-jpms\5.14.0\jna-jpms-5.14.0.jar"
+$props = "$env:TEMP\dc-oss.properties"
+
+# (a) no prefix, no user -> still disabled
+"analyzer.ossindex.password=DUMMY_TOKEN" | Set-Content $props -Encoding ascii
+& $bat --project oss-a --scan $jar --propertyfile $props --out "$env:TEMP\dc-a" --noupdate --format JSON 2>&1 |
+  Select-String "OSS Index"
+#   -> [WARN] ... disabled due to missing credentials
+
+# (b) Sonatype Guide PAT prefix, no user -> ENABLED
+"analyzer.ossindex.password=sonatype_pat_DUMMYVALUE" | Set-Content $props -Encoding ascii
+& $bat --project oss-b --scan $jar --propertyfile $props --out "$env:TEMP\dc-b" --noupdate --format JSON 2>&1 |
+  Select-String "OSS Index"
+#   -> [ERROR] Sonatype OSS Index / Guide has invalid credentials, disabling the analyzer.  (exit 14)
+
+# (c) legacy token: user + password -> ENABLED, with a migration deprecation warning
+@"
+analyzer.ossindex.user=someone@e2open.com
+analyzer.ossindex.password=legacy_api_token_value
+"@ | Set-Content $props -Encoding ascii
+& $bat --project oss-c --scan $jar --propertyfile $props --out "$env:TEMP\dc-c" --noupdate --format JSON `
+       --ossIndexRemoteErrorWarnOnly true 2>&1 | Select-String "OSS Index"
+#   -> [WARN] ... not yet using a Sonatype Guide personal access token ... before December 31, 2026
+#   -> exit 0, because --ossIndexRemoteErrorWarnOnly downgrades the failure
+
+# putting the token on the command line instead of in the file is possible but DC objects:
+& $bat --project oss-d --scan $jar --ossIndexPassword "sonatype_pat_X" --out "$env:TEMP\dc-d" --noupdate 2>&1 |
+  Select-String "used on the command line"
+#   -> [WARN] ossIndexPassword used on the command line, consider moving the password to a
+#             properties file using the key `analyzer.ossindex.password`
+```
+
 ---
 
-## 9. Files changed
+## 9. The other two HIGHs — origin, and whether a fix exists
+
+Out of scope for this branch (covered by the agreed two-week release exception), but recorded here so
+the follow-up ticket does not have to redo the research.
+
+### 9.1 Where they come from
+
+```
+visibility-s3-archiver
+ \- visibility-commons
+    +- com.inttra.mercury:commons:1.0.33-SNAPSHOT
+    |   \- org.jsoup:jsoup:1.17.2                     <-- transitive, NOT declared in visibility
+    \- com.fasterxml.jackson.core:jackson-databind:2.22.0
+                                                      <-- declared in visibility-commons/pom.xml:51-54
+                                                          as ${jackson.version}, set in visibility/pom.xml:36
+```
+
+| Jar | Declared where | Controlled by |
+|---|---|---|
+| `jackson-databind` 2.22.0 | `visibility/visibility-commons/pom.xml` | `<jackson.version>` in `visibility/pom.xml` — **we own this** |
+| `jsoup` 1.17.2 | nowhere in visibility | transitive from `commons` — **owned by `mercury-services-commons`** |
+
+That asymmetry matters: bumping jackson is a one-line change in `visibility/pom.xml`; bumping jsoup
+requires either a change in `mercury-services-commons`, or a `dependencyManagement` pin in
+`visibility/pom.xml` to override the transitive version.
+
+### 9.2 The findings, and fix availability
+
+Both HIGHs are CWE-770 (allocation without limits) with an identical CVSSv4 base score of **8.7**, and
+both come from **OSS Index**, not NVD (§5.2).
+
+| Jar | CVE | Sev | What it is | Fixed in |
+|---|---|---|---|---|
+| `jsoup` 1.17.2 | **CVE-2026-75140** | **HIGH** | `XmlTreeBuilder` copies the whole inherited namespace map on every start element → quadratic time/memory on deeply nested, uniquely-namespaced XML → `OutOfMemoryError`. Affects jsoup **through 1.23.2**; fix commit `862ba2f`, PR jhy/jsoup#2556 | **jsoup 1.23.3** |
+| `jsoup` 1.17.2 | CVE-2026-71497 | MEDIUM | XSS | included in the same upgrade |
+| `jackson-databind` 2.22.0 | **CVE-2026-68497** | **HIGH** | no `StreamReadConstraints` number-length limit on `XMLGregorianCalendar` / `Duration` deserialization; PR FasterXML/jackson-databind#6127 | confirmed in **3.1.6**; a 2.22.x backport is **not yet published** |
+| `jackson-databind` 2.22.0 | CVE-2026-54515, CVE-2026-59889, CVE-2026-77310, CVE-2026-19032 | MEDIUM | various | **2.22.1** fixes 54515 / 59889 / 77310 |
+
+### 9.3 Suggested follow-up when the exception expires
+
+* **jsoup** — clean, low-risk win. Ask `mercury-services-commons` to move to **1.23.3**; if that is
+  slow, pin it in `visibility/pom.xml` `<dependencyManagement>` in the same style as the Jetty /
+  httpclient5 / guava pins added yesterday. This clears one of the two remaining HIGHs outright.
+* **jackson-databind** — bumping `<jackson.version>` to **2.22.1** clears three MEDIUMs but,
+  as of this writing, **not** the CVE-2026-68497 HIGH, which is only confirmed fixed on the 3.x line.
+  Re-check the 2.22.x release notes before the exception lapses; if no backport has shipped, the
+  exception will need to be renewed for that one CVE alone.
+* Do the jsoup bump first — it is the one that actually reduces the HIGH count.
+
+---
+
+## 10. Files changed
 
 | File | Change |
 |---|---|
@@ -676,11 +1367,13 @@ No production Java source changed; no other visibility module is affected.
 
 ---
 
-## 10. Residual risk
+## 11. Residual risk
 
 | Risk | Assessment |
 |---|---|
 | A lambda needs `SetUIDListener` at runtime | None. It is only reachable via `AbstractServerFactory.buildServer(...)`, and the lambdas never build a Jetty `Server`. Proven by boot-testing all four handlers from their actual deployment ZIPs (§7.4) and by a constant-pool scan of ~220 jars per package (§7.5 / §8 command 13). |
 | A future dependency reintroduces `jetty-setuid-jna` on a fourth path | The exclusion is applied to all three `com.inttra.mercury` compile dependencies in each lambda, covering every current path. A new path would reappear in CI as the same FP; re-run §8 command 6 if it does. |
 | Other visibility modules regress | None. All seven still resolve `jetty-setuid-jna:2.0.3 → jna-jpms:5.14.0` unchanged (§7.1), and the full reactor builds and tests green (§7.3). |
-| `jackson-databind` / `jsoup` HIGHs | Knowingly deferred under the agreed two-week release exception; both jars still ship unchanged. |
+| `jackson-databind` / `jsoup` HIGHs | Knowingly deferred under the agreed two-week release exception; both jars still ship unchanged. See §9 for origin and fix availability. |
+| `VisibilityS3ArchiverIT` regresses again | Real. It is not run by the Jenkins job (`package sonar:sonar`, §6.3), so only a local `mvn -o clean verify` will catch it. Raising a ticket to add `verify` to CI is the durable fix. |
+| Local OWASP scans give false assurance | Real. Without an OSS Index token, local DC 13.0.0 sees NVD findings only and silently misses ~1/3 of what CI reports (§5.2). Do not sign off a security fix on a local scan alone. |

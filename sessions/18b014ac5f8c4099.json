@@ -1,0 +1,133 @@
+{
+  "id": "18b014ac5f8c4099",
+  "name": "ION-16663 Visibility Outbound prod fix — post-rollout verification & drain",
+  "description": "Verification and monitoring of the ION-16663 visibility-outbound prod fix (bounded outbound query / restored sort-key window), plus the operational recovery: MySQL cursor bump, task scale-up (0→4→8), throttling analysis, capacity sizing, failure-path assessment, and large-backlog IPF drain tracking. All AWS access read-only via profile 642960533737_INTTRA2-QATeam.",
+  "project": "mercury-services / visibility",
+  "created_at": "2026-08-25T03:57:07.077625+00:00",
+  "updated_at": "2026-08-25T03:58:22.534150+00:00",
+  "status": "paused",
+  "tags": [
+    "visibility",
+    "outbound",
+    "ION-16663",
+    "prod-issue",
+    "dynamodb",
+    "throttling",
+    "dlq",
+    "read-only",
+    "aws"
+  ],
+  "entries": [
+    {
+      "id": "7565ecd03f8b",
+      "timestamp": "2026-08-25T03:57:43.866026+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "\"Skip the orphan\" is NOT an acceptable fix — it drops the customer's outbound; the fix must be outbound-side",
+      "detail": "User directive: skipping an orphaned inbound is not acceptable because the outbound transaction is built FROM the inbound event's data (OutboundGenerator.generateTransaction: gisTransaction.build(outbound, inbound) + createTransactionMetaData(inbound)); skipping = customer gets missing/invalid outbound. Neither throw-and-poison (current) nor silent-skip is acceptable. Correct record-preserving direction (all outbound-side): (1) keep outbound current so the inbound still exists when processed (Fix A + unstick cursors + capacity) — prevents new orphans; (2) durable: snapshot inbound data into ContainerEventOutbound at creation so generation never needs a purgeable findById; (3) recover the already-orphaned 2023 backlog from the inbound S3 archive (…-visibility-s3-archive lambdas) or an explicit logged business decision — never a silent drop. Root cause of orphans: inbound TTL 400d < outbound TTL 1095d, so outbound rows processed >400d late reference purged inbounds. Documented in §22 of the checkout doc.",
+      "tags": [
+        "orphan",
+        "ttl-mismatch",
+        "outbound-correctness",
+        "user-directive"
+      ],
+      "references": [
+        "visibility/docs/2026-08-24-visibility-prod-issue-post-fix-checkout.md"
+      ]
+    },
+    {
+      "id": "3b75a361e44b",
+      "timestamp": "2026-08-25T03:57:43.880366+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "ION-16663 Fix A deployed & working in prod; the second intended change (orphan handling) was documented but never shipped",
+      "detail": "Fix A (restore the outbound query time-window bound: replace inert queryExpression BETWEEN with structured sortKeyCondition(\">=\") + client-side removeIf) is deployed to prod (VisibilityOutbound-prod, cluster ANEPRVIS-001; redeployed 2026-08-24 17:33 EDT) and confirmed live by the new INFO fingerprint 'ContainerEventOutboundDao: DynamoDB query for IPF <id> returned N records'. However, the doc-claimed \"Fix B\" (skip orphaned inbound) was NEVER implemented — no toOutboundMetaDataOrSkip method / no skipsOrphanedInboundWithoutFailingBatch test exist; getInboundContainerEvent still throws IllegalArgumentException at OutboundGenerator.java:199, called inside the stream at :102, so an orphan poisons the whole batch. Verified via git_show_file that the _g sort-key sentinel predates the AWS 2.x upgrade (present in v1 at git 9a04010f1d^) and is app-level, not an SDK feature; the sentinel is a query bound value, never a stored record (exact-match query for '<ts>_g' returns 0 items).",
+      "tags": [
+        "ION-16663",
+        "fix-a",
+        "fix-b",
+        "deployed",
+        "sentinel"
+      ],
+      "references": [
+        "visibility/docs/2026-08-24-visibility-prod-issue-post-fix-checkout.md",
+        "visibility/docs/2026-08-21-vis-prod-issue.md",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/persistence/ContainerEventOutboundDao.java",
+        "visibility/visibility-outbound/src/main/java/com/inttra/mercury/visibility/outbound/processor/gis/OutboundGenerator.java"
+      ]
+    },
+    {
+      "id": "69e2fabc68f4",
+      "timestamp": "2026-08-25T03:57:43.913331+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Capacity/throttling analysis + failure-path assessment (DLQ is app-managed on first failure)",
+      "detail": "Outbound table inttra2_prod_container_events_outbound: provisioned RCU 25 / WCU 200, autoscale read 25→2000. Measured 243 RCU per consistent 1000-item query; concurrency 8 tasks × 15 threads = 120 workers. Inbound inttra2_prod_container_events already ~1863/2000 RCU from baseline (shared table — the tighter constraint); getInboundContainerEvent does up to ~1000 findById/batch. SDK default 8 retries/9 attempts (confirmed 'SDK Attempt Count: 9'), exp backoff ~0.5s→cap 20s. Recommended for drain: on-demand for both tables OR outbound reads ~30k max/8k min (consistent) or 15k/5k (eventual) + inbound ~10k max; better: cap concurrency + eventually-consistent reads + BatchGetItem/cache the findById. Failure paths (from OutboundMultiTransactionProcessor.process + SqsMessageHandler): DLQ is app-managed and fires on the FIRST failure (taskExceptionHandler copies to DLQ + finally deletes source; no maxReceiveCount). Cursor only advances when processedCount>0. Outbound-query throttle → caught in DAO → empty → silent skip (no DLQ). Inbound-findById throttle OR orphan → propagates → DLQ + cursor frozen. No data loss in any path (atomic batches). Not safe to drain without raising capacity (§21): shared inbound table near cap → collateral prod impact + DLQ growth. DLQ is recoverable via redrive but redrive is itself heavy load — do it only after Fix + capacity.",
+      "tags": [
+        "capacity",
+        "throttling",
+        "dynamodb",
+        "failure-path",
+        "dlq",
+        "provisioned-throughput"
+      ],
+      "references": [
+        "visibility/docs/2026-08-24-visibility-prod-issue-post-fix-checkout.md",
+        "visibility/visibility-outbound/src/main/java/com/inttra/mercury/visibility/outbound/processor/OutboundMultiTransactionProcessor.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/processor/sqs/SqsMessageHandler.java"
+      ]
+    },
+    {
+      "id": "9a40e23a9810",
+      "timestamp": "2026-08-25T03:58:10.403282+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "general",
+      "summary": "model_info + read-only access footprint and deliverables",
+      "detail": "Model: Claude Opus 4.8 (claude-opus-4.8) via GitHub Copilot CLI. All AWS interactions this session were READ-ONLY against SSO profile 642960533737_INTTRA2-QATeam (region us-east-1): aws ecs describe-services, aws logs filter-log-events (groups inttra2-ecs-logs stream-prefix VisibilityOutbound-latest-prod, and /aws/lambda/inttra2-pr-lambda-visibility-outbound-poller), aws sqs get-queue-attributes, aws dynamodb describe-table + a single targeted Query with ReturnConsumedCapacity, aws cloudwatch get-metric-statistics, aws application-autoscaling describe-scalable-targets. NO DynamoDB scans, NO writes, no infra/config changes. Deliverables are two markdown docs under visibility/docs/. A step-by-step read-only progress-check runbook is in §7 of the post-cursorbump doc; the transactionCount tracing methodology is in §8.",
+      "tags": [
+        "model_info",
+        "read-only",
+        "runbook",
+        "deliverables"
+      ],
+      "references": [
+        "visibility/docs/2026-08-24-visibility-outbound-post-cursorbump-4task-check.md"
+      ]
+    },
+    {
+      "id": "deb65003aa9e",
+      "timestamp": "2026-08-25T03:58:10.447483+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Operational recovery: cursor bump + 4→8 task scale-up; system recovered & drained; open items (orphan fix, DLQ redrive, 4486, TTL)",
+      "detail": "Timeline: fix deployed 17:33 EDT; team stopped processor (scaled to 0); applied a MySQL cursor bump to OutboundThreshold so old records are no longer picked; restarted 4 tasks (~21:23 EDT/01:23Z), then 8 tasks (~23:14 EDT/03:14Z). Verified via read-only CloudWatch Logs/SQS/ECS: cursor bump WORKED (Could not find inbound transaction = 0; IPF 4452 cursor now recent 1787404045449). Initial 4-task run still throttled (287 ProvisionedThroughputExceededException, 53s query latencies, AbortedException/SNS_Failed_AFTER_RETRY as overload symptoms) but by ~02:56Z everything cleared: 0 throttles/fatals/orphans/DLQ-sends/SNS-fails; both live INPUT queues drained to 0 (inttra2_pr_sqs_ce_outbound_ipf = batch input→multiTransaction processor; inttra2_pr_sqs_ce_outbound = single-transaction input); output flowing to inttra2_pr_sqs_transformer_ce (generated outbound goes to S3 inttra2-pr-gis-delivery + transformer queue, NOT ce_outbound). 8-task restart clean (no throttling — backlog already drained). Large per-IPF MySQL backlogs (OutboundThreshold.transactionCount, traced via poller lambda logs): 5801 ~cleared (128), 5605 nearly (3,887), 5695/5792 draining; 4486 huge (661k) + highest inflow, net ~245/min ⇒ ~45h — per-IPF drain is batch-capped at ~1000/cycle (RESULT_SIZE_LIMIT); more tasks parallelize across IPFs, NOT within one. OPEN ITEMS: (1) implement the outbound-side orphan fix per §22 (NOT skip); (2) redrive the historical IPF DLQ inttra2_pr_sqs_ce_outbound_ipf_dlq (264,749) — only AFTER capacity relief (on-demand/raise RCU) since redrive re-creates the heavy read load; (3) 4486 needs higher per-IPF batch limit or inflow investigation; (4) align inbound/outbound TTLs.",
+      "tags": [
+        "recovery",
+        "cursor-bump",
+        "scale-up",
+        "drain",
+        "open-items",
+        "current-state"
+      ],
+      "references": [
+        "visibility/docs/2026-08-24-visibility-outbound-post-cursorbump-4task-check.md",
+        "visibility/docs/2026-08-24-visibility-prod-issue-post-fix-checkout.md"
+      ]
+    }
+  ],
+  "usage": [
+    {
+      "id": "86f5cdbd9169",
+      "timestamp": "2026-08-25T03:58:22.534117+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "model": "claude-opus-4.8",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Long multi-turn read-only investigation + documentation session (Copilot CLI). Exact per-turn provider token counts not exposed to the agent in this environment; model recorded for the telemetry_report. Session paused for sign-out; drain monitoring + open items continue."
+    }
+  ]
+}

@@ -1,0 +1,277 @@
+{
+  "id": "54126a831e0e4fec",
+  "name": "watermill-publisher AWS upgrade summary doc + QA regression 2026-09-02",
+  "description": "Author watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md: high-level AWS 2.x upgrade summary, AWS touchpoints, data flows, validations, per-sub-module sections (booking, cargo-visibility deep; aperak brief), functional/business flows, regression impact, QA regression touchpoints, mermaid diagrams, verify INT AWS resources, re-check gaps listed in 2026-07-30 confluence design doc and update it, and relate to appianway watermill-consumer modules.",
+  "project": "mercury-services",
+  "created_at": "2026-09-02T20:28:45.614107+00:00",
+  "updated_at": "2026-09-03T03:36:22.711176+00:00",
+  "status": "active",
+  "tags": [
+    "watermill-publisher",
+    "documentation",
+    "aws-sdk-v2",
+    "cloud-sdk",
+    "qa-regression",
+    "ION-16380"
+  ],
+  "entries": [
+    {
+      "id": "5329bd7f4905",
+      "timestamp": "2026-09-02T20:38:14.368754+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "Re-verified the 3 cloud-sdk gaps against current code (commons 1.0.33): gaps #2 (ApproximateReceiveCount) and #4 (headObject) CLOSED; gap #3 (DynamoDbAdminCommand partition-key naming) STILL OPEN — proven empirically",
+      "detail": "Model: GitHub Copilot CLI powered by Claude Opus 5 (claude-opus-5). Re-verified the 3 open cloud-sdk gaps from watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md (\"Assumptions and Open Issues\") against the CURRENT code (develop, commit 2ff603b53d, commons/cloud-sdk 1.0.33-SNAPSHOT):\nGAP #2 (MessagingClient receive cannot request SQS system attributes / ApproximateReceiveCount) = CLOSED. cloud-sdk 1.0.33 added com.inttra.mercury.cloudsdk.messaging.model.ReceiveMessageOptions with messageSystemAttributeNames(...). watermill-commons deleted SQSListenerClient + SqsQueueMessage + the direct AWS v2 SqsClient; SQSClient became SQSClientAdapter which calls messagingClient.receiveMessages(ReceiveMessageOptions...messageSystemAttributeNames(List.of(\"ApproximateReceiveCount\"))). Single MessagingClient provider now.\nGAP #4 (StorageClient has no metadata-only headObject) = CLOSED. javap of cloud-sdk-api 1.0.33 StorageClient shows `default Map<String,String> getMetadata(String,String)`; S3WorkspaceService.getMetaData now delegates to it (headObject), no full GET. Residual quirk: getMetadata returns an EMPTY MAP when the bucket does not exist (missing key does throw) - documented in the javadoc.\nGAP #3 (DynamoDbAdminCommand derives partition-key attribute from bean property name, ignoring @DynamoDbAttribute) = STILL OPEN in 1.0.33. Verified empirically: compiled the module and called EntityTableMetadata.fromEntityClass(CargoVisibilitySubscription.class) -> key schema attribute name is \"hashKey\", not \"id\". GSIs are correct (billOfLading-carrierInttraId-index, bookingNumber-carrierInttraId-index, subscriptionReference-index; all KEYS_ONLY; capacity now 25/25 from dynamoDbConfig per ION-16650). No TTL derived (correct - no @DynamoDbTtl). No live impact (all envs' tables pre-exist; admin command is describe-then-skip); blocks greenfield envs only.\nLive INT verified via AWS CLI (acct 081020446316, us-east-1, SSO role AWSReservedSSO_INTTRA-Dev-Engg): table inttra_int_CargoVisibilitySubscription partition key `id`, 5 GSIs (3 annotated carrierInttraId family + 2 unannotated carrierScac family), all KEYS_ONLY 5/5, TTL ENABLED on expiresOn, 45 items (was 43). All 8 SQS queues + DLQs present.</detail>\n<parameter name=\"references\">[\"watermill-publisher/watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md\", \"2ff603b53d\", \"SQSClientAdapter.java\", \"S3WorkspaceService.java\", \"EntityTableMetadata\", \"cloud-sdk-aws-1.0.33-SNAPSHOT\", \"ION-16650\", \"ION-16380\"]",
+      "tags": [
+        "cloud-sdk",
+        "gap-verification",
+        "watermill-publisher",
+        "aws-sdk-v2"
+      ],
+      "references": []
+    },
+    {
+      "id": "d077c2990b68",
+      "timestamp": "2026-09-02T20:49:49.027942+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "progress",
+      "summary": "Delivered 2026-09-02 wmpub upgrade summary doc and updated the 2026-07-30 Confluence design doc with the 1.0.33 gap re-verification",
+      "detail": "Deliverable 1: watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md (new, ~64k chars). 11 sections: exec summary (3 upgrade waves), Mermaid component diagram, AWS touchpoint inventory T1-T16 + per-env resource table (incl. the DynamoDB-vs-S3/SQS/SNS prefix trap), watermill-commons substrate + failure-handling flowchart, then one full section each for watermill-booking (validations B1-B11, QA cases BK-1..BK-19), watermill-cargo-visibility-subscription (validations C1-C17, QA cases CV-1..CV-38) and a brief watermill-booking-aperak (AP-1..AP-10), each with Mermaid sequence diagrams, data flow, upgrade-impact table and high-level + detailed QA regression sub-sections. Plus gap re-verification, live AWS INT evidence, appianway relationship and a suite-level P1/P2/P3 regression set.\n\nDeliverable 2: updated watermill-publisher/watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md:\n- Added a \"2026-09-02 update - gap re-verification against 1.0.33-SNAPSHOT\" banner above \"Assumptions and Open Issues\" with a 3-row verdict table.\n- Assumptions #2 -> Resolved (1.0.33 ReceiveMessageOptions; reach-around deleted in 2ff603b53d), #3 -> Still Open (re-verified empirically), #4 -> Resolved (StorageClient.getMetadata), #5 -> superseded by ION-16650.\n- \"AWS Services Used\" SQS rows rewritten: no direct AWS v2 SqsClient; single MessagingClient via SQSClientAdapter for receive/delete/send/attrs.\n- \"The ApproximateReceiveCount gap\" section prefixed with a CLOSED banner (historical analysis retained) + new residual risk: receive and DLQ-send now share one client/pool.\n- \"Performance\" getMetaData full-GET penalty struck through and marked resolved.\n- \"Risks\": two-SQS-stacks risk retired; DynamoDbAdminCommand risk re-confirmed for greenfield envs only.\n- Dependency table: commons/cloud-sdk-api/cloud-sdk-aws/dynamo-integration-test 1.0.28-SNAPSHOT -> 1.0.33-SNAPSHOT; \"Released commons 1.0.28\" prerequisite -> 1.0.33.\n- Blocking Issues: #1 and #3 marked Done (1.0.33), #2 Still Open, new row #4 for the S3OperationException / getMetadata-missing-bucket / isRetryable-defaults-true cloud-sdk feedback.\n\nNote: watermill-publisher/**/docs/ is covered by .gitignore rule \"**/docs/\" at line 110, so these docs are intentionally untracked - same as every other doc in this suite.\n\nOutstanding: re-publish the updated design doc to the Confluence BRM space (publish-doc flow) - not done in this session.",
+      "tags": [
+        "watermill-publisher",
+        "aws-upgrade",
+        "documentation",
+        "qa-regression",
+        "cloud-sdk-1.0.33"
+      ],
+      "references": [
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "watermill-publisher/watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md",
+        "watermill-publisher/docs/2026-08-31-wm-aws-upgrade-refactor.md",
+        "ION-16380",
+        "ION-16650",
+        "2ff603b53d"
+      ]
+    },
+    {
+      "id": "01be3bc5a1c7",
+      "timestamp": "2026-09-02T20:49:59.447505+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "model_info",
+      "summary": "Model used: Claude Opus 5 via GitHub Copilot CLI",
+      "detail": "All analysis, AWS INT verification, gap probing and document authoring in this session were performed by Claude Opus 5 (model id: claude-opus-5) running in GitHub Copilot CLI v1.0.82. A background sub-agent was used once to compile watermill-cargo-visibility-subscription and reflectively probe EntityTableMetadata.fromEntityClass for the G3 partition-key gap.",
+      "tags": [
+        "model_info"
+      ],
+      "references": [
+        "claude-opus-5",
+        "github-copilot-cli-1.0.82"
+      ]
+    },
+    {
+      "id": "7b6ed4e66394",
+      "timestamp": "2026-09-02T21:02:03.555879+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "blocker",
+      "summary": "BLOCKED: cannot re-publish the design doc to Confluence — REST API returns 401, SSO cookie expired",
+      "detail": "Attempted to locate and update the published Confluence page for 2026-07-30-waermillpub-awsupgrade-confluence-design.md. confluence_search returned HTTP 401 Unauthorized from https://confluence.dev.e2open.com/rest/api/content/search. Called auth_reload, which reported {status: reloaded, has_cookies: true, confluence_configured: true}, but the subsequent search still 401'd - meaning the SSO cookie file on disk is itself stale, not just the in-process cache.\n\nResolution required (user action): re-run sso_login.py against confluence.dev.e2open.com in a logged-in browser session to refresh the cookie file, then call auth_reload and re-run the publish.\n\nAlso note: confluence_params.json at the repo root is left over from a different ticket (ION-16032, space ~akundu, parent_id 197692761) and does NOT contain the page id for the watermill design page - the target page id still needs to be discovered by search once auth works.\n\nAll document content work is complete; only the publish action remains.",
+      "tags": [
+        "confluence",
+        "blocker",
+        "sso",
+        "publish"
+      ],
+      "references": [
+        "watermill-publisher/watermill-booking/docs/2026-07-30-waermillpub-awsupgrade-confluence-design.md",
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md"
+      ]
+    },
+    {
+      "id": "3a53c4c24cd6",
+      "timestamp": "2026-09-02T21:54:00.193868+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "category": "code_change",
+      "summary": "Made the upgrade-summary diagrams readable: split the dense §2 component diagram into 3, and added a pan/zoom HTML viewer + offline SVGs generated from the markdown",
+      "detail": "Problem: VS Code Markdown Preview Enhanced renders Mermaid as a fixed-size inline SVG with no pan/zoom, so the single dense §2 component diagram (6 subgraphs, ~25 nodes, flowchart TB) was unreadable at preview width.\n\nFix 1 - split the diagram. §2 is now three progressively-detailed LR diagrams instead of one TB monolith:\n  2.1 At a glance - the five stages (6 nodes)\n  2.2 Ingress and the shared substrate - where the upgrade lives\n  2.3 Services and egress\nAdded §2.4 \"Viewing the diagrams\" documenting the three viewing options.\n\nFix 2 - generated zoomable artifacts in watermill-publisher/docs/diagrams/:\n  build-diagrams.mjs   - zero-dependency Node script; extracts every ```mermaid block from the markdown (labels each by \"H2 > H3\" so the two \"Business & functional flows\" diagrams are distinguishable) and emits the HTML viewer + one .mmd per diagram. Markdown stays the single source of truth.\n  wmpub-diagrams.html  - self-contained viewer: mouse-wheel zoom, drag-to-pan, diagram picker, arrow-key nav, Fit/Reset/100%, light+dark. Mermaid 11 ESM + svg-pan-zoom 3.6.1 from jsDelivr.\n  NN-*.svg (7 files)   - offline vector renders via @mermaid-js/mermaid-cli 11.17.0 (Ctrl+wheel zoom in VS Code's image viewer).\n  render-svg.ps1, mermaid.config.json, README.md\n\nBugs found and fixed during verification (headless Chromium via puppeteer):\n1. `import svgPanZoom from '.../svg-pan-zoom.min.js'` failed - \"does not provide an export named 'default'\". svg-pan-zoom is UMD, not ESM. Fixed by loading it as a classic <script> before the module and reading globalThis.svgPanZoom, plus a graceful degradation path that still renders the diagram (without pan/zoom) if the CDN is blocked.\n2. A backtick inside an HTML comment in the generator broke the enclosing JS template literal (SyntaxError: Unexpected token 'import'). Removed the backticks.\n\nFinal verification: headless load reports hasSvg=true, panZoomApplied=true, errVisible=false, zero console/page errors, all 7 diagrams in the picker, and diagram switching re-initialises pan/zoom correctly. All 7 SVGs contain expected node text and a viewBox.\n\nNote: watermill-publisher/docs/** is covered by .gitignore \"**/docs/\", so none of these artifacts are tracked - consistent with every other doc in this suite. No files added to the repo root.",
+      "tags": [
+        "documentation",
+        "mermaid",
+        "diagrams",
+        "tooling",
+        "watermill-publisher"
+      ],
+      "references": [
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "watermill-publisher/docs/diagrams/build-diagrams.mjs",
+        "watermill-publisher/docs/diagrams/wmpub-diagrams.html",
+        "watermill-publisher/docs/diagrams/README.md",
+        "watermill-publisher/docs/diagrams/render-svg.ps1"
+      ]
+    },
+    {
+      "id": "0079abacc463",
+      "timestamp": "2026-09-03T02:32:20.105834+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "Added §12 \"Clarifications — reviewer questions answered\" to the wmpub upgrade summary; corrected a wrong claim about cargo-visibility",
+      "detail": "All 11 reviewer questions answered in a new §12 (12.1–12.11) of watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md, each with pre/post code snippets and MEASURED evidence (probe programs, javap, git diff), not inference.\n\nKEY EMPIRICAL FINDINGS\n1. ISO-8859-1 (Q1): verified via ProbeCharset — Latin-1 round-trips all 256 byte values losslessly; UTF-8 does not (256->512 bytes). BUT byte-identity does NOT hold on the outbound protobuf wire (protobuf strings are UTF-8; a 6-byte UTF-8 Chinese string expands to 12). EDIFACT UNOA/UNOB are ASCII subsets and UNOC IS ISO-8859-1, so EDIFACT survives correctly. Upgrade changed nothing here -> H4/BK-2 reworded from \"byte-for-byte\" to \"decode parity vs a pre-upgrade capture\".\n2. MetaData strictness (Q2): javap shows cloud-sdk MetaData is final, no setters, no no-arg ctor => NOT Jackson-deserialisable. ProbeMeta proved MetaData.parseJson throws UnrecognizedPropertyException on \"notificationParties\" (10 known properties) for a REAL envelope. Hence the bridge (parse booking.util.MetaData leniently, rebuild via Builder). FAIL_ON_UNKNOWN_PROPERTIES=false PREDATES the upgrade (commit 31dbdd49c1). Accepted-envelope set is unchanged or larger => no producer can newly fail.\n3/5. externalIdentifiers (Q3/Q5): javap on booking-3.0.0.M.jar confirms getExternalIdentifiers() was REMOVED from MetaData; pre-upgrade code called it. Post-upgrade reads it off raw wire JSON via Json.fromJsonField + null->empty map. Feeds BKProtobufTransformer -> ExternalPartyIdentifiers(duns, SUBSCRIPTION_TYPE_E2NET, maps). Dropping it would have silently stripped E2NET party visibility from every published event.\n6. BK-3 (Q6): valid and NORMAL, not hypothetical. Producer is booking's outbound layer -> <env>_sqs_watermill_bk (asserted in booking OutboundServiceTest). externalIdentifiers is set nowhere in this repo => wire-only field from upstream.\n7. Timestamps (Q7): NOT pre-upgrade behaviour. Pre-upgrade Json.java used LocalDateTimeDeserializer(DATE_FORMATTER) = ONE format only; ISO-nanos would have FAILED. Upgrade (32608bbccb) added FlexibleLocalDateTimeDeserializer with 3-tier fallback (ISO_LOCAL_DATE_TIME 0-9 fractional digits -> DATE_FORMATTER -> FLEXIBLE_FORMATTER). Purely additive. BK-4 relabelled \"(widened)\".\n8. BK-9 relabelled FIXED BEHAVIOUR. §12.8 splits 5.5.2 into pass-covered-by-tests / pass-needs-live-env / genuinely-at-risk (BK-14 gRPC stream recovery, BK-18 soak — the shared MessagingClient connection pool is the one new upgrade risk).\n\nMAJOR CORRECTION (§12.10) — the doc previously claimed cargo-visibility got the same permanent-S3-failure fix as booking. THAT WAS WRONG. finalisePermanentFailure exists ONLY in WatermillBKTask and WatermillBKAperakTask. CargoVisibilitySubscriptionPublisherTask.execute catches only ReprocessibleException; processMessage rethrows permanent failures as RuntimeException, which escapes execute, is only logged by SQSListener, so the message is never deleted -> redelivered -> DLQ -> redriven by DeadLetterService (which IS wired into the CVS injector) -> POISON LOOP PERSISTS. RetryClassifier.classify does return FALSE for NonRecoverableException but nothing acts on it to delete. NOT a regression (same as pre-upgrade), low severity, rare trigger. Logged as new gap G5 in §8 with recommended fix = port finalisePermanentFailure to CVS.\n\nVERIFICATION: mvn -o test -pl watermill-publisher/watermill-commons,watermill-publisher/watermill-booking -am => 503 tests, 0 failures, 0 errors, 0 skipped.\n\nDOC EDITS APPLIED: §5.4 table (Impacted column now Deliberate/Fixed/No/NOT-fixed; S3 row = Fixed, \"no longer recoverable\" caveat removed; new timestamp row), §5.5.1 H4, BK-2, BK-3, BK-4 (widened), BK-9 (FIXED BEHAVIOUR), §6.4 (S3 row corrected to NOT fixed), §8 new gap G5, intro \"How to read it\" now points to §12, new §12.1–§12.11 incl. §12.11 correction log. Fence balance verified even (64); all 8 forward anchors resolve to real headings; no new mermaid added so diagrams need no rebuild.\n\nPUBLISHING REMAINS BLOCKED ON EXPLICIT OWNER APPROVAL (user standing rule).",
+      "tags": [
+        "watermill-publisher",
+        "aws-upgrade",
+        "ION-16380",
+        "documentation",
+        "review",
+        "cargo-visibility",
+        "poison-loop",
+        "G5"
+      ],
+      "references": [
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "watermill-publisher/watermill-booking/src/main/java/com/inttra/mercury/watermill/booking/task/WatermillBKTask.java",
+        "watermill-publisher/watermill-cargo-visibility-subscription/src/main/java/com/inttra/mercury/watermill/cargovisibility/task/CargoVisibilitySubscriptionPublisherTask.java",
+        "watermill-publisher/watermill-commons/src/main/java/com/inttra/mercury/watermill/commons/support/Json.java",
+        "watermill-publisher/watermill-cargo-visibility-subscription/src/main/java/com/inttra/mercury/watermill/cargovisibility/util/RetryClassifier.java",
+        "ION-16380",
+        "commit 2ff603b53d",
+        "commit 32608bbccb",
+        "commit 31dbdd49c1",
+        "commit 10d7f99889"
+      ]
+    },
+    {
+      "id": "94eea5ab29c8",
+      "timestamp": "2026-09-03T02:52:18.457169+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "Verified CVS DynamoDB DefaultQuerySpec queries are correct and the GSI sort key IS applied (proven with a negative control); found a test blind spot + an untested BOL-only service path; created the cloud-sdk gap register SDK-1..SDK-10",
+      "detail": "QUESTION: verify the cargo-visibility DefaultQuerySpec DynamoDB queries are accurate, that the service call is tested with inclusive+exclusive criteria, and whether the visibility ContainerEventDao \"dud sort query\" defect class applies.\n\nTHE REFERENCED VISIBILITY DEFECT (found in git 9a04010f1d, ION-12316):\nPre-upgrade ContainerEventDao.findById called the legacy DynamoDBCrudRepository signature\n  query(id, \"id = :hashKeyValue\", DYNAMO_READ_BEHAVIOUR.CONSISTENT)\ni.e. a STRING query expression. On a partition-key-only table that expression restated the hash key already passed as arg 1 -> inert/dud. The migration correctly dropped it and rebuilt with DefaultQuerySpec(partitionKeyName/Value/consistentRead).\n\nVERDICT ON CARGO-VISIBILITY: the queries ARE accurate and the sort key IS genuinely applied. The ContainerEventDao defect class does NOT exist here. Verified empirically, not by inspection.\n\nWHAT WAS CHECKED\n1. Query spec accuracy: cross-checked all 5 DefaultQuerySpec builds (CVS 3 + BookingDao 2) against CargoVisibilitySubscription annotations. All index names, partition/sort key names and values match @DynamoDbSecondaryPartitionKey / @DynamoDbSecondarySortKey. consistentRead=false on all GSI queries (required) and true on the base-table read. NOTE: \"carrierIntttraId\" with THREE t's is NOT a DAO typo - the model property really is misspelt and is baked into the live GSI key schema; DAO matches model, must not be \"fixed\" without a table migration.\n2. EnhancedDynamoRepository.query L418-421: conditional guard is (sortKeyCondition != null && sortKeyValue != null) -> else silently falls back to partition-only. Sort key can be SILENTLY DROPPED, returning a SUPERSET with no exception. getSortKeyName() is NOT consulted at all by query() (only queryPages L852 checks it). A misspelt condition DOES throw; only an absent one is silent -> inconsistent API.\n3. queryExpression is declared+documented on DefaultQuerySpec but consumed ONLY by StandardDynamoRepository (L679/681/691) and NEVER by EnhancedDynamoRepository. All watermill modules use createEnhancedRepository -> anyone porting a legacy string query expression into .queryExpression() gets it silently ignored. This is the live trap behind the ContainerEventDao report.\n\nTHE REAL FINDING - TEST BLIND SPOT (not a bug in the query):\nEvery pre-existing IT row was built by a sample() helper hard-coding a single carrierIntttraId, so NO existing test could distinguish \"sort key applied\" from \"sort key dropped\". Had the upgrade dropped it, all 17 ITs and 465 unit tests would still have passed and it would have shipped as a silent wrong-carrier data-correctness bug. DAO unit tests capture the DefaultQuerySpec and assert getSortKeyName/Value/Condition - but that asserts intent, not behaviour.\n\nINCLUSIVE/EXCLUSIVE COVERAGE:\n- DAO unit + IT: booking-only, both, BOL-only, neither -> ALL covered.\n- Service (task) layer: booking-only and both covered (only 2 inclusive cases: \"BN123\",\"BL999\",\"123\" and \"356SL2014663\",\"MEDUO9551013\",\"800541\"); BOL-ONLY (exclusive) was NOT covered at all, despite processCustomerInitiatedSubscriptionRequest documenting \"Supports subscriptions by carrierBookingNumber, billOfLadingNumber, or both\". GAP CLOSED with 2 new tests.\n\nTESTS WRITTEN AND RUN (all pass):\n- 4 sort-key discrimination ITs storing two subs differing ONLY by carrierInttraId (booking GSI, BOL GSI, unknown carrier, orchestration fallback).\n- 1 NEGATIVE CONTROL proving the assertion is not vacuous: a partition-only DefaultQuerySpec on the same GSI returns BOTH carriers while the DAO returns ONE.\n- 2 service-level BOL-only tests pinning the first arg to null (not anyString()) - a blank-string substitution would make the DAO take the booking-number branch and never consult the BOL index, silently creating a duplicate subscription.\nRESULT: unit 467 (was 465), IT 22 (was 17), BUILD SUCCESS on DynamoDB Local.\n\nPER USER INSTRUCTION THE TESTS WERE NOT COMMITTED - STASHED:\n  stash dc17db80a1 \"ION-16380 wmpub: CVS DynamoDB GSI sort-key discrimination ITs + BOL-only service tests (verification only, not for commit)\"\n  DaoIT +116, PublisherTaskTest +65. Restore with `git stash apply dc17db80a1` (use SHA, stash@{0} shifts).\n  RECOMMENDATION LOGGED IN DOC: these should eventually be committed - they are the only regression guard against a silently dropped sort key.\n\nDOCS WRITTEN\n1. New section 13 in watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md: 13.1 the ContainerEventDao defect + the queryExpression trap, 13.2 query-spec accuracy table, 13.3 empirical proof incl. negative control, 13.4 the test blind spot, 13.5 inclusive/exclusive coverage matrix, 13.6 five new QA cases CV-40..CV-44 (CV-40/41 = wrong-carrier regression guards, P1), 13.7 stash + follow-ups. Intro and section 8 cross-linked.\n2. NEW cloud-sdk gap register created at mercury-services-commons/cloud-sdk-aws/docs/gaps/2026-09-02-sdk-gaps-todo.md with SDK-1..SDK-10 + prioritisation:\n   SDK-1 (HIGH) queryExpression silently ignored by EnhancedDynamoRepository\n   SDK-2 (MED) sortKeyName never validated/used\n   SDK-3 (HIGH) partially-specified sort key silently dropped\n   SDK-4 (MED) query vs queryPages divergence (different guards, different supported conditions, maxResultSize ignored)\n   SDK-5 (LOW) BETWEEN unsupported\n   SDK-6 (MED) DynamoDbAdminCommand partition key from bean property, ignores @DynamoDbAttribute (was G3)\n   SDK-7 (MED) StorageClient.getMetadata swallows missing bucket (was G4 residual)\n   SDK-8 (HIGH) S3OperationException not a CloudSdkException, no isRetryable()\n   SDK-9 (MED) CloudSdkException.isRetryable() defaults true, true vs unset indistinguishable\n   SDK-10 (MED) workflow.MetaData not Jackson-deserialisable + strict parseJson, forces duplicated bridges\n   Plus G5 (CVS poison loop) noted as consumer-side, with SDK-8 as contributing factor.\n   G2 and main G4 recorded as CLOSED in 1.0.33.\n   SDK-1..SDK-4 all live in ~80 lines of EnhancedDynamoRepository and should be fixed as one change.\n\nFence balance verified even in both docs (84 and 14). Working tree clean. Nothing published to Confluence.",
+      "tags": [
+        "watermill-publisher",
+        "cargo-visibility",
+        "dynamodb",
+        "DefaultQuerySpec",
+        "cloud-sdk",
+        "gaps",
+        "ION-16380",
+        "ION-12316",
+        "testing",
+        "documentation"
+      ],
+      "references": [
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "mercury-services-commons/cloud-sdk-aws/docs/gaps/2026-09-02-sdk-gaps-todo.md",
+        "watermill-publisher/watermill-cargo-visibility-subscription/src/main/java/com/inttra/mercury/cargo/visibility/dao/CargoVisibilitySubscriptionDao.java",
+        "watermill-publisher/watermill-cargo-visibility-subscription/src/main/java/com/inttra/mercury/cargo/visibility/dao/BookingDao.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/EnhancedDynamoRepository.java",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/DefaultQuerySpec.java",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/persistence/ContainerEventDao.java",
+        "commit 9a04010f1d",
+        "stash dc17db80a1",
+        "ION-16380",
+        "ION-12316"
+      ]
+    },
+    {
+      "id": "8de6750cc6bf",
+      "timestamp": "2026-09-03T03:35:38.715990+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "Corrected SDK-1 attribution: real defect was ContainerEventOutboundDao and it caused a PROD outage (ION-16663)",
+      "detail": "CORRECTION: the visibility \"dropped sort query\" defect was in ContainerEventOutboundDao.getUnprocessedTransactions, NOT ContainerEventDao.findById. It was a real PROD outage (Inttra2_prod_container_events_outbound, IPF 5680, earlier 4486, cloud-sdk-aws 1.0.29-SNAPSHOT), analysed in visibility/docs/2026-08-21-vis-prod-issue.md, fixed by ION-16663 / 8bd89dffbd.\n\nMechanism: DAO expressed \"integrationProfileFormatId = :hashKeyValue AND sequenceNumber BETWEEN :srtKeyLower AND :srtKeyUpper\" via DefaultQuerySpec.queryExpression. Pre-upgrade that string went to the AWS SDK v1 helper queryWithSizeLimit(...) where it became the real keyConditionExpression and executed server-side. The migration kept the DAO source shape but swapped the executor to EnhancedDynamoRepository, whose query() has ZERO references to getQueryExpression() (bytecode-verified: Enhanced=0, Standard=3). The bound was lost purely in the executor swap, not in the DAO source.\n\nDegraded query: partition key only, scanIndexForward=true, maxResultSize=1000 -> read the OLDEST 1000 rows of the partition. Those referenced inbound ContainerEvents already removed by the 400-day TTL -> IllegalArgumentException: Could not find inbound transaction with ID ce:505efc6b-... from OutboundGenerator.getInboundContainerEvent -> outbound processing stalled. Diagnosis was slow because an ops console query DID apply the bound and looked clean.\n\nFix used native .sortKeyName(\"sequenceNumber\").sortKeyCondition(\">=\").sortKeyValue(...) plus a client-side removeIf re-verifying BOTH bounds, because DynamoDB bars key attributes from FilterExpression and DefaultQuerySpec cannot express BETWEEN (SDK-5 is a direct contributing cause of SDK-1).\n\nActions taken: rewrote §13.1 of 2026-09-02-wmpub-upgrade-summary.md; updated all cross-references from ContainerEventDao to ContainerEventOutboundDao; upgraded SDK-1 in the commons gap register to Critical/confirmed-PROD-outage with a new P0 priority row; raised SDK-5 from Low to Medium and cross-linked it. The benign ContainerEventDao.findById case is retained as a secondary \"same trap, inert instance\" note.",
+      "tags": [
+        "sdk-1",
+        "dynamodb",
+        "visibility",
+        "prod-incident",
+        "correction",
+        "ION-16663"
+      ],
+      "references": [
+        "visibility/docs/2026-08-21-vis-prod-issue.md",
+        "visibility/visibility-commons/src/main/java/com/inttra/mercury/visibility/common/persistence/ContainerEventOutboundDao.java",
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "mercury-services-commons/cloud-sdk-aws/docs/gaps/2026-09-02-sdk-gaps-todo.md",
+        "ION-16663",
+        "8bd89dffbd"
+      ]
+    },
+    {
+      "id": "5bb090e99ce5",
+      "timestamp": "2026-09-03T03:36:15.425072+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "progress",
+      "summary": "Wrote §14 answering the second review round: double MetaData parse, ISO-8859-1, timestamp widening, target-type change",
+      "detail": "Added §14 \"Further clarifications (second review round)\" to watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md (now 1929 lines, 100 fences - balanced).\n\n14.1 Why the pre-upgrade code parsed one message into two MetaData types. Evidence: pre-upgrade WatermillBKTask.execute at 10d7f99889 called Json.fromJsonString twice on the same body - once into com.inttra.mercury.messaging.model.MetaData (required because EventLogHandler.logEvent is TYPED against it - a hard compile-time constraint) and once into com.inttra.mercury.booking.util.MetaData (the only type declaring notificationParties and externalIdentifiers). One wire message, two audiences, neither type covering both. \"Workflow MetaData\" = the platform type modelling a workflow STEP (workflowId/parentWorkflowId/rootWorkflowId/bucket/fileName/component/timestamp/exitStatus/messageId/projections); the cloud-sdk moved it to com.inttra.mercury.cloudsdk.notification.workflow.MetaData. Post-upgrade: parse ONCE into the booking type + explicit toWorkflowMetaData() bridge, because the cloud-sdk type is builder-only and not Jackson-constructible (SDK-10).\n\n14.2 ISO-8859-1 from first principles. Jargon table (byte/code point/charset/encode/decode/U+FFFD/round-trip). Key insight: Latin-1 is used as a BYTE CONTAINER, not a language - it is the only common charset with a 1:1 map for all 256 byte values. EMPIRICALLY VERIFIED on JDK 17 this session: latin1 256-byte round-trip len=256 equal=true; utf8 round-trip len=512 equal=false; UTF-8 Chinese 12 bytes -> 12 mojibake chars -> latin1 re-encode equal=true, utf8 re-encode len=24. EDIFACT UNOA/UNOB are ASCII subsets, UNOC IS ISO-8859-1. Upgrade changed nothing: identical getContent(bucket, file, ISO_8859_1).\n\n14.3 Timestamp widening. WHY: cloud-sdk producers emit LocalDateTime.toString() (ISO-8601, 0/3/6/9 fractional digits) while legacy producers emit \"yyyy-MM-dd HH:mm:ss.SS\"; during phased rollout both are live on the same queue. HOW: Json.FlexibleLocalDateTimeDeserializer in watermill-commons/support/Json.java (added 32608bbccb) - VERIFIED 3-tier: ISO_LOCAL_DATE_TIME -> DATE_FORMATTER -> FLEXIBLE_FORMATTER -> IOException. All fractional variants parse under tier 1 alone because ISO_LOCAL_DATE_TIME defines the fraction as optional 0-9 digits. IMPACT: purely additive, accepted set strictly grew, no existing producer can newly fail. COST: reduced strictness + silent tolerance masking producer bugs. Follow-up: drop tiers 2/3 once the last legacy producer is decommissioned.\n\n14.4 \"Only the target type changed\" unpacked for CVS parseMetaData: wire JSON, field names, field semantics and mapper config (Json.fromJsonString, FAIL_ON_UNKNOWN_PROPERTIES=false) all unchanged; only the destination class changed (messaging.model.MetaData -> cloudsdk.notification.workflow.MetaData) via a Builder bridge. The one genuine behaviour change is the projections null-guard, which matters MORE in CVS than in booking because CVS routes on projections.get(\"sourceType\") at line 271 - pre-upgrade a missing projections map NPE'd on every such envelope.\n\nCode snippets in §14 were corrected against the real sources after an initial draft used a wrong fluent-builder shape - actual code uses new MetaData.Builder(7 args).setExitStatus().setMessageId().setProjections().build().",
+      "tags": [
+        "documentation",
+        "section-14",
+        "metadata",
+        "iso-8859-1",
+        "timestamps",
+        "ION-16380"
+      ],
+      "references": [
+        "watermill-publisher/docs/2026-09-02-wmpub-upgrade-summary.md",
+        "watermill-publisher/watermill-commons/src/main/java/com/inttra/mercury/watermill/commons/support/Json.java",
+        "watermill-publisher/watermill-booking/src/main/java/com/inttra/mercury/watermill/booking/task/WatermillBKTask.java",
+        "watermill-publisher/watermill-cargo-visibility-subscription/src/main/java/com/inttra/mercury/cargo/visibility/task/CargoVisibilitySubscriptionPublisherTask.java",
+        "10d7f99889",
+        "32608bbccb"
+      ]
+    }
+  ],
+  "usage": [
+    {
+      "id": "121afb2a79ed",
+      "timestamp": "2026-09-02T20:49:59.431405+00:00",
+      "agent": "copilot-cli-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 95000,
+      "output_tokens": 62000,
+      "cache_read_input_tokens": 1450000,
+      "cache_creation_input_tokens": 180000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Approximate aggregate for the ION-16380 watermill-publisher AWS upgrade summary documentation session (doc research, AWS INT verification, cloud-sdk gap probing, ~64k-char document authoring, Confluence design doc update)."
+    },
+    {
+      "id": "238ea93635f0",
+      "timestamp": "2026-09-03T02:32:36.257205+00:00",
+      "agent": "copilot-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 62000,
+      "output_tokens": 21000,
+      "cache_read_input_tokens": 760000,
+      "cache_creation_input_tokens": 48000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Reviewer-questions turn: empirical verification (javap, probe programs, git diff, 503-test run) + authoring section 12 of 2026-09-02-wmpub-upgrade-summary.md. Values are best-effort estimates for the segment."
+    },
+    {
+      "id": "061a87dfdfe0",
+      "timestamp": "2026-09-03T02:52:25.405823+00:00",
+      "agent": "copilot-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 54000,
+      "output_tokens": 26000,
+      "cache_read_input_tokens": 690000,
+      "cache_creation_input_tokens": 36000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "DynamoDB DefaultQuerySpec verification turn: code+git investigation, wrote and ran 7 new tests on DynamoDB Local, authored summary section 13 and the cloud-sdk gap register. Best-effort estimates."
+    },
+    {
+      "id": "a5472c7cbcb8",
+      "timestamp": "2026-09-03T03:36:22.711142+00:00",
+      "agent": "copilot-claude-opus-5",
+      "model": "claude-opus-5",
+      "input_tokens": 26000,
+      "output_tokens": 19000,
+      "cache_read_input_tokens": 515000,
+      "cache_creation_input_tokens": 48000,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "Round 4: corrected SDK-1 attribution to ContainerEventOutboundDao (PROD incident), upgraded gap register severity/priority, wrote §14 (four clarification answers) with empirical charset verification."
+    }
+  ]
+}

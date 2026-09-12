@@ -1,0 +1,125 @@
+{
+  "id": "1ec936447f7145c6",
+  "name": "ION-16417 PI OWASP issue fix (Jetty + others)",
+  "description": "Address OWASP CRITICAL/HIGH findings in partner-integrator module (all DW services + lambdas), mirroring the visibility OWASP refactor. Jetty 12.1.9 CVE-2026-10050 first, then httpclient5/jackson/guava/jsoup/gson/logback. Branch feature/ION-16417-pi-owasp-issue-fix off develop. Must be backward compatible; verify tests + boot for DW modules and lambdas. Related visibility docs: visibility/docs/2026-08-31-visibility-owasp-refactor.md, 2026-09-01-visibility-lambda-owasp.md. Related session 59a4c1b2109b487d (ION-16417 PI AWS upgrade).",
+  "project": "mercury-services",
+  "created_at": "2026-09-02T13:28:35.485160+00:00",
+  "updated_at": "2026-09-02T17:37:41.577193+00:00",
+  "status": "completed",
+  "tags": [
+    "partner-integrator",
+    "owasp",
+    "security",
+    "jetty",
+    "ION-16417",
+    "aws-upgrade"
+  ],
+  "entries": [
+    {
+      "id": "a7bc92327fa5",
+      "timestamp": "2026-09-02T13:30:24.253549+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "OWASP baseline for partner-integrator (commons 1.0.33 on develop) captured from existing owasp-reports/pi-* JSON.",
+      "detail": "CRITICAL/HIGH per module:\n- pi-booking-processor: httpclient5 5.4.4 CRITICAL CVE-2026-71290 + HIGH CVE-2026-40542; jetty 12.1.9 HIGH CVE-2026-10050 (server/util/security/ee10-servlet); jackson-databind 2.21.4 HIGH CVE-2026-68497; jsoup 1.17.2 HIGH CVE-2026-75140.\n- pi-si-in-processor / pi-si-out-processor / pi-statusevents-out-processor: same set (si-in also guava 31.0.1 HIGH CVE-2023-2976).\n- pi-bl-in-processor: httpclient5 CRITICAL/HIGH + jackson + jsoup (NO jetty).\n- pi-bl-es-lambda: httpclient5 CRITICAL/HIGH + jackson HIGH + guava 18.0 HIGH (NO jetty - already excluded).\n- pi-lambda-streamToSns: jetty 12.1.9 HIGH (io/server), jackson-databind 2.17.1 HIGH x3, guava 31.0.1 HIGH, gson 2.8.0 HIGH CVE-2022-25647, logback-core 1.5.33 HIGH CVE-2026-13006.\nJetty CVE (this round) affects: pi-booking-processor, pi-si-in/out, pi-statusevents-out, pi-lambda-streamToSns.\nBranch feature/ION-16417-pi-owasp-issue-fix off develop. Session created 1ec936447f7145c6; related PI AWS upgrade session 59a4c1b2109b487d.",
+      "tags": [],
+      "references": [
+        "owasp-reports/pi-booking-processor/dependency-check-report.json",
+        "owasp-reports/pi-lambda-streamToSns/dependency-check-report.json",
+        "partner-integrator/pom.xml"
+      ]
+    },
+    {
+      "id": "9e5162de0ae8",
+      "timestamp": "2026-09-02T13:37:33.831926+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Applied + verified Jetty 12.1.12 BOM pin in partner-integrator reactor pom; CI scans confirm affected modules.",
+      "detail": "Fix (round 1, Jetty only): added jetty-bom + jetty-ee10-bom import at 12.1.12 to partner-integrator/pom.xml <dependencyManagement>, plus <jetty.version>12.1.12</jetty.version> property. Root cause: cloud-sdk-api -> dropwizard-core 5.0.2 declares Jetty 12.1.9 from a nearer path and wins nearest-wins over commons 1.0.33 (which pins 12.1.12). BOM import overrides selection for all jetty artifacts. Verified via dependency:tree: pi-si-out-processor and pi-lambda-streamToSns now resolve all jetty artifacts (server/util/security/http/io/session/ee10-servlet/servlets) at 12.1.12. Jenkins CI scans (Downloads, 26.09.00x) confirm CVE-2026-10050 present in PIBK, PISI_IN, PISI_OUT, PISE_OUT, PI_StreamToSNS; absent in PIBL_IN and PIBL_ES_Lambda (matches analysis). Backward compatible: patch bump within 12.1 line, no dep added/removed. Doc: partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md. User confirmed: avoid concurrent maven builds; Jenkins scans in Downloads.",
+      "tags": [],
+      "references": [
+        "partner-integrator/pom.xml",
+        "partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md"
+      ]
+    },
+    {
+      "id": "0c988a33d6f4",
+      "timestamp": "2026-09-02T13:47:10.181899+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "PI reactor verify BUILD SUCCESS (0 failures) + all DW/lambda boot checks pass after Jetty 12.1.12 pin.",
+      "detail": "mvn -f partner-integrator/pom.xml clean verify => BUILD SUCCESS, all 8 modules, unit + integration (*IT DynamoDB Local) tests, 0 failures/0 errors. Shaded jars now bundle jetty-*-12.1.12.jar (confirmed in shade output). Boot checks: 5 DW services (pi-booking, pi-si-in, pi-si-out, pi-statusevents-out, pi-bl-in) java -jar no-arg -> Dropwizard usage printed, exit 0. Lambda handler linkage via jshell: streamToSns StreamToSnSProcessor + StreamStatusEventsToSnsProcessor LOADED; pi-bl-es-lambda IndexerHandler LOADED. pi-bl-es-lambda excludes jetty (no-op); streamToSns carries jetty as unused weight now 12.1.12. All backward compatible. Note: pi-bl-in-processor is a DW app (BLPIApplication) that bundles jetty but PIBL_IN scan not flagged for CVE-2026-10050 (OK per CI/user).",
+      "tags": [],
+      "references": [
+        "pi-verify.log",
+        "partner-integrator/pom.xml",
+        "partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md"
+      ]
+    },
+    {
+      "id": "28a0c09bec38",
+      "timestamp": "2026-09-02T13:48:50.795730+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Jetty-first OWASP round complete + verified; remaining findings inventoried and deferred per user checkpoint. Session kept active.",
+      "detail": "Round 1 (Jetty) DONE and verified. Branch feature/ION-16417-pi-owasp-issue-fix, commit e5bb4889b0 (partner-integrator/pom.xml: jetty-bom + jetty-ee10-bom import @12.1.12). Closes CVE-2026-10050 (HIGH) + CVE-2026-10051 (MED). mvn verify BUILD SUCCESS 0 failures incl DynamoDB ITs; 5 DW services boot exit 0; 2 lambda handlers link clean. Doc at partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md (gitignored per **/docs/ rule, local artifact like visibility owasp docs). Model: claude-opus-4.8. REMAINING (deferred per user 'then we will check about the others'): httpclient5 5.4.4 CRITICAL CVE-2026-71290 (+HIGH CVE-2026-40542) all DW + pi-bl-es + pi-bl-in; guava CVE-2023-2976; jackson-databind CVE-2026-68497; jsoup CVE-2026-75140; gson CVE-2022-25647 (streamToSns); logback-core CVE-2026-13006 (streamToSns). Session left ACTIVE for follow-up rounds.",
+      "tags": [],
+      "references": [
+        "partner-integrator/pom.xml",
+        "partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md"
+      ]
+    },
+    {
+      "id": "bedfe69113e4",
+      "timestamp": "2026-09-02T14:06:20.589218+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "decision",
+      "summary": "Round 2: httpclient5 5.6.4 + guava 33.5.0-jre + gson 2.10.1 + logback 1.5.38 (core+classic aligned) pinned; jsoup/databind deferred as exceptions.",
+      "detail": "Round 2 pins added to partner-integrator/pom.xml <dependencyManagement> (properties + managed deps): httpclient5 5.6.4 (CVE-2026-71290 CRITICAL fixed 5.6.4; CVE-2026-40542 HIGH fixed 5.6.1; 5.6.4 clears both; httpcore5 stays 5.4.3), guava 33.5.0-jre (CVE-2023-2976, fixed 32+), gson 2.10.1 (CVE-2022-25647, fixed 2.8.9), logback-core 1.5.38 + logback-classic 1.5.38 (CVE-2026-13006 affects <=1.5.36; MUST pin both together to avoid runtime NoClassDefFound / IT failures - user confirmed seen in visibility). Leaving jsoup (CVE-2026-75140) and jackson-databind (CVE-2026-68497) per user - release exceptions. dependency:tree on streamToSns confirms logback-core/classic 1.5.38, guava 33.5.0-jre, gson 2.10.1. Guard: if httpclient5 5.6.4 breaks any module/test/boot, revert httpclient5 only and log finding; keep the rest. Two-commit plan: jetty already committed (e5bb4889b0); this round = one commit, both messages contain ION-16417.",
+      "tags": [],
+      "references": [
+        "partner-integrator/pom.xml"
+      ]
+    },
+    {
+      "id": "e21b910f0584",
+      "timestamp": "2026-09-02T14:51:38.311795+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Latent bl-es cold-start bug (missing AwsRegionProvider from ES v1 signing) found, root-caused, fixed with aws-java-sdk-core 1.12.730; QA/PROD run old code, INT dormant.",
+      "detail": "LATENT BUG found + fixed in pi-bl-es-lambda (NOT caused by OWASP work; pre-existing on develop, verified by rebuilding jetty-only jar which failed identically). Root cause: bl-es excludes com.amazonaws:aws-java-sdk-core from cloud-sdk-aws; ES SigV4 signing via vc.inreach.aws:aws-signing-request-interceptor:0.0.22 references com.amazonaws.regions.AwsRegionProvider but only drags in aws-java-sdk-core:1.10.19 which lacks that class -> IndexerHandler no-arg ctor (AWS Lambda cold-start entry) throws NoClassDefFoundError: com/amazonaws/regions/AwsRegionProvider. Verified 1.10.19 lacks class, 1.12.730 has it. FIX: added explicit com.amazonaws:aws-java-sdk-core:1.12.730 to pi-bl-es-lambda pom (depth-1 wins over interceptor's 1.10.19). After fix: jar 65MB (was 63.5), AwsRegionProvider present, IndexerHandler() INIT_OK with creds, 93 tests pass.\nINVOCATION: bl-es lambda triggered by SQS event-source mapping (Enabled, batchSize 1) from queue inttra_*_sqs_pi_bl_es; handler IndexerHandler::handle. AWS instantiates via no-arg ctor each cold start.\nPROD/QA state (acct 642960533737, profile 642960533737_INTTRA2-QATeam): inttra2_qa/pr_lambda_bl_es_stream both run OLD pre-upgrade jar (~104MB, LastModified Jun 1 / Jun 13) and process BL events cleanly today (logs show IndexerHandler running, no AwsRegionProvider error; 'Error in BL ES Delete not_found' is benign app log). INT inttra_int_lambda_bl_es_stream got NEW upgraded jar (66MB) today 09:56 but last invoked Mar 2025 -> latent bug dormant. When ION-16417 upgrade deploys to QA/PROD, bl-es would break at cold start WITHOUT this fix.",
+      "tags": [],
+      "references": [
+        "partner-integrator/pi-bl-es-lambda/pom.xml"
+      ]
+    },
+    {
+      "id": "769524d3a748",
+      "timestamp": "2026-09-02T15:06:48.355258+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "All PI OWASP CRITICAL/HIGH addressed (jsoup/databind excepted) + jna false positive + latent bl-es cold-start fix; 3 ION-16417 commits; full reactor verify green + boots clean.",
+      "detail": "COMPLETE + verified. 3 commits on feature/ION-16417-pi-owasp-issue-fix (each ION-16417):\n1. e5bb4889b0 Jetty 12.1.12 BOM pin (CVE-2026-10050/10051)\n2. 63cfa0f309 httpclient5 5.6.4 (CVE-2026-71290 CRIT + 40542), guava 33.5.0-jre (CVE-2023-2976), gson 2.10.1 (CVE-2022-25647), logback-core+classic 1.5.38 aligned (CVE-2026-13006), + streamToSns jetty-setuid-jna exclusion (jna-jpms HIGH false positive). jsoup + jackson-databind left per code-freeze exception.\n3. a6d0d88dfe latent bl-es fix: aws-java-sdk-core 1.12.730 restores AwsRegionProvider (root cause: shrink commit b6463e8e14 excluded v1 core; interceptor's 1.10.19 lacks the class; would break bl-es cold start when ION-16417 reaches QA/prod).\nFinal full reactor mvn verify: BUILD SUCCESS, all 8 modules, 0 failures/0 errors (unit + DynamoDB ITs). Boot checks: 5 DW services java -jar exit 0; streamToSns handlers init SNS client OK; bl-es IndexerHandler() INIT_OK (with creds). httpclient5 confirmed NON-breaking. Doc: partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md (gitignored local artifact, §1-9 incl commands + prod/QA evidence). Model claude-opus-4.8.",
+      "tags": [],
+      "references": [
+        "partner-integrator/pom.xml",
+        "partner-integrator/pi-lambda-streamToSns/pom.xml",
+        "partner-integrator/pi-bl-es-lambda/pom.xml",
+        "partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md"
+      ]
+    },
+    {
+      "id": "c7895cf7a534",
+      "timestamp": "2026-09-02T17:37:41.577151+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pushed branch with upstream (after CVE reword to satisfy Jira hook); doc extended with full command/syntax appendix + bash equivalents; closing session.",
+      "detail": "Branch pushed to origin (upstream set): feature/ION-16417-pi-owasp-issue-fix. Push initially rejected by Bitbucket Control-Freak hook because CVE-2026-xxxx parsed as Jira ticket [CVE-2026]; reworded commit messages CVE-####->'CVE ####' via non-interactive rebase (GIT_SEQUENCE_EDITOR/GIT_EDITOR scripts), only ION-16417 remains. Final commits: 107c743174 (Jetty), ecd27ab41d (httpclient5/guava/gson/logback + streamToSns jna exclusion), fc97551fae (latent bl-es AwsRegionProvider fix). Commit messages contain NO doc references; all poms carry inline comments. Doc partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md expanded with Appendix A (full command reference: mvn, git incl pickaxe/reword rebase, grep/ripgrep/sed/awk, jar/zip inspection, boot verification jshell, AWS CLI lambda/sqs/logs with JMESPath + --filter-pattern, PowerShell->bash map with syntax + Unix equivalents) and Appendix B (session traceability). Session marked completed.",
+      "tags": [],
+      "references": [
+        "partner-integrator/docs/2026-09-02-pi-aws-upgrade-owasp-refactor.md"
+      ]
+    }
+  ],
+  "usage": []
+}

@@ -1,0 +1,195 @@
+{
+  "id": "ec3111711f2e4b66",
+  "name": "booking commons 1.0.31-SNAPSHOT bump + startup verification",
+  "description": "Bump booking module mercury.commons.version from 1.0.27-SNAPSHOT to 1.0.31-SNAPSHOT, run clean package, boot the Dropwizard app with AWS dev credentials and verify all AWS service clients (DynamoDB, SQS, SNS, S3, SSM, SES) initialize at startup. Linked upstream session: 7164c414d551444a (ION-12310 cloud-sdk 1.0.31 defect fix in mercury-services-commons).",
+  "project": "mercury-services",
+  "created_at": "2026-08-16T21:33:49.934139+00:00",
+  "updated_at": "2026-08-16T22:58:00.777896+00:00",
+  "status": "active",
+  "tags": [
+    "java",
+    "aws",
+    "cloud-sdk",
+    "booking",
+    "1.0.31-SNAPSHOT",
+    "ION-12310"
+  ],
+  "entries": [
+    {
+      "id": "a4826566385a",
+      "timestamp": "2026-08-16T21:45:06.371585+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "blocker",
+      "summary": "BLOCKER: booking fails to boot on commons 1.0.31 — split logback (core 1.5.38 vs classic 1.5.18) -> NoSuchMethodError LoggerContext.initCollisionMaps()",
+      "detail": "booking/pom.xml bumped 1.0.27-SNAPSHOT -> 1.0.31-SNAPSHOT. `mvn -pl booking clean package` = BUILD SUCCESS (shaded jar contains commons/cloud-sdk-api/cloud-sdk-aws 1.0.31-SNAPSHOT). App boot FAILED immediately:\n\njava.lang.NoSuchMethodError: 'void ch.qos.logback.classic.LoggerContext.initCollisionMaps()'\n  at ch.qos.logback.classic.LoggerContext.reset(LoggerContext.java:381)\n  at io.dropwizard.logging.common.DefaultLoggingFactory.configureLoggers(DefaultLoggingFactory.java:222)\n  at io.dropwizard.core.cli.ConfiguredCommand.run(ConfiguredCommand.java:94)\n  at com.inttra.mercury.booking.BookingApplication.main(BookingApplication.java:325)\n\nResolved classpath: ch.qos.logback:logback-core:1.5.38 + ch.qos.logback:logback-classic:1.5.18 (split logback).\n\nOrigin (dependency:tree -Dverbose):\n- commons-1.0.31-SNAPSHOT.pom NEW: <exclusion> ch.qos.logback:logback-core from io.dropwizard:dropwizard-core:5.0.2, AND a direct <dependency> ch.qos.logback:logback-core:1.5.38 compile. commons-1.0.27-SNAPSHOT.pom has NO logback declarations at all.\n- dynamo-integration-test-1.0.31-SNAPSHOT.pom declares ch.qos.logback:logback-classic:1.5.18 (unchanged behaviour; Maven nearest-wins picks 1.5.18 at depth 2 and widens its scope to compile even though dynamo-integration-test itself is test-scope in booking).\n- dropwizard-core 5.0.2 would otherwise supply the matched pair logback-classic/core 1.5.33 (both \"omitted for conflict\").\n\nNet: at 1.0.27 both classic and core resolved to 1.5.18 (consistent, app booted). At 1.0.31 core jumps to 1.5.38 while classic stays 1.5.18 -> ContextBase.initCollisionMaps() no longer present in the pairing -> hard boot failure for EVERY consumer of commons 1.0.31, not just booking.\n\nROOT CAUSE IS UPSTREAM in mercury-services-commons: pinning logback-core without pinning logback-classic to the same version. Recommended upstream fix: align dynamo-integration-test's logback-classic to 1.5.38 (or add a logback dependencyManagement pair in the commons parent).</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"commons-1.0.31-SNAPSHOT.pom\", \"dynamo-integration-test-1.0.31-SNAPSHOT.pom\", \"booking/src/main/java/com/inttra/mercury/booking/BookingApplication.java\"]",
+      "tags": [
+        "blocker",
+        "logback",
+        "1.0.31-SNAPSHOT",
+        "booking",
+        "dependency-conflict"
+      ],
+      "references": []
+    },
+    {
+      "id": "ea28ca57a4e2",
+      "timestamp": "2026-08-16T21:54:40.277626+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "FIX: pinned logback-classic + logback-core to 1.5.38 via booking dependencyManagement; boot restored",
+      "detail": "booking/pom.xml (2 edits):\n1. <mercury.commons.version> 1.0.27-SNAPSHOT -> 1.0.31-SNAPSHOT\n2. New <logback.version>1.5.38</logback.version> property + logback-classic/logback-core entries in the existing <dependencyManagement> block (same block that already pins jackson-bom for the identical nearest-wins reason).\n\nRationale: commons 1.0.31 excludes logback-core from dropwizard-core and pins logback-core 1.5.38, while dynamo-integration-test 1.0.31 pins logback-classic 1.5.18. Maven nearest-wins then produced a split logback pair -> NoSuchMethodError at boot. dependencyManagement forces both halves to 1.5.38 (chosen over 1.5.18 to keep commons' security intent).\n\nVerification after fix: mvn -pl booking dependency:tree shows logback-core 1.5.38 + logback-classic 1.5.38.\n\nRESIDUAL (non-fatal, logged as WARN once at boot):\n  LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38\n  (dropwizard's logback-access-common/jetty12 2.0.12 is compiled against 1.5.32). Access logging works.\n\nUPSTREAM FOLLOW-UP still recommended in mercury-services-commons: align logback-classic in dynamo-integration-test to 1.5.38, or add a logback dependencyManagement pair in the commons parent, so every consumer of commons 1.0.31 does not need this local workaround. Consumers still on older commons that upgrade to 1.0.31 (auth, booking-bridge, db-migration, registration, tx-tracking, network, rates, value-added-service, visibility, webbl, bill-of-lading-v2, watermill) will hit the same boot failure.</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"7164c414d551444a\"]",
+      "tags": [
+        "fix",
+        "logback",
+        "pom",
+        "dependencyManagement",
+        "booking"
+      ],
+      "references": []
+    },
+    {
+      "id": "6080c0d67465",
+      "timestamp": "2026-08-16T21:55:02.363604+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "test_result",
+      "summary": "VERIFIED: booking on commons 1.0.31 builds (997 tests pass), boots clean, all AWS clients (SSM/DynamoDB/SQS/SNS/S3/SES/ES-SigV4) start against dev account 081020446316",
+      "detail": "BUILD: mvn -pl booking clean package -> BUILD SUCCESS. Surefire: Tests run 997, Failures 0, Errors 0, Skipped 9 (TestSuite 998/10 skipped). Shaded jar contains commons/cloud-sdk-api/cloud-sdk-aws 1.0.31-SNAPSHOT.\n\nBOOT: java -jar booking/target/booking-1.0.jar server booking/conf/int/config.yaml\nAWS identity: arn:aws:sts::081020446316:assumed-role/AWSReservedSSO_INTTRA-Dev-Engg/arijit.kundu (us-east-1, SSO).\nResult: \"Booking life cycle started\", 0 ERROR lines, app listening 8080 / admin 8091... (8081).\n\nAWS SERVICE STARTUP EVIDENCE (from boot log):\n- SSM Parameter Store: com.inttra.mercury.cloudsdk.paramstore.impl.SsmCloudParameterStore resolves ${awsps:...} at boot. PROVEN LIVE by negative test — a bogus path produced \"Parameter not found: /inttra/int/booking/config/DOES_NOT_EXIST_XYZ\" + RuntimeException \"No value found for parameter\"; the real config resolved cleanly. NOTE: the `check` command does NOT run awsps substitution (bogus param still reported \"Configuration is OK\") — only `server` (ConfigProcessingServerCommand) does.\n- DynamoDB: BaseDynamoDbConfig resolved region us-east-1 via DefaultAwsRegionProviderChain + DefaultCredentialsProvider; DynamoRepositoryFactory built all 7 repos — inttra_int_booking_{BookingDetail(composite), UniqueId(pk), SequenceId(pk), RapidReservation(composite), SpotRatesDetail(pk), SpotRatesToInttraRefDetail(pk), Template(composite x2: Template + TemplateSummary)}.\n- SQS: MessagingClientFactory.createDefaultStringClient() -> \"SQS MessagingClient created successfully\"; SQSListener thread started and polled the live int inbound queue for >2 min with zero errors.\n- SNS: NotificationClientFactory.createDefaultClient -> \"SNS NotificationService created successfully for topic: arn:aws:sns:us-east-1:081020446316:inttra_int_sns_event\".\n- S3: StorageClientFactory.createDefaultS3Client() -> S3StorageClient resolved DefaultCredentialsProvider chain, Access Key ASIARFXJR4ZW... ; \"S3 StorageClient created successfully\". Archive bucket inttra-int-s3-bookingdetail-s3archive.\n- SES/Email: EmailClientFactory.createDefaultSesClient loaded all 6 templates (RequestAmend, Cancel, DeclineReplace, InternalError, PendingConfirm, ValidationError).\n- Elasticsearch (Jest + SigV4): JestModule created signed client for search-inttra-int-es-bk-search-*.us-east-1.es.amazonaws.com, signer ASIARFXJR4ZW..., region us-east-1.\n\nHTTP CHECKS:\n- GET /booking/services/ping -> 200\n- GET /booking/services/version -> 200\n- GET /admin/healthcheck -> 200; \"Basic functionality\" healthy=true, \"deadlocks\" healthy=true\n- GET /booking/search/{ref} -> 401 (auth required; expected, not an AWS fault)\n\nZero source-code changes were required in booking for cloud-sdk 1.0.31 — the ONLY change needed was the pom (version bump + logback alignment), so the upstream \"zero source changes in mercury-services modules\" constraint holds at the Java API level.</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"booking/conf/int/config.yaml\", \"booking/src/main/java/com/inttra/mercury/booking/config/BookingMessagingModule.java\", \"booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java\", \"booking/src/main/java/com/inttra/mercury/booking/config/BookingEmailSenderModule.java\"]",
+      "tags": [
+        "verification",
+        "startup",
+        "aws",
+        "1.0.31-SNAPSHOT",
+        "booking",
+        "passed"
+      ],
+      "references": []
+    },
+    {
+      "id": "ab27013debe4",
+      "timestamp": "2026-08-16T22:07:48.800415+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "CONFIRMED via javap: bumping logback-classic to 1.5.38 in dynamo-integration-test alone fixes ALL consumers — no consumer-side pom change needed",
+      "detail": "Bytecode proof (javap) that logback-classic 1.5.18 is the SOLE offender:\n\nContextBase (logback-core):\n  1.5.18 -> protected void initCollisionMaps();  public void reset();\n  1.5.33 -> (initCollisionMaps REMOVED)          public void reset();\n  1.5.38 -> (initCollisionMaps REMOVED)          public void reset();\n\nLoggerContext.reset() body (logback-classic):\n  1.5.18 -> ... invokevirtual initCollisionMaps:()V ...   <-- NoSuchMethodError against core >= 1.5.33\n  1.5.33 -> (no such call)\n\n=> Bumping logback-classic in dynamo-integration-test from 1.5.18 to 1.5.38 IS sufficient; no consumer pom needs changing:\n - Consumers WITH dynamo-integration-test: classic 1.5.38 (depth 2) + core 1.5.38 -> exact match.\n - Consumers WITHOUT dynamo-integration-test: classic 1.5.33 from dropwizard-core 5.0.2 + core 1.5.38 -> compatible (1.5.33 no longer calls initCollisionMaps).\n\nStill RECOMMENDED to additionally add a managed logback-classic + logback-core pair to the commons parent dependencyManagement so the pairing can never drift again (dependencyManagement beats transitive depth entirely).\n\nCorroborating evidence from the OWASP scan: booking/suppressions.xml has a rule\n  pkg:maven/ch.qos.logback/logback-core@1.5.18 -> CVE-2025-11226\nwhich now reports ZERO MATCHES. That CVE is the reason commons pinned logback-core 1.5.38, confirming the fix direction must be UP to 1.5.38, not down to 1.5.18. The suppression rule is now stale and can be deleted.</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"booking/suppressions.xml\", \"booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md\"]",
+      "tags": [
+        "logback",
+        "analysis",
+        "upstream-fix",
+        "bytecode-evidence"
+      ],
+      "references": []
+    },
+    {
+      "id": "604fbe42ceb8",
+      "timestamp": "2026-08-16T22:08:03.524975+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Added reusable dependency-check.sh runner at repo root + booking checkout doc",
+      "detail": "NEW FILE: dependency-check.sh (repo root, chmod +x). Module-agnostic OWASP dependency-check runner.\n\nUsage: ./dependency-check.sh <module> [options]\n  -j/--jar, -o/--out, -s/--suppression, -p/--project, -f/--format,\n  --fail-on-cvss, -n/--no-update, --purge, --no-summary, -h/--help\n\nKey behaviours:\n- Auto-detects shaded jar(s) in <module>/target, excluding original-*, *-sources, *-javadoc, *-tests.\n- Suppression resolution: <module>/suppressions.xml then repo-root suppressions.xml.\n- CREATES the output dir (default <module>/target/owasp). The user's original command failed with\n  \"Invalid 'out' argument: 'owasp' - path does not exist\" because dependency-check will NOT mkdir.\n- Nested modules supported (network/server, visibility/visibility-inbound).\n- SECURITY: NVD_API_KEY written to a chmod 600 mktemp property file as nvd.api.key and passed via\n  --propertyfile instead of --nvdApiKey, so the key is not visible in the process list. trap removes it on exit.\n- Windows/Git Bash: cygpath -w conversion + MSYS2_ARG_CONV_EXCL=\"*\" so args are not mangled for\n  dependency-check.bat. Resolves dependency-check | .bat | .sh from PATH.\n- Prints a severity roll-up + all CRITICAL/HIGH findings from the JSON report after the run.\n\nBug found and fixed during testing: the summary passed an MSYS path (/c/Users/...) to a native Windows\npython -> FileNotFoundError. Fixed by wrapping the report path in to_native().\n\nAlso created booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md documenting the whole checkout.\nNOTE: .gitignore:110 has `**/docs/`, so ALL module docs folders are untracked, including that file. Flagged\nin the doc (section 9) with a suggested `!**/docs/*.md` negation; not changed since it is repo-wide.\n\nTemp helper scripts booking/target/check-prereqs.ps1 and run-depcheck.ps1 were removed after use.</detail>\n<parameter name=\"references\">[\"dependency-check.sh\", \"booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md\", \".gitignore\"]",
+      "tags": [
+        "tooling",
+        "owasp",
+        "dependency-check",
+        "script",
+        "documentation"
+      ],
+      "references": []
+    },
+    {
+      "id": "319fc7ba7d59",
+      "timestamp": "2026-08-16T22:08:19.312036+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "test_result",
+      "summary": "OWASP dependency-check on booking @1.0.31: 55 findings (6 HIGH / 49 MEDIUM), all pre-existing log4j + swagger-ui, none caused by the bump",
+      "detail": "Command: ./dependency-check.sh booking  (scanned booking-1.0.jar + booking-lambdas-1.0.jar, suppression booking/suppressions.xml). Exit code 0. Reports: booking/target/owasp/{html,xml,json,csv,sarif,junit,gitlab,jenkins}.\n\nSUMMARY: 55 findings across 9 vulnerable dependencies — HIGH 6, MEDIUM 49. No CRITICAL.\n\nHIGH:\n  7.5  org.apache.logging.log4j:log4j-core:2.23.1   CVE-2026-34478\n  7.5  org.apache.logging.log4j:log4j-core:2.23.1   CVE-2026-34479\n  7.5  org.apache.logging.log4j:log4j-core:2.23.1   CVE-2026-34480\n  7.5  org.apache.logging.log4j:log4j-api:2.23.1    CVE-2026-34479\n  7.2  swagger-ui-bundle.js (swagger-ui 5.17.14)    CVE-2026-65898\n  7.2  swagger-ui-es-bundle.js (swagger-ui 5.17.14) CVE-2026-65898\n\nMEDIUM (notable, non-swagger):\n  6.5  commons-configuration:1.8              CVE-2025-46392\n  5.9  log4j-core/api:2.23.1                  CVE-2026-34477, CVE-2026-49844\n  4.8  log4j-core:2.23.1                      CVE-2025-68161\n  5.3  jackson-databind:2.21.4                CVE-2026-54515\n  5.3  commons-lang3:3.13.0                   CVE-2025-48924\n  5.3  httpclient5:5.4.4                      CVE-2026-64607\n  -    metrics-httpclient5:4.2.39             CVE-2020-13956, CVE-2014-3577\nRemaining ~34 MEDIUM are swagger-ui 5.17.14 bundle CVEs (mostly XSS, CVSS 6.1).\n\nIMPORTANT: none of these are introduced by the commons 1.0.31 bump — they are pre-existing log4j / swagger-ui / Apache Commons versions declared in booking/pom.xml. Recommend separate remediation tickets for log4j 2.23.1 and swagger-ui 5.17.14.\n\nSTALE SUPPRESSIONS (zero matches, should be deleted from booking/suppressions.xml):\n  1. pkg:maven/ch.qos.logback/logback-core@1.5.18 -> CVE-2025-11226  (obsolete: core is now 1.5.38)\n  2. ^pkg:javascript/handlebars@.*$ -> CVE-2026-.*\n\nCAVEAT: Sonatype OSS Index analyzer was disabled (missing credentials / token now required), so findings are NVD + RetireJS only.</detail>\n<parameter name=\"references\">[\"dependency-check.sh\", \"booking/target/owasp/dependency-check-report.html\", \"booking/suppressions.xml\"]",
+      "tags": [
+        "owasp",
+        "cve",
+        "security",
+        "booking",
+        "1.0.31-SNAPSHOT"
+      ],
+      "references": []
+    },
+    {
+      "id": "f1ccfef063f8",
+      "timestamp": "2026-08-16T22:24:06.899583+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "test_result",
+      "summary": "RESOLVED: upstream logback fix verified; booking workaround removed; clean build + boot pass with a one-line pom diff",
+      "detail": "Upstream logback fix confirmed in reinstalled artifacts (~/.m2, 2026-08-16 18:07-18:10):\n- commons-1.0.31-SNAPSHOT.pom: now excludes BOTH logback-core AND logback-classic from dropwizard-core:5.0.2, and declares BOTH at 1.5.38.\n- dynamo-integration-test-1.0.31-SNAPSHOT.pom: logback-classic 1.5.18 -> 1.5.38 (+ logback-core 1.5.38).\n\nACTION: removed the temporary logback dependencyManagement block AND the logback.version property from booking/pom.xml.\n\nRESULT: booking/pom.xml diff vs develop is now a SINGLE LINE:\n  -<mercury.commons.version>1.0.27-SNAPSHOT</mercury.commons.version>\n  +<mercury.commons.version>1.0.31-SNAPSHOT</mercury.commons.version>\n\nVerification WITHOUT any workaround:\n- mvn -pl booking dependency:tree -> logback-core 1.5.38 + logback-classic 1.5.38 (matched pair, sourced purely from commons).\n- mvn -pl booking clean package -> BUILD SUCCESS, Tests run 997, Failures 0, Errors 0, Skipped 9.\n- Boot -> \"Booking life cycle started\", 0 ERROR lines, no NoSuchMethodError. ping 200, /admin/healthcheck 200.\n- All AWS clients up again: Jest/ES SigV4, DynamoDB (7 repos), SQS, SNS, S3, SES, SSM.\n- Only residual: harmless one-time WARN \"LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38\".\n\n=> \"zero changes required in mercury-services consumers\" constraint now fully holds. Other consumers need ONLY the version bump.\n\nBUILD GOTCHA hit en route: first `mvn clean` failed with \"Failed to delete booking/target/booking-1.0.jar\". Cause: the booking app JVM from the earlier boot was still alive (Windows PID 22532). On Windows Git Bash, `kill <bash-job-pid>` does NOT kill the child java.exe. Fix: stop by Windows command line match ->\n  Get-CimInstance Win32_Process -Filter \"Name='java.exe'\" | Where CommandLine -like '*booking-1.0.jar server*' | Stop-Process -Force</detail>\n<parameter name=\"references\">[\"booking/pom.xml\", \"commons-1.0.31-SNAPSHOT.pom\", \"dynamo-integration-test-1.0.31-SNAPSHOT.pom\"]",
+      "tags": [
+        "resolved",
+        "logback",
+        "1.0.31-SNAPSHOT",
+        "booking",
+        "verification"
+      ],
+      "references": []
+    },
+    {
+      "id": "b98086e5ec56",
+      "timestamp": "2026-08-16T22:24:25.493279+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "CLARIFIED: no DynamoDB tables were created — \"Creating ... repository\" = in-JVM object binding; INT tables date from 2018-2019 and were untouched",
+      "detail": "Question raised: the checkout doc said \"DynamoDB repositories created\" — did the app create tables in INT? NO. Wording was misleading; doc section 6.3-6.5 corrected.\n\nThe boot line \"Creating <Entity> composite-key repository for table: inttra_int_booking_X\" is emitted by booking's OWN BookingDynamoModule, BEFORE the SDK call, and refers to constructing an in-JVM DatabaseRepository object (Guice singleton wrapping a DynamoDbEnhancedClient table handle). It is not a CreateTable API call.\n\nEVIDENCE 1 — the factory cannot create tables (bytecode scan of cloud-sdk-aws-1.0.31-SNAPSHOT.jar):\n  javap -c -p DynamoRepositoryFactory | grep -ic 'createTable|describeTable'  ->  0\n  grep -rl \"createTable\" --include=*.class .  ->  only\n      com.inttra.mercury.cloudsdk.database.command.DynamoDbAdminCommand\n      com.inttra.mercury.cloudsdk.database.util.DynamoDbAdminUtil\n  Table creation lives solely in DynamoDbAdminCommand.createTableWithGsisIfNotExists(...), reachable ONLY via the\n  opt-in `dynamo-create` CLI command. We ran `server`. BookingDynamoDbAdminCommand is merely REGISTERED in the\n  bootstrap (hence \"initialized with 7 entity classes\" on every start, even --help); registration != execution.\n\nEVIDENCE 2 — createEnhancedRepository call graph is entirely in-process:\n  validateConfig(clientConfig)\n  createDynamoDbClient(clientConfig)                      // lazy client, no connection\n  DynamoDbEnhancedClient.builder().dynamoDbClient(..).build()\n  new EnhancedDynamoRepository(client, enhancedClient, tableName, domainType, config)\n  The table name is just a String handed to the enhanced client; nothing hits AWS until a real read/write.\n\nEVIDENCE 3 — aws dynamodb describe-table shows the INT tables long predate this work and kept their data:\n  inttra_int_booking_BookingDetail              2018-06-07  588 items\n  inttra_int_booking_UniqueId                   2018-06-07    1\n  inttra_int_booking_SequenceId                 2019-02-21    1\n  inttra_int_booking_RapidReservation           2018-08-24   10\n  inttra_int_booking_SpotRatesDetail            2019-10-04    0\n  inttra_int_booking_SpotRatesToInttraRefDetail 2019-10-15   11\n  inttra_int_booking_Template                   2018-10-03   18\n  (Template + TemplateSummary are two repositories over ONE physical table.)\n\nEVIDENCE 4 — bogus-credential boot died at the FIRST genuine AWS call, which is SSM, before the Dynamo module ran:\n  software.amazon.awssdk.services.ssm.model.SsmException: The security token included in the request is invalid.\n  Confirms SSM is the first live call and that Dynamo wiring is offline.</detail>\n<parameter name=\"references\">[\"booking/src/main/java/com/inttra/mercury/booking/config/BookingDynamoModule.java\", \"booking/src/main/java/com/inttra/mercury/booking/dynamodb/BookingDynamoDbAdminCommand.java\", \"booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md\"]",
+      "tags": [
+        "clarification",
+        "dynamodb",
+        "documentation-fix",
+        "evidence"
+      ],
+      "references": []
+    },
+    {
+      "id": "f651d67108b9",
+      "timestamp": "2026-08-16T22:37:02.535881+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "test_result",
+      "summary": "tx-tracking bumped to 1.0.31-SNAPSHOT: 287 tests pass, boots clean, S3/SQS/SES/ES-SigV4/SSM all verified — 2-line pom diff, no workaround",
+      "detail": "CHANGE: tx-tracking/pom.xml two properties bumped 1.0.27-SNAPSHOT -> 1.0.31-SNAPSHOT:\n  <mercury.commons.version>      (artifact: commons)\n  <mercury.emailsender.version>  (artifact: email-sender -- tx-tracking still declares this legacy artifact\n                                  even though its code uses cloudsdk.email.*; 1.0.31-SNAPSHOT exists in .m2)\nNo Java source changes. No logback workaround needed.\n\nNOTE: tx-tracking does NOT declare cloud-sdk-api/cloud-sdk-aws directly; it inherits them transitively via commons.\n  commons 1.0.31 -> cloud-sdk-api 1.0.31 + cloud-sdk-aws 1.0.31 (confirmed in dependency:tree).\n\nLOGBACK (independent confirmation of the upstream fix on a second consumer, no dependencyManagement present):\n  [INFO] +- com.inttra.mercury:commons:jar:1.0.31-SNAPSHOT:compile\n  [INFO] |  +- ch.qos.logback:logback-core:jar:1.5.38:compile\n  [INFO] |  \\- ch.qos.logback:logback-classic:jar:1.5.38:compile\n  Matched pair sourced purely from commons => the commons-side fix generalises. No NoSuchMethodError.\n\nBUILD: mvn -pl tx-tracking clean package -> BUILD SUCCESS. Tests run 287, Failures 0, Errors 0, Skipped 0.\nShaded jar tx-tracking/target/tx-tracking-1.0.jar (main class com.inttra.mercury.txtracking.TxTrackingApplication).\n\nBOOT: java -jar tx-tracking/target/tx-tracking-1.0.jar server tx-tracking/conf/int/config.yaml\nDev account 081020446316 / us-east-1 SSO. Jetty started application@0.0.0.0:8080 + admin@0.0.0.0:8081.\n0 ERROR lines. No NoSuchMethodError / no fatal exceptions.\n\nAWS SERVICE STARTUP EVIDENCE (TxTrackingModule + cloud-sdk):\n- S3   : StorageClientFactory.createDefaultS3Client() -> \"S3 Storage Client created\".\n         Buckets in config: inttra-int-tx-tracking-report (txReportConfig.reportBucket),\n         inttra-int-workspace (workSpaceConfig.s3WorkSpaceBucket).\n- SQS  : MessagingClientFactory.createDefaultClient(queueUrl, StringMessageConverter) -> \"Sqs Messaging Client created\".\n         reprocessConfig.baseSQSUrl = https://sqs.us-east-1.amazonaws.com/081020446316/\n- SES  : EmailClientFactory.createDefaultSesClient() -> \"Ses Email Client created\".\n- ES   : JestModule \"Created client with endpoint https://search-inttra-int-es-tx-tracker-*.us-east-1.es.amazonaws.com/,\n         signer ASIARFXJR4ZW..., region us-east-1\" (SigV4 signed).\n- SSM  : PROVEN LIVE via negative test -- replacing\n         ${awsps:/inttra/int/mercuryservices/partner-integration/authclientsecret} with a bogus path produced\n         \"SsmCloudParameterStore: Parameter not found: /inttra/int/txtracking/DOES_NOT_EXIST_PROBE\" +\n         RuntimeException \"No value found for parameter\". Real config resolves cleanly.\n- NO DynamoDB and NO SNS in tx-tracking (not used by this module).\n\nHTTP CHECKS:\n- GET :8081/admin/healthcheck -> 200, \"Basic functionality\" healthy, \"deadlocks\" healthy\n- GET :8080/tx-tracking/services/ping -> 200\n- GET :8080/services/ping -> 404 (correct; rootPath is /tx-tracking)\n- GET :8080/tx-tracking/workflow/search and /tx-tracking/workflow -> 401 Unauthorized (auth required; expected, not an AWS fault)\n\nCONCLUSION: tx-tracking is green on 1.0.31 with a 2-line pom diff and zero source changes.</detail>\n<parameter name=\"references\">[\"tx-tracking/pom.xml\", \"tx-tracking/src/main/java/com/inttra/mercury/txtracking/config/TxTrackingModule.java\", \"tx-tracking/conf/int/config.yaml\", \"tx-tracking/src/main/java/com/inttra/mercury/txtracking/TxTrackingApplication.java\"]",
+      "tags": [
+        "tx-tracking",
+        "1.0.31-SNAPSHOT",
+        "verification",
+        "aws",
+        "passed"
+      ],
+      "references": []
+    },
+    {
+      "id": "dff1303ab69e",
+      "timestamp": "2026-08-16T22:45:16.615676+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "code_change",
+      "summary": "Fixed dependency-check.sh output location (mvn clean was deleting reports) + added full explanatory comments; re-ran booking and tx-tracking",
+      "detail": "ISSUE FOUND: booking/target/owasp had vanished. Root cause: `mvn -pl booking clean package` (run twice afterwards for the logback fix verification) deletes the entire target/ directory, taking the OWASP reports with it. Reports must not live under target/.\n\nFIX in dependency-check.sh:\n- Default output dir changed from <module>/target/owasp to <repo-root>/owasp-reports/<module>.\n  Survives `mvn clean`, keeps every module's reports side by side, one place to gitignore.\n- Added `owasp-reports/` to .gitignore (line 113) so generated reports don't pollute git status.\n- Removed the stale tx-tracking/target/owasp directory.\n\nDOCUMENTATION: rewrote dependency-check.sh with thorough explanatory comments -\n- File header: purpose, quick start, common uses, why we scan the SHADED JAR not the pom\n  (fat jars: scanning the jar reports what actually ships, including shaded transitives),\n  and requirements.\n- Explained `set -euo pipefail` flag by flag.\n- Explained REPO_ROOT derivation from BASH_SOURCE (run from any cwd).\n- Explained MSYS2_ARG_CONV_EXCL (stops Git Bash mangling args for the .bat launcher).\n- Explained the `[[ -t 1 ]]` colour guard (plain text when piped/CI).\n- Explained to_native()/cygpath and why BOTH the .bat launcher and native Windows python need it.\n- Explained resolve_cli() trying dependency-check | .bat | .sh.\n- Explained why SCAN_TARGETS/SUPPRESSIONS are arrays (repeatable flags).\n- Explained ${1%/} trailing-slash strip from tab completion.\n- Explained each jar exclusion: original-* (pre-shade, double counts), -sources, -javadoc, -tests.\n- Explained the `while IFS= read -r` loop (filenames with spaces).\n- Explained mkdir -p: dependency-check does NOT create --out and fails with\n  \"Invalid 'out' argument: <dir> - path does not exist\".\n- Explained the propertyfile approach for NVD_API_KEY (avoid secret in ps/Task Manager),\n  chmod 600 BEFORE writing, and the EXIT trap covering normal/error/Ctrl-C.\n- Explained `set +e` around the CLI call so --fail-on-cvss doesn't skip the summary.\n- Commented the embedded python summary: severity rank map, missing \"vulnerabilities\" key,\n  cvssv3 -> cvssv4 -> severity fallback, and `-(score or 0)` for None scores.\n\nScript location: <repo-root>/dependency-check.sh (C:\\Users\\arijit.kundu\\projects\\mercury-services\\dependency-check.sh), chmod +x, bash -n clean.\n\nRE-RAN BOTH into the new location, results identical to before (no drift):\n- owasp-reports/booking      : 55 findings / 9 vulnerable deps - HIGH 6, MEDIUM 49\n- owasp-reports/tx-tracking  : 14 findings / 6 vulnerable deps - HIGH 4, MEDIUM 10\nBoth produce html/xml/json/csv/sarif/junit/gitlab/jenkins reports.</detail>\n<parameter name=\"references\">[\"dependency-check.sh\", \".gitignore\", \"owasp-reports/booking/dependency-check-report.html\", \"owasp-reports/tx-tracking/dependency-check-report.html\"]",
+      "tags": [
+        "tooling",
+        "owasp",
+        "dependency-check",
+        "script",
+        "bugfix"
+      ],
+      "references": []
+    },
+    {
+      "id": "9ff1caafd98f",
+      "timestamp": "2026-08-16T22:58:00.777877+00:00",
+      "agent": "copilot-claude-opus-5",
+      "category": "finding",
+      "summary": "CORRECTION: no HIGH findings exist — booking 55 MEDIUM, tx-tracking 14 MEDIUM. My summary wrongly used cvssv3.baseSeverity instead of dependency-check's own severity field",
+      "detail": "User challenged: \"I did not see any HIGHs\" in the HTML report. User was RIGHT; my summary script was wrong.\n\nROOT CAUSE: my summary read `cvssv3.baseSeverity` from the JSON. dependency-check publishes its OWN\nreconciled verdict in the top-level `severity` field, and that is what the HTML renders. The tool prefers the\nnewer CVSS v4 score when the CNA published one.\n\nExample CVE-2026-34478 (log4j-core 2.23.1):\n  \"severity\": \"MEDIUM\"                      <- tool verdict, shown in HTML\n  cvssv3.baseScore 7.5, baseSeverity HIGH   <- what my script wrongly used\n  cvssv4 vector AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N  (source security@apache.org)\n  -> v4 shows no confidentiality/integrity/availability impact on the vulnerable system, hence MEDIUM.\n\nCORRECTED COUNTS (dependency-check severity == HTML):\n  booking     : 55 findings / 9 vulnerable deps -> MEDIUM 55.  ZERO Critical/High.\n  tx-tracking : 14 findings / 6 vulnerable deps -> MEDIUM 14.  ZERO Critical/High.\nPreviously reported \"booking 6 HIGH / tx-tracking 4 HIGH\" was an artifact of the wrong field. Retract those.\n\nMismatched CVEs (CVSS v3 HIGH but tool MEDIUM): CVE-2026-34478/34479/34480 (7.5, log4j) and\nCVE-2026-65898 (7.2, swagger-ui, booking only).\n\nFIX in dependency-check.sh summary block:\n- Primary severity now `vuln['severity']` (tool verdict) so the console summary always matches the HTML.\n- Score shown is cvssv3.baseScore or cvssv4.baseScore.\n- Prints \"No CRITICAL or HIGH findings.\" when clean.\n- New de-duplicated FYI section listing CVEs whose CVSS v3 rating is HARSHER than the tool verdict, so the\n  stricter v3 view is not lost but does not inflate the headline counts.\nBoth modules re-scanned with the corrected logic; output now agrees with the HTML reports.\n\nCorrected booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md sections 7.1, 7.2 and follow-up 6.\n\nLESSON: for OWASP dependency-check JSON, the authoritative severity is the top-level `severity` field.\nDo NOT derive severity from cvssv3.baseSeverity — it disagrees with the report the humans read.</detail>\n<parameter name=\"references\">[\"dependency-check.sh\", \"owasp-reports/booking/dependency-check-report.json\", \"owasp-reports/tx-tracking/dependency-check-report.json\", \"booking/docs/2026-08-16-booking-app-checkout-1.0.31-SNAPSHOT.md\"]",
+      "tags": [
+        "correction",
+        "owasp",
+        "dependency-check",
+        "severity",
+        "bugfix"
+      ],
+      "references": []
+    }
+  ],
+  "usage": []
+}

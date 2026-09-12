@@ -1,0 +1,131 @@
+{
+  "id": "dc1c51ad144b4114",
+  "name": "ION-16397-bk-cargoscreen-PR-review-designdoc-20260813",
+  "description": "Review the booking-cargoscreen AWS SDK 2.x upgrade branch (ION-16397) ahead of PR completion, write review comments to booking-downstream-processor/booking-cargoscreen/docs/2026-08-13-bk-cargoscreen-awsupgrade-claude-review.md, and produce a pre-Confluence design document at .../2026-08-13-bk-cargoscreen-awsupgrade-confluence-design.md following the watermill-booking precedent and .github/prompts/designdocs templates.",
+  "project": "mercury-services",
+  "created_at": "2026-08-13T21:00:29.110418+00:00",
+  "updated_at": "2026-08-14T04:22:22.397621+00:00",
+  "status": "active",
+  "tags": [
+    "ION-16397",
+    "aws-sdk-2x",
+    "cloud-sdk",
+    "booking-cargoscreen",
+    "pr-review",
+    "confluence",
+    "design-doc"
+  ],
+  "entries": [
+    {
+      "id": "2274ae85eea5",
+      "timestamp": "2026-08-13T21:16:34.847024+00:00",
+      "agent": "claude-opus-5",
+      "category": "finding",
+      "summary": "Code review of ION-16397 booking-cargoscreen AWS SDK v1→2.x migration: 3 substantive findings from bytecode verification",
+      "detail": "Branch feature/ION-16397-bk-cargoscreen-aws-upgrade, single commit 2f8a4829e8, 19 files.\n\nFINDING 1 (High) - AbortedException catch is now dead code.\njavap on cloud-sdk-aws SqsMessagingClient shows every method (incl. receiveMessages) funnels failures through\nprivate handleException(...) which ALWAYS returns MessagingException (extends RuntimeException) and rethrows.\nv1 commons SQSClient.receiveMessage had NO try/catch, so com.amazonaws.AbortedException propagated to\nSqsMessageHandler.start() -> stop() + Thread.interrupt(). Now software.amazon.awssdk.core.exception.AbortedException\nis wrapped in MessagingException, so `catch (AbortedException)` at SqsMessageHandler.java:78 can never fire.\nInterrupt during long-poll falls to `catch (Exception)` -> log + `while (notStopped)` retries immediately -> hot\nerror loop. Fix: catch MessagingException/Exception and unwrap the cause chain for AbortedException/InterruptedException.\n\nFINDING 2 (High) - SQS/SNS client tuning silently dropped; v1 reader/writer split collapsed.\nv1 commons SQSModule held TWO AmazonSQS instances (amazonSQSReader + amazonSQSWriter) configured from\ncom.inttra.mercury.util.AWSConstants:\n  STANDARD_SQS_READER_CONFIGURATION  = maxErrorRetry 3, RetryPolicy(fullJitter 500/5000, 3, false),\n                                       connTimeout 1000ms, maxConnections 50  (no socketTimeout, no execTimeout)\n  STANDARD_SQS_WRITER_CONFIGURATION  = maxErrorRetry 3, same policy, connTimeout 1000ms,\n                                       clientExecutionTimeout 10000ms, socketTimeout 5000ms, maxConnections 50\n  STANDARD_SNS_PUBLISH_CONFIGURATION = maxErrorRetry 2, same policy, connTimeout 1000ms,\n                                       clientExecutionTimeout 10000ms, socketTimeout 5000ms, maxConnections 50\nReplacement MessagingClientFactory.createDefaultStringClient() / NotificationClientFactory.createDefaultClient(arn)\nboth use DefaultRetryStrategy.standardStrategyBuilder().build() (2 retries, standard retryable predicate, circuit\nbreaker ON) + ApacheHttpClient(maxConnections 50, connTimeout 5000ms, socketTimeout 30s, connAcqTimeout 10s),\nregion pinned US_EAST_1, and NO apiCallTimeout. So: retries 3->2 on SQS and 2->2 on SNS but with a *different*\npredicate (403/404 no longer retried), connect 1s->5s, DLQ-send socket 5s->30s, exec deadline 10s->none, and one\nshared client for long-poll receive + delete + DLQ send. ION-16380 (watermill) explicitly kept the reader/writer\nsplit and asserted distinctness. Asymmetry: S3 tuning preserved to the byte, SQS/SNS silently defaulted. Neither\nthe design doc nor the commit message mentions this.\n\nFINDING 3 (Medium) - S3ClientTuningTest asserts the ingredients, not the wiring.\nbackoffIsFullJitterExponentialCappedAt5000ms builds its own BackoffStrategy.exponentialDelay(...) instead of\nreading it off s3RetryStrategy(); retryPredicateRetriesEvenNonRetryableExceptions calls s3RetryPredicate()\ndirectly. Swapping exponentialDelayWithoutJitter, or dropping .retryOnException(...)/.throttlingBackoffStrategy(...)\n/.circuitBreakerEnabled(false) inside s3RetryStrategy(), would not fail any test. Only maxAttempts() and\nuseClientDefaults() are read back off the real strategy.\n\nAlso noted: no production call site sets DO_NOT_DELETE / DO_NO_SEND_TO_DLQ (grep: only tests), so the adapter\nguards a mechanism production never activates today - correct to preserve, but the risk framing was theoretical.\nS3 region hard-coded us-east-1 in Java while ES region comes from YAML (esConfiguration.region) - three different\nregion-resolution mechanisms now. MessagingClient is AutoCloseable and never closed at shutdown.\ncloud-sdk 1.0.28-SNAPSHOT has advanced (20260724 -> 20260805) since the branch was built; re-verify.",
+      "tags": [
+        "ION-16397",
+        "code-review",
+        "cloud-sdk",
+        "aws-sdk-v2",
+        "sqs",
+        "s3"
+      ],
+      "references": [
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/processor/sqs/SqsMessageHandler.java",
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/config/BookingCargoScreenApplicationInjector.java",
+        "2f8a4829e8"
+      ]
+    },
+    {
+      "id": "ff9f9cedc0a1",
+      "timestamp": "2026-08-13T21:25:58.057434+00:00",
+      "agent": "claude-opus-5",
+      "category": "progress",
+      "summary": "Deliverables written; build re-verified 69 tests green on current snapshot; Confluence/Jira MCP returns 401 (SSO expired)",
+      "detail": "Written:\n1. booking-downstream-processor/booking-cargoscreen/docs/2026-08-13-bk-cargoscreen-awsupgrade-claude-review.md\n   Verdict \"approve with changes\". F1 (AbortedException unreachable) and F2 (SQS/SNS tuning + reader/writer split)\n   are blocking; F3 (S3ClientTuningTest asserts ingredients not wiring) should-fix; F4-F7 low/info. Includes a\n   \"checked and found NOT to be problems\" table so the same ground is not re-covered.\n2. booking-downstream-processor/booking-cargoscreen/docs/2026-08-13-bk-cargoscreen-awsupgrade-confluence-design.md\n   Follows .github/prompts/designdocs/templates/architecture-template.md section-for-section (all official sections\n   present, (ext) subsections used where they carry content). Modelled on the ION-16380 watermill page. The three\n   open review findings are carried into Assumptions/Open Issues, Risks, Acceptance Criteria (rows 10-11 marked\n   FAILED) and Blocking Issues #1-#8.\n\nVerification done as part of the review:\n  mvn -pl booking-downstream-processor/booking-cargoscreen -am -o clean verify -B\n  -> Tests run: 69, Failures: 0, Errors: 0, Skipped: 0; BUILD SUCCESS\n  against cloud-sdk-{api,aws}-1.0.28-20260805-2 (the branch was originally verified against -20260724-1).\n  Shade output confirms jackson 2.21.4 throughout and AWS SDK 2.30.24, with the five v1 artifacts still arriving\n  via cloud-sdk-aws.\nNOT re-run: OWASP post-scan and local INT boot-check against the -2 snapshot.\n\nBLOCKER for publishing: mcp jira_get_issue / confluence tools return 401 Unauthorized. Per\n.github/prompts/designdocs/SETUP-confluence-mcp.md Action 2, refresh SSO cookies:\n  cd \"C:\\Users\\arijit.kundu\\OneDrive - WiseTech Global\\aiengg\\mcp\\mcp-summary-server\"\n  .\\.venv\\Scripts\\python.exe sso_login.py\nThen convert with `python convert_design_doc.py <in.md> <out.xhtml>` (repo root) and publish via\nconfluence_create_page under the 26.4 Design Documents parent in space BRM.",
+      "tags": [
+        "ION-16397",
+        "design-doc",
+        "confluence",
+        "blocked-sso"
+      ],
+      "references": [
+        "booking-downstream-processor/booking-cargoscreen/docs/2026-08-13-bk-cargoscreen-awsupgrade-claude-review.md",
+        "booking-downstream-processor/booking-cargoscreen/docs/2026-08-13-bk-cargoscreen-awsupgrade-confluence-design.md"
+      ]
+    },
+    {
+      "id": "1d65ddc1061c",
+      "timestamp": "2026-08-13T23:45:00.604498+00:00",
+      "agent": "claude-opus-5",
+      "category": "code_change",
+      "summary": "Review fixes implemented: F1 abort handling, F2(c) reader/writer split, F3 mutation-verified tests, F4 S3 region config. F5 withdrawn as my error.",
+      "detail": "F5 CORRECTION - I was wrong, user was right.\n  commons source of truth = mercury-services-commons branch feature/ION-12310-commons-cloudsdk-refactoring (HEAD 1293c50):\n    cloud-sdk-api/.../messaging/api/MessagingClient.java:14  -> \"public interface MessagingClient<T> {\"  (NOT AutoCloseable)\n    cloud-sdk-aws/.../messaging/aws/impl/SqsMessagingClient.java:53 -> no close() method at all\n  Cached jars DISAGREE with each other:\n    cloud-sdk-api-1.0.28-20260724.194357-1.jar -> not AutoCloseable\n    cloud-sdk-api-1.0.28-20260805.053457-2.jar -> extends AutoCloseable   <-- what -SNAPSHOT.jar resolves to\n  So the published SNAPSHOT contains API absent from the source branch => build-integrity hazard for every module.\n  environment.lifecycle().manage(...) code was written then REVERTED; a comment in bindSqsReaderClient() records why.\n  My original F5 also claimed StorageClient was closeable - simply wrong, it has no close() in any build.\n\nIMPLEMENTED (all on feature/ION-16397-bk-cargoscreen-aws-upgrade, NOT committed, NOT pushed):\n F1 SqsMessageHandler.start(): single catch(Exception) + static isAbortSignal(Throwable) walking the cause chain for\n    AbortedException/InterruptedException, self-reference guard, Thread.isInterrupted() fallback. 6 tests.\n F2(c) Reader/writer SQS split restored: BookingCargoScreenApplicationInjector.SQS_READER / SQS_WRITER @Named\n    @Singleton providers; SqsMessageHandler ctor now (reader, writer, sqsConfig, threadPoolConfig, task); receives on\n    reader, deleteMessage + DLQ sendMessage on writer; CargoScreenEventProcessor injects both by @Named.\n    Tests: listenerAndSenderGetSeparateMessagingClients, receivesUseTheReaderAndWritesUseTheWriter.\n    NOTE: the SQS/SNS retry+timeout tuning delta is STILL OPEN - user decision pending.\n F3 4 behavioural tests driving the built strategy via acquireInitialToken/refreshRetryToken. VERIFIED BY MUTATION:\n      exponentialDelay->exponentialDelayWithoutJitter  => theInstalledBackoffIsJitteredAndCapped\n      circuitBreakerEnabled(false)->(true)             => theInstalledStrategyHasNoCircuitBreaker\n      .retryOnException(...) deleted                   => theInstalledPredicateRetriesNonRetryableExceptions (+3)\n      maxAttempts(4)->6                                => theInstalledStrategyStopsAfterThreeRetries (+2)\n    throttlingBackoffStrategy still unasserted (cannot synthesise a throttling response through this API).\n F4 New S3Config {region, DEFAULT_REGION=\"us-east-1\"}; BookingCargoScreenApplicationConfig.s3Config initialised to a\n    default instance so the YAML block is optional; s3StorageConfig() -> s3StorageConfig(String region);\n    s3Config.region added explicitly to conf/{int,qa,cvt,prod}/config.yaml. This ENDS the \"zero config change\" claim.\n    SQS/SNS regions remain pinned inside cloud-sdk factories - not overridable via createDefault*Client().\n\nBUILD: 69 -> 84 tests. Full `clean verify` BUILD SUCCESS observed twice with these changes.\nFLAKY (pre-existing, timing/load dependent, NOT caused by these changes - same code passed green twice):\n  BoundedThreadPoolTest, CargoScreenProcessorManagedHandlerTest, SqsMessageHandlerTest.testWebApplicationError\n  (the last one's own source comment admits \"This could be a brittle test\"). Worth stabilising separately.",
+      "tags": [
+        "ION-16397",
+        "code-change",
+        "review-fixes",
+        "cloud-sdk",
+        "flaky-tests"
+      ],
+      "references": [
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/config/S3Config.java",
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/processor/sqs/SqsMessageHandler.java",
+        "mercury-services-commons@feature/ION-12310-commons-cloudsdk-refactoring"
+      ]
+    },
+    {
+      "id": "017d871ec0eb",
+      "timestamp": "2026-08-14T00:08:44.038844+00:00",
+      "agent": "claude-opus-5",
+      "category": "code_change",
+      "summary": "Retry predicate switched to v2 standard for ALL clients; SQS/SNS v1 tuning carried over; 82 tests green; INT boot clean HTTP 200",
+      "detail": "USER DECISION: use the AWS SDK v2 standard retry predicate uniformly, including S3 (\"makes no sense to retry 403/404\").\nThen: also carry SQS/SNS tuning parity as far as the libraries permit, all tests green, app boots clean.\n\nCRITICAL GOTCHA FOUND: StandardRetryStrategy.builder() and DefaultRetryStrategy.standardStrategyBuilder() do NOT\ncarry the standard retry predicates on the returned object. They are merged in by the AWS client builder at build\ntime, and ONLY when useClientDefaults()==true. The previous code had useClientDefaults(false) + retryOnException(\nalwaysTrue) to reproduce v1. Simply deleting retryOnException from that yields a strategy that retries NOTHING.\nVerified empirically: refreshRetryToken threw \"Request attempt 1 encountered non-retryable failure\" even for\nRetryableException. => must use DefaultRetryStrategy.standardStrategyBuilder() and leave useClientDefaults true.\nConsequence: retryability CANNOT be asserted on the bare strategy object in a unit test. The load-bearing assertion\nis useClientDefaults()==true. SdkDefaultRetryStrategy (which does carry the predicates) is in\nsoftware.amazon.awssdk.core.INTERNAL.retry - deliberately not used in production code.\n\nFINAL SHAPE (BookingCargoScreenApplicationInjector):\n  retryStrategy(int maxAttempts) - shared: standardStrategyBuilder + maxAttempts + fullJitter(500,5000) as both\n      backoffStrategy and throttlingBackoffStrategy + circuitBreakerEnabled(false). Used by all 4 clients.\n  httpClient(Duration socketTimeout) - shared: connect 1000ms, maxConnections 50, per-client socket timeout.\n  v1 values carried (from AWSConstants decompilation):\n      S3          attempts 4, socket 5000ms,  execTimeout 60s (v1 had none; cloud-sdk forces one, 39s worst case)\n      SQS reader  attempts 4, socket 50s,     execTimeout 240s (v1 set NEITHER; 50s is v1's SDK default and MUST\n                  exceed the 10s long poll - do not copy the writer's 5s)\n      SQS writer  attempts 4, socket 5000ms,  execTimeout 10000ms  (v1 really did set 10s)\n      SNS         attempts 3, socket 5000ms,  execTimeout 10000ms  (v1 withMaxErrorRetry(2) - one fewer!)\n  AwsMessagingClientConfig validates queueUrl non-empty AND maxMessages 1..10 -> sqsClientConfig takes the whole\n  SQSConfig so the client defaults come from the same config the handler uses.\n  S3Config renamed -> AwsConfig (it now supplies the region for S3, SQS and SNS); YAML key s3Config -> awsConfig.\n\nTESTS: S3ClientTuningTest replaced by AwsClientTuningTest (13 tests) covering all four client configs.\n  82 tests total, 0 failures, exit 0.\nBOOT: mvn package + java -jar ... server conf/int/config.yaml with `aws configure export-credentials` env vars.\n  \"Building AWS clients for region us-east-1\", S3StorageClient resolved creds, JestModule connected to INT ES,\n  Jetty 8080/8081 up, GET /admin/healthcheck -> HTTP 200 all healthy, ZERO ERROR lines in 40 log lines.\n  startListeners resolves Set<Processor> which requires both @Named SQS clients + the SNS publisher, so all four\n  clients were really constructed against INT settings; ~35s of live polling with no errors also validates the\n  reader's 50s socket timeout against the 10s long poll.\n  Only pre-existing warnings remain (Log4j2 StatusLogger, Jersey provider, logback 1.5.32 vs 1.5.33).",
+      "tags": [
+        "ION-16397",
+        "retry-strategy",
+        "sqs",
+        "sns",
+        "boot-verified"
+      ],
+      "references": [
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/config/BookingCargoScreenApplicationInjector.java",
+        "booking-downstream-processor/booking-cargoscreen/src/test/java/com/inttra/mercury/booking/cargoscreen/config/AwsClientTuningTest.java"
+      ]
+    },
+    {
+      "id": "bf54473b6947",
+      "timestamp": "2026-08-14T04:15:51.816705+00:00",
+      "agent": "claude-opus-5",
+      "category": "code_change",
+      "summary": "Region now from DefaultAwsRegionProviderChain (zero config changes); AWS event POJOs replaced with local ones -> zero com.amazonaws imports; 86 tests green",
+      "detail": "USER PUSHBACK, both correct:\n (a) remove the region config and use AWS defaults\n (b) why import AWS v1 S3 libraries just for JSON deserialisation\n\nCHANGE 1 - region from the default provider chain.\n  cloud-sdk S3ClientFactory / MessagingClientFactory.createConfiguredClient /\n  NotificationClientFactory.createConfiguredClient all call config.getRegion().getRegionDelegate() unconditionally,\n  and BaseAwsConfig.validateBaseConfig rejects null (\"Region must not be null\"). AWS SDK v1 had no such requirement -\n  it used DefaultAwsRegionProviderChain. Fix: resolve the chain in the injector and pass the result.\n    String region() { configured if non-blank, else DefaultAwsRegionProviderChain.builder().build().getRegion().id() }\n  AwsConfig.region is now an OPTIONAL override defaulting to null; DEFAULT_REGION constant deleted; the awsConfig\n  block was REMOVED from all four config.yaml files -> conf/ is byte-identical to HEAD again (zero config changes).\n  Net effect: removes hard-coding rather than adding config (was Region.US_EAST_1 in the injector for S3, and\n  MessagingClientFactory.DEFAULT_REGION / NotificationClientFactory.DEFAULT_REGION inside cloud-sdk for SQS/SNS).\n\nCHANGE 2 - local event POJOs, AWS v1 types gone from source.\n  KEY FACT: com.amazonaws.services.s3.event.S3EventNotification ships in aws-java-sdk-s3:1.12.730 (AWS SDK v1 S3),\n  NOT in aws-lambda-java-events (which only provides S3Event + SNSEvent). The module only needed two strings from\n  the payload: bucket name and object key.\n  New: processor/model/SnsNotification.java and processor/model/S3EventNotification.java - minimal @Data +\n  @JsonIgnoreProperties(ignoreUnknown=true) POJOs parsed by the existing SNSMapper (which enables\n  ACCEPT_CASE_INSENSITIVE_PROPERTIES so \"Records\"/\"Message\" and lower-case both work, and does NOT disable\n  FAIL_ON_UNKNOWN_PROPERTIES - hence ignoreUnknown is mandatory at every level).\n  CRITICAL PARITY DETAIL: v1 S3ObjectEntity.getKey() is a plain field return (NO url decoding);\n  getUrlDecodedKey() is the decoding one and the module never used it. So the POJO returns the raw percent-encoded\n  key - asserted by theObjectKeyIsNotUrlDecoded.\n  aws-lambda-java-events dependency REMOVED from pom; confirmed gone from the shaded jar.\n  RESULT: grep '^import com.amazonaws' over src/main AND src/test -> ZERO matches.\n\nNew test: processor/model/S3EventNotificationParsingTest (4 tests) - real AWS SNS+S3 envelope end-to-end, case\n  sensitivity both ways, raw key preservation, unknown fields at every level. No mocking.\n\nBUILD: 86 tests, 0 failures, BUILD SUCCESS.\nBOOT: could NOT be re-run - the local SSO token expired at 23:00 (\"Token has expired and refresh failed\"), so\n  `aws sts get-caller-identity` and `aws configure export-credentials` both fail. The boot attempt died in\n  ParameterStoreConfigTransform -> SsmCloudParameterStore.getParameter during CONFIG PARSING, before Guice is built\n  and therefore before region() is ever called - i.e. environmental, not caused by these changes. Region resolution\n  is covered instead by the unit test regionResolvesFromTheDefaultProviderChainWhenNotConfigured, which passed with\n  no awsConfig block and AWS_REGION unset. Re-run the boot after `aws sso login`.\n\nSTILL TRUE: aws-java-sdk-core/kms/s3/sns/sqs remain in the shaded jar via cloud-sdk-aws, and aws-java-sdk-core is\n  LOAD-BEARING for Elasticsearch SigV4 signing (cloudsdk.aws.module.JestModule uses v1\n  DefaultAWSCredentialsProviderChain + vc.inreach.aws.request.AWSSigner).",
+      "tags": [
+        "ION-16397",
+        "region-chain",
+        "event-pojos",
+        "aws-sdk-v1-removal"
+      ],
+      "references": [
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/processor/model/S3EventNotification.java",
+        "booking-downstream-processor/booking-cargoscreen/src/main/java/com/inttra/mercury/booking/cargoscreen/config/AwsConfig.java"
+      ]
+    },
+    {
+      "id": "6a21f24d973c",
+      "timestamp": "2026-08-14T04:22:22.397580+00:00",
+      "agent": "claude-opus-5",
+      "category": "test_result",
+      "summary": "Boot re-verified 2026-08-14 after region-chain and event-POJO changes: HTTP 200, region resolved from provider chain, zero errors",
+      "detail": "After `aws sso login` refreshed the token:\n  aws sts get-caller-identity -> account 081020446316, AWSReservedSSO_INTTRA-Dev-Engg\n  java -jar target/booking-cargoscreen-1.0.jar server conf/int/config.yaml\n  with AWS_ACCESS_KEY_ID/SECRET/SESSION_TOKEN exported, and AWS_REGION + AWS_DEFAULT_REGION deliberately UNSET.\n\nRESULT - clean:\n  JestModule: Created client with endpoint https://search-inttra-int-es-bk-search-....us-east-1.es.amazonaws.com,\n              signer ASIARFXJR4ZWCHQWUFSW, region us-east-1\n  BookingCargoScreenApplicationInjector: Building AWS clients for region us-east-1   <- from\n              DefaultAwsRegionProviderChain via the ~/.aws profile, since both env vars were unset\n  S3StorageClient: Resolved AWS credentials using DefaultCredentialsProvider; Access Key ID ASIARFXJR4ZW...\n  Jetty 12.1.9 application@0.0.0.0:8080 + admin@0.0.0.0:8081, Started @389ms\n  GET /admin/healthcheck -> HTTP 200 {\"Basic functionality\":{\"healthy\":true},\"deadlocks\":{\"healthy\":true}}\n  ZERO ERROR lines in 40 log lines; alive past 40s.\n  Only pre-existing stderr notice: Log4j2 StatusLogger (app uses logback; present on the baseline jar too).\n\nThis closes the last open verification item apart from the OWASP post-scan, which the user deferred.\nBuild state at this point: 86 tests, 0 failures, BUILD SUCCESS; conf/ byte-identical to HEAD (zero config changes);\nzero com.amazonaws imports in src/main and src/test.",
+      "tags": [
+        "ION-16397",
+        "boot-check",
+        "verified"
+      ],
+      "references": []
+    }
+  ],
+  "usage": []
+}

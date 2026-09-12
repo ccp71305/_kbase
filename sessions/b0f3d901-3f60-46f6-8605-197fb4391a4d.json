@@ -1,0 +1,55 @@
+{
+  "id": "b0f3d901-3f60-46f6-8605-197fb4391a4d",
+  "name": "copilot-cli b0f3d901",
+  "description": "Auto-tracked token usage from the Copilot CLI agentStop hook.",
+  "project": "",
+  "created_at": "2026-09-09T23:23:07.447453+00:00",
+  "updated_at": "2026-09-09T23:23:40.726340+00:00",
+  "status": "active",
+  "tags": [
+    "copilot-cli",
+    "auto-telemetry"
+  ],
+  "entries": [],
+  "usage": [
+    {
+      "id": "22b9001bb815",
+      "timestamp": "2026-09-09T23:23:07.447511+00:00",
+      "agent": "copilot-cli",
+      "model": "gpt-4o-mini-2024-07-18",
+      "input_tokens": 616,
+      "output_tokens": 14,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:chatcmpl-EMLiwuIbqayFzRgwU70Af226EDRAC"
+    },
+    {
+      "id": "be677d4a2d7e",
+      "timestamp": "2026-09-09T23:23:07.447549+00:00",
+      "agent": "copilot-cli",
+      "model": "",
+      "input_tokens": 616,
+      "output_tokens": 14,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l9"
+    },
+    {
+      "id": "499449586984",
+      "timestamp": "2026-09-09T23:23:40.726316+00:00",
+      "agent": "copilot-cli",
+      "model": "claude-opus-4.8",
+      "input_tokens": 146589,
+      "output_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "context_window": null,
+      "source": "agent_reported",
+      "note": "cc:l186.0"
+    }
+  ]
+}

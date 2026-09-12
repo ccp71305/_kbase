@@ -1,0 +1,91 @@
+{
+  "id": "5fab7d4aa9ff4d22",
+  "name": "sdk-commons-dynamo rebase onto develop (Jetty/logback OWASP) 2026-08-14",
+  "description": "Pull incoming origin/feature (ION-16431) changes then rebase cloud-sdk feature branch onto origin/develop to gain ION-16376 (Jetty 12.1.12 / slf4j 2.0.18 / logback-core 1.5.38 OWASP) and ION-15990 (wtg-federation). Bump dependency.version to 1.0.30-SNAPSHOT. All steps documented in cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md. Based on analysis in 2026-08-13-sdk-commons-rebase-analysis.md.",
+  "project": "mercury-services-commons",
+  "created_at": "2026-08-14T21:54:02.564879+00:00",
+  "updated_at": "2026-08-14T22:34:07.090966+00:00",
+  "status": "completed",
+  "tags": [
+    "rebase",
+    "ION-12310",
+    "ION-16431",
+    "ION-16376",
+    "cloud-sdk",
+    "jetty",
+    "logback",
+    "owasp",
+    "java"
+  ],
+  "entries": [
+    {
+      "id": "949bd12facc8",
+      "timestamp": "2026-08-14T21:54:16.760701+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "model_info",
+      "summary": "Model info + task kickoff",
+      "detail": "Agent: GitHub Copilot CLI powered by Claude Opus 4.8 (claude-opus-4-8). Task: pull incoming origin/feature (ION-16431, 8 commits) via fast-forward, then rebase 52 feature commits onto origin/develop (ION-16376 Jetty/logback OWASP + ION-15990 wtg-federation). Bump dependency.version to 1.0.30-SNAPSHOT. Document all steps in cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md. Based on 2026-08-13-sdk-commons-rebase-analysis.md.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-13-sdk-commons-rebase-analysis.md",
+        "cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md"
+      ]
+    },
+    {
+      "id": "157422212fdb",
+      "timestamp": "2026-08-14T21:55:18.527709+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "progress",
+      "summary": "Pre-flight verified; backup created; fast-forwarded to origin/feature (ION-16431, 1.0.29-SNAPSHOT)",
+      "detail": "Verified counts match analysis (0/8, merge-base 0c797f4, 5 incoming, 52 to replay, develop=2f9d341, feature=b305acc). Created backup branch backup/feature-ION-12310-pre-rebase-4 -> b305acc. Fast-forwarded local feature to origin/feature (1293c50..b305acc), 13 files, now at 1.0.29-SNAPSHOT with ION-16431 (DynamoDB maxResultSize cap, MessagingClient AutoCloseable, AwsHttpClientWrapper builder mode).",
+      "tags": [],
+      "references": [
+        "backup/feature-ION-12310-pre-rebase-4",
+        "pom.xml"
+      ]
+    },
+    {
+      "id": "c746b3d2cab4",
+      "timestamp": "2026-08-14T21:59:27.234894+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "code_change",
+      "summary": "Rebase complete (1 conflict, resolved UNION); version bumped to 1.0.30-SNAPSHOT; §6 checklist verified; committed 727dd87",
+      "detail": "git rebase origin/develop replayed 49 commits; single conflict on early commit fa2d428 (root pom.xml dependency.version) resolved as UNION per analysis §5.1 (kept feature SNAPSHOT lineage, develop libs.dependency.version=1.R.01.003, jetty 12.1.12, slf4j 2.0.18, logback-core 1.5.38). commons/pom.xml and README auto-merged (disjoint regions). Post-rebase: bumped dependency.version 1.0.29->1.0.30-SNAPSHOT, updated stale commons Jetty pin comments 12.1.9->12.1.12, added README v1.0.30-SNAPSHOT changelog. Committed as 727dd87. Verified §6 checklist: cloud-sdk-aws/api/dynamo-integration-test modules present; aws.java.sdk.version=1.12.730; assertj 3.27.2; 8 Jetty direct deps; flattenDependencyMode=all absent; EnhancedDynamoRepository maxResultSize cap present; commons logback-core managed+excluded+direct present; ION-15990 TargetConfigurationResolver present. Branch now 50 ahead / 0 behind origin/develop.",
+      "tags": [],
+      "references": [
+        "pom.xml",
+        "commons/pom.xml",
+        "README.md",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/EnhancedDynamoRepository.java",
+        "727dd87"
+      ]
+    },
+    {
+      "id": "a5f3d3ddfe58",
+      "timestamp": "2026-08-14T22:18:01.106944+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "test_result",
+      "summary": "All validation green: 2159 unit + 6 dynamo-IT + 137 cloud-sdk-aws IT; task complete, documented",
+      "detail": "Validation gates all green on rebased branch (tip 727dd87, 1.0.30-SNAPSHOT):\n- mvn clean install -DskipITs: BUILD SUCCESS, 2159 unit tests, 0 failures/errors/skipped (332 surefire reports).\n- mvn -pl dynamo-integration-test verify: BUILD SUCCESS, 6 tests.\n- mvn -pl cloud-sdk-aws verify: BUILD SUCCESS, 137 DynamoDB-Local integration tests (RepositoryQueryIT, QuerySpecIntegrationTests exercise the maxResultSize cap), 0 failures/errors.\nFull step-by-step execution record documented in cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md. Remaining pre-publish (out of scope): force-push + PR update, MessagingClient.close() external-implementor sweep.",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md",
+        "727dd87"
+      ]
+    },
+    {
+      "id": "c6e854a3ce16",
+      "timestamp": "2026-08-14T22:34:07.090945+00:00",
+      "agent": "copilot-claude-opus-4.8",
+      "category": "finding",
+      "summary": "Logged cast-removal review + explanation to doc §9",
+      "detail": "Code-review Q&A logged to doc §9: removal of redundant (T) casts in EnhancedDynamoRepository update() and saveIfNotExist() (old lines 275/324, .item((T) item) -> .item(item)). Both methods are generic <S extends T>, so item is already a T; the cast was a redundant no-op upcast and an unchecked cast to a type variable (javac warning). Removal has no runtime/API/compat downside; type safety slightly improved. Review commands: git log/diff 1293c50..b305acc on the file + view of method bodies (lines 248-300, 303-335).",
+      "tags": [],
+      "references": [
+        "cloud-sdk-api/docs/2026-08-14-sdk-commons-dynamo-changes-rebase-jetty-logback.md",
+        "cloud-sdk-aws/src/main/java/com/inttra/mercury/cloudsdk/database/impl/EnhancedDynamoRepository.java"
+      ]
+    }
+  ],
+  "usage": []
+}
