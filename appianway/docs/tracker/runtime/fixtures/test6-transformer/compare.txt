@@ -1,0 +1,13 @@
+OK    bk_inbound_dlq     bc     confirmBooking  target=-: MetaData same; document same (203430 B); headers same
+OK    bk_inbound_dlq     bc     confirmBooking  target=-: MetaData same; document same (203430 B); headers same
+OK    bk_inbound_dlq     bf     requestBooking  target=-: MetaData same; document same (1304 B); headers same
+OK    file_delivery_dlq  bf     messageFA       target=2366: MetaData same; document same except digits (201 vs 201 B); differing numbers: ['100029604001', '100029605001', '1037', '1039']; headers same
+OK    file_delivery_dlq  ob-bc  confirmBooking  target=1709: MetaData same; document same except digits (41985 vs 41985 B); differing numbers: ['1037', '1039', '667831206', '903666640']; headers same
+OK    file_delivery_dlq  ob-fa  messageFA       target=2366: MetaData same; document same except digits (201 vs 201 B); differing numbers: ['100029604002', '100029605002', '1037', '1039']; headers same
+
+OK    events bf    : 2 v1, 2 v2, identical
+OK    events bc    : 2 v1, 2 v2, identical
+OK    events ob-fa : 1 v1, 1 v2, identical
+OK    events ob-bc : 1 v1, 1 v2, identical
+
+RESULT: all identical (after normalization)

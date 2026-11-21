@@ -1,0 +1,13 @@
+301  archive  key same shape | body identical (41985 B) | content type application/octet-stream / application/octet-stream | metadata identical
+301  delivery key same shape | body identical (41985 B) | content type application/octet-stream / application/octet-stream | metadata identical
+fa   archive  key same shape | body identical (201 B) | content type application/octet-stream / application/octet-stream | metadata identical
+fa   delivery key same shape | body identical (201 B) | content type application/octet-stream / application/octet-stream | metadata identical
+opt  archive  key same shape | body identical (201 B) | content type application/octet-stream / application/octet-stream | metadata identical
+     opt metadata (new build): {'outboundediid': '', 'workflowid': 'wi01124532-rt-dist-v2-opt-wf', 'rootworkflowid': 'wi01124532-rt-dist-v2-opt', 'inftpfilepickuptime': '2026-11-19 17:55:29.00', 'contextcode': '', 'outboundintegrationprofileformatid': '2366', 'parentworkflowid': 'wi01124532-rt-dist-v2-opt-parent'}
+opt  delivery key same shape | body identical (201 B) | content type application/octet-stream / application/octet-stream | metadata identical
+     opt metadata (new build): {'outboundediid': '', 'workflowid': 'wi01124532-rt-dist-v2-opt-wf', 'rootworkflowid': 'wi01124532-rt-dist-v2-opt', 'inftpfilepickuptime': '2026-11-19 17:55:29.00', 'contextcode': '', 'outboundintegrationprofileformatid': '2366', 'parentworkflowid': 'wi01124532-rt-dist-v2-opt-parent'}
+events fa   v1 3, new 3
+events 301  v1 3, new 3
+events opt  v1 3, new 3
+QA fa  same key shape | body identical | content type application/octet-stream / application/octet-stream | metadata identical
+QA 301 same key shape | body identical | content type application/octet-stream / application/octet-stream | metadata identical

@@ -1,0 +1,7 @@
+routed bf: v1 1, new 1, QA 1; v1 == new: True; new == QA: False
+  new vs QA differences: {'fileName': ('<root>/BK3_Request_MinMSC', '<root>/<split-id>')} projections {}
+documents bf: v1 [467], new [467]; bytes equal: True; headers v1 ['[\n"text/plain",\n467,\n{\n"originalfilename":"BK3_Request_MinMSC",\n"xlogid":"9000000000000000000240361333",\n"inftpfilepickuptime":"2026-11-1917:55:29.00"\n}\n]\n'] new ['[\n"text/plain",\n467,\n{\n"originalfilename":"BK3_Request_MinMSC",\n"xlogid":"9000000000000000000240361333",\n"inftpfilepickuptime":"2026-11-1917:55:29.00"\n}\n]\n']
+documents bf vs QA: QA [467]; new == QA bytes: True; QA headers ['["text/plain",467,{"originalfilename":"BK3_Request_MinMSC","xlogid":"9000000000000000000240361333","inftpfilepickuptime":"2026-11-1917:55:29.00"}]']
+routed bc: v1 2, new 2, QA 2; v1 == new: True; new == QA: True
+documents bc: v1 [53607, 53607], new [53607, 53607]; bytes equal: True; headers v1 ['[\n"application/octet-stream",\n53607,\n{}\n]\n'] new ['[\n"application/octet-stream",\n53607,\n{}\n]\n']
+documents bc vs QA: QA [53607, 53607]; new == QA bytes: True; QA headers ['["application/octet-stream",53607,{}]']

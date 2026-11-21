@@ -1,0 +1,6 @@
+21:02:41 queues before: pickup 0 0, errors 0 0
+21:02:52 workspace copies: 3
+21:02:59 started
+21:03:14 sent 3
+21:03:26 queues after: pickup 0 0, errors 0 0
+21:03:32 stopped in 1781 ms; ERROR lines: 0; copies logged: 6

@@ -1,0 +1,32 @@
+09:26:02 build start
+09:28:11 build v1 (222d58be) exit 0 201383086 from transformer-1.0-shaded.jar
+09:30:05 build v2 (d937538e) exit 0 201390859 from transformer-1.0-shaded.jar
+09:31:16 boot v1 started (no messages)
+09:32:43 healthcheck v1 (read)
+09:32:59 stop v1 (Ctrl+C) exit after 3 s
+09:33:04 boot v2 started (no messages)
+09:34:58 healthcheck v2 (read)
+09:35:00 stop v2 (Ctrl+C) exit after 2 s
+10:29:30 WRITE copy-object x6 (marked roots wi01124532-rt-tf-*)
+10:36:04 read sequence table (before): scan, 1 item
+10:36:19 stop idle v1 (Ctrl+C; nothing sent; restart with the real sequence table)
+10:36:55 WRITE copy-object x4 (outbound marked roots wi01124532-rt-tf-*-ob-*)
+10:37:04 start v1 (maps, real sequence table) PID 9760
+10:37:20 healthcheck v1 (read)
+10:37:23 WRITE send input-v1-bf-BK3_Requ.json -> transformer_inbound_dlq 9f48f7c8-5e0e-44c0-80b2-b109d232a7d9
+10:37:27 WRITE send input-v1-bc-434766ec.json -> transformer_inbound_dlq ae08683f-dcc6-4f11-ba44-e4455fa2573b
+10:37:33 WRITE send input-v1-bc-4fedaefb.json -> transformer_inbound_dlq 0cbbd382-e6dd-4f1b-956b-45d2bd4ab7a2
+10:37:37 WRITE send input-v1-ob-fa.json -> transformer_inbound_dlq c078b665-91c9-4a16-b538-ca7c275d7c76
+10:37:40 WRITE send input-v1-ob-bc.json -> transformer_inbound_dlq 65814461-88c5-4406-8a47-233add8667f8
+10:38:25 v1 processed 5 + its FA; queues read; sequence read; stop v1 (Ctrl+C)
+10:39:16 start v2 (maps, real sequence table) PID 28536
+10:39:24 healthcheck v2 (read)
+10:39:28 WRITE send input-v2-bf-BK3_Requ.json -> transformer_inbound_dlq 65acd1b7-e6c0-46d5-ba99-759c7a58211e
+10:39:32 WRITE send input-v2-bc-434766ec.json -> transformer_inbound_dlq a5ba2cbc-83d6-4f0b-99c4-63d57637f740
+10:39:42 WRITE send input-v2-bc-4fedaefb.json -> transformer_inbound_dlq de5a014a-4128-4af6-bc84-16e458862a4c
+10:39:49 WRITE send input-v2-ob-fa.json -> transformer_inbound_dlq a49b78e0-8d10-4c96-a111-18995ab6624c
+10:39:54 WRITE send input-v2-ob-bc.json -> transformer_inbound_dlq 87733306-e5c3-442b-869a-1b99161ef9b7
+10:40:58 v2 processed 5 + its FA; queues read; sequence read; stop v2 (Ctrl+C) 2 s
+10:42:38 collect (read: receive vis 30 s, get-object, events)
+10:48:31 WRITE cleanup: deleted our messages (see output)
+10:49:01 borrowed queues checked

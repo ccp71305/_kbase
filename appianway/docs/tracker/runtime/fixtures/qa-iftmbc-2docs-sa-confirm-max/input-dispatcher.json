@@ -1,0 +1,12 @@
+{
+  "Type": "Notification",
+  "MessageId": "39cbfcde-c868-5041-8cdc-9fa6884b0a3c",
+  "TopicArn": "arn:aws:sns:us-east-1:642960533737:inttra2_qa_sns_inbound",
+  "Subject": "Amazon S3 Notification",
+  "Message": "{\"Records\":[{\"eventVersion\":\"2.6\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2026-11-19T00:08:03.518Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:AIDAIMNEA65P6GWRVTXSQ\"},\"requestParameters\":{\"sourceIPAddress\":\"70.42.133.20\"},\"responseElements\":{\"x-amz-request-id\":\"Q3EXV32CYNK1RY96\",\"x-amz-id-2\":\"41Aq02mL22xDscMaWjwxd2ChuEtYTqCOizbKewsawttorBvNZkevNRD0T5eDXRmRv31mbUnV5AEAlgKt2NFhxT+ORV3444z4\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"All_Files_Event\",\"bucket\":{\"name\":\"inttra2-qa-inbound-pickup\",\"ownerIdentity\":{\"principalId\":\"A18GMKM92DN43X\"},\"arn\":\"arn:aws:s3:::inttra2-qa-inbound-pickup\"},\"object\":{\"key\":\"301_IFTMBC/20261119/carriers/CA2000/BK3_SAConfirm_Max_996677102.txt\",\"size\":115526,\"eTag\":\"350dd758a8adcfb78152d8ee913050ad\",\"sequencer\":\"006AFE3DE2EB42BF65\"}}}]}",
+  "Timestamp": "2026-11-19T00:08:03.911Z",
+  "SignatureVersion": "1",
+  "Signature": "FoEpQVJLaPlChN1l7robQtWwPsXHmj505gJyWJ+5LWKnK0cQ6p4zGYq6GBjEOdAs+bTev+wRHoD1vZV9axCqo6PC8U/CVSYEXdXo3+fFSY3csd6QvTgRx3ePXbjdOpdI79lKw9vj2xiurYp12wXS4dQrZeWT4SNXrexhNWTH5G2kqudnU9E1OIXATHAOrTjVu5Lp4dS38F/UqZdvYOoBeqDHbQ6AX89I3yiCe62leY1QofDfIhIfrswJsrdQOYWXu9EfUi5CLm5hChguxFkSUHion8oluLiyuNOjaaiIooB/r9gMNpZ+az4kQ0vzFrCYa241O05t5h7aEU26LsmFEw==",
+  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-1e59c4574facfe41babdb2d652f8ebef.pem",
+  "UnsubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:642960533737:inttra2_qa_sns_inbound:cc8dade8-6a8c-4334-b676-ac18f51b6a77"
+}

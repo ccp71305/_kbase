@@ -1,0 +1,39 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.6",
+      "eventSource": "aws:s3",
+      "awsRegion": "us-east-1",
+      "eventTime": "2026-11-19T17:55:38.353Z",
+      "eventName": "ObjectCreated:Copy",
+      "userIdentity": {
+        "principalId": "AWS:AROAIEWHSROODHDUQ4XNI:8343f380942f46f6b11e90ae9f90db1a"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "34.195.157.203"
+      },
+      "responseElements": {
+        "x-amz-request-id": "9HPAY4GR42NZWZ0R",
+        "x-amz-id-2": "z/OsTsRKSHRgHl9E9gSfiDNAQ94p0V6Vx57L2K3f2wnsOG2071FbNlkTgptcddQoY8ZMmH4xf3XLQaSc7r8ftQO32BXAiY/a"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "OUTBOUND_PICKUP_Event",
+        "bucket": {
+          "name": "inttra2-qa-outbound-delivery",
+          "ownerIdentity": {
+            "principalId": "A18GMKM92DN43X"
+          },
+          "arn": "arn:aws:s3:::inttra2-qa-outbound-delivery"
+        },
+        "object": {
+          "key": "customers/CU2100/outbound_archive/CONTRL/20261119/CONTRL_20261119175538165_9025705928.txt",
+          "size": 201,
+          "eTag": "7ce9fe0af658d4f48ce70bd39704e3ce",
+          "sequencer": "006AFF381A4FD16902",
+          "hasObjectAnnotation": false
+        }
+      }
+    }
+  ]
+}

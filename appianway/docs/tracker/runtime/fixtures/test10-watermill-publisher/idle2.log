@@ -1,0 +1,59 @@
+INFO  [2026-11-21 02:17:35,649] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-21 02:17:35,653] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-21 02:17:38,819] [main]            c.i.m.watermill.se.StatusEventGrpcClient:  Creating new streams....
+INFO  [2026-11-21 02:17:38,976] [main]            c.i.m.watermill.se.StatusEventGrpcClient:  Creating new streams....
+INFO  [2026-11-21 02:17:38,976] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-21 02:17:38,976] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-21 02:17:38,977] [main]            io.dropwizard.core.server.ServerFactory :  Starting WatermillPubApplication
+INFO  [2026-11-21 02:17:39,067] [main]            org.eclipse.jetty.setuid.SetUIDListener :  Opened WatermillPubApplication@7d5d77a6{HTTP/1.1, (http/1.1)}{0.0.0.0:18090}
+INFO  [2026-11-21 02:17:39,072] [main]            org.eclipse.jetty.server.Server         :  jetty-12.1.14; built: 2026-10-02T05:48:05.032Z; git: 15cecbd757a2f6b0fdc6a8944f4c6d0020b17da0; jvm 17.0.17+10
+INFO  [2026-11-21 02:17:39,076] [main]            c.i.m.watermill.task.ListenerManager    :  Started DeadLetterService
+INFO  [2026-11-21 02:17:39,076] [pool-9-thread-1] c.i.m.watermill.task.DeadLetterService  :  Executing DeadLetterService...
+INFO  [2026-11-21 02:17:39,076] [pool-8-thread-2] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-21 02:17:39,076] [pool-8-thread-1] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-21 02:17:39,077] [main]            i.dropwizard.core.setup.AdminEnvironment:  tasks = 
+
+    POST    /tasks/log-level (io.dropwizard.servlets.tasks.LogConfigurationTask)
+    POST    /tasks/gc (io.dropwizard.servlets.tasks.GarbageCollectionTask)
+
+WARN  [2026-11-21 02:17:39,077] [main]            i.dropwizard.core.setup.AdminEnvironment:  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!    THIS APPLICATION HAS NO HEALTHCHECKS. THIS MEANS YOU WILL NEVER KNOW      !
+!     IF IT DIES IN PRODUCTION, WHICH MEANS YOU WILL NEVER KNOW IF YOU'RE      !
+!    LETTING YOUR USERS DOWN. YOU SHOULD ADD A HEALTHCHECK FOR EACH OF YOUR    !
+!         APPLICATION'S DEPENDENCIES WHICH FULLY (BUT LIGHTLY) TESTS IT.       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+INFO  [2026-11-21 02:17:39,087] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@76208b80{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@339cde4b{STARTED}}
+INFO  [2026-11-21 02:17:39,094] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@76208b80{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@339cde4b{STARTED}}
+INFO  [2026-11-21 02:17:39,094] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@47c356e{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@66e218d8{STARTED}}
+INFO  [2026-11-21 02:17:39,466] [main]            i.d.jersey.DropwizardResourceConfig     :  The following paths were found for the configured resources:
+
+    NONE
+
+INFO  [2026-11-21 02:17:39,468] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@47c356e{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@66e218d8{STARTED}}
+21:17:39,477 |-INFO in LogbackAccessRequestLog - Found logback-access-jetty12 version 2.0.12
+21:17:39,478 |-INFO in LogbackAccessRequestLog - Found logback-core version 1.5.38
+21:17:39,478 |-INFO in LogbackAccessRequestLog - Found logback-access-common version 2.0.12
+21:17:39,478 |-WARN in LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38
+
+INFO  [2026-11-21 02:17:39,501] [main]            o.eclipse.jetty.server.AbstractConnector:  Started WatermillPubApplication@7d5d77a6{HTTP/1.1, (http/1.1)}{0.0.0.0:18090}
+INFO  [2026-11-21 02:17:39,502] [main]            org.eclipse.jetty.server.Server         :  Started oejs.Server@755a90a6{STARTING}[12.1.14,sto=30000] @435ms
+ERROR [2026-11-21 02:17:43,593] [pool-9-thread-1] c.i.m.c.m.aws.impl.SqsMessagingClient   :  Queue https://sqs.us-east-1.amazonaws.com/642960533737/inttra2_qa_sqs_rest_delivery_dlq_dlq does not exist
+software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException: The specified queue does not exist. (Service: Sqs, Status Code: 400, Request ID: 3cdad17a-fa22-5912-8e1c-b201fba5134a) (SDK Attempt Count: 4)
+	at software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException$BuilderImpl.build(QueueDoesNotExistException.java:146)
+	at software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException$BuilderImpl.build(QueueDoesNotExistException.java:94)
+	at software.amazon.awssdk.core.internal.http.pipeline.stages.utils.RetryableStageHelper.retryPolicyDisallowedRetryException(RetryableStageHelper.java:168)
+	Suppressed: software.amazon.awssdk.core.exception.SdkClientException: Request attempt 1 failure: The specified queue does not exist. (Service: Sqs, Status Code: 400, Request ID: 629f1475-7867-522c-bc48-770e79e43874)
+	Suppressed: software.amazon.awssdk.core.exception.SdkClientException: Request attempt 2 failure: The specified queue does not exist. (Service: Sqs, Status Code: 400, Request ID: 5bb505ac-563e-5609-bd41-66d757bafc51)
+	Suppressed: software.amazon.awssdk.core.exception.SdkClientException: Request attempt 3 failure: The specified queue does not exist. (Service: Sqs, Status Code: 400, Request ID: bade5a94-e676-51e2-ab7d-39efe7f30bba)
+INFO  [2026-11-21 02:17:48,259] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Stopped oejs.Server@755a90a6{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-21 02:17:48,259] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Shutdown oejs.Server@755a90a6{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-21 02:17:48,262] [JettyShutdownThread] o.eclipse.jetty.server.AbstractConnector:  Stopped WatermillPubApplication@7d5d77a6{HTTP/1.1, (http/1.1)}{0.0.0.0:18090}
+INFO  [2026-11-21 02:17:48,270] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@47c356e{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@66e218d8{STOPPED}}
+INFO  [2026-11-21 02:17:48,270] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@76208b80{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@339cde4b{STOPPED}}
+INFO  [2026-11-21 02:17:48,270] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue sender client on application shutdown
+INFO  [2026-11-21 02:17:48,271] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue listener client on application shutdown
+INFO  [2026-11-21 02:17:48,272] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage download client on application shutdown
+INFO  [2026-11-21 02:17:48,272] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage client on application shutdown

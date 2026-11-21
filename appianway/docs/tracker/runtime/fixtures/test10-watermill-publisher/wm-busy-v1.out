@@ -1,0 +1,8 @@
+Note: LocalWatermill.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+2026-11-21T03:36:17.447122900Z local Watermill listening on 18443 (TLS)
+2026-11-21T03:36:28.958132600Z received 0877cf6a-ad7c-4ebb-8067-a6f90c6056fd
+2026-11-21T03:36:30.203884100Z received 097c0e74-3995-49fd-b9eb-9bd2a2ed1e99
+2026-11-21T03:36:31.517807900Z stream ended by the client: io.grpc.StatusRuntimeException: CANCELLED: client cancelled
+2026-11-21T03:36:31.519318Z stream ended by the client: io.grpc.StatusRuntimeException: CANCELLED: client cancelled
+2026-11-21T03:36:33.967982600Z could not ack 0877cf6a-ad7c-4ebb-8067-a6f90c6056fd: io.grpc.StatusRuntimeException: CANCELLED: call already cancelled. Use ServerCallStreamObserver.setOnCancelHandler() to disable this exception

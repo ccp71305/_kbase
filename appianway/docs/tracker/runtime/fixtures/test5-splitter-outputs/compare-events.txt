@@ -1,0 +1,5 @@
+bf v1 2 new 2 identical after normalizing: True
+bc v1 3 new 3 identical after normalizing: True
+closeRun closeWorkflow success [('ediId', 'CA2000'), ('integrationProfileId', '2'), ('interchangeControlReferenceNumber', '20231103R01'), ('pickupQueue', 'https://sqs.us-east-1.amazonaws.com/642960533737/inttra2_qa_sqs_splitter_pu_dlq')]
+closeRun startWorkflow success [('dropOffQueue', 'inttra2_qa_sqs_transformer_inbound_dlq'), ('pickupQueue', 'https://sqs.us-east-1.amazonaws.com/642960533737/inttra2_qa_sqs_splitter_pu_dlq')]
+closeRun startWorkflow success [('dropOffQueue', 'inttra2_qa_sqs_transformer_inbound_dlq'), ('pickupQueue', 'https://sqs.us-east-1.amazonaws.com/642960533737/inttra2_qa_sqs_splitter_pu_dlq')]

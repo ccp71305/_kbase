@@ -1,0 +1,8 @@
+bf booking result (to booking)        1304 vs    1304 B  application/octet-stream / application/octet-stream: identical
+bf structural-validation result        209 vs     209 B  text/plain / text/plain: identical except numbers ['100029580983', '100029605001']
+bf FA request (to own pickup)         1594 vs    1594 B  text/plain / text/plain: identical
+bf FA CONTRL (to file delivery)        201 vs     201 B  application/octet-stream / application/octet-stream: identical except numbers ['100029580983', '100029605001', '1039', '1755', '261119', '261120']
+bc confirmation result A            203430 vs  203430 B  application/octet-stream / application/octet-stream: identical
+bc confirmation result B            203430 vs  203430 B  application/octet-stream / application/octet-stream: identical
+ob-fa FA CONTRL                        201 vs     201 B  application/octet-stream / application/octet-stream: identical except numbers ['100029580983', '100029605002', '1039', '1755', '261119', '261120']
+ob-bc X12 301 to CU2100              41985 vs   41985 B  application/octet-stream / application/octet-stream: identical except numbers ['0008', '1039', '20261119', '20261120', '261119', '261120', '903666640', '975971440']

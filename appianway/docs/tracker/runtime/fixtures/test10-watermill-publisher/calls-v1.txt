@@ -1,0 +1,2 @@
+watermill.api.Publisher/PublishShipmentStatusMicroBatch username=present password=present tenant=INTTRA grpc-encoding=gzip
+watermill.api.Publisher/PublishShipmentStatusMicroBatch username=present password=present tenant=INTTRA grpc-encoding=gzip

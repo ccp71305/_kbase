@@ -1,0 +1,7 @@
+02:16:31 queue before: 0 0
+02:16:43 started in 7793 ms: 2 listener(s)
+02:16:43 health check HTTP 200 in 0.070239s
+   deadlocks True
+02:16:48 sent 2
+02:17:00 queue after: 0 0; events at the local Watermill: 2
+02:17:03 stopped in 1414 ms; ERROR lines: 1; clients closed: 4

@@ -1,0 +1,48 @@
+INFO  [2026-11-20 21:02:55,429] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 21:02:55,433] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 21:02:58,248] [main]            c.i.m.s.networkservices.auth.AuthClient :  Get call: https://api-beta.inttra.com/auth in (ms): 1066
+INFO  [2026-11-20 21:02:58,259] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 21:02:58,259] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 21:02:58,260] [main]            io.dropwizard.core.server.ServerFactory :  Starting DistributorApplication
+INFO  [2026-11-20 21:02:58,334] [main]            org.eclipse.jetty.setuid.SetUIDListener :  Opened DistributorApplication@41ddec69{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:02:58,338] [main]            org.eclipse.jetty.server.Server         :  jetty-12.1.14; built: 2026-10-02T05:48:05.032Z; git: 15cecbd757a2f6b0fdc6a8944f4c6d0020b17da0; jvm 17.0.17+10
+INFO  [2026-11-20 21:02:58,340] [pool-4-thread-1] c.i.mercury.shared.listener.SQSListener :  Listener com.inttra.mercury.shared.listener.SQSListener starting.
+INFO  [2026-11-20 21:02:58,341] [main]            i.dropwizard.core.setup.AdminEnvironment:  tasks = 
+
+    POST    /tasks/log-level (io.dropwizard.servlets.tasks.LogConfigurationTask)
+    POST    /tasks/gc (io.dropwizard.servlets.tasks.GarbageCollectionTask)
+
+INFO  [2026-11-20 21:02:58,348] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@45f95ac0{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@3b77940f{STARTED}}
+INFO  [2026-11-20 21:02:58,351] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@45f95ac0{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@3b77940f{STARTED}}
+INFO  [2026-11-20 21:02:58,352] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@17d19538{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@6068cda1{STARTED}}
+INFO  [2026-11-20 21:02:58,500] [main]            i.d.jersey.DropwizardResourceConfig     :  The following paths were found for the configured resources:
+
+    NONE
+
+INFO  [2026-11-20 21:02:58,501] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@17d19538{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@6068cda1{STARTED}}
+16:02:58,505 |-INFO in LogbackAccessRequestLog - Found logback-access-jetty12 version 2.0.12
+16:02:58,505 |-INFO in LogbackAccessRequestLog - Found logback-core version 1.5.38
+16:02:58,505 |-INFO in LogbackAccessRequestLog - Found logback-access-common version 2.0.12
+16:02:58,505 |-WARN in LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38
+
+INFO  [2026-11-20 21:02:58,533] [main]            o.eclipse.jetty.server.AbstractConnector:  Started DistributorApplication@41ddec69{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:02:58,533] [main]            org.eclipse.jetty.server.Server         :  Started oejs.Server@56554365{STARTING}[12.1.14,sto=30000] @198ms
+INFO  [2026-11-20 21:03:01,404] [pool-2-thread-1] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v1-fa-wf
+INFO  [2026-11-20 21:03:01,686] [pool-2-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/format/2366 in (ms): 280
+INFO  [2026-11-20 21:03:01,908] [pool-2-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /message/format/121 in (ms): 219
+INFO  [2026-11-20 21:03:02,107] [pool-2-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/4 in (ms): 198
+INFO  [2026-11-20 21:03:02,862] [pool-2-thread-1] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-fa/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/CONTRL/CONTRL_20261120210301687_6329189648.txt
+INFO  [2026-11-20 21:03:03,089] [pool-2-thread-1] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-fa/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/CONTRL/20261120/CONTRL_20261120210301687_6329189648.txt
+INFO  [2026-11-20 21:03:06,382] [pool-2-thread-2] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v1-301-wf
+INFO  [2026-11-20 21:03:06,585] [pool-2-thread-2] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/format/1709 in (ms): 203
+INFO  [2026-11-20 21:03:06,776] [pool-2-thread-2] c.i.m.s.n.NetworkServiceClient          :  Get call: /message/format/13 in (ms): 191
+INFO  [2026-11-20 21:03:06,999] [pool-2-thread-2] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-301/2b56cb22-e669-4c7d-a6cf-3bbc8df060cd has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/301/KOTAHI802435IFTMBC220261120210306585_3728404966.txt
+INFO  [2026-11-20 21:03:07,226] [pool-2-thread-2] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-301/2b56cb22-e669-4c7d-a6cf-3bbc8df060cd has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/301/20261120/KOTAHI802435IFTMBC220261120210306585_3728404966.txt
+INFO  [2026-11-20 21:03:11,618] [pool-2-thread-3] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v1-opt-wf
+INFO  [2026-11-20 21:03:11,859] [pool-2-thread-3] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-opt/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/CONTRL/CONTRL_20261120210311619_3912268529.txt
+INFO  [2026-11-20 21:03:12,075] [pool-2-thread-3] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v1-opt/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/CONTRL/20261120/CONTRL_20261120210311619_3912268529.txt
+INFO  [2026-11-20 21:03:31,625] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Stopped oejs.Server@56554365{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 21:03:31,625] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Shutdown oejs.Server@56554365{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 21:03:31,630] [JettyShutdownThread] o.eclipse.jetty.server.AbstractConnector:  Stopped DistributorApplication@41ddec69{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:03:31,639] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@17d19538{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@6068cda1{STOPPED}}
+INFO  [2026-11-20 21:03:31,640] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@45f95ac0{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@3b77940f{STOPPED}}

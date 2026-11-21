@@ -1,0 +1,7 @@
+events: 104 real events in the new build; QA indexed 104 of them (['txtrack-event-2026-11-19']); identical: 104; differ: 0
+aggregate 1519b31d (QA txtrack-agg-2026-11-19): identical
+aggregate 1c224a22 (QA txtrack-agg-2026-11-19): {'ftpCarrierArchiveFileName': ('/qaftp/carriers/mram5166/outbound_archive/300_IFTMBF/20261119/IFTMBFBK2ToBK1_20261119175539370_3444032763.txt', '/qaftp/carriers/mram5166/outbound_archive/300_IFTMBF/20261119/MSCmftFTP_IFTMBF_20261119175539435_0785659868.txt'), 'ftpArchiveDeliveryFileName': ('/qaftp/carriers/mram5166/outbound_archive/300_IFTMBF/20261119/IFTMBFBK2ToBK1_20261119175539370_3444032763.txt', '/qaftp/customers/CU2100/outbound_archive/APERAK/20261119/DESC_APERAKCU21mftFTP_20261119175540165_0493547883.txt')}
+aggregate a8511d88 (QA txtrack-agg-2026-11-19): identical
+aggregate bc95ae83 (QA txtrack-agg-2026-11-19): identical
+aggregate d77b8868 (QA txtrack-agg-2026-11-19): identical
+aggregate f103b6aa (QA txtrack-agg-2026-11-19): identical

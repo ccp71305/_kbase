@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ns2:ExportSEPartInt xmlns:ns2="http://xml.inttra.com/core/services/01">
+    <Header>
+        <SenderId>INTTRA</SenderId>
+        <PayloadId>097c0e74-3995-49fd-b9eb-9bd2a2ed1e99</PayloadId>
+        <DateTimeStamp>2026-11-19T00:13:53.059Z</DateTimeStamp>
+    </Header>
+    <Transactions>
+        <Transaction>
+            <ContentSchemaVersion>1.0</ContentSchemaVersion>
+            <Content>
+                <Properties>
+                    <PartiesWithAccess>
+                        <PartyIdentifier Type="INTTRACompanyID">824688</PartyIdentifier>
+                    </PartiesWithAccess>
+                    <Transport>
+                        <Carriage>
+                            <Mode>MaritimeTransport</Mode>
+                            <Vessel>
+                                <VesselName>NYK DAEDALUS</VesselName>
+                                <LloydsCode>9337614</LloydsCode>
+                                <VesselFlagCountryCode Type="ISO"></VesselFlagCountryCode>
+                            </Vessel>
+                            <ConveyanceNumber>0107N</ConveyanceNumber>
+                        </Carriage>
+                        <Locations>
+                            <LocationDetails>
+                                <LocationType>PlaceOfDelivery</LocationType>
+                                <Location>
+                                    <LocationIdentifier Type="UNLOC">JPTYO</LocationIdentifier>
+                                    <LocationSystemLiteral>Tokyo, Tôkyô [Tokyo], JAPAN</LocationSystemLiteral>
+                                </Location>
+                            </LocationDetails>
+                            <LocationDetails>
+                                <LocationType>PlaceOfReceipt</LocationType>
+                                <Location>
+                                    <LocationIdentifier Type="UNLOC">FIHEL</LocationIdentifier>
+                                    <LocationSystemLiteral>Helsingfors (Helsinki), Uusimaa, FINLAND</LocationSystemLiteral>
+                                </Location>
+                            </LocationDetails>
+                            <LocationDetails>
+                                <LocationType>PortOfDischarge</LocationType>
+                                <Location>
+                                    <LocationIdentifier Type="UNLOC">JPTYO</LocationIdentifier>
+                                    <LocationSystemLiteral>Tokyo, Tôkyô [Tokyo], JAPAN</LocationSystemLiteral>
+                                </Location>
+                            </LocationDetails>
+                            <LocationDetails>
+                                <LocationType>PortOfLoad</LocationType>
+                                <Location>
+                                    <LocationIdentifier Type="UNLOC">SGSIN</LocationIdentifier>
+                                    <LocationSystemLiteral>Singapore, SINGAPORE</LocationSystemLiteral>
+                                </Location>
+                            </LocationDetails>
+                        </Locations>
+                    </Transport>
+                </Properties>
+                <Details>
+                    <EventDetails>
+                        <EventCategory>ContainerStatusEvent</EventCategory>
+                        <EventSource>ProvidedByCarrier</EventSource>
+                        <ReportingEntity>Ocean Network Express Pte. Ltd.</ReportingEntity>
+                        <ReportingEntityIdentifier Type="SCAC">ONEY</ReportingEntityIdentifier>
+                        <EventType>
+                            <EventCode Type="INTTRA">Z7</EventCode>
+                            <Description>Estimated Vessel Departure at Transshipment Port</Description>
+                        </EventType>
+                        <EventLocation>
+                            <LocationType>ContainerEventLocation</LocationType>
+                            <LocationIdentifier Type="UNLOC">SGSIN</LocationIdentifier>
+                            <LocationName>Singapore</LocationName>
+                            <LocationSystemLiteral>Singapore, SINGAPORE</LocationSystemLiteral>
+                        </EventLocation>
+                        <EventDate Type="EventDate" Format="CCYYMMDDHHMMSS">20261206070000</EventDate>
+                        <EventDate Type="MessageDate" Format="CCYYMMDDHHMMSS">20261119001351</EventDate>
+                        <EventReferences>
+                            <Reference Type="BookingNumber">HELG03598300</Reference>
+                            <Reference Type="BillOfLadingNumber">HELG03598300</Reference>
+                        </EventReferences>
+                    </EventDetails>
+                    <EquipmentIdentifier>TCLU4209825</EquipmentIdentifier>
+                    <EquipmentSizeType>
+                        <Code Type="ISO">42G0</Code>
+                    </EquipmentSizeType>
+                    <FullIndicator>True</FullIndicator>
+                </Details>
+            </Content>
+        </Transaction>
+    </Transactions>
+</ns2:ExportSEPartInt>

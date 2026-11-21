@@ -1,0 +1,52 @@
+INFO  [2026-11-20 21:03:56,222] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 21:03:56,225] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 21:03:59,509] [main]            c.i.m.s.networkservices.auth.AuthClient :  Get call: https://api-beta.inttra.com/auth in (ms): 1004
+INFO  [2026-11-20 21:03:59,517] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 21:03:59,517] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 21:03:59,517] [main]            io.dropwizard.core.server.ServerFactory :  Starting DistributorApplication
+INFO  [2026-11-20 21:03:59,574] [main]            org.eclipse.jetty.setuid.SetUIDListener :  Opened DistributorApplication@11939a9f{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:03:59,576] [main]            org.eclipse.jetty.server.Server         :  jetty-12.1.14; built: 2026-10-02T05:48:05.032Z; git: 15cecbd757a2f6b0fdc6a8944f4c6d0020b17da0; jvm 17.0.17+10
+INFO  [2026-11-20 21:03:59,578] [pool-10-thread-1] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 21:03:59,583] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@6dbdeb69{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@a238a8e{STARTED}}
+INFO  [2026-11-20 21:03:59,701] [main]            i.d.jersey.DropwizardResourceConfig     :  The following paths were found for the configured resources:
+
+    NONE
+
+INFO  [2026-11-20 21:03:59,702] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@6dbdeb69{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@a238a8e{STARTED}}
+INFO  [2026-11-20 21:03:59,705] [main]            i.dropwizard.core.setup.AdminEnvironment:  tasks = 
+
+    POST    /tasks/log-level (io.dropwizard.servlets.tasks.LogConfigurationTask)
+    POST    /tasks/gc (io.dropwizard.servlets.tasks.GarbageCollectionTask)
+
+INFO  [2026-11-20 21:03:59,706] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@e76134d{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@2a317af7{STARTED}}
+INFO  [2026-11-20 21:03:59,706] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@e76134d{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@2a317af7{STARTED}}
+16:03:59,707 |-INFO in LogbackAccessRequestLog - Found logback-access-jetty12 version 2.0.12
+16:03:59,708 |-INFO in LogbackAccessRequestLog - Found logback-core version 1.5.38
+16:03:59,708 |-INFO in LogbackAccessRequestLog - Found logback-access-common version 2.0.12
+16:03:59,708 |-WARN in LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38
+
+INFO  [2026-11-20 21:03:59,725] [main]            o.eclipse.jetty.server.AbstractConnector:  Started DistributorApplication@11939a9f{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:03:59,725] [main]            org.eclipse.jetty.server.Server         :  Started oejs.Server@24d097c8{STARTING}[12.1.14,sto=30000] @151ms
+INFO  [2026-11-20 21:04:02,270] [pool-8-thread-1] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v2-fa-wf
+INFO  [2026-11-20 21:04:02,485] [pool-8-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/format/2366 in (ms): 212
+INFO  [2026-11-20 21:04:02,703] [pool-8-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /message/format/121 in (ms): 216
+INFO  [2026-11-20 21:04:02,899] [pool-8-thread-1] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/4 in (ms): 195
+INFO  [2026-11-20 21:04:03,620] [pool-8-thread-1] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-fa/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/CONTRL/CONTRL_20261120210402485_3334343584.txt
+INFO  [2026-11-20 21:04:03,827] [pool-8-thread-1] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-fa/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/CONTRL/20261120/CONTRL_20261120210402485_3334343584.txt
+INFO  [2026-11-20 21:04:07,284] [pool-8-thread-2] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v2-301-wf
+INFO  [2026-11-20 21:04:07,476] [pool-8-thread-2] c.i.m.s.n.NetworkServiceClient          :  Get call: /participant/integrationProfile/format/1709 in (ms): 191
+INFO  [2026-11-20 21:04:07,661] [pool-8-thread-2] c.i.m.s.n.NetworkServiceClient          :  Get call: /message/format/13 in (ms): 185
+INFO  [2026-11-20 21:04:07,909] [pool-8-thread-2] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-301/2b56cb22-e669-4c7d-a6cf-3bbc8df060cd has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/301/KOTAHI802435IFTMBC220261120210407476_1627128069.txt
+INFO  [2026-11-20 21:04:08,142] [pool-8-thread-2] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-301/2b56cb22-e669-4c7d-a6cf-3bbc8df060cd has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/301/20261120/KOTAHI802435IFTMBC220261120210407476_1627128069.txt
+INFO  [2026-11-20 21:04:12,265] [pool-8-thread-3] c.i.m.distributor.task.DistributorTask  :  Processing workflowId :wi01124532-rt-dist-v2-opt-wf
+INFO  [2026-11-20 21:04:12,490] [pool-8-thread-3] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-opt/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound/CONTRL/CONTRL_20261120210412265_2258499064.txt
+INFO  [2026-11-20 21:04:12,698] [pool-8-thread-3] c.i.m.d.services.FileDeliveryService    :  File inttra2-qa-workspace/wi01124532-rt-dist-v2-opt/b720acd6-fe76-4541-8e2d-8c7d22a698cc has been copied to inttra2-qa-outbound-delivery/customers/CU2100/outbound_archive/CONTRL/20261120/CONTRL_20261120210412265_2258499064.txt
+INFO  [2026-11-20 21:04:32,027] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Stopped oejs.Server@24d097c8{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 21:04:32,028] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Shutdown oejs.Server@24d097c8{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 21:04:32,030] [JettyShutdownThread] o.eclipse.jetty.server.AbstractConnector:  Stopped DistributorApplication@11939a9f{HTTP/1.1, (http/1.1)}{0.0.0.0:18088}
+INFO  [2026-11-20 21:04:32,034] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@e76134d{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@2a317af7{STOPPED}}
+INFO  [2026-11-20 21:04:32,038] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@6dbdeb69{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@a238a8e{STOPPED}}
+INFO  [2026-11-20 21:04:32,039] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue sender client on application shutdown
+INFO  [2026-11-20 21:04:32,040] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue listener client on application shutdown
+INFO  [2026-11-20 21:04:32,040] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage download client on application shutdown
+INFO  [2026-11-20 21:04:32,041] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage client on application shutdown

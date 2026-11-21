@@ -1,0 +1,8 @@
+03:36:13 [busy-v1] queue before (visible in-flight): 0 0
+03:36:25 [busy-v1] started
+03:36:30 [busy-v1] both events at the local Watermill, acks pending (5000 ms): sending Ctrl+C
+03:36:31 [busy-v1] stopped in 1578 ms
+  stand-in: received 2, acked 0, could not ack 0
+  service: acks handled 0; drain warning 0; clients closed 0; ERROR lines other than the missing _dlq_dlq 0
+03:36:32 [busy-v1] queue right after the stop: 0 0
+03:37:09 [busy-v1] queue 35 s later (after the 30 s visibility timeout): 2 0

@@ -1,0 +1,9 @@
+Note: LocalWatermill.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+2026-11-21T03:35:04.518993400Z local Watermill listening on 18443 (TLS)
+2026-11-21T03:35:19.474989700Z received 0877cf6a-ad7c-4ebb-8067-a6f90c6056fd
+2026-11-21T03:35:20.717021400Z received 097c0e74-3995-49fd-b9eb-9bd2a2ed1e99
+2026-11-21T03:35:24.487952300Z acked 0877cf6a-ad7c-4ebb-8067-a6f90c6056fd
+2026-11-21T03:35:25.729220200Z acked 097c0e74-3995-49fd-b9eb-9bd2a2ed1e99
+2026-11-21T03:35:26.425618800Z stream ended by the client: io.grpc.StatusRuntimeException: CANCELLED: client cancelled
+2026-11-21T03:35:26.425618800Z stream ended by the client: io.grpc.StatusRuntimeException: CANCELLED: client cancelled

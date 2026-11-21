@@ -1,0 +1,18 @@
+{
+    "Items": [
+        {
+            "keyId": {
+                "S": "SequenceId"
+            },
+            "id": {
+                "N": "100029603000"
+            },
+            "version": {
+                "N": "29603"
+            }
+        }
+    ],
+    "Count": 1,
+    "ScannedCount": 1,
+    "ConsumedCapacity": null
+}

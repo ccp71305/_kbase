@@ -1,0 +1,32 @@
+{
+  "messageId": "c64efd20-0d63-47e9-a211-23b2fb67737d",
+  "workflowId": "fffd3db4-c2c2-4d1a-9497-c44cede27e84",
+  "rootWorkflowId": "wi01124532-rt-tf-v1-bf",
+  "parentWorkflowId": "wi01124532-rt-tf-v1-bf",
+  "bucket": "inttra2-qa-workspace",
+  "fileName": "wi01124532-rt-tf-v1-bf/BK3_Request_MinMSC",
+  "component": "splitter",
+  "exitStatus": "success",
+  "timestamp": "2026-11-20 01:09:10.66",
+  "projections": {
+    "originalFileName": "BK3_Request_MinMSC",
+    "inboundS3FileName": "300_IFTMBF/20261119/customers/CU2100/BK3_Request_MinMSC",
+    "interchangeControlReferenceNumber": "MIN1120000001",
+    "formatCode": "IFTMBF2_D99B_IN_V20",
+    "mftId": "CU2100",
+    "s3EventCreationTime": "2026-11-19 17:55:29.65",
+    "inftpfilepickuptime": "2026-11-19 17:55:29.00",
+    "contextCode": "requestBooking",
+    "xlogId": "9000000000000000000240361333",
+    "integrationProfileId": "4",
+    "splitterFileSize": "467",
+    "documentControlNumber": "00000000000002",
+    "pickupFileName": "300_IFTMBF/20261119/customers/CU2100/BK3_Request_MinMSC",
+    "formatId": "84",
+    "originalFileSize": "467",
+    "dispatcherStartRunTime": "2026-11-19 17:55:30.74",
+    "ediId": "CU2100",
+    "fileType": "300_IFTMBF",
+    "integrationProfileFormatId": "131"
+  }
+}

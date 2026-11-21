@@ -1,0 +1,8 @@
+bf booking result (to booking)	a8511d88-4308-4774-9900-430aa0d7d1bc/0a17dccb-ecb9-474d-bda4-d4b81d619b86	wi01124532-rt-tf-v2-bf/3a5faeb3-31ef-4b59-810e-f5bbf986a637
+bf structural-validation result	a8511d88-4308-4774-9900-430aa0d7d1bc/807ce6f5-790e-4171-9c19-85900049a4d5	wi01124532-rt-tf-v2-bf/e14af7c9-d280-4e41-b56f-a6763ef1bfbe
+bf FA request (to own pickup)	a8511d88-4308-4774-9900-430aa0d7d1bc/681337db-646a-40ca-a823-e53341629593	wi01124532-rt-tf-v2-bf/f29d3f28-9872-4664-b632-bf60f04af464
+bf FA CONTRL (to file delivery)	a8511d88-4308-4774-9900-430aa0d7d1bc/b720acd6-fe76-4541-8e2d-8c7d22a698cc	wi01124532-rt-tf-v2-bf/d5adac2e-8e62-4c4c-bdc1-f193dea2f156
+bc confirmation result A	d77b8868-1c3a-4527-b6bb-9dbb302ba6f2/3b87e50f-f166-443e-9c19-d28dc0c662c0	wi01124532-rt-tf-v2-bc/5067b438-dfbd-44e3-be48-4c20a2783d33
+bc confirmation result B	d77b8868-1c3a-4527-b6bb-9dbb302ba6f2/949e3936-2f10-4482-ad61-46a5ecaf50d8	wi01124532-rt-tf-v2-bc/fe60e618-ff72-49e5-9139-4e3109a6f51d
+ob-fa FA CONTRL	a8511d88-4308-4774-9900-430aa0d7d1bc/b720acd6-fe76-4541-8e2d-8c7d22a698cc	wi01124532-rt-tf-v2-ob-fa/db24de0f-f236-4b30-a6f7-4d471022f0d6
+ob-bc X12 301 to CU2100	d77b8868-1c3a-4527-b6bb-9dbb302ba6f2/2b56cb22-e669-4c7d-a6cf-3bbc8df060cd	wi01124532-rt-tf-v2-ob-bc/2d011995-dd6d-48b2-8582-0259a533d208

@@ -1,0 +1,23 @@
+{
+  "messageId": "d5804834-ecb7-4048-bff8-c35383d6bf1c",
+  "workflowId": "a8511d88-4308-4774-9900-430aa0d7d1bc",
+  "rootWorkflowId": "a8511d88-4308-4774-9900-430aa0d7d1bc",
+  "parentWorkflowId": "a8511d88-4308-4774-9900-430aa0d7d1bc",
+  "bucket": "inttra2-qa-workspace",
+  "fileName": "a8511d88-4308-4774-9900-430aa0d7d1bc/7bf5abf8-b8e6-45fe-a6c1-2adee29bf4c7",
+  "component": "dispatcher",
+  "exitStatus": "success",
+  "timestamp": "2026-11-19 17:55:37.23",
+  "projections": {
+    "originalFileName": "BK3_Request_MinMSC",
+    "inboundS3FileName": "300_IFTMBF/20261119/customers/CU2100/BK3_Request_MinMSC",
+    "pickupFileName": "300_IFTMBF/20261119/customers/CU2100/BK3_Request_MinMSC",
+    "originalFileSize": "467",
+    "mftId": "CU2100",
+    "s3EventCreationTime": "2026-11-19 17:55:29.65",
+    "dispatcherStartRunTime": "2026-11-19 17:55:30.74",
+    "inftpfilepickuptime": "2026-11-19 17:55:29.00",
+    "xlogId": "9000000000000000000240361333",
+    "fileType": "300_IFTMBF"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "Records": [
+    {
+      "eventVersion": "2.6",
+      "eventSource": "aws:s3",
+      "awsRegion": "us-east-1",
+      "eventTime": "2026-11-19T00:08:08.135Z",
+      "eventName": "ObjectCreated:Copy",
+      "userIdentity": {
+        "principalId": "AWS:AROAIEWHSROODHDUQ4XNI:6174dec1251d4e0faeebae36304e3b98"
+      },
+      "requestParameters": {
+        "sourceIPAddress": "34.195.157.203"
+      },
+      "responseElements": {
+        "x-amz-request-id": "WAVJAA0Q8NW6278J",
+        "x-amz-id-2": "KhTMZuDcmmGtL3DsuemFIcB2mwfpmpz9CkX+O5AE/dFEHnnqBFbl5a1PS89aKwr8pjgigSiRbPuSzO3w6Cb+xJ/nmk8oKf6A"
+      },
+      "s3": {
+        "s3SchemaVersion": "1.0",
+        "configurationId": "OUTBOUND_PICKUP_Event",
+        "bucket": {
+          "name": "inttra2-qa-outbound-delivery",
+          "ownerIdentity": {
+            "principalId": "A18GMKM92DN43X"
+          },
+          "arn": "arn:aws:s3:::inttra2-qa-outbound-delivery"
+        },
+        "object": {
+          "key": "customers/CU2100/outbound_archive/301/20261119/KOTAHI802435IFTMBC220261119000808008_3254350241.txt",
+          "size": 41985,
+          "eTag": "e0adf1a2b937165d7d3e81ffbd5cfc73",
+          "sequencer": "006AFE3DE8167F9BB7",
+          "hasObjectAnnotation": false
+        }
+      }
+    }
+  ]
+}

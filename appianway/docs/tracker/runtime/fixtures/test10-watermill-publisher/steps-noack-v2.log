@@ -1,0 +1,8 @@
+03:37:43 [noack-v2] queue before (visible in-flight): 0 0
+03:37:56 [noack-v2] started
+03:38:01 [noack-v2] both events at the local Watermill, acks pending (-1 ms): sending Ctrl+C
+03:38:22 [noack-v2] stopped in 21347 ms
+  stand-in: received 2, acked 0, could not ack 0
+  service: acks handled 0; drain warning 1; clients closed 4; ERROR lines other than the missing _dlq_dlq 0
+03:38:23 [noack-v2] queue right after the stop: 0 0
+03:39:00 [noack-v2] queue 35 s later (after the 30 s visibility timeout): 2 0

@@ -1,0 +1,51 @@
+INFO  [2026-11-20 22:23:32,784] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 22:23:32,787] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 22:23:36,183] [main]            c.i.m.s.networkservices.auth.AuthClient :  Get call: https://api-beta.inttra.com/auth in (ms): 969
+INFO  [2026-11-20 22:23:36,183] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 22:23:36,183] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 22:23:36,184] [main]            io.dropwizard.core.server.ServerFactory :  Starting DistributorApplication
+INFO  [2026-11-20 22:23:36,260] [main]            org.eclipse.jetty.setuid.SetUIDListener :  Opened DistributorApplication@3b590f6a{HTTP/1.1, (http/1.1)}{0.0.0.0:18089}
+INFO  [2026-11-20 22:23:36,263] [main]            org.eclipse.jetty.server.Server         :  jetty-12.1.14; built: 2026-10-02T05:48:05.032Z; git: 15cecbd757a2f6b0fdc6a8944f4c6d0020b17da0; jvm 17.0.17+10
+INFO  [2026-11-20 22:23:36,266] [pool-10-thread-1] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 22:23:36,266] [main]            i.dropwizard.core.setup.AdminEnvironment:  tasks = 
+
+    POST    /tasks/log-level (io.dropwizard.servlets.tasks.LogConfigurationTask)
+    POST    /tasks/gc (io.dropwizard.servlets.tasks.GarbageCollectionTask)
+
+WARN  [2026-11-20 22:23:36,266] [main]            i.dropwizard.core.setup.AdminEnvironment:  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!    THIS APPLICATION HAS NO HEALTHCHECKS. THIS MEANS YOU WILL NEVER KNOW      !
+!     IF IT DIES IN PRODUCTION, WHICH MEANS YOU WILL NEVER KNOW IF YOU'RE      !
+!    LETTING YOUR USERS DOWN. YOU SHOULD ADD A HEALTHCHECK FOR EACH OF YOUR    !
+!         APPLICATION'S DEPENDENCIES WHICH FULLY (BUT LIGHTLY) TESTS IT.       !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+INFO  [2026-11-20 22:23:36,272] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@4bcf08ae{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@626b9092{STARTED}}
+INFO  [2026-11-20 22:23:36,275] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@4bcf08ae{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@626b9092{STARTED}}
+INFO  [2026-11-20 22:23:36,275] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@40416321{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@3ab70d34{STARTED}}
+INFO  [2026-11-20 22:23:36,425] [main]            i.d.jersey.DropwizardResourceConfig     :  The following paths were found for the configured resources:
+
+    NONE
+
+INFO  [2026-11-20 22:23:36,427] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@40416321{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@3ab70d34{STARTED}}
+17:23:36,433 |-INFO in LogbackAccessRequestLog - Found logback-access-jetty12 version 2.0.12
+17:23:36,434 |-INFO in LogbackAccessRequestLog - Found logback-core version 1.5.38
+17:23:36,434 |-INFO in LogbackAccessRequestLog - Found logback-access-common version 2.0.12
+17:23:36,434 |-WARN in LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38
+
+INFO  [2026-11-20 22:23:36,456] [main]            o.eclipse.jetty.server.AbstractConnector:  Started DistributorApplication@3b590f6a{HTTP/1.1, (http/1.1)}{0.0.0.0:18089}
+INFO  [2026-11-20 22:23:36,457] [main]            org.eclipse.jetty.server.Server         :  Started oejs.Server@2b18b308{STARTING}[12.1.14,sto=30000] @196ms
+[0:0:0:0:0:0:0:1] - - [20/Nov/2026:22:23:36 +0000] "GET /admin/healthcheck HTTP/1.1" 200 87 "-" "curl/8.23.0" 51
+INFO  [2026-11-20 22:23:39,241] [pool-8-thread-1] c.i.m.d.task.DistributorTask            :  Processing workflowId :wi01124532-rt-drest-v2-wf
+ERROR [2026-11-20 22:23:39,241] [pool-8-thread-1] c.i.m.d.task.DistributorTask            :  No subscriptionId !!!
+INFO  [2026-11-20 22:23:39,767] [pool-8-thread-1] c.i.m.d.task.DistributorTask            :  Processed workflowId :wi01124532-rt-drest-v2-wf
+INFO  [2026-11-20 22:23:48,042] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Stopped oejs.Server@2b18b308{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 22:23:48,042] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Shutdown oejs.Server@2b18b308{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 22:23:48,045] [JettyShutdownThread] o.eclipse.jetty.server.AbstractConnector:  Stopped DistributorApplication@3b590f6a{HTTP/1.1, (http/1.1)}{0.0.0.0:18089}
+INFO  [2026-11-20 22:23:48,050] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@40416321{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@3ab70d34{STOPPED}}
+INFO  [2026-11-20 22:23:48,050] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@4bcf08ae{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@626b9092{STOPPED}}
+INFO  [2026-11-20 22:23:48,051] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue sender client on application shutdown
+INFO  [2026-11-20 22:23:48,052] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue listener client on application shutdown
+INFO  [2026-11-20 22:23:48,052] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage download client on application shutdown
+INFO  [2026-11-20 22:23:48,052] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage client on application shutdown

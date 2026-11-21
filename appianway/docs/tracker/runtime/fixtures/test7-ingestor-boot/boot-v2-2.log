@@ -1,0 +1,52 @@
+WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance.
+INFO  [2026-11-20 18:54:28,033] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 18:54:28,036] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 18:54:31,129] [main]            io.searchbox.client.AbstractJestClient  :  Setting server pool to a list of 1 servers: [http://localhost:9/]
+INFO  [2026-11-20 18:54:31,129] [main]            io.searchbox.client.JestClientFactory   :  Using multi thread/connection supporting pooling connection manager
+INFO  [2026-11-20 18:54:31,155] [main]            io.searchbox.client.JestClientFactory   :  Using default GSON instance
+INFO  [2026-11-20 18:54:31,155] [main]            io.searchbox.client.JestClientFactory   :  Node Discovery disabled...
+INFO  [2026-11-20 18:54:31,155] [main]            io.searchbox.client.JestClientFactory   :  Idle connection reaping disabled...
+INFO  [2026-11-20 18:54:31,156] [main]            com.coreoz.wisp.Scheduler               :  Scheduling job 'com.inttra.mercury.ingestor.config.PollerJobProvider$$Lambda$1484/0x0000024901706520@ff8e36d' to run every 86400000ms
+INFO  [2026-11-20 18:54:32,234] [main]            c.i.m.s.networkservices.auth.AuthClient :  Get call: https://api-beta.inttra.com/auth in (ms): 1057
+INFO  [2026-11-20 18:54:32,238] [main]            i.d.core.server.SimpleServerFactory     :  Registering jersey handler with root path prefix: /application
+INFO  [2026-11-20 18:54:32,238] [main]            i.d.core.server.SimpleServerFactory     :  Registering admin handler with root path prefix: /admin
+INFO  [2026-11-20 18:54:32,238] [main]            io.dropwizard.core.server.ServerFactory :  Starting IngestorApplication
+INFO  [2026-11-20 18:54:32,287] [main]            org.eclipse.jetty.setuid.SetUIDListener :  Opened IngestorApplication@15a6a91f{HTTP/1.1, (http/1.1)}{0.0.0.0:18087}
+INFO  [2026-11-20 18:54:32,289] [main]            org.eclipse.jetty.server.Server         :  jetty-12.1.14; built: 2026-10-02T05:48:05.032Z; git: 15cecbd757a2f6b0fdc6a8944f4c6d0020b17da0; jvm 17.0.17+10
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-2] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-1] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-5] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-8] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-3] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-6] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-7] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,291] [pool-10-thread-4] c.i.m.s.listener.MessageQueueListener   :  Listener com.inttra.mercury.shared.listener.MessageQueueListener starting.
+INFO  [2026-11-20 18:54:32,292] [main]            i.dropwizard.core.setup.AdminEnvironment:  tasks = 
+
+    POST    /tasks/log-level (io.dropwizard.servlets.tasks.LogConfigurationTask)
+    POST    /tasks/gc (io.dropwizard.servlets.tasks.GarbageCollectionTask)
+
+INFO  [2026-11-20 18:54:32,303] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@57fae911{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@52a0bc48{STARTED}}
+INFO  [2026-11-20 18:54:32,307] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@57fae911{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@52a0bc48{STARTED}}
+INFO  [2026-11-20 18:54:32,307] [main]            o.e.jetty.server.handler.ContextHandler :  Started idj.MutableServletContextHandler@46146832{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@1d6014a7{STARTED}}
+INFO  [2026-11-20 18:54:32,468] [main]            i.d.jersey.DropwizardResourceConfig     :  The following paths were found for the configured resources:
+
+    NONE
+
+INFO  [2026-11-20 18:54:32,469] [main]            o.e.j.ee10.servlet.ServletContextHandler:  Started idj.MutableServletContextHandler@46146832{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@1d6014a7{STARTED}}
+13:54:32,474 |-INFO in LogbackAccessRequestLog - Found logback-access-jetty12 version 2.0.12
+13:54:32,474 |-INFO in LogbackAccessRequestLog - Found logback-core version 1.5.38
+13:54:32,474 |-INFO in LogbackAccessRequestLog - Found logback-access-common version 2.0.12
+13:54:32,474 |-WARN in LogbackAccessRequestLog - For logback-core, expected version 1.5.32 but found 1.5.38
+
+INFO  [2026-11-20 18:54:32,499] [main]            o.eclipse.jetty.server.AbstractConnector:  Started IngestorApplication@15a6a91f{HTTP/1.1, (http/1.1)}{0.0.0.0:18087}
+INFO  [2026-11-20 18:54:32,499] [main]            org.eclipse.jetty.server.Server         :  Started oejs.Server@677d4cea{STARTING}[12.1.14,sto=30000] @211ms
+INFO  [2026-11-20 18:54:43,329] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Stopped oejs.Server@677d4cea{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 18:54:43,329] [JettyShutdownThread] org.eclipse.jetty.server.Server         :  Shutdown oejs.Server@677d4cea{STOPPING}[12.1.14,sto=30000]
+INFO  [2026-11-20 18:54:43,335] [JettyShutdownThread] o.eclipse.jetty.server.AbstractConnector:  Stopped IngestorApplication@15a6a91f{HTTP/1.1, (http/1.1)}{0.0.0.0:18087}
+INFO  [2026-11-20 18:54:43,341] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@46146832{/application,/application,b=null,a=AVAILABLE,h=idrl.LogbackAccessRequestLogAwareHandler@1d6014a7{STOPPED}}
+INFO  [2026-11-20 18:54:43,341] [JettyShutdownThread] o.e.j.ee10.servlet.ServletContextHandler:  Stopped idj.MutableServletContextHandler@57fae911{/admin,/admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@52a0bc48{STOPPED}}
+INFO  [2026-11-20 18:54:43,341] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue sender client on application shutdown
+INFO  [2026-11-20 18:54:43,342] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing message queue listener client on application shutdown
+INFO  [2026-11-20 18:54:43,344] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage download client on application shutdown
+INFO  [2026-11-20 18:54:43,345] [JettyShutdownThread] c.i.m.c.config.ManagedCloudResource     :  Closing storage client on application shutdown

@@ -1,0 +1,5 @@
+19:08:57 queue before: 0 0
+19:09:08 started: 1 listener(s)
+19:11:30 sent 56
+19:11:55 queue after: 0 0
+19:12:01 stopped in 3216 ms; ERROR lines: 0; Elastic failures: 0
